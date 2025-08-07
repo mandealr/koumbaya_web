@@ -9,6 +9,13 @@ use App\Http\Controllers\Api\LotteryController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\CountryController;
 use App\Http\Controllers\Api\LanguageController;
+use App\Http\Controllers\Api\TicketController;
+use App\Http\Controllers\Api\PaymentCallbackController;
+use App\Http\Controllers\Api\MerchantDashboardController;
+use App\Http\Controllers\Api\PublicResultsController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\RefundController;
+use App\Http\Controllers\Api\AdminRefundController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,6 +61,7 @@ Route::group([
     
     // Products
     Route::get('products', [ProductController::class, 'index']);
+    Route::get('products/search', [ProductController::class, 'search']);
     Route::get('products/featured', [ProductController::class, 'featured']);
     Route::get('products/{id}', [ProductController::class, 'show']);
     
@@ -62,9 +70,31 @@ Route::group([
     Route::get('lotteries/active', [LotteryController::class, 'active']);
     Route::get('lotteries/{id}', [LotteryController::class, 'show']);
     
-    // Payments callbacks (public)
+    // Payment callbacks (public)
+    Route::post('payment/callback', [PaymentCallbackController::class, 'handleCallback']);
+    Route::post('payment/return', [PaymentCallbackController::class, 'handleReturn']);
+    Route::post('payment/test-callback', [PaymentCallbackController::class, 'testCallback']);
+    
+    // Legacy payment callbacks
     Route::post('payments/callback', [PaymentController::class, 'callback']);
+    Route::post('payments/notify', [PaymentController::class, 'notify']);
     Route::get('payments/success', [PaymentController::class, 'success']);
+    
+    // OTP endpoints (public)
+    Route::post('otp/send', [App\Http\Controllers\Api\OtpController::class, 'send']);
+    Route::post('otp/verify', [App\Http\Controllers\Api\OtpController::class, 'verify']);
+    Route::post('otp/resend', [App\Http\Controllers\Api\OtpController::class, 'resend']);
+    Route::get('otp/status/{identifier}', [App\Http\Controllers\Api\OtpController::class, 'status']);
+    Route::delete('otp/cleanup', [App\Http\Controllers\Api\OtpController::class, 'cleanup']);
+    
+    // Public Results
+    Route::prefix('public/results')->group(function () {
+        Route::get('/', [PublicResultsController::class, 'index']);
+        Route::get('/stats', [PublicResultsController::class, 'stats']);
+        Route::get('/recent-winners', [PublicResultsController::class, 'recentWinners']);
+        Route::get('/verify/{code}', [PublicResultsController::class, 'verify']);
+        Route::get('/{lottery}', [PublicResultsController::class, 'show']);
+    });
 });
 
 // Routes protégées (authentification requise) avec rate limiting
@@ -76,13 +106,43 @@ Route::group([
         return $request->user();
     });
     
-    // Lotteries (Utilisateurs)
+    // Tickets (Nouveau système d'achat)
+    Route::post('tickets/purchase', [TicketController::class, 'purchase']);
+    Route::get('tickets/my-tickets', [TicketController::class, 'myTickets']);
+    Route::get('tickets/{id}', [TicketController::class, 'show']);
+    Route::post('tickets/{id}/cancel', [TicketController::class, 'cancel']);
+    
+    // Transaction status
+    Route::get('transactions/{transactionId}/status', [PaymentCallbackController::class, 'checkStatus']);
+    
+    // Lotteries (Utilisateurs) - Legacy
     Route::post('lotteries/{id}/buy-ticket', [LotteryController::class, 'buyTicket']);
     Route::get('lotteries/{id}/my-tickets', [LotteryController::class, 'myTickets']);
     
-    // Payments
+    // Payments - Legacy
     Route::post('payments/initiate', [PaymentController::class, 'initiate']);
+    Route::post('payments/ussd-push', [PaymentController::class, 'pushUssd']);
+    Route::get('payments/kyc', [PaymentController::class, 'kyc']);
     Route::get('payments/{id}/status', [PaymentController::class, 'status']);
+    
+    // Notifications
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead']);
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+        Route::delete('/{id}', [NotificationController::class, 'destroy']);
+        Route::get('/stats', [NotificationController::class, 'stats']);
+        Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+    });
+    
+    // Refunds
+    Route::prefix('refunds')->group(function () {
+        Route::get('/', [RefundController::class, 'index']);
+        Route::post('/', [RefundController::class, 'store']);
+        Route::get('/stats', [RefundController::class, 'stats']);
+        Route::get('/{id}', [RefundController::class, 'show']);
+        Route::post('/{id}/cancel', [RefundController::class, 'cancel']);
+    });
 });
 
 // Routes Marchands seulement avec rate limiting strict
@@ -96,4 +156,29 @@ Route::group([
     
     // Lottery draw (Marchands seulement)
     Route::post('lotteries/{id}/draw', [LotteryController::class, 'drawLottery']);
+    
+    // Merchant Dashboard
+    Route::prefix('merchant/dashboard')->group(function () {
+        Route::get('stats', [MerchantDashboardController::class, 'getStats']);
+        Route::get('sales-chart', [MerchantDashboardController::class, 'getSalesChart']);
+        Route::get('top-products', [MerchantDashboardController::class, 'getTopProducts']);
+        Route::get('recent-transactions', [MerchantDashboardController::class, 'getRecentTransactions']);
+        Route::get('lottery-performance', [MerchantDashboardController::class, 'getLotteryPerformance']);
+    });
+});
+
+// Routes Admin avec rate limiting strict
+Route::group([
+    'middleware' => ['auth:sanctum', 'admin', 'throttle.api:200,1'],
+    'prefix' => 'admin'
+], function () {
+    // Admin Refunds
+    Route::prefix('refunds')->group(function () {
+        Route::get('/', [AdminRefundController::class, 'index']);
+        Route::get('/stats', [AdminRefundController::class, 'stats']);
+        Route::get('/eligible-lotteries', [AdminRefundController::class, 'eligibleLotteries']);
+        Route::post('/process-automatic', [AdminRefundController::class, 'processAutomatic']);
+        Route::post('/{id}/approve', [AdminRefundController::class, 'approve']);
+        Route::post('/{id}/reject', [AdminRefundController::class, 'reject']);
+    });
 });

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { ref } from 'vue'
 
 const api = axios.create({
   baseURL: '/api',
@@ -34,5 +35,40 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+// Composable useApi pour Vue 3 Composition API
+export function useApi() {
+  const loading = ref(false)
+  const error = ref(null)
+
+  const makeRequest = async (requestFn) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await requestFn()
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message || 'Une erreur est survenue'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const get = (url, config = {}) => makeRequest(() => api.get(url, config))
+  const post = (url, data = {}, config = {}) => makeRequest(() => api.post(url, data, config))
+  const put = (url, data = {}, config = {}) => makeRequest(() => api.put(url, data, config))
+  const del = (url, config = {}) => makeRequest(() => api.delete(url, config))
+
+  return {
+    loading,
+    error,
+    get,
+    post,
+    put,
+    delete: del,
+    api // Expose l'instance axios pour les cas avancés
+  }
+}
 
 export default api

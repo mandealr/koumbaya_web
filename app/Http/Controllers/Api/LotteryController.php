@@ -6,9 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Lottery;
 use App\Models\LotteryTicket;
 use App\Models\Transaction;
+use App\Models\Product;
+use App\Services\EBillingService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * @OA\Tag(
@@ -18,9 +22,12 @@ use Illuminate\Support\Facades\DB;
  */
 class LotteryController extends Controller
 {
-    public function __construct()
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
     {
-        $this->middleware('auth:api', ['except' => ['index', 'show', 'active']]);
+        $this->middleware('auth:sanctum', ['except' => ['index', 'show', 'active']]);
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -35,23 +42,126 @@ class LotteryController extends Controller
      *         required=false,
      *         @OA\Schema(type="string", enum={"pending","active","completed","cancelled"})
      *     ),
+     *     @OA\Parameter(
+     *         name="category_id",
+     *         in="query",
+     *         description="Filtrer par catégorie de produit",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="min_ticket_price",
+     *         in="query",
+     *         description="Prix minimum du ticket",
+     *         required=false,
+     *         @OA\Schema(type="number")
+     *     ),
+     *     @OA\Parameter(
+     *         name="max_ticket_price",
+     *         in="query",
+     *         description="Prix maximum du ticket",
+     *         required=false,
+     *         @OA\Schema(type="number")
+     *     ),
+     *     @OA\Parameter(
+     *         name="ending_soon",
+     *         in="query",
+     *         description="Tombolas se terminant dans les 24h",
+     *         required=false,
+     *         @OA\Schema(type="boolean")
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort_by",
+     *         in="query",
+     *         description="Trier par",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"end_date_asc", "end_date_desc", "ticket_price_asc", "ticket_price_desc", "popularity"})
+     *     ),
      *     @OA\Response(response=200, description="Liste des tombolas")
      * )
      */
     public function index(Request $request)
     {
-        $query = Lottery::with(['product.category', 'product.merchant']);
+        $query = Lottery::with(['product.category', 'product.merchant', 'tickets']);
 
+        // Filtres de base
         if ($request->has('status')) {
             $query->where('status', $request->status);
         }
 
+        // Filtre par catégorie de produit
+        if ($request->filled('category_id')) {
+            $query->whereHas('product', function ($productQuery) use ($request) {
+                $productQuery->where('category_id', $request->category_id);
+            });
+        }
+
+        // Filtres de prix de ticket
+        if ($request->filled('min_ticket_price')) {
+            $query->where('ticket_price', '>=', $request->min_ticket_price);
+        }
+
+        if ($request->filled('max_ticket_price')) {
+            $query->where('ticket_price', '<=', $request->max_ticket_price);
+        }
+
+        // Tombolas se terminant bientôt
+        if ($request->boolean('ending_soon')) {
+            $query->where('end_date', '<=', now()->addHours(24))
+                  ->where('end_date', '>', now())
+                  ->where('status', 'active');
+        }
+
+        // Tri des résultats
+        $this->applyLotterySorting($query, $request->get('sort_by', 'end_date_asc'));
+
         $perPage = min($request->get('per_page', 15), 50);
-        $lotteries = $query->orderBy('created_at', 'desc')->paginate($perPage);
+        $lotteries = $query->paginate($perPage);
+
+        // Ajouter des informations utiles
+        $lotteries->getCollection()->transform(function ($lottery) {
+            $lottery->append(['time_remaining', 'participation_rate', 'is_ending_soon']);
+            return $lottery;
+        });
 
         return response()->json([
-            'lotteries' => $lotteries
+            'success' => true,
+            'data' => $lotteries,
+            'filters' => [
+                'available_categories' => \App\Models\Category::whereHas('products.lotteries')->get(['id', 'name']),
+                'ticket_price_range' => [
+                    'min' => Lottery::min('ticket_price'),
+                    'max' => Lottery::max('ticket_price')
+                ]
+            ]
         ]);
+    }
+
+    /**
+     * Appliquer le tri aux tombolas
+     */
+    private function applyLotterySorting($query, $sortBy)
+    {
+        switch ($sortBy) {
+            case 'end_date_asc':
+                $query->orderBy('end_date', 'asc');
+                break;
+            case 'end_date_desc':
+                $query->orderBy('end_date', 'desc');
+                break;
+            case 'ticket_price_asc':
+                $query->orderBy('ticket_price', 'asc');
+                break;
+            case 'ticket_price_desc':
+                $query->orderBy('ticket_price', 'desc');
+                break;
+            case 'popularity':
+                $query->withCount('tickets')
+                      ->orderBy('tickets_count', 'desc');
+                break;
+            default:
+                $query->orderBy('end_date', 'asc');
+        }
     }
 
     /**
@@ -65,13 +175,28 @@ class LotteryController extends Controller
     public function active()
     {
         $lotteries = Lottery::active()
-            ->with(['product.category', 'product.merchant'])
+            ->with(['product.category', 'product.merchant', 'tickets'])
             ->orderBy('end_date', 'asc')
             ->limit(20)
             ->get();
 
+        // Ajouter des informations de temps et participation
+        $lotteries->transform(function ($lottery) {
+            $lottery->append(['time_remaining', 'participation_rate', 'is_ending_soon']);
+            return $lottery;
+        });
+
         return response()->json([
-            'lotteries' => $lotteries
+            'success' => true,
+            'data' => [
+                'lotteries' => $lotteries,
+                'stats' => [
+                    'total_active' => Lottery::active()->count(),
+                    'ending_soon' => Lottery::active()
+                        ->where('end_date', '<=', now()->addHours(24))
+                        ->count()
+                ]
+            ]
         ]);
     }
 
@@ -130,7 +255,7 @@ class LotteryController extends Controller
      */
     public function buyTicket(Request $request, $id)
     {
-        $user = auth('api')->user();
+        $user = auth('sanctum')->user();
         $lottery = Lottery::findOrFail($id);
 
         if (!$lottery->canPurchaseTicket()) {
@@ -220,7 +345,7 @@ class LotteryController extends Controller
      */
     public function myTickets($id)
     {
-        $user = auth('api')->user();
+        $user = auth('sanctum')->user();
         $lottery = Lottery::findOrFail($id);
 
         $tickets = $lottery->tickets()
@@ -299,6 +424,25 @@ class LotteryController extends Controller
             $lottery->product->update(['status' => 'sold']);
 
             DB::commit();
+
+            // Envoyer les notifications après le commit réussi
+            try {
+                // Notification du gagnant
+                $this->notificationService->notifyLotteryWinner(
+                    $lottery->fresh(['product', 'winner']), 
+                    $winningTicket->user, 
+                    $winningTicket
+                );
+
+                // Notifications des résultats pour tous les participants
+                $this->notificationService->notifyLotteryResult(
+                    $lottery->fresh(['product', 'winner']), 
+                    $winningTicket->user
+                );
+            } catch (\Exception $e) {
+                // Log l'erreur mais ne pas faire échouer le tirage
+                \Log::error('Failed to send draw notifications: ' . $e->getMessage());
+            }
 
             return response()->json([
                 'message' => 'Tirage effectué avec succès',

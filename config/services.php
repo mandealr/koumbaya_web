@@ -35,4 +35,79 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | E-Billing Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for E-Billing payment gateway integration
+    |
+    */
+
+    'ebilling' => [
+        'username' => env('EBILLING_USERNAME'),
+        'shared_key' => env('EBILLING_SHARED_KEY'),
+        'server_url' => env('EBILLING_SERVER_URL', 'https://lab.billing-easy.net/api/v1/merchant/e_bills'),
+        'url' => env('EBILLING_URL', 'https://lab.billing-easy.net/api/v1/'),
+        'transfer_username' => env('EBILLING_TRANSFER_USERNAME'),
+        'transfer_shared_key' => env('EBILLING_TRANSFER_SHARED_KEY'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mobile Money Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for Mobile Money operators in Gabon
+    |
+    */
+
+    'mobile_money' => [
+        'airtel' => [
+            'name' => 'Airtel Money',
+            'code' => 'airtel_money',
+            'enabled' => env('AIRTEL_MONEY_ENABLED', true),
+        ],
+        'moov' => [
+            'name' => 'Moov Money',
+            'code' => 'moov_money', 
+            'enabled' => env('MOOV_MONEY_ENABLED', true),
+        ],
+        'gtmoney' => [
+            'name' => 'GT Money',
+            'code' => 'gt_money',
+            'enabled' => env('GT_MONEY_ENABLED', true),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Payment Fees Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Default fees applied to various payment types
+    |
+    */
+
+    'payment_fees' => [
+        'lottery_ticket' => env('LOTTERY_TICKET_FEES', 0),
+        'product_purchase' => env('PRODUCT_PURCHASE_FEES', 0),
+        'ebilling_percentage' => env('EBILLING_PERCENTAGE_FEE', 2), // 2% fee
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | SMS Service Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for SMS service provider
+    |
+    */
+
+    'sms' => [
+        'api_url' => env('SMS_API_URL'),
+        'api_key' => env('SMS_API_KEY'),
+        'sender' => env('SMS_SENDER', 'Koumbaya'),
+    ],
+
 ];

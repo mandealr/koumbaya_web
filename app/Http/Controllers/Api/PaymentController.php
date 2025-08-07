@@ -6,11 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Transaction;
 use App\Models\LotteryTicket;
+use App\Models\Lottery;
+use App\Models\Product;
+use App\Services\EBillingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 /**
  * @OA\Tag(
@@ -22,113 +26,121 @@ class PaymentController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['callback', 'success']]);
+        $this->middleware('auth:sanctum', ['except' => ['callback', 'success', 'notify']]);
     }
 
     /**
      * @OA\Post(
      *     path="/api/payments/initiate",
      *     tags={"Payments"},
-     *     summary="Initier un paiement E-Billing",
+     *     summary="Initier un paiement pour achat de tickets ou produit",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"transaction_id"},
-     *             @OA\Property(property="transaction_id", type="integer", example=1),
-     *             @OA\Property(property="success_url", type="string", example="http://localhost:3000/payment/success"),
+     *             required={"type"},
+     *             @OA\Property(property="type", type="string", enum={"lottery_ticket", "product_purchase"}, example="lottery_ticket"),
+     *             @OA\Property(property="lottery_id", type="integer", example=1, description="Required for lottery_ticket type"),
+     *             @OA\Property(property="product_id", type="integer", example=1, description="Required for product_purchase type"),
+     *             @OA\Property(property="quantity", type="integer", example=1, description="Number of tickets (for lottery_ticket)"),
+     *             @OA\Property(property="phone", type="string", example="074123456", description="Phone for payment")
      *         )
      *     ),
      *     @OA\Response(
      *         response=201,
      *         description="Paiement initié",
      *         @OA\JsonContent(
-     *             @OA\Property(property="payment", type="object"),
-     *             @OA\Property(property="ebilling_url", type="string"),
-     *             @OA\Property(property="redirect_required", type="boolean")
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="bill_id", type="string"),
+     *                 @OA\Property(property="reference", type="string"),
+     *                 @OA\Property(property="amount", type="number")
+     *             )
      *         )
      *     )
      * )
      */
     public function initiate(Request $request)
     {
-        $user = auth('api')->user();
+        $user = auth('sanctum')->user();
 
         $validator = Validator::make($request->all(), [
-            'transaction_id' => 'required|exists:transactions,id',
-            'success_url' => 'nullable|url',
+            'type' => 'required|in:lottery_ticket,product_purchase',
+            'lottery_id' => 'required_if:type,lottery_ticket|exists:lotteries,id',
+            'product_id' => 'required_if:type,product_purchase|exists:products,id',
+            'quantity' => 'nullable|integer|min:1|max:10',
+            'phone' => 'nullable|string|max:20'
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
-        $transaction = Transaction::findOrFail($request->transaction_id);
-
-        // Vérifier que la transaction appartient à l'utilisateur
-        if ($transaction->user_id !== $user->id) {
-            return response()->json(['error' => 'Transaction non autorisée'], 403);
-        }
-
-        // Vérifier que la transaction n'est pas déjà payée
-        if ($transaction->status !== 'created') {
-            return response()->json(['error' => 'Transaction déjà traitée'], 422);
-        }
-
-        DB::beginTransaction();
         try {
-            // Créer l'enregistrement de paiement
-            $payment = Payment::create([
-                'reference' => 'PAY-' . time() . '-' . $user->id,
-                'transaction_id' => $transaction->id,
-                'user_id' => $user->id,
-                'amount' => $transaction->amount,
-                'currency' => $transaction->currency,
-                'customer_name' => $user->full_name,
-                'customer_phone' => $user->phone,
-                'customer_email' => $user->email,
-                'description' => $transaction->description,
-                'payment_gateway' => 'ebilling',
-                'success_url' => $request->success_url ?? config('app.url') . '/payment/success',
-                'callback_url' => config('app.url') . '/api/payments/callback',
-                'status' => 'created',
-            ]);
+            $data = (object) [
+                'user' => $user,
+                'reference' => 'KMB_' . strtoupper(Str::random(10))
+            ];
 
-            // Appeler E-Billing API
-            $ebillingResponse = $this->callEBillingAPI($payment);
+            if ($request->type === 'lottery_ticket') {
+                $lottery = Lottery::findOrFail($request->lottery_id);
+                
+                if ($lottery->status !== 'active') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cette tombola n\'est pas active'
+                    ], 422);
+                }
 
-            if (!$ebillingResponse['success']) {
-                DB::rollback();
-                return response()->json(['error' => 'Erreur lors de l\'initialisation du paiement'], 500);
+                $quantity = $request->quantity ?? 1;
+                $data->lottery_id = $lottery->id;
+                $data->quantity = $quantity;
+                $data->amount = $lottery->ticket_price * $quantity;
+
+            } elseif ($request->type === 'product_purchase') {
+                $product = Product::findOrFail($request->product_id);
+                $data->product = $product;
+                $data->amount = $product->price;
             }
 
-            // Mettre à jour avec la réponse E-Billing
-            $payment->update([
-                'ebilling_id' => $ebillingResponse['data']['bill_id'],
-                'status' => 'pending',
-                'gateway_response' => $ebillingResponse['data'],
-            ]);
+            // Update user phone if provided
+            if ($request->phone) {
+                $user->phone = $request->phone;
+                $user->save();
+            }
 
-            // Mettre à jour la transaction
-            $transaction->update(['status' => 'pending']);
+            // Initiate e-billing payment
+            $billId = EBillingService::initiate($request->type, $data);
 
-            DB::commit();
+            if (!$billId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erreur lors de l\'initialisation du paiement'
+                ], 500);
+            }
 
             return response()->json([
+                'success' => true,
                 'message' => 'Paiement initié avec succès',
-                'payment' => $payment,
-                'ebilling_url' => config('app.ebilling_redirect_url', 'https://test.billing-easy.net'),
-                'redirect_required' => true,
-                'redirect_data' => [
-                    'invoice_number' => $ebillingResponse['data']['bill_id'],
-                    'merchant_redirect_url' => $payment->success_url,
+                'data' => [
+                    'bill_id' => $billId,
+                    'reference' => $data->reference,
+                    'amount' => $data->amount,
+                    'type' => $request->type
                 ]
             ], 201);
 
         } catch (\Exception $e) {
-            DB::rollback();
             Log::error('Payment initiation failed: ' . $e->getMessage());
-            return response()->json(['error' => 'Erreur lors de l\'initiation du paiement'], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'initiation du paiement'
+            ], 500);
         }
     }
 
@@ -151,65 +163,7 @@ class PaymentController extends Controller
      */
     public function callback(Request $request)
     {
-        Log::info('E-Billing callback received: ', $request->all());
-
-        $validator = Validator::make($request->all(), [
-            'reference' => 'required|string',
-            'transactionid' => 'required|string',
-            'paymentsystem' => 'required|string',
-            'amount' => 'required|numeric',
-        ]);
-
-        if ($validator->fails()) {
-            Log::error('Invalid callback data: ', $validator->errors()->toArray());
-            return response()->json(['error' => 'Invalid callback data'], 400);
-        }
-
-        DB::beginTransaction();
-        try {
-            // Trouver le paiement par référence
-            $payment = Payment::where('reference', $request->reference)->first();
-
-            if (!$payment) {
-                Log::error('Payment not found for reference: ' . $request->reference);
-                return response()->json(['error' => 'Payment not found'], 404);
-            }
-
-            // Marquer le paiement comme payé
-            $payment->markAsPaid(
-                $request->paymentsystem,
-                $request->transactionid,
-                $request->all()
-            );
-
-            // Marquer la transaction comme payée
-            $payment->transaction->update([
-                'status' => 'paid',
-                'payment_method' => $request->paymentsystem,
-                'external_transaction_id' => $request->transactionid,
-                'paid_at' => now(),
-            ]);
-
-            // Si c'est un achat de tickets, marquer les tickets comme payés
-            if ($payment->transaction->type === 'ticket_purchase') {
-                LotteryTicket::where('payment_reference', $payment->transaction->reference)
-                    ->update(['status' => 'paid']);
-            }
-
-            // Marquer comme traité
-            $payment->markAsProcessed();
-
-            DB::commit();
-
-            Log::info('Payment processed successfully: ' . $payment->reference);
-
-            return response()->json(['status' => 'success'], 200);
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            Log::error('Callback processing failed: ' . $e->getMessage());
-            return response()->json(['error' => 'Callback processing failed'], 500);
-        }
+        return response()->json(['message' => 'Callback handled'], 200);
     }
 
     /**
@@ -230,16 +184,20 @@ class PaymentController extends Controller
      */
     public function status($id)
     {
-        $user = auth('api')->user();
+        $user = auth('sanctum')->user();
         $payment = Payment::findOrFail($id);
 
         // Vérifier que le paiement appartient à l'utilisateur
         if ($payment->user_id !== $user->id) {
-            return response()->json(['error' => 'Paiement non autorisé'], 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'Paiement non autorisé'
+            ], 403);
         }
 
         return response()->json([
-            'payment' => $payment->load('transaction')
+            'success' => true,
+            'data' => $payment
         ]);
     }
 
@@ -278,43 +236,99 @@ class PaymentController extends Controller
     }
 
     /**
-     * Appeler l'API E-Billing
+     * @OA\Post(
+     *     path="/api/payments/notify",
+     *     tags={"Payments"},
+     *     summary="Notification E-Billing (IPN)",
+     *     @OA\Response(response=200, description="Notification traitée")
+     * )
      */
-    private function callEBillingAPI($payment)
+    public function notify(Request $request)
     {
-        try {
-            $payload = [
-                'amount' => $payment->amount,
-                'reference' => $payment->reference,
-                'description' => $payment->description,
-                'customer_name' => $payment->customer_name,
-                'customer_phone' => $payment->customer_phone,
-                'customer_email' => $payment->customer_email,
-                'success_url' => $payment->success_url,
-                'callback_url' => $payment->callback_url,
-            ];
+        $result = EBillingService::processNotification($request->all());
+        return response('', $result['status']);
+    }
 
-            // Configuration E-Billing (à définir dans config)
-            $ebillingUrl = config('ebilling.api_url', 'https://lab.billing-easy.net/api/v1/merchant/e_bills');
-            $username = config('ebilling.username');
-            $password = config('ebilling.password');
+    /**
+     * @OA\Post(
+     *     path="/api/payments/ussd-push",
+     *     tags={"Payments"},
+     *     summary="Déclencher un push USSD",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"bill_id", "payment_system_name", "payer_msisdn"},
+     *             @OA\Property(property="bill_id", type="string", example="BILL123456"),
+     *             @OA\Property(property="payment_system_name", type="string", example="airtel_money"),
+     *             @OA\Property(property="payer_msisdn", type="string", example="074123456")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Push USSD envoyé")
+     * )
+     */
+    public function pushUssd(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'bill_id' => 'required|string',
+            'payment_system_name' => 'required|string',
+            'payer_msisdn' => 'required|string'
+        ]);
 
-            $response = Http::withBasicAuth($username, $password)
-                ->post($ebillingUrl, $payload);
-
-            if ($response->successful()) {
-                return [
-                    'success' => true,
-                    'data' => $response->json()
-                ];
-            }
-
-            Log::error('E-Billing API error: ', $response->json());
-            return ['success' => false];
-
-        } catch (\Exception $e) {
-            Log::error('E-Billing API call failed: ' . $e->getMessage());
-            return ['success' => false];
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
         }
+
+        $result = EBillingService::pushUssd(
+            $request->bill_id,
+            $request->payment_system_name,
+            $request->payer_msisdn
+        );
+
+        return response()->json($result);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/payments/kyc",
+     *     tags={"Payments"},
+     *     summary="Récupérer les informations KYC",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="operator",
+     *         in="query",
+     *         required=true,
+     *         @OA\Schema(type="string", example="airtel_money")
+     *     ),
+     *     @OA\Parameter(
+     *         name="phone",
+     *         in="query",
+     *         required=true,
+     *         @OA\Schema(type="string", example="074123456")
+     *     ),
+     *     @OA\Response(response=200, description="Données KYC récupérées")
+     * )
+     */
+    public function kyc(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'operator' => 'required|string',
+            'phone' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $result = EBillingService::getKyc($request->operator, $request->phone);
+        return response()->json($result);
     }
 }

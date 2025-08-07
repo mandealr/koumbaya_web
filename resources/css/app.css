@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './koumbaya-theme.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -6,6 +7,14 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'AmazonEmberDisplay', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    
+    /* Couleurs Koumbaya pour TailwindCSS */
+    --color-koumbaya-primary: #0099cc;
+    --color-koumbaya-secondary: #000000;
+    --color-koumbaya-accent: #0099cc;
+    --color-koumbaya-success: #4caf50;
+    --color-koumbaya-warning: #ff9800;
+    --color-koumbaya-error: #f44336;
 }

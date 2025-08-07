@@ -61,10 +61,40 @@ class AuthController extends Controller
             'phone' => 'required|string|max:20|unique:users',
             'password' => 'required|string|min:6',
             'role' => 'required|in:MERCHANT,RESELLER,PARTNER',
+            'otp_code' => 'nullable|string|size:6',
+            'skip_otp' => 'nullable|boolean'
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return $this->sendValidationError($validator);
+        }
+
+        // Vérification OTP si requis (sauf en dev mode avec skip_otp)
+        if (!$request->skip_otp || config('app.env') !== 'local') {
+            if (!$request->otp_code) {
+                // Envoyer OTP par email
+                $otpResult = OtpService::sendEmailOtp($request->email, Otp::PURPOSE_REGISTRATION);
+                
+                if ($otpResult['success']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Vérification OTP requise',
+                        'otp_required' => true,
+                        'identifier' => $request->email,
+                        'masked_identifier' => $otpResult['masked_identifier'],
+                        'expires_at' => $otpResult['expires_at']
+                    ], 400);
+                }
+                
+                return $this->sendError('Erreur lors de l\'envoi du code de vérification');
+            }
+
+            // Vérifier le code OTP
+            $otpVerification = OtpService::verifyOtp($request->email, $request->otp_code, Otp::PURPOSE_REGISTRATION);
+            
+            if (!$otpVerification['success']) {
+                return $this->sendError($otpVerification['message'], [], 400);
+            }
         }
 
         $user = User::create([
@@ -90,12 +120,11 @@ class AuthController extends Controller
 
         $this->logUserLogin($user, $request->ip(), 'success');
 
-        return response()->json([
-            'message' => 'Utilisateur créé avec succès',
+        return $this->sendResponse([
             'user' => $user,
             'access_token' => $token,
             'token_type' => 'Bearer'
-        ], 201);
+        ], 'Utilisateur créé avec succès', 201);
     }
 
     /**

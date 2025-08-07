@@ -13,6 +13,7 @@ class LotteryTicket extends Model
         'ticket_number',
         'lottery_id',
         'user_id',
+        'transaction_id',
         'price_paid',
         'payment_reference',
         'status',
@@ -44,7 +45,7 @@ class LotteryTicket extends Model
 
     public function transaction()
     {
-        return $this->hasOne(Transaction::class, 'lottery_ticket_id');
+        return $this->belongsTo(Transaction::class, 'transaction_id');
     }
 
     /**

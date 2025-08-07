@@ -2,20 +2,21 @@
     "openapi": "3.0.0",
     "info": {
         "title": "Koumbaya Marketplace API",
-        "description": "API pour la plateforme de tombola digitale Koumbaya",
+        "description": "API REST pour la marketplace Koumbaya avec système de tombolas et paiements mobile money",
         "contact": {
-            "email": "support@koumbaya.com"
+            "name": "Équipe Koumbaya",
+            "email": "dev@koumbaya.com"
         },
         "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
         },
         "version": "1.0.0"
     },
     "servers": [
         {
-            "url": "http://localhost:8888",
-            "description": "API Server"
+            "url": "http://localhost:8000",
+            "description": "Serveur de développement Koumbaya"
         }
     ],
     "paths": {
@@ -424,6 +425,197 @@
                 }
             }
         },
+        "/api/countries": {
+            "get": {
+                "tags": [
+                    "Countries"
+                ],
+                "summary": "Lister tous les pays",
+                "operationId": "bbb90b9e86a9cab92aaa448fe98954c9",
+                "parameters": [
+                    {
+                        "name": "active_only",
+                        "in": "query",
+                        "description": "Afficher seulement les pays actifs",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des pays",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "countries": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/countries/{id}": {
+            "get": {
+                "tags": [
+                    "Countries"
+                ],
+                "summary": "Récupérer un pays par ID",
+                "operationId": "c172dfb1b3785a376f52b0f46f344f20",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du pays",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails du pays",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "country": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pays non trouvé"
+                    }
+                }
+            }
+        },
+        "/api/languages": {
+            "get": {
+                "tags": [
+                    "Languages"
+                ],
+                "summary": "Lister toutes les langues",
+                "operationId": "1cb1ddff581b67412e8c4d53e8a5286d",
+                "parameters": [
+                    {
+                        "name": "active_only",
+                        "in": "query",
+                        "description": "Afficher seulement les langues actives",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des langues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "languages": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/languages/{id}": {
+            "get": {
+                "tags": [
+                    "Languages"
+                ],
+                "summary": "Récupérer une langue par ID",
+                "operationId": "0f580519be224b9e58ceae07113528c8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la langue",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails de la langue",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "language": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Langue non trouvée"
+                    }
+                }
+            }
+        },
+        "/api/languages/default": {
+            "get": {
+                "tags": [
+                    "Languages"
+                ],
+                "summary": "Récupérer la langue par défaut",
+                "operationId": "0e6b8efde73a795079b0013889422368",
+                "responses": {
+                    "200": {
+                        "description": "Langue par défaut",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "language": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Aucune langue par défaut définie"
+                    }
+                }
+            }
+        },
         "/api/lotteries": {
             "get": {
                 "tags": [
@@ -444,6 +636,58 @@
                                 "active",
                                 "completed",
                                 "cancelled"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "description": "Filtrer par catégorie de produit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "min_ticket_price",
+                        "in": "query",
+                        "description": "Prix minimum du ticket",
+                        "required": false,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "max_ticket_price",
+                        "in": "query",
+                        "description": "Prix maximum du ticket",
+                        "required": false,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "ending_soon",
+                        "in": "query",
+                        "description": "Tombolas se terminant dans les 24h",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "description": "Trier par",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "end_date_asc",
+                                "end_date_desc",
+                                "ticket_price_asc",
+                                "ticket_price_desc",
+                                "popularity"
                             ]
                         }
                     }
@@ -601,12 +845,405 @@
                 ]
             }
         },
+        "/api/otp/send": {
+            "post": {
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Envoyer un code OTP",
+                "operationId": "d34d0fcd867e74d90714f6163dae0c32",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "identifier",
+                                    "type",
+                                    "purpose"
+                                ],
+                                "properties": {
+                                    "identifier": {
+                                        "description": "Email ou numéro de téléphone",
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "type": {
+                                        "description": "Type d'envoi",
+                                        "type": "string",
+                                        "enum": [
+                                            "email",
+                                            "sms"
+                                        ],
+                                        "example": "email"
+                                    },
+                                    "purpose": {
+                                        "description": "But du code OTP",
+                                        "type": "string",
+                                        "enum": [
+                                            "registration",
+                                            "password_reset",
+                                            "login",
+                                            "payment"
+                                        ],
+                                        "example": "registration"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Code OTP envoyé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Code de vérification envoyé par email"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "masked_identifier": {
+                                                    "type": "string",
+                                                    "example": "us**@example.com"
+                                                },
+                                                "expires_at": {
+                                                    "type": "string",
+                                                    "example": "2025-08-07 18:05:00"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation failed"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Trop de tentatives",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Trop de tentatives, veuillez patienter"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/otp/verify": {
+            "post": {
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Vérifier un code OTP",
+                "operationId": "4d68b7909e86f7183a88d99c570feee3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "identifier",
+                                    "code",
+                                    "purpose"
+                                ],
+                                "properties": {
+                                    "identifier": {
+                                        "description": "Email ou numéro de téléphone",
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "code": {
+                                        "description": "Code OTP à 6 chiffres",
+                                        "type": "string",
+                                        "example": "123456"
+                                    },
+                                    "purpose": {
+                                        "description": "But du code OTP",
+                                        "type": "string",
+                                        "enum": [
+                                            "registration",
+                                            "password_reset",
+                                            "login",
+                                            "payment"
+                                        ],
+                                        "example": "registration"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Code OTP vérifié avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Code de vérification validé avec succès"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Code invalide ou expiré",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Code de vérification invalide ou expiré"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/otp/resend": {
+            "post": {
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Renvoyer un code OTP",
+                "operationId": "fd23a34799a79abfe400251392bba317",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "identifier",
+                                    "type",
+                                    "purpose"
+                                ],
+                                "properties": {
+                                    "identifier": {
+                                        "description": "Email ou numéro de téléphone",
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "type": {
+                                        "description": "Type d'envoi",
+                                        "type": "string",
+                                        "enum": [
+                                            "email",
+                                            "sms"
+                                        ],
+                                        "example": "email"
+                                    },
+                                    "purpose": {
+                                        "description": "But du code OTP",
+                                        "type": "string",
+                                        "enum": [
+                                            "registration",
+                                            "password_reset",
+                                            "login",
+                                            "payment"
+                                        ],
+                                        "example": "registration"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Code OTP renvoyé avec succès"
+                    }
+                }
+            }
+        },
+        "/api/otp/status/{identifier}": {
+            "get": {
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Vérifier le statut d'un OTP",
+                "operationId": "49bd7d71599eff2916f33c8aa045dcde",
+                "parameters": [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Email ou téléphone",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "purpose",
+                        "in": "query",
+                        "description": "But du code OTP",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "registration",
+                                "password_reset",
+                                "login",
+                                "payment"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Statut de l'OTP",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "has_pending_otp": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "masked_identifier": {
+                                                    "type": "string",
+                                                    "example": "us**@example.com"
+                                                },
+                                                "expires_at": {
+                                                    "type": "string",
+                                                    "example": "2025-08-07 18:05:00"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "example": "email"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/otp/cleanup": {
+            "delete": {
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Nettoyer les anciens codes OTP (Admin only)",
+                "operationId": "32b1e92d3fb6208119c7a75ed92e37d8",
+                "responses": {
+                    "200": {
+                        "description": "Nettoyage effectué",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Nettoyage effectué"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "deleted_count": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/payments/initiate": {
             "post": {
                 "tags": [
                     "Payments"
                 ],
-                "summary": "Initier un paiement E-Billing",
+                "summary": "Initier un paiement pour achat de tickets ou produit",
                 "operationId": "09337e33e2aff50f10b00befaf0ae25f",
                 "requestBody": {
                     "required": true,
@@ -614,16 +1251,36 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "transaction_id"
+                                    "type"
                                 ],
                                 "properties": {
-                                    "transaction_id": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "lottery_ticket",
+                                            "product_purchase"
+                                        ],
+                                        "example": "lottery_ticket"
+                                    },
+                                    "lottery_id": {
+                                        "description": "Required for lottery_ticket type",
                                         "type": "integer",
                                         "example": 1
                                     },
-                                    "success_url": {
+                                    "product_id": {
+                                        "description": "Required for product_purchase type",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "quantity": {
+                                        "description": "Number of tickets (for lottery_ticket)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "phone": {
+                                        "description": "Phone for payment",
                                         "type": "string",
-                                        "example": "http://localhost:3000/payment/success"
+                                        "example": "074123456"
                                     }
                                 },
                                 "type": "object"
@@ -638,14 +1295,25 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "payment": {
-                                            "type": "object"
+                                        "success": {
+                                            "type": "boolean"
                                         },
-                                        "ebilling_url": {
+                                        "message": {
                                             "type": "string"
                                         },
-                                        "redirect_required": {
-                                            "type": "boolean"
+                                        "data": {
+                                            "properties": {
+                                                "bill_id": {
+                                                    "type": "string"
+                                                },
+                                                "reference": {
+                                                    "type": "string"
+                                                },
+                                                "amount": {
+                                                    "type": "number"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -754,6 +1422,107 @@
                 }
             }
         },
+        "/api/payments/notify": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Notification E-Billing (IPN)",
+                "operationId": "ab2521c44367d3e67b70dfbf676947b3",
+                "responses": {
+                    "200": {
+                        "description": "Notification traitée"
+                    }
+                }
+            }
+        },
+        "/api/payments/ussd-push": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Déclencher un push USSD",
+                "operationId": "f27fc5a34e475b3e862c434d2c05cbe1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "bill_id",
+                                    "payment_system_name",
+                                    "payer_msisdn"
+                                ],
+                                "properties": {
+                                    "bill_id": {
+                                        "type": "string",
+                                        "example": "BILL123456"
+                                    },
+                                    "payment_system_name": {
+                                        "type": "string",
+                                        "example": "airtel_money"
+                                    },
+                                    "payer_msisdn": {
+                                        "type": "string",
+                                        "example": "074123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Push USSD envoyé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/payments/kyc": {
+            "get": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Récupérer les informations KYC",
+                "operationId": "946c715356c8c637ddae58608c6e16b1",
+                "parameters": [
+                    {
+                        "name": "operator",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "airtel_money"
+                        }
+                    },
+                    {
+                        "name": "phone",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "074123456"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Données KYC récupérées"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/products": {
             "get": {
                 "tags": [
@@ -787,6 +1556,60 @@
                         "required": false,
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "name": "min_price",
+                        "in": "query",
+                        "description": "Prix minimum",
+                        "required": false,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "max_price",
+                        "in": "query",
+                        "description": "Prix maximum",
+                        "required": false,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "description": "Trier par",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "price_asc",
+                                "price_desc",
+                                "date_asc",
+                                "date_desc",
+                                "name_asc",
+                                "name_desc",
+                                "popularity"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "has_lottery",
+                        "in": "query",
+                        "description": "Produits avec tombola active",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "lottery_ending_soon",
+                        "in": "query",
+                        "description": "Tombolas se terminant bientôt (24h)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
                         }
                     }
                 ],
@@ -892,6 +1715,100 @@
                 ]
             }
         },
+        "/api/products/search": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Recherche intelligente avec auto-complétion",
+                "operationId": "6b588a52a56a41d175df187e5fb615c8",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Terme de recherche",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Nombre de suggestions (max 10)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Suggestions de recherche",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "suggestions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "product"
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "iPhone 15 Pro"
+                                                            },
+                                                            "subtitle": {
+                                                                "type": "string",
+                                                                "example": "Électronique"
+                                                            },
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "example": 750000
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "categories": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/products/featured": {
             "get": {
                 "tags": [
@@ -901,22 +1818,7 @@
                 "operationId": "787711e5f2b08d01a9338d339746e9e1",
                 "responses": {
                     "200": {
-                        "description": "Produits featured",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "products": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Produits mis en avant"
                     }
                 }
             }
@@ -1041,6 +1943,7 @@
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",
+                "description": "Authentification via token Bearer JWT",
                 "bearerFormat": "JWT",
                 "scheme": "bearer"
             }
@@ -1049,23 +1952,35 @@
     "tags": [
         {
             "name": "Authentication",
-            "description": "API endpoints pour l'authentification utilisateur"
+            "description": "Endpoints d'authentification et gestion utilisateurs"
         },
         {
             "name": "Categories",
-            "description": "API endpoints pour la gestion des catégories"
+            "description": "Gestion des catégories de produits"
+        },
+        {
+            "name": "Countries",
+            "description": "Gestion des pays et localisation"
+        },
+        {
+            "name": "Languages",
+            "description": "Gestion des langues et internationalisation"
         },
         {
             "name": "Lotteries",
-            "description": "API endpoints pour la gestion des tombolas"
+            "description": "Gestion des tombolas et tirages"
+        },
+        {
+            "name": "OTP",
+            "description": "Gestion des codes de vérification OTP (SMS/Email)"
         },
         {
             "name": "Payments",
-            "description": "API endpoints pour la gestion des paiements E-Billing"
+            "description": "Système de paiement E-Billing et Mobile Money"
         },
         {
             "name": "Products",
-            "description": "API endpoints pour la gestion des produits"
+            "description": "Gestion des produits et catalogue"
         }
     ]
 }

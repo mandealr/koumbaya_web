@@ -1,0 +1,468 @@
+/* ===========================================
+   Koumbaya Marketplace - Thème personnalisé
+   =========================================== */
+
+/* Polices Amazon Ember Display */
+@font-face {
+  font-family: 'AmazonEmberDisplay';
+  src: url('/fonts/AmazonEmberDisplay_Rg.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AmazonEmberDisplay';
+  src: url('/fonts/AmazonEmberDisplay_Lt.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AmazonEmberDisplay';
+  src: url('/fonts/AmazonEmberDisplay_Md.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AmazonEmberDisplay';
+  src: url('/fonts/AmazonEmberDisplay_Bd.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AmazonEmberDisplay';
+  src: url('/fonts/AmazonEmberDisplay_He.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Variables CSS - Couleurs Koumbaya */
+:root {
+  /* Couleurs principales */
+  --koumbaya-primary: #0099cc;
+  --koumbaya-secondary: #000000;
+  --koumbaya-accent: #0099cc;
+  
+  /* Couleurs dérivées */
+  --koumbaya-primary-light: #33aadd;
+  --koumbaya-primary-lighter: #66bbee;
+  --koumbaya-primary-lightest: #e6f7ff;
+  --koumbaya-primary-dark: #0088bb;
+  --koumbaya-primary-darker: #007799;
+  
+  /* Couleurs utilitaires */
+  --koumbaya-success: #4caf50;
+  --koumbaya-warning: #ff9800;
+  --koumbaya-error: #f44336;
+  --koumbaya-info: #2196f3;
+  
+  /* Couleurs neutres */
+  --koumbaya-gray-50: #fafbfc;
+  --koumbaya-gray-100: #f5f5f5;
+  --koumbaya-gray-200: #e0e0e0;
+  --koumbaya-gray-300: #bdbdbd;
+  --koumbaya-gray-400: #9e9e9e;
+  --koumbaya-gray-500: #666666;
+  --koumbaya-gray-600: #424242;
+  --koumbaya-gray-700: #303030;
+  --koumbaya-gray-800: #1a1a1a;
+  --koumbaya-gray-900: #000000;
+  
+  /* Police principale */
+  --koumbaya-font-family: 'AmazonEmberDisplay', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Tailles de police */
+  --koumbaya-font-xs: 0.75rem;    /* 12px */
+  --koumbaya-font-sm: 0.875rem;   /* 14px */
+  --koumbaya-font-base: 1rem;     /* 16px */
+  --koumbaya-font-lg: 1.125rem;   /* 18px */
+  --koumbaya-font-xl: 1.25rem;    /* 20px */
+  --koumbaya-font-2xl: 1.5rem;    /* 24px */
+  --koumbaya-font-3xl: 1.875rem;  /* 30px */
+  --koumbaya-font-4xl: 2.25rem;   /* 36px */
+  
+  /* Poids de police */
+  --koumbaya-font-light: 300;
+  --koumbaya-font-normal: 400;
+  --koumbaya-font-medium: 500;
+  --koumbaya-font-semibold: 600;
+  --koumbaya-font-bold: 700;
+  --koumbaya-font-extrabold: 900;
+  
+  /* Espacement */
+  --koumbaya-space-xs: 0.25rem;   /* 4px */
+  --koumbaya-space-sm: 0.5rem;    /* 8px */
+  --koumbaya-space-md: 0.75rem;   /* 12px */
+  --koumbaya-space-lg: 1rem;      /* 16px */
+  --koumbaya-space-xl: 1.5rem;    /* 24px */
+  --koumbaya-space-2xl: 2rem;     /* 32px */
+  --koumbaya-space-3xl: 3rem;     /* 48px */
+  
+  /* Rayons de bordure */
+  --koumbaya-radius-sm: 0.25rem;   /* 4px */
+  --koumbaya-radius-md: 0.5rem;    /* 8px */
+  --koumbaya-radius-lg: 0.75rem;   /* 12px */
+  --koumbaya-radius-xl: 1rem;      /* 16px */
+  --koumbaya-radius-full: 9999px;
+  
+  /* Ombres */
+  --koumbaya-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --koumbaya-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --koumbaya-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --koumbaya-shadow-primary: 0 4px 14px rgba(0, 153, 204, 0.15);
+  
+  /* Transitions */
+  --koumbaya-transition: all 0.3s ease;
+  --koumbaya-transition-fast: all 0.15s ease;
+}
+
+/* Reset et base */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--koumbaya-font-family);
+  line-height: 1.6;
+  color: var(--koumbaya-gray-800);
+  background-color: var(--koumbaya-gray-50);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typographie */
+.koumbaya-heading-1 {
+  font-size: var(--koumbaya-font-4xl);
+  font-weight: var(--koumbaya-font-bold);
+  line-height: 1.2;
+  color: var(--koumbaya-gray-900);
+  margin: 0 0 var(--koumbaya-space-xl) 0;
+}
+
+.koumbaya-heading-2 {
+  font-size: var(--koumbaya-font-3xl);
+  font-weight: var(--koumbaya-font-semibold);
+  line-height: 1.3;
+  color: var(--koumbaya-gray-900);
+  margin: 0 0 var(--koumbaya-space-lg) 0;
+}
+
+.koumbaya-heading-3 {
+  font-size: var(--koumbaya-font-2xl);
+  font-weight: var(--koumbaya-font-semibold);
+  line-height: 1.4;
+  color: var(--koumbaya-gray-800);
+  margin: 0 0 var(--koumbaya-space-md) 0;
+}
+
+.koumbaya-heading-4 {
+  font-size: var(--koumbaya-font-xl);
+  font-weight: var(--koumbaya-font-medium);
+  line-height: 1.4;
+  color: var(--koumbaya-gray-800);
+  margin: 0 0 var(--koumbaya-space-md) 0;
+}
+
+.koumbaya-text-body {
+  font-size: var(--koumbaya-font-base);
+  font-weight: var(--koumbaya-font-normal);
+  line-height: 1.6;
+  color: var(--koumbaya-gray-700);
+}
+
+.koumbaya-text-small {
+  font-size: var(--koumbaya-font-sm);
+  font-weight: var(--koumbaya-font-normal);
+  line-height: 1.5;
+  color: var(--koumbaya-gray-600);
+}
+
+.koumbaya-text-primary {
+  color: var(--koumbaya-primary);
+}
+
+.koumbaya-text-secondary {
+  color: var(--koumbaya-secondary);
+}
+
+/* Boutons Koumbaya */
+.koumbaya-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--koumbaya-space-sm);
+  padding: var(--koumbaya-space-md) var(--koumbaya-space-xl);
+  font-family: var(--koumbaya-font-family);
+  font-size: var(--koumbaya-font-base);
+  font-weight: var(--koumbaya-font-semibold);
+  line-height: 1;
+  text-decoration: none;
+  border: none;
+  border-radius: var(--koumbaya-radius-md);
+  cursor: pointer;
+  transition: var(--koumbaya-transition);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.koumbaya-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.koumbaya-btn-primary {
+  background-color: var(--koumbaya-primary);
+  color: white;
+  box-shadow: var(--koumbaya-shadow-primary);
+}
+
+.koumbaya-btn-primary:hover:not(:disabled) {
+  background-color: var(--koumbaya-primary-dark);
+  box-shadow: var(--koumbaya-shadow-lg);
+  transform: translateY(-1px);
+}
+
+.koumbaya-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--koumbaya-shadow-md);
+}
+
+.koumbaya-btn-secondary {
+  background-color: var(--koumbaya-secondary);
+  color: white;
+  box-shadow: var(--koumbaya-shadow-md);
+}
+
+.koumbaya-btn-secondary:hover:not(:disabled) {
+  background-color: var(--koumbaya-gray-800);
+  box-shadow: var(--koumbaya-shadow-lg);
+  transform: translateY(-1px);
+}
+
+.koumbaya-btn-outline {
+  background-color: transparent;
+  color: var(--koumbaya-primary);
+  border: 2px solid var(--koumbaya-primary);
+}
+
+.koumbaya-btn-outline:hover:not(:disabled) {
+  background-color: var(--koumbaya-primary);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.koumbaya-btn-ghost {
+  background-color: transparent;
+  color: var(--koumbaya-primary);
+  box-shadow: none;
+}
+
+.koumbaya-btn-ghost:hover:not(:disabled) {
+  background-color: var(--koumbaya-primary-lightest);
+}
+
+/* Tailles de boutons */
+.koumbaya-btn-sm {
+  padding: var(--koumbaya-space-sm) var(--koumbaya-space-lg);
+  font-size: var(--koumbaya-font-sm);
+}
+
+.koumbaya-btn-lg {
+  padding: var(--koumbaya-space-lg) var(--koumbaya-space-2xl);
+  font-size: var(--koumbaya-font-lg);
+}
+
+.koumbaya-btn-full {
+  width: 100%;
+}
+
+/* Cartes */
+.koumbaya-card {
+  background: white;
+  border-radius: var(--koumbaya-radius-lg);
+  box-shadow: var(--koumbaya-shadow-md);
+  overflow: hidden;
+  transition: var(--koumbaya-transition);
+}
+
+.koumbaya-card:hover {
+  box-shadow: var(--koumbaya-shadow-lg);
+  transform: translateY(-2px);
+}
+
+.koumbaya-card-header {
+  padding: var(--koumbaya-space-xl);
+  border-bottom: 1px solid var(--koumbaya-gray-200);
+}
+
+.koumbaya-card-body {
+  padding: var(--koumbaya-space-xl);
+}
+
+.koumbaya-card-footer {
+  padding: var(--koumbaya-space-xl);
+  border-top: 1px solid var(--koumbaya-gray-200);
+  background-color: var(--koumbaya-gray-50);
+}
+
+/* Formulaires */
+.koumbaya-form-group {
+  margin-bottom: var(--koumbaya-space-lg);
+}
+
+.koumbaya-label {
+  display: block;
+  font-size: var(--koumbaya-font-sm);
+  font-weight: var(--koumbaya-font-medium);
+  color: var(--koumbaya-gray-700);
+  margin-bottom: var(--koumbaya-space-sm);
+}
+
+.koumbaya-input {
+  width: 100%;
+  padding: var(--koumbaya-space-md) var(--koumbaya-space-lg);
+  font-family: var(--koumbaya-font-family);
+  font-size: var(--koumbaya-font-base);
+  line-height: 1.5;
+  color: var(--koumbaya-gray-800);
+  background-color: white;
+  border: 2px solid var(--koumbaya-gray-200);
+  border-radius: var(--koumbaya-radius-md);
+  transition: var(--koumbaya-transition);
+}
+
+.koumbaya-input:focus {
+  outline: none;
+  border-color: var(--koumbaya-primary);
+  box-shadow: 0 0 0 3px rgba(0, 153, 204, 0.1);
+}
+
+.koumbaya-input::placeholder {
+  color: var(--koumbaya-gray-400);
+}
+
+/* Badges et chips */
+.koumbaya-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--koumbaya-space-xs) var(--koumbaya-space-sm);
+  font-size: var(--koumbaya-font-xs);
+  font-weight: var(--koumbaya-font-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: var(--koumbaya-radius-full);
+}
+
+.koumbaya-badge-primary {
+  background-color: var(--koumbaya-primary-lightest);
+  color: var(--koumbaya-primary-dark);
+}
+
+.koumbaya-badge-success {
+  background-color: #e8f5e8;
+  color: var(--koumbaya-success);
+}
+
+.koumbaya-badge-warning {
+  background-color: #fff3e0;
+  color: var(--koumbaya-warning);
+}
+
+.koumbaya-badge-error {
+  background-color: #ffebee;
+  color: var(--koumbaya-error);
+}
+
+/* Utilities */
+.koumbaya-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--koumbaya-space-lg);
+}
+
+.koumbaya-flex {
+  display: flex;
+}
+
+.koumbaya-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.koumbaya-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.koumbaya-grid {
+  display: grid;
+}
+
+.koumbaya-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--koumbaya-space-lg);
+}
+
+.koumbaya-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--koumbaya-space-lg);
+}
+
+.koumbaya-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--koumbaya-space-lg);
+}
+
+@media (max-width: 768px) {
+  .koumbaya-grid-2,
+  .koumbaya-grid-3,
+  .koumbaya-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animation d'apparition */
+.koumbaya-fade-in {
+  animation: koumbayaFadeIn 0.6s ease-out;
+}
+
+@keyframes koumbayaFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mode sombre */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --koumbaya-gray-50: #1a1a1a;
+    --koumbaya-gray-100: #2a2a2a;
+    --koumbaya-gray-800: #e0e0e0;
+    --koumbaya-gray-900: #ffffff;
+  }
+  
+  body {
+    background-color: var(--koumbaya-gray-100);
+    color: var(--koumbaya-gray-800);
+  }
+}

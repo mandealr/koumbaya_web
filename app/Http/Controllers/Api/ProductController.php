@@ -5,8 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Lottery;
+use App\Models\LotteryTicket;
+use App\Http\Resources\ProductResource;
+use App\Http\Resources\LotteryResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
@@ -19,7 +23,7 @@ class ProductController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['index', 'show', 'featured']]);
+        $this->middleware('auth:sanctum', ['except' => ['index', 'show', 'featured', 'search']]);
     }
 
     /**
@@ -48,6 +52,41 @@ class ProductController extends Controller
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
+     *     @OA\Parameter(
+     *         name="min_price",
+     *         in="query",
+     *         description="Prix minimum",
+     *         required=false,
+     *         @OA\Schema(type="number")
+     *     ),
+     *     @OA\Parameter(
+     *         name="max_price",
+     *         in="query",
+     *         description="Prix maximum",
+     *         required=false,
+     *         @OA\Schema(type="number")
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort_by",
+     *         in="query",
+     *         description="Trier par",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"price_asc", "price_desc", "date_asc", "date_desc", "name_asc", "name_desc", "popularity"})
+     *     ),
+     *     @OA\Parameter(
+     *         name="has_lottery",
+     *         in="query",
+     *         description="Produits avec tombola active",
+     *         required=false,
+     *         @OA\Schema(type="boolean")
+     *     ),
+     *     @OA\Parameter(
+     *         name="lottery_ending_soon",
+     *         in="query",
+     *         description="Tombolas se terminant bientôt (24h)",
+     *         required=false,
+     *         @OA\Schema(type="boolean")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Liste des produits",
@@ -59,31 +98,249 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::active()->with(['category', 'merchant', 'activeLottery']);
+        $query = Product::with(['category', 'merchant', 'activeLottery']);
 
-        // Filtres
+        // Filtres de base
         if ($request->has('category_id')) {
-            $query->byCategory($request->category_id);
+            $query->where('category_id', $request->category_id);
         }
 
         if ($request->boolean('featured')) {
-            $query->featured();
+            $query->where('is_featured', true);
         }
 
-        if ($request->has('search')) {
+        // Recherche textuelle
+        if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('description', 'LIKE', "%{$search}%")
+                  ->orWhereHas('category', function ($categoryQuery) use ($search) {
+                      $categoryQuery->where('name', 'LIKE', "%{$search}%");
+                  });
             });
         }
 
+        // Filtres de prix
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        // Filtre par disponibilité de tombola
+        if ($request->boolean('has_lottery')) {
+            $query->whereHas('activeLottery');
+        }
+
+        // Filtre tombolas se terminant bientôt
+        if ($request->boolean('lottery_ending_soon')) {
+            $query->whereHas('activeLottery', function ($lotteryQuery) {
+                $lotteryQuery->where('end_date', '<=', now()->addHours(24))
+                            ->where('end_date', '>', now());
+            });
+        }
+
+        // Tri des résultats
+        $this->applySorting($query, $request->get('sort_by', 'date_desc'));
+
+        // Pagination
         $perPage = min($request->get('per_page', 15), 50);
-        $products = $query->orderBy('created_at', 'desc')->paginate($perPage);
+        $products = $query->paginate($perPage);
+
+        // Ajouter des métadonnées utiles
+        $products->getCollection()->transform(function ($product) {
+            $product->append(['has_active_lottery', 'lottery_ends_soon', 'popularity_score']);
+            return $product;
+        });
 
         return response()->json([
-            'products' => $products
+            'success' => true,
+            'data' => [
+                'products' => ProductResource::collection($products->items()),
+                'pagination' => [
+                    'current_page' => $products->currentPage(),
+                    'last_page' => $products->lastPage(),
+                    'per_page' => $products->perPage(),
+                    'total' => $products->total(),
+                ],
+            ],
+            'filters' => [
+                'available_categories' => \App\Models\Category::whereHas('products')->get(['id', 'name']),
+                'price_range' => [
+                    'min' => Product::min('price'),
+                    'max' => Product::max('price')
+                ]
+            ]
         ]);
+    }
+
+    /**
+     * Appliquer le tri aux résultats
+     */
+    private function applySorting($query, $sortBy)
+    {
+        switch ($sortBy) {
+            case 'price_asc':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_desc':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'date_asc':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'date_desc':
+                $query->orderBy('created_at', 'desc');
+                break;
+            case 'name_asc':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'name_desc':
+                $query->orderBy('name', 'desc');
+                break;
+            case 'popularity':
+                $query->withCount('lotteryTickets')
+                      ->orderBy('lottery_tickets_count', 'desc');
+                break;
+            default:
+                $query->orderBy('created_at', 'desc');
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/products/search",
+     *     tags={"Products"},
+     *     summary="Recherche intelligente avec auto-complétion",
+     *     @OA\Parameter(
+     *         name="q",
+     *         in="query",
+     *         description="Terme de recherche",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         description="Nombre de suggestions (max 10)",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Suggestions de recherche",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="suggestions", type="array",
+     *                     @OA\Items(type="object",
+     *                         @OA\Property(property="type", type="string", example="product"),
+     *                         @OA\Property(property="title", type="string", example="iPhone 15 Pro"),
+     *                         @OA\Property(property="subtitle", type="string", example="Électronique"),
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="price", type="number", example=750000)
+     *                     )
+     *                 ),
+     *                 @OA\Property(property="categories", type="array",
+     *                     @OA\Items(type="object",
+     *                         @OA\Property(property="id", type="integer"),
+     *                         @OA\Property(property="name", type="string")
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function search(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'q' => 'required|string|min:2|max:100',
+            'limit' => 'nullable|integer|min:1|max:10'
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendValidationError($validator);
+        }
+
+        $searchTerm = $request->q;
+        $limit = $request->get('limit', 5);
+
+        $suggestions = [];
+        $categories = [];
+
+        // Recherche de produits
+        $products = Product::with(['category', 'activeLottery'])
+            ->where(function ($query) use ($searchTerm) {
+                $query->where('name', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('description', 'LIKE', "%{$searchTerm}%");
+            })
+            ->limit($limit)
+            ->get();
+
+        foreach ($products as $product) {
+            $suggestions[] = [
+                'type' => 'product',
+                'id' => $product->id,
+                'title' => $product->name,
+                'subtitle' => $product->category->name ?? 'Produit',
+                'price' => $product->price,
+                'image' => $product->image_url,
+                'has_lottery' => $product->activeLottery !== null,
+                'match_score' => $this->calculateMatchScore($searchTerm, $product->name)
+            ];
+        }
+
+        // Recherche de catégories
+        $categoryMatches = \App\Models\Category::where('name', 'LIKE', "%{$searchTerm}%")
+            ->whereHas('products')
+            ->limit(3)
+            ->get(['id', 'name', 'slug']);
+
+        foreach ($categoryMatches as $category) {
+            $categories[] = [
+                'id' => $category->id,
+                'name' => $category->name,
+                'slug' => $category->slug,
+                'type' => 'category'
+            ];
+        }
+
+        // Trier les suggestions par score de pertinence
+        usort($suggestions, function ($a, $b) {
+            return $b['match_score'] <=> $a['match_score'];
+        });
+
+        return $this->sendResponse([
+            'suggestions' => $suggestions,
+            'categories' => $categories,
+            'search_term' => $searchTerm,
+            'total_found' => count($suggestions)
+        ]);
+    }
+
+    /**
+     * Calculer le score de correspondance
+     */
+    private function calculateMatchScore($searchTerm, $title)
+    {
+        $searchTerm = strtolower($searchTerm);
+        $title = strtolower($title);
+        
+        // Score exact match
+        if ($title === $searchTerm) return 100;
+        
+        // Score starts with
+        if (str_starts_with($title, $searchTerm)) return 80;
+        
+        // Score contains
+        if (str_contains($title, $searchTerm)) return 60;
+        
+        // Score similarity
+        return (int) (similar_text($searchTerm, $title) / strlen($title) * 40);
     }
 
     /**
@@ -91,13 +348,7 @@ class ProductController extends Controller
      *     path="/api/products/featured",
      *     tags={"Products"},
      *     summary="Produits mis en avant",
-     *     @OA\Response(
-     *         response=200,
-     *         description="Produits featured",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="products", type="array", @OA\Items(type="object"))
-     *         )
-     *     )
+     *     @OA\Response(response=200, description="Produits mis en avant")
      * )
      */
     public function featured()
@@ -109,7 +360,8 @@ class ProductController extends Controller
             ->get();
 
         return response()->json([
-            'products' => $products
+            'success' => true,
+            'data' => $products
         ]);
     }
 
@@ -145,8 +397,8 @@ class ProductController extends Controller
             }
         ])->findOrFail($id);
 
-        return response()->json([
-            'product' => $product
+        return $this->sendResponse([
+            'product' => new ProductResource($product)
         ]);
     }
 

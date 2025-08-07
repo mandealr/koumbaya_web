@@ -10,6 +10,9 @@ import AdminLayout from '@/components/common/AdminLayout.vue'
 import Login from '@/pages/auth/Login.vue'
 import Register from '@/pages/auth/Register.vue'
 import Home from '@/pages/guest/Home.vue'
+import Results from '@/pages/public/Results.vue'
+import VerifyWinner from '@/pages/public/VerifyWinner.vue'
+import History from '@/pages/public/History.vue'
 
 // Customer Pages
 import CustomerDashboard from '@/pages/customer/Dashboard.vue'
@@ -17,6 +20,7 @@ import Products from '@/pages/customer/Products.vue'
 import ProductDetail from '@/pages/customer/ProductDetail.vue'
 import Profile from '@/pages/customer/Profile.vue'
 import MyTickets from '@/pages/customer/MyTickets.vue'
+import Refunds from '@/pages/customer/Refunds.vue'
 
 // Admin Pages
 import AdminDashboard from '@/pages/admin/Dashboard.vue'
@@ -24,6 +28,7 @@ import UserManagement from '@/pages/admin/UserManagement.vue'
 import ProductManagement from '@/pages/admin/ProductManagement.vue'
 import LotteryManagement from '@/pages/admin/LotteryManagement.vue'
 import CountryLanguageManagement from '@/pages/admin/CountryLanguageManagement.vue'
+import RefundManagement from '@/pages/admin/RefundManagement.vue'
 
 const routes = [
   // Guest Routes
@@ -35,6 +40,21 @@ const routes = [
         path: '',
         name: 'home',
         component: Home
+      },
+      {
+        path: 'results',
+        name: 'public.results',
+        component: Results
+      },
+      {
+        path: 'verify',
+        name: 'public.verify',
+        component: VerifyWinner
+      },
+      {
+        path: 'history',
+        name: 'public.history',
+        component: History
       },
       {
         path: 'login',
@@ -82,6 +102,11 @@ const routes = [
         path: 'tickets',
         name: 'customer.tickets',
         component: MyTickets
+      },
+      {
+        path: 'refunds',
+        name: 'customer.refunds',
+        component: Refunds
       }
     ]
   },
@@ -116,6 +141,11 @@ const routes = [
         path: 'settings',
         name: 'admin.settings',
         component: CountryLanguageManagement
+      },
+      {
+        path: 'refunds',
+        name: 'admin.refunds',
+        component: RefundManagement
       }
     ]
   }

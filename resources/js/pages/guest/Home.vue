@@ -1,118 +1,198 @@
 <template>
   <div>
-    <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-green-600 to-green-800 text-white">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <div class="text-center">
-          <h1 class="text-4xl md:text-6xl font-bold mb-6">
+    <!-- Hero Section - Koumbaya Brand -->
+    <section class="bg-gradient-to-br from-[#0099cc] via-[#0088bb] to-[#007799] text-white relative overflow-hidden">
+      <div class="absolute inset-0 bg-black/10"></div>
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+        <div class="text-center koumbaya-fade-in">
+          <h1 class="text-5xl md:text-7xl font-bold mb-8 leading-tight">
             Gagnez des
-            <span class="text-green-200">produits incroyables</span>
+            <span class="text-cyan-200 bg-gradient-to-r from-cyan-200 to-white bg-clip-text text-transparent">produits incroyables</span>
           </h1>
-          <p class="text-xl md:text-2xl mb-8 text-green-100 max-w-3xl mx-auto">
-            Koumbaya est la première plateforme de loteries premium au Cameroun. 
-            Achetez vos billets et tentez de remporter des prix exceptionnels.
+          <p class="text-xl md:text-2xl mb-12 text-blue-100 max-w-4xl mx-auto leading-relaxed font-light">
+            🎯 Koumbaya est la première plateforme de loteries premium au Cameroun.<br>
+            Achetez vos billets et tentez de remporter des prix exceptionnels avec transparence totale.
           </p>
-          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
             <router-link
               to="/register"
-              class="bg-white text-green-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors"
+              class="koumbaya-btn koumbaya-btn-secondary koumbaya-btn-lg shadow-2xl hover:shadow-cyan-500/25 transform hover:scale-105"
             >
-              Commencer maintenant
+              🚀 Commencer maintenant
             </router-link>
             <button
               @click="scrollToProducts"
-              class="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-green-600 transition-colors"
+              class="koumbaya-btn koumbaya-btn-outline koumbaya-btn-lg border-white text-white hover:bg-white hover:text-[#0099cc]"
             >
-              Voir les produits
+              👀 Voir les produits
             </button>
           </div>
+          <div class="mt-16 flex justify-center items-center gap-8 text-blue-200">
+            <div class="text-center">
+              <div class="text-3xl font-bold">1000+</div>
+              <div class="text-sm">Participants</div>
+            </div>
+            <div class="w-px h-12 bg-blue-300/30"></div>
+            <div class="text-center">
+              <div class="text-3xl font-bold">50+</div>
+              <div class="text-sm">Produits gagnés</div>
+            </div>
+            <div class="w-px h-12 bg-blue-300/30"></div>
+            <div class="text-center">
+              <div class="text-3xl font-bold">100%</div>
+              <div class="text-sm">Transparent</div>
+            </div>
+          </div>
         </div>
       </div>
+      <!-- Forme décorative -->
+      <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent"></div>
     </section>
 
-    <!-- Features Section -->
-    <section class="py-24 bg-gray-50">
+    <!-- Features Section - Design amélioré -->
+    <section class="py-32 bg-gradient-to-b from-white to-gray-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Pourquoi choisir Koumbaya ?
+        <div class="text-center mb-20">
+          <h2 class="koumbaya-heading-2 text-4xl md:text-5xl text-gray-900 mb-6">
+            Pourquoi choisir <span class="koumbaya-text-primary">Koumbaya</span> ?
           </h2>
-          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Une plateforme moderne, sécurisée et transparente pour tous vos jeux de loterie
+          <p class="koumbaya-text-body text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            Une plateforme moderne, sécurisée et transparente pour tous vos jeux de loterie.<br>
+            Découvrez les avantages qui font la différence.
           </p>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div v-for="feature in features" :key="feature.title" class="text-center">
-            <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <component :is="feature.icon" class="w-8 h-8 text-white" />
+        <div class="koumbaya-grid-3 gap-12">
+          <div v-for="feature in features" :key="feature.title" class="koumbaya-card text-center group hover:scale-105 transition-transform">
+            <div class="koumbaya-card-body">
+              <div class="w-20 h-20 bg-gradient-to-br from-[#0099cc] to-[#007799] rounded-2xl flex items-center justify-center mx-auto mb-8 group-hover:shadow-lg group-hover:shadow-cyan-500/25 transition-shadow">
+                <component :is="feature.icon" class="w-10 h-10 text-white" />
+              </div>
+              <h3 class="koumbaya-heading-4 text-gray-900 mb-4">{{ feature.title }}</h3>
+              <p class="koumbaya-text-body text-gray-600 leading-relaxed">{{ feature.description }}</p>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900 mb-4">{{ feature.title }}</h3>
-            <p class="text-gray-600">{{ feature.description }}</p>
+          </div>
+        </div>
+        
+        <!-- Badges de confiance -->
+        <div class="mt-20 pt-12 border-t border-gray-200">
+          <div class="flex flex-wrap justify-center items-center gap-8 text-gray-500">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <span class="font-medium">100% Sécurisé</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <span class="font-medium">Paiements certifiés</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <span class="font-medium">Support 24/7</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Products Section -->
-    <section id="products" class="py-24">
+    <!-- Products Section - Design premium -->
+    <section id="products" class="py-32 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Produits en loterie
+        <div class="text-center mb-20">
+          <h2 class="koumbaya-heading-2 text-4xl md:text-5xl text-gray-900 mb-6">
+            🎁 Produits en <span class="koumbaya-text-primary">loterie</span>
           </h2>
-          <p class="text-xl text-gray-600">
-            Découvrez les incroyables produits que vous pouvez gagner
+          <p class="koumbaya-text-body text-xl text-gray-600 max-w-3xl mx-auto">
+            Découvrez les incroyables produits que vous pouvez gagner.<br>
+            Des marques prestigieuses, des prix exceptionnels !
           </p>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="koumbaya-grid-3 gap-8">
           <div
             v-for="product in featuredProducts"
             :key="product.id"
-            class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+            class="koumbaya-card group hover:scale-105 transition-all duration-300 relative overflow-hidden"
           >
-            <img
-              :src="product.image"
-              :alt="product.title"
-              class="w-full h-48 object-cover"
-            />
-            <div class="p-6">
-              <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ product.title }}</h3>
-              <p class="text-gray-600 mb-4">{{ product.description }}</p>
-              <div class="flex justify-between items-center mb-4">
-                <span class="text-2xl font-bold text-green-600">{{ product.price }} FCFA</span>
-                <span class="text-sm text-gray-500">{{ product.ticket_price }} FCFA/billet</span>
+            <!-- Badge de popularité -->
+            <div v-if="product.progress > 80" class="absolute top-4 left-4 z-10">
+              <div class="koumbaya-badge koumbaya-badge-warning shadow-md">
+                🔥 Populaire
               </div>
-              <div class="mb-4">
-                <div class="flex justify-between text-sm text-gray-600 mb-1">
-                  <span>Progression</span>
+            </div>
+            
+            <!-- Image du produit avec overlay -->
+            <div class="relative overflow-hidden">
+              <img
+                :src="product.image"
+                :alt="product.title"
+                class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </div>
+            
+            <div class="koumbaya-card-body">
+              <h3 class="koumbaya-heading-4 text-gray-900 mb-3 group-hover:text-[#0099cc] transition-colors">
+                {{ product.title }}
+              </h3>
+              <p class="koumbaya-text-small text-gray-600 mb-6 leading-relaxed">
+                {{ product.description }}
+              </p>
+              
+              <!-- Prix et informations -->
+              <div class="flex justify-between items-center mb-6">
+                <div class="text-3xl font-bold text-[#0099cc]">{{ product.price }} FCFA</div>
+                <div class="koumbaya-badge koumbaya-badge-primary">
+                  {{ product.ticket_price }} FCFA/billet
+                </div>
+              </div>
+              
+              <!-- Barre de progression stylisée -->
+              <div class="mb-6">
+                <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
+                  <span>🎯 Progression</span>
                   <span>{{ product.progress }}%</span>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="w-full bg-gray-200 rounded-full h-3 relative overflow-hidden">
                   <div 
-                    class="bg-green-600 h-2 rounded-full transition-all duration-300" 
+                    class="bg-gradient-to-r from-[#0099cc] to-[#00aadd] h-full rounded-full transition-all duration-700 relative" 
                     :style="{ width: product.progress + '%' }"
-                  ></div>
+                  >
+                    <div class="absolute inset-0 bg-white/20 animate-pulse rounded-full"></div>
+                  </div>
                 </div>
               </div>
+              
+              <!-- Bouton d'action -->
               <router-link
                 to="/register"
-                class="block w-full text-center bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
+                class="koumbaya-btn koumbaya-btn-primary koumbaya-btn-full group-hover:shadow-lg"
               >
-                Acheter des billets
+                🎫 Acheter des billets
               </router-link>
             </div>
           </div>
         </div>
         
-        <div class="text-center mt-12">
+        <!-- Call-to-action -->
+        <div class="text-center mt-16">
           <router-link
             to="/register"
-            class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-green-600 bg-green-50 hover:bg-green-100"
+            class="koumbaya-btn koumbaya-btn-outline koumbaya-btn-lg"
           >
             Voir tous les produits
-            <ArrowRightIcon class="ml-2 w-5 h-5" />
+            <ArrowRightIcon class="ml-2 w-6 h-6" />
           </router-link>
         </div>
       </div>

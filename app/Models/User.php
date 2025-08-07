@@ -99,6 +99,16 @@ class User extends Authenticatable
         return $this->hasMany(LotteryTicket::class, 'user_id');
     }
 
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'user_id');
+    }
+
+    public function wonLotteries()
+    {
+        return $this->hasMany(Lottery::class, 'winner_user_id');
+    }
+
     public function transactions()
     {
         return $this->hasMany(Transaction::class, 'user_id');
@@ -122,6 +132,11 @@ class User extends Authenticatable
     public function language()
     {
         return $this->belongsTo(Language::class, 'language_id');
+    }
+
+    public function refunds()
+    {
+        return $this->hasMany(Refund::class, 'user_id');
     }
 
     /**
