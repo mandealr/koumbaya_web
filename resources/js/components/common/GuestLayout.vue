@@ -6,17 +6,14 @@
         <div class="flex justify-between items-center h-16">
           <!-- Logo -->
           <router-link to="/" class="flex items-center">
-            <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-              <span class="text-white font-bold text-lg">K</span>
-            </div>
-            <span class="ml-2 text-xl font-bold text-gray-900">Koumbaya</span>
+            <img src="/build/assets/logo.png" alt="Koumbaya" class="h-8 w-auto" onerror="this.src='/logo.png'">
           </router-link>
 
           <!-- Navigation Links -->
           <nav class="hidden md:flex space-x-8">
             <router-link
               to="/"
-              class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium"
+              class="text-gray-600 hover:text-koumbaya-primary px-3 py-2 rounded-md text-sm font-medium"
             >
               Accueil
             </router-link>
@@ -35,13 +32,13 @@
           <div class="flex items-center space-x-4">
             <router-link
               to="/login"
-              class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium"
+              class="text-gray-600 hover:text-koumbaya-primary px-3 py-2 rounded-md text-sm font-medium"
             >
               Se connecter
             </router-link>
             <router-link
               to="/register"
-              class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              class="bg-koumbaya-primary hover:bg-koumbaya-primary-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
             >
               S'inscrire
             </router-link>
@@ -98,7 +95,7 @@
             </router-link>
             <router-link
               to="/register"
-              class="block px-3 py-2 mt-2 rounded-md text-base font-medium bg-green-600 text-white hover:bg-green-700"
+              class="block px-3 py-2 mt-2 rounded-md text-base font-medium bg-koumbaya-primary text-white hover:bg-koumbaya-primary-dark"
               @click="mobileMenuOpen = false"
             >
               S'inscrire
@@ -119,10 +116,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div class="col-span-1">
             <div class="flex items-center">
-              <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <span class="text-white font-bold text-lg">K</span>
-              </div>
-              <span class="ml-2 text-xl font-bold text-gray-900">Koumbaya</span>
+              <img src="/build/assets/logo.png" alt="Koumbaya" class="h-8 w-auto" onerror="this.src='/logo.png'">
             </div>
             <p class="mt-4 text-gray-600 text-sm">
               La plateforme de loteries premium qui transforme vos rêves en réalité.
