@@ -1,0 +1,162 @@
+{
+  "_RocketLaunchIcon-DVcC8RYo.js": {
+    "file": "assets/RocketLaunchIcon-DVcC8RYo.js",
+    "name": "RocketLaunchIcon",
+    "imports": [
+      "_vendor-CznQeBe4.js"
+    ]
+  },
+  "_vendor-CznQeBe4.js": {
+    "file": "assets/vendor-CznQeBe4.js",
+    "name": "vendor"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-DAeCo1Y9.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-CjAYcriH.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "imports": [
+      "_vendor-CznQeBe4.js"
+    ],
+    "dynamicImports": [
+      "resources/js/components/common/MerchantLayout.vue",
+      "resources/js/pages/merchant/Dashboard.vue",
+      "resources/js/pages/merchant/Products.vue",
+      "resources/js/pages/merchant/CreateProduct.vue",
+      "resources/js/pages/merchant/Orders.vue",
+      "resources/js/pages/merchant/LotteriesSimple.vue",
+      "resources/js/pages/merchant/LotteryView.vue",
+      "resources/js/pages/merchant/Analytics.vue",
+      "resources/js/pages/merchant/Settings.vue",
+      "resources/js/pages/merchant/Profile.vue"
+    ],
+    "css": [
+      "assets/app-BxgHhk3k.css"
+    ],
+    "assets": [
+      "assets/logo-EG9ssmOb.png",
+      "assets/placeholder-BS1MYrTN.jpg"
+    ]
+  },
+  "resources/js/assets/avatar-placeholder.jpg": {
+    "file": "assets/placeholder-BS1MYrTN.jpg",
+    "src": "resources/js/assets/avatar-placeholder.jpg"
+  },
+  "resources/js/assets/logo.png": {
+    "file": "assets/logo-EG9ssmOb.png",
+    "src": "resources/js/assets/logo.png"
+  },
+  "resources/js/assets/placeholder.jpg": {
+    "file": "assets/placeholder-BS1MYrTN.jpg",
+    "src": "resources/js/assets/avatar-placeholder.jpg"
+  },
+  "resources/js/components/common/MerchantLayout.vue": {
+    "file": "assets/MerchantLayout-BWBZpX5h.js",
+    "name": "MerchantLayout",
+    "src": "resources/js/components/common/MerchantLayout.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-CznQeBe4.js",
+      "resources/js/app.js"
+    ]
+  },
+  "resources/js/pages/merchant/Analytics.vue": {
+    "file": "assets/Analytics-Byf7EQ43.js",
+    "name": "Analytics",
+    "src": "resources/js/pages/merchant/Analytics.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js",
+      "_vendor-CznQeBe4.js"
+    ]
+  },
+  "resources/js/pages/merchant/CreateProduct.vue": {
+    "file": "assets/CreateProduct-BCT01H0R.js",
+    "name": "CreateProduct",
+    "src": "resources/js/pages/merchant/CreateProduct.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-CznQeBe4.js",
+      "resources/js/app.js",
+      "_RocketLaunchIcon-DVcC8RYo.js"
+    ]
+  },
+  "resources/js/pages/merchant/Dashboard.vue": {
+    "file": "assets/Dashboard-B2Wg-s7P.js",
+    "name": "Dashboard",
+    "src": "resources/js/pages/merchant/Dashboard.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js",
+      "_vendor-CznQeBe4.js"
+    ]
+  },
+  "resources/js/pages/merchant/LotteriesSimple.vue": {
+    "file": "assets/LotteriesSimple-BemWhWzi.js",
+    "name": "LotteriesSimple",
+    "src": "resources/js/pages/merchant/LotteriesSimple.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-CznQeBe4.js"
+    ]
+  },
+  "resources/js/pages/merchant/LotteryView.vue": {
+    "file": "assets/LotteryView-D3DINqP5.js",
+    "name": "LotteryView",
+    "src": "resources/js/pages/merchant/LotteryView.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-CznQeBe4.js",
+      "resources/js/app.js"
+    ]
+  },
+  "resources/js/pages/merchant/Orders.vue": {
+    "file": "assets/Orders-BmF0hnIp.js",
+    "name": "Orders",
+    "src": "resources/js/pages/merchant/Orders.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-CznQeBe4.js",
+      "resources/js/app.js"
+    ]
+  },
+  "resources/js/pages/merchant/Products.vue": {
+    "file": "assets/Products-_twAtXUs.js",
+    "name": "Products",
+    "src": "resources/js/pages/merchant/Products.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-CznQeBe4.js",
+      "resources/js/app.js",
+      "_RocketLaunchIcon-DVcC8RYo.js"
+    ]
+  },
+  "resources/js/pages/merchant/Profile.vue": {
+    "file": "assets/Profile-DaCLdY_N.js",
+    "name": "Profile",
+    "src": "resources/js/pages/merchant/Profile.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-CznQeBe4.js",
+      "resources/js/app.js"
+    ]
+  },
+  "resources/js/pages/merchant/Settings.vue": {
+    "file": "assets/Settings-Bk7FFPW9.js",
+    "name": "Settings",
+    "src": "resources/js/pages/merchant/Settings.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-CznQeBe4.js",
+      "resources/js/app.js"
+    ]
+  }
+}
