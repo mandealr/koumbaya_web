@@ -35,7 +35,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <router-link
           to="/customer/products"
-          class="flex items-center p-4 border border-gray-200 rounded-lg hover:border-[#0099cc] hover:bg-[#0099cc]-50 transition-colors"
+          class="flex items-center p-4 border border-gray-200 rounded-lg hover:border-[#0099cc] hover:bg-blue-50 transition-colors"
         >
           <ShoppingBagIcon class="w-8 h-8 text-[#0099cc] mr-3" />
           <div>
@@ -46,9 +46,9 @@
 
         <router-link
           to="/customer/tickets"
-          class="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+          class="flex items-center p-4 border border-gray-200 rounded-lg hover:border-black hover:bg-gray-50 transition-colors"
         >
-          <TicketIcon class="w-8 h-8 text-blue-600 mr-3" />
+          <TicketIcon class="w-8 h-8 text-black mr-3" />
           <div>
             <p class="font-medium text-gray-900">Mes billets</p>
             <p class="text-sm text-gray-600">Voir mes participations</p>
@@ -57,9 +57,9 @@
 
         <router-link
           to="/customer/profile"
-          class="flex items-center p-4 border border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-colors"
+          class="flex items-center p-4 border border-gray-200 rounded-lg hover:border-[#0099cc] hover:bg-blue-50 transition-colors"
         >
-          <UserIcon class="w-8 h-8 text-purple-600 mr-3" />
+          <UserIcon class="w-8 h-8 text-[#0099cc] mr-3" />
           <div>
             <p class="font-medium text-gray-900">Mon profil</p>
             <p class="text-sm text-gray-600">Gérer mes informations</p>
@@ -76,7 +76,7 @@
           <h3 class="text-lg font-semibold text-gray-900">Mes derniers billets</h3>
           <router-link
             to="/customer/tickets"
-            class="text-sm text-[#0099cc] hover:text-[#0099cc]-700"
+            class="text-sm text-[#0099cc] hover:text-blue-700"
           >
             Voir tout
           </router-link>
@@ -87,7 +87,7 @@
           <p class="text-gray-600">Aucun billet acheté pour le moment</p>
           <router-link
             to="/customer/products"
-            class="inline-block mt-2 text-[#0099cc] hover:text-[#0099cc]-700"
+            class="inline-block mt-2 text-[#0099cc] hover:text-blue-700"
           >
             Acheter des billets
           </router-link>
@@ -114,7 +114,7 @@
             </div>
             <span :class="[
               'px-2 py-1 text-xs font-medium rounded-full',
-              ticket.status === 'active' ? 'bg-[#0099cc] text-[#fff]' :
+              ticket.status === 'active' ? 'bg-[#0099cc] text-white' :
               ticket.status === 'won' ? 'bg-yellow-100 text-yellow-800' :
               'bg-gray-100 text-gray-800'
             ]">
@@ -130,7 +130,7 @@
           <h3 class="text-lg font-semibold text-gray-900">Tombolas populaires</h3>
           <router-link
             to="/customer/products"
-            class="text-sm text-[#0099cc] hover:text-[#0099cc]-700"
+            class="text-sm text-[#0099cc] hover:text-blue-700"
           >
             Voir tout
           </router-link>
@@ -171,7 +171,7 @@
                   </span>
                   <router-link
                     :to="`/customer/products/${lottery.product.id}`"
-                    class="text-sm bg-[#0099cc] text-white px-3 py-1 rounded-md hover:bg-[#0099cc]-700 transition-colors"
+                    class="text-sm bg-[#0099cc] text-white px-3 py-1 rounded-md hover:bg-blue-700 transition-colors"
                   >
                     Participer
                   </router-link>
@@ -209,7 +209,7 @@ const stats = ref([
   {
     label: 'Tombolas participées',
     value: '5',
-    color: 'bg-[#0099cc]-500',
+    color: 'bg-[#0099cc]',
     icon: GiftIcon
   },
   {

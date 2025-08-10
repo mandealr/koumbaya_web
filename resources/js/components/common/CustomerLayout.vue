@@ -21,7 +21,7 @@
                 'px-3 py-2 rounded-md text-sm font-medium transition-colors',
                 $route.name === item.name
                   ? 'text-white bg-[#0099cc]'
-                  : 'text-gray-600 hover:text-[#0099cc]-600 hover:bg-[#0099cc]-50'
+                  : 'text-gray-600 hover:text-[#0099cc] hover:bg-blue-50'
               ]"
             >
               {{ item.label }}
@@ -106,8 +106,8 @@
             :class="[
               'block px-3 py-2 rounded-md text-base font-medium',
               $route.name === item.name
-                ? 'text-[#0099cc]-600 bg-[#0099cc]-50'
-                : 'text-gray-600 hover:text-[#0099cc]-600 hover:bg-[#0099cc]-50'
+                ? 'text-[#0099cc] bg-blue-50'
+                : 'text-gray-600 hover:text-[#0099cc] hover:bg-blue-50'
             ]"
             @click="mobileMenuOpen = false"
           >
