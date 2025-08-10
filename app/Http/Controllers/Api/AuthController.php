@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str;
 
 /**
  * @OA\Tag(
@@ -120,6 +122,9 @@ class AuthController extends Controller
 
         $this->logUserLogin($user, $request->ip(), 'success');
 
+        // Charger les relations nécessaires
+        $user->load(['wallet', 'roles']);
+
         return $this->sendResponse([
             'user' => $user,
             'access_token' => $token,
@@ -172,7 +177,7 @@ class AuthController extends Controller
             return response()->json(['error' => 'Identifiants invalides'], 401);
         }
 
-        $user = User::find(Auth::guard('web')->user()->id);
+        $user = User::with('roles', 'wallet')->find(Auth::guard('web')->user()->id);
 
         // Vérifier si l'utilisateur est actif
         if (!$user->is_active) {
@@ -216,7 +221,7 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         $user = $request->user();
-        $user->load(['wallet', 'userType']);
+        $user->load(['wallet', 'userType', 'roles']);
 
         return response()->json([
             'user' => $user
@@ -307,5 +312,113 @@ class AuthController extends Controller
                 'state' => 'failed',
             ]);
         }
+    }
+
+    /**
+     * Redirect to social provider
+     */
+    public function redirectToProvider($provider)
+    {
+        $validProviders = ['facebook', 'google', 'apple'];
+        
+        if (!in_array($provider, $validProviders)) {
+            return response()->json(['error' => 'Provider not supported'], 400);
+        }
+
+        try {
+            $redirect_url = Socialite::driver($provider)->redirect()->getTargetUrl();
+            return response()->json(['redirect_url' => $redirect_url]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Unable to redirect to provider'], 500);
+        }
+    }
+
+    /**
+     * Handle social provider callback
+     */
+    public function handleProviderCallback($provider, Request $request)
+    {
+        $validProviders = ['facebook', 'google', 'apple'];
+        
+        if (!in_array($provider, $validProviders)) {
+            return response()->json(['error' => 'Provider not supported'], 400);
+        }
+
+        try {
+            $socialUser = Socialite::driver($provider)->user();
+            
+            // Check if user exists with this social ID
+            $user = User::where($provider . '_id', $socialUser->getId())->first();
+            
+            if (!$user) {
+                // Check if user exists with same email
+                $user = User::where('email', $socialUser->getEmail())->first();
+                
+                if ($user) {
+                    // Link social account to existing user
+                    $user->{$provider . '_id'} = $socialUser->getId();
+                    $user->save();
+                } else {
+                    // Create new user
+                    $names = $this->parseName($socialUser->getName());
+                    
+                    $user = User::create([
+                        'first_name' => $names['first_name'],
+                        'last_name' => $names['last_name'],
+                        'email' => $socialUser->getEmail(),
+                        'email_verified_at' => now(),
+                        $provider . '_id' => $socialUser->getId(),
+                        'avatar_url' => $socialUser->getAvatar(),
+                        'account_type' => 'personal',
+                        'can_sell' => false,
+                        'can_buy' => true,
+                        'is_active' => true,
+                        'source_ip_address' => $request->ip(),
+                        'source_server_info' => $request->userAgent(),
+                        'password' => Hash::make(Str::random(16)), // Random password
+                    ]);
+
+                    // Create user wallet
+                    UserWallet::create([
+                        'user_id' => $user->id,
+                        'balance' => 0.00,
+                        'currency' => 'XAF',
+                    ]);
+                }
+            }
+
+            // Generate auth token
+            $token = $user->createAuthToken('social-login-token');
+            
+            $this->logUserLogin($user, $request->ip(), 'success');
+
+            return response()->json([
+                'message' => 'Connexion réussie',
+                'user' => $user->load('wallet'),
+                'access_token' => $token,
+                'token_type' => 'Bearer'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Authentication failed',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Parse full name into first and last name
+     */
+    private function parseName($fullName)
+    {
+        $names = explode(' ', trim($fullName));
+        $firstName = $names[0];
+        $lastName = count($names) > 1 ? implode(' ', array_slice($names, 1)) : '';
+
+        return [
+            'first_name' => $firstName ?: 'User',
+            'last_name' => $lastName ?: 'Account'
+        ];
     }
 }

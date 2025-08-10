@@ -16,5 +16,24 @@ export default defineConfig({
         alias: {
             '@': '/resources/js',
         }
-    }
+    },
+    server: {
+        host: 'localhost',
+        hmr: {
+            host: 'localhost',
+        },
+    },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    vendor: ['vue', 'vue-router', 'pinia', 'axios']
+                }
+            }
+        },
+        minify: 'esbuild',
+        chunkSizeWarningLimit: 600
+    },
+    assetsInclude: ['**/*.jpg', '**/*.png', '**/*.gif', '**/*.svg', '**/*.ttf', '**/*.woff', '**/*.woff2'],
+    publicDir: 'public'
 });

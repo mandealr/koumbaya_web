@@ -8,21 +8,20 @@
           <div class="flex">
             <div class="flex-shrink-0 flex items-center">
               <router-link to="/merchant/dashboard" class="flex items-center">
-                <img class="h-8 w-auto" src="/images/logo.png" alt="Koumbaya" />
-                <span class="ml-2 text-xl font-bold text-gray-900">Koumbaya</span>
-                <span class="ml-1 text-sm text-green-600 font-medium">Marchand</span>
+                <img class="h-8 w-auto" :src="logoUrl" alt="Koumbaya" />
+                <span class="ml-1 text-sm text-[#0099cc] font-medium">Marchand</span>
               </router-link>
             </div>
-            
+
             <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <router-link 
-                v-for="item in navigation" 
+              <router-link
+                v-for="item in navigation"
                 :key="item.name"
                 :to="item.href"
                 :class="[
                   'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium',
-                  $route.path.startsWith(item.href) 
-                    ? 'border-green-500 text-gray-900' 
+                  $route.path.startsWith(item.href)
+                    ? 'border-green-500 text-gray-900'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 ]"
               >
@@ -45,7 +44,7 @@
             <!-- User menu -->
             <div class="relative ml-3">
               <div>
-                <button 
+                <button
                   @click="userMenuOpen = !userMenuOpen"
                   class="flex items-center max-w-xs bg-white rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                 >
@@ -120,9 +119,12 @@
     </div>
 
     <!-- Page content -->
-    <main class="py-10">
-      <slot />
+    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <router-view />
     </main>
+
+    <!-- Footer -->
+    <KoumbayaFooter />
 
     <!-- Quick Stats Footer -->
     <div v-if="showQuickStats" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 lg:hidden z-40">
@@ -149,9 +151,12 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/api'
+import KoumbayaFooter from './KoumbayaFooter.vue'
+import logoUrl from '@/assets/logo.png'
 import {
   HomeIcon,
   ShoppingBagIcon,
+  ClipboardDocumentListIcon,
   GiftIcon,
   ChartBarIcon,
   CogIcon,
@@ -180,6 +185,7 @@ const quickStats = ref({
 const navigation = [
   { name: 'Dashboard', href: '/merchant/dashboard', icon: HomeIcon },
   { name: 'Produits', href: '/merchant/products', icon: ShoppingBagIcon },
+  { name: 'Commandes', href: '/merchant/orders', icon: ClipboardDocumentListIcon },
   { name: 'Tombolas', href: '/merchant/lotteries', icon: GiftIcon },
   { name: 'Statistiques', href: '/merchant/analytics', icon: ChartBarIcon },
   { name: 'Paramètres', href: '/merchant/settings', icon: CogIcon }
@@ -213,14 +219,20 @@ const loadQuickStats = async () => {
   try {
     const response = await get('/merchant/dashboard/stats')
     const data = response.data
-    
+
     quickStats.value = {
-      products: data.total_products.toString(),
-      lotteries: data.active_lotteries.toString(),
-      revenue: formatCurrency(data.revenue_this_month)
+      products: data.total_products?.toString() || '0',
+      lotteries: data.active_lotteries?.toString() || '0',
+      revenue: formatCurrency(data.revenue_this_month || 0)
     }
   } catch (error) {
     console.error('Erreur lors du chargement des stats rapides:', error)
+    // Set default values on error to prevent display issues
+    quickStats.value = {
+      products: '0',
+      lotteries: '0',
+      revenue: '0 FCFA'
+    }
   }
 }
 
@@ -234,7 +246,7 @@ const formatCurrency = (amount) => {
 // Lifecycle
 onMounted(() => {
   loadQuickStats()
-  
+
   // Close menus when clicking outside
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.relative')) {

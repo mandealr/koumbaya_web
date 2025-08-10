@@ -3,7 +3,7 @@
     <!-- Page Header -->
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-gray-900">Mes billets</h1>
-      <p class="mt-2 text-gray-600">Suivez vos participations aux loteries</p>
+      <p class="mt-2 text-gray-600">Suivez vos participations aux tombolas</p>
     </div>
 
     <!-- Stats Cards -->
@@ -86,7 +86,7 @@
       </h3>
       <p class="text-gray-600 mb-4">
         {{ tickets.length === 0 
-          ? 'Vous n\'avez pas encore participé à des loteries'
+          ? 'Vous n\'avez pas encore participé à des tombolas'
           : 'Essayez de modifier vos filtres de recherche'
         }}
       </p>
@@ -175,7 +175,7 @@
               <!-- Progress Bar -->
               <div v-if="ticket.status === 'active'" class="mb-4">
                 <div class="flex justify-between text-xs text-gray-600 mb-1">
-                  <span>Progression de la loterie</span>
+                  <span>Progression de la tombola</span>
                   <span>{{ ticket.lottery.progress }}%</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2">

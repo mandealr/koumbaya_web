@@ -6,42 +6,106 @@
         <div class="flex justify-between items-center h-16">
           <!-- Logo -->
           <router-link to="/" class="flex items-center">
-            <img src="/build/assets/logo.png" alt="Koumbaya" class="h-8 w-auto" onerror="this.src='/logo.png'">
+            <img :src="logoUrl" alt="Koumbaya" class="h-8 w-auto">
           </router-link>
 
           <!-- Navigation Links -->
           <nav class="hidden md:flex space-x-8">
             <router-link
               to="/"
-              class="text-gray-600 hover:text-koumbaya-primary px-3 py-2 rounded-md text-sm font-medium"
+              class="text-gray-600 hover:text-[#0099cc] px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               Accueil
             </router-link>
-            <a href="#products" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium">
+            <router-link
+              to="/products"
+              class="text-gray-600 hover:text-[#0099cc] px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
               Produits
-            </a>
-            <a href="#how-it-works" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium">
+            </router-link>
+            <router-link
+              to="/how-it-works"
+              class="text-gray-600 hover:text-[#0099cc] px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
               Comment ça marche
-            </a>
-            <a href="#contact" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium">
+            </router-link>
+            <router-link
+              to="/contact"
+              class="text-gray-600 hover:text-[#0099cc] px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
               Contact
-            </a>
+            </router-link>
           </nav>
 
-          <!-- Auth Buttons -->
+          <!-- Auth Buttons / User Menu -->
           <div class="flex items-center space-x-4">
-            <router-link
-              to="/login"
-              class="text-gray-600 hover:text-koumbaya-primary px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Se connecter
-            </router-link>
-            <router-link
-              to="/register"
-              class="bg-koumbaya-primary hover:bg-koumbaya-primary-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              S'inscrire
-            </router-link>
+            <!-- Si utilisateur connecté -->
+            <div v-if="authStore.isAuthenticated" class="flex items-center space-x-4">
+              <!-- Bouton Mon Espace -->
+              <router-link
+                :to="userDashboardPath"
+                class="bg-[#0099cc] hover:bg-[#0088bb] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
+              >
+                <UserIcon class="w-4 h-4 mr-2" />
+                Mon Espace
+              </router-link>
+              
+              <!-- Menu utilisateur rapide -->
+              <div class="relative">
+                <button
+                  @click="userMenuOpen = !userMenuOpen"
+                  class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50"
+                >
+                  <div class="w-8 h-8 bg-[#0099cc] rounded-full flex items-center justify-center">
+                    <span class="text-sm font-medium text-white">{{ userInitials }}</span>
+                  </div>
+                  <ChevronDownIcon class="w-4 h-4 text-gray-500" />
+                </button>
+
+                <!-- Dropdown menu -->
+                <div
+                  v-if="userMenuOpen"
+                  class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200"
+                  @click.outside="userMenuOpen = false"
+                >
+                  <div class="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
+                    <p class="font-medium">{{ authStore.user?.first_name }} {{ authStore.user?.last_name }}</p>
+                    <p class="text-xs text-gray-500">{{ authStore.user?.email }}</p>
+                  </div>
+                  <router-link
+                    :to="userDashboardPath"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    @click="userMenuOpen = false"
+                  >
+                    <UserIcon class="w-4 h-4 inline mr-2" />
+                    Mon Espace
+                  </router-link>
+                  <button
+                    @click="handleLogout"
+                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <ArrowRightOnRectangleIcon class="w-4 h-4 inline mr-2" />
+                    Se déconnecter
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Si utilisateur non connecté -->
+            <div v-else class="flex items-center space-x-4">
+              <router-link
+                to="/login"
+                class="text-gray-600 hover:text-[#0099cc] px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Se connecter
+              </router-link>
+              <router-link
+                to="/register"
+                class="bg-[#0099cc] hover:bg-[#0088bb] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                S'inscrire
+              </router-link>
+            </div>
 
             <!-- Mobile menu button -->
             <button
@@ -59,47 +123,72 @@
         <div class="px-4 py-3 space-y-1">
           <router-link
             to="/"
-            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-green-600 hover:bg-green-50"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-blue-50"
             @click="mobileMenuOpen = false"
           >
             Accueil
           </router-link>
-          <a
-            href="#products"
-            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-green-600 hover:bg-green-50"
+          <router-link
+            to="/products"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-blue-50"
             @click="mobileMenuOpen = false"
           >
             Produits
-          </a>
-          <a
-            href="#how-it-works"
-            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-green-600 hover:bg-green-50"
+          </router-link>
+          <router-link
+            to="/how-it-works"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-blue-50"
             @click="mobileMenuOpen = false"
           >
             Comment ça marche
-          </a>
-          <a
-            href="#contact"
-            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-green-600 hover:bg-green-50"
+          </router-link>
+          <router-link
+            to="/contact"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-blue-50"
             @click="mobileMenuOpen = false"
           >
             Contact
-          </a>
+          </router-link>
           <div class="border-t border-gray-200 pt-4 mt-4">
-            <router-link
-              to="/login"
-              class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-green-600 hover:bg-green-50"
-              @click="mobileMenuOpen = false"
-            >
-              Se connecter
-            </router-link>
-            <router-link
-              to="/register"
-              class="block px-3 py-2 mt-2 rounded-md text-base font-medium bg-koumbaya-primary text-white hover:bg-koumbaya-primary-dark"
-              @click="mobileMenuOpen = false"
-            >
-              S'inscrire
-            </router-link>
+            <!-- Si utilisateur connecté -->
+            <div v-if="authStore.isAuthenticated" class="space-y-2">
+              <router-link
+                :to="userDashboardPath"
+                class="block px-3 py-2 rounded-md text-base font-medium bg-[#0099cc] text-white hover:bg-[#0088bb] flex items-center"
+                @click="mobileMenuOpen = false"
+              >
+                <UserIcon class="w-5 h-5 mr-2" />
+                Mon Espace
+              </router-link>
+              <div class="px-3 py-2 text-sm text-gray-600">
+                {{ authStore.user?.first_name }} {{ authStore.user?.last_name }}
+              </div>
+              <button
+                @click="handleLogout"
+                class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-blue-50"
+              >
+                <ArrowRightOnRectangleIcon class="w-5 h-5 inline mr-2" />
+                Se déconnecter
+              </button>
+            </div>
+            
+            <!-- Si utilisateur non connecté -->
+            <div v-else class="space-y-2">
+              <router-link
+                to="/login"
+                class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-blue-50"
+                @click="mobileMenuOpen = false"
+              >
+                Se connecter
+              </router-link>
+              <router-link
+                to="/register"
+                class="block px-3 py-2 rounded-md text-base font-medium bg-[#0099cc] text-white hover:bg-[#0088bb]"
+                @click="mobileMenuOpen = false"
+              >
+                S'inscrire
+              </router-link>
+            </div>
           </div>
         </div>
       </div>
@@ -111,82 +200,68 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200">
-      <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div class="col-span-1">
-            <div class="flex items-center">
-              <img src="/build/assets/logo.png" alt="Koumbaya" class="h-8 w-auto" onerror="this.src='/logo.png'">
-            </div>
-            <p class="mt-4 text-gray-600 text-sm">
-              La plateforme de loteries premium qui transforme vos rêves en réalité.
-            </p>
-          </div>
-          
-          <div>
-            <h3 class="text-sm font-semibold text-gray-900 tracking-wider uppercase">Produits</h3>
-            <ul class="mt-4 space-y-4">
-              <li><a href="#" class="text-sm text-gray-600 hover:text-green-600">Électronique</a></li>
-              <li><a href="#" class="text-sm text-gray-600 hover:text-green-600">Mode</a></li>
-              <li><a href="#" class="text-sm text-gray-600 hover:text-green-600">Automobiles</a></li>
-              <li><a href="#" class="text-sm text-gray-600 hover:text-green-600">Immobilier</a></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 class="text-sm font-semibold text-gray-900 tracking-wider uppercase">Entreprise</h3>
-            <ul class="mt-4 space-y-4">
-              <li><a href="#" class="text-sm text-gray-600 hover:text-green-600">À propos</a></li>
-              <li><a href="#" class="text-sm text-gray-600 hover:text-green-600">Carrières</a></li>
-              <li><a href="#" class="text-sm text-gray-600 hover:text-green-600">Partenaires</a></li>
-              <li><a href="#" class="text-sm text-gray-600 hover:text-green-600">Blog</a></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 class="text-sm font-semibold text-gray-900 tracking-wider uppercase">Support</h3>
-            <ul class="mt-4 space-y-4">
-              <li><a href="#" class="text-sm text-gray-600 hover:text-green-600">Centre d'aide</a></li>
-              <li><a href="#" class="text-sm text-gray-600 hover:text-green-600">Contact</a></li>
-              <li><a href="#" class="text-sm text-gray-600 hover:text-green-600">CGU</a></li>
-              <li><a href="#" class="text-sm text-gray-600 hover:text-green-600">Confidentialité</a></li>
-            </ul>
-          </div>
-        </div>
-        
-        <div class="mt-8 border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p class="text-base text-gray-400">
-            &copy; 2024 Koumbaya. Tous droits réservés.
-          </p>
-          <div class="mt-4 md:mt-0 flex space-x-6">
-            <a href="#" class="text-gray-400 hover:text-green-600">
-              <span class="sr-only">Facebook</span>
-              <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                <path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd"/>
-              </svg>
-            </a>
-            <a href="#" class="text-gray-400 hover:text-green-600">
-              <span class="sr-only">Instagram</span>
-              <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                <path fill-rule="evenodd" d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.618 5.367 11.986 11.988 11.986s11.987-5.368 11.987-11.986C24.004 5.367 18.635.001 12.017.001zM8.449 16.988c-1.297 0-2.448-.49-3.323-1.297C4.198 14.895 3.68 13.729 3.68 12.417s.518-2.478 1.446-3.274c.875-.807 2.026-1.297 3.323-1.297s2.448.49 3.323 1.297c.928.796 1.446 1.962 1.446 3.274s-.518 2.478-1.446 3.274c-.875.807-2.026 1.297-3.323 1.297zm7.718 0c-1.297 0-2.448-.49-3.323-1.297-.928-.796-1.446-1.962-1.446-3.274s.518-2.478 1.446-3.274c.875-.807 2.026-1.297 3.323-1.297s2.448.49 3.323 1.297c.928.796 1.446 1.962 1.446 3.274s-.518 2.478-1.446 3.274c-.875.807-2.026 1.297-3.323 1.297z" clip-rule="evenodd"/>
-              </svg>
-            </a>
-            <a href="#" class="text-gray-400 hover:text-green-600">
-              <span class="sr-only">Twitter</span>
-              <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"/>
-              </svg>
-            </a>
-          </div>
-        </div>
-      </div>
-    </footer>
+    <KoumbayaFooter />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { Bars3Icon } from '@heroicons/vue/24/outline'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { 
+  Bars3Icon,
+  UserIcon,
+  ArrowRightOnRectangleIcon,
+  ChevronDownIcon
+} from '@heroicons/vue/24/outline'
+import KoumbayaFooter from './KoumbayaFooter.vue'
+import logoUrl from '@/assets/logo.png'
+
+const router = useRouter()
+const authStore = useAuthStore()
 
 const mobileMenuOpen = ref(false)
+const userMenuOpen = ref(false)
+
+// Computed
+const userInitials = computed(() => {
+  const user = authStore.user
+  if (!user) return 'U'
+  return (user.first_name?.[0] || '') + (user.last_name?.[0] || '')
+})
+
+const userDashboardPath = computed(() => {
+  const redirectTo = authStore.getDefaultRedirect()
+  
+  // Convertir les noms de route en chemins
+  const routePaths = {
+    'admin.dashboard': '/admin/dashboard',
+    'merchant.dashboard': '/merchant/dashboard', 
+    'customer.dashboard': '/customer/dashboard'
+  }
+  
+  return routePaths[redirectTo] || '/customer/dashboard'
+})
+
+// Methods
+const handleLogout = async () => {
+  userMenuOpen.value = false
+  await authStore.logout()
+  router.push('/login')
+}
+
+const handleClickOutside = (event) => {
+  if (!event.target.closest('.relative')) {
+    userMenuOpen.value = false
+  }
+}
+
+// Lifecycle
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>

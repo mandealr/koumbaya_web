@@ -7,6 +7,9 @@ import App from './App.vue';
 const app = createApp(App);
 const pinia = createPinia();
 
+// Exposer le router globalement pour l'intercepteur API
+window.router = router;
+
 app.use(pinia);
 app.use(router);
 

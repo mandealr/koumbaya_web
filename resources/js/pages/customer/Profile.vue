@@ -537,22 +537,22 @@ const loginSessions = ref([
 const notificationCategories = [
   {
     key: 'lottery',
-    title: 'Loteries',
+    title: 'Tombolas',
     notifications: [
       {
         key: 'draw_results',
         title: 'Résultats des tirages',
-        description: 'Être notifié des résultats des loteries auxquelles vous participez'
+        description: 'Être notifié des résultats des tombolas auxquelles vous participez'
       },
       {
         key: 'new_lottery',
-        title: 'Nouvelles loteries',
-        description: 'Être informé des nouveaux produits mis en loterie'
+        title: 'Nouvelles tombolas',
+        description: 'Être informé des nouveaux produits mis en tombola'
       },
       {
         key: 'ending_soon',
-        title: 'Fin de loterie',
-        description: 'Rappel quand une loterie se termine bientôt'
+        title: 'Fin de tombola',
+        description: 'Rappel quand une tombola se termine bientôt'
       }
     ]
   },

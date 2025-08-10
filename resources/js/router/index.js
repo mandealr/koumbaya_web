@@ -14,6 +14,12 @@ import Results from '@/pages/public/Results.vue'
 import VerifyWinner from '@/pages/public/VerifyWinner.vue'
 import History from '@/pages/public/History.vue'
 
+// Public Pages (accessible without authentication)
+import PublicProducts from '@/pages/public/Products.vue'
+import PublicProductDetail from '@/pages/public/ProductDetail.vue'
+import HowItWorks from '@/pages/public/HowItWorks.vue'
+import Contact from '@/pages/public/Contact.vue'
+
 // Customer Pages
 import CustomerDashboard from '@/pages/customer/Dashboard.vue'
 import Products from '@/pages/customer/Products.vue'
@@ -29,8 +35,17 @@ import ProductManagement from '@/pages/admin/ProductManagement.vue'
 import LotteryManagement from '@/pages/admin/LotteryManagement.vue'
 import CountryLanguageManagement from '@/pages/admin/CountryLanguageManagement.vue'
 import RefundManagement from '@/pages/admin/RefundManagement.vue'
+import PaymentManagement from '@/pages/admin/PaymentManagement.vue'
 
 const routes = [
+  // Standalone Register Route (no layout)
+  {
+    path: '/register',
+    name: 'register',
+    component: Register,
+    meta: { requiresGuest: true }
+  },
+
   // Guest Routes
   {
     path: '/',
@@ -63,19 +78,35 @@ const routes = [
         meta: { requiresGuest: true }
       },
       {
-        path: 'register',
-        name: 'register',
-        component: Register,
-        meta: { requiresGuest: true }
+        path: 'products',
+        name: 'public.products',
+        component: PublicProducts
+      },
+      {
+        path: 'products/:id',
+        name: 'public.product.detail',
+        component: PublicProductDetail,
+        props: true
+      },
+      {
+        path: 'how-it-works',
+        name: 'public.how-it-works',
+        component: HowItWorks
+      },
+      {
+        path: 'contact',
+        name: 'public.contact',
+        component: Contact
       }
     ]
   },
+
 
   // Customer Routes
   {
     path: '/customer',
     component: CustomerLayout,
-    meta: { requiresAuth: true, role: 'CUSTOMER' },
+    meta: { requiresAuth: true },
     children: [
       {
         path: '',
@@ -111,11 +142,11 @@ const routes = [
     ]
   },
 
-  // Admin Routes
+  // Admin Routes  
   {
     path: '/admin',
     component: AdminLayout,
-    meta: { requiresAuth: true, role: 'ADMIN' },
+    meta: { requiresAuth: true },
     children: [
       {
         path: '',
@@ -146,6 +177,70 @@ const routes = [
         path: 'refunds',
         name: 'admin.refunds',
         component: RefundManagement
+      },
+      {
+        path: 'payments',
+        name: 'admin.payments',
+        component: PaymentManagement
+      }
+    ]
+  },
+
+  // Merchant Routes
+  {
+    path: '/merchant',
+    component: () => import('@/components/common/MerchantLayout.vue'),
+    meta: { requiresAuth: true, role: 'MERCHANT' },
+    children: [
+      {
+        path: '',
+        redirect: 'dashboard'
+      },
+      {
+        path: 'dashboard',
+        name: 'merchant.dashboard',
+        component: () => import('@/pages/merchant/Dashboard.vue')
+      },
+      {
+        path: 'products',
+        name: 'merchant.products',
+        component: () => import('@/pages/merchant/Products.vue')
+      },
+      {
+        path: 'products/create',
+        name: 'merchant.products.create',
+        component: () => import('@/pages/merchant/CreateProduct.vue')
+      },
+      {
+        path: 'orders',
+        name: 'merchant.orders',
+        component: () => import('@/pages/merchant/Orders.vue')
+      },
+      {
+        path: 'lotteries',
+        name: 'merchant.lotteries',
+        component: () => import('@/pages/merchant/LotteriesSimple.vue')
+      },
+      {
+        path: 'lotteries/:id',
+        name: 'merchant.lottery.view',
+        component: () => import('@/pages/merchant/LotteryView.vue'),
+        props: true
+      },
+      {
+        path: 'analytics',
+        name: 'merchant.analytics',
+        component: () => import('@/pages/merchant/Analytics.vue')
+      },
+      {
+        path: 'settings',
+        name: 'merchant.settings',
+        component: () => import('@/pages/merchant/Settings.vue')
+      },
+      {
+        path: 'profile',
+        name: 'merchant.profile',
+        component: () => import('@/pages/merchant/Profile.vue')
       }
     ]
   }
@@ -160,32 +255,45 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
   
+  // Check if route requires authentication
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next({ name: 'login' })
     return
   }
   
+  // Redirect authenticated users away from guest pages
   if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    // Redirect based on user role
-    if (authStore.user?.role === 'ADMIN') {
-      next({ name: 'admin.dashboard' })
-    } else {
-      next({ name: 'customer.dashboard' })
-    }
+    const redirectTo = authStore.getDefaultRedirect()
+    next({ name: redirectTo })
     return
   }
   
-  if (to.meta.role && authStore.user?.role !== to.meta.role) {
-    // Redirect to appropriate dashboard if wrong role
-    if (authStore.user?.role === 'ADMIN') {
-      next({ name: 'admin.dashboard' })
-    } else {
-      next({ name: 'customer.dashboard' })
+  // Role-based access control
+  if (to.meta.role && authStore.isAuthenticated) {
+    const hasAccess = checkRoleAccess(to.meta.role, authStore)
+    
+    if (!hasAccess) {
+      const redirectTo = authStore.getDefaultRedirect()
+      next({ name: redirectTo })
+      return
     }
-    return
   }
   
   next()
 })
+
+// Helper function to check role access
+function checkRoleAccess(requiredRole, authStore) {
+  switch (requiredRole) {
+    case 'ADMIN':
+      return authStore.isAdmin
+    case 'MERCHANT':
+      return authStore.isMerchant
+    case 'CUSTOMER':
+      return authStore.isCustomer
+    default:
+      return false
+  }
+}
 
 export default router

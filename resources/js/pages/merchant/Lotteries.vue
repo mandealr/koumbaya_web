@@ -1,6 +1,5 @@
 <template>
-  <MerchantLayout>
-    <div class="px-6">
+    <div class="space-y-6">
       <div class="sm:flex sm:items-center sm:justify-between mb-8">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">Mes Tombolas</h1>
@@ -254,35 +253,33 @@
       </div>
     </div>
 
-    <!-- Draw Lottery Modal -->
-    <LotteryDrawModal
-      v-if="showDrawModal"
-      :lottery="selectedLottery"
-      @close="showDrawModal = false"
-      @drawn="onLotteryDrawn"
-    />
+  <!-- Draw Lottery Modal -->
+  <LotteryDrawModal
+    v-if="showDrawModal"
+    :lottery="selectedLottery"
+    @close="showDrawModal = false"
+    @drawn="onLotteryDrawn"
+  />
 
-    <!-- Extend Lottery Modal -->
-    <LotteryExtendModal
-      v-if="showExtendModal"
-      :lottery="selectedLottery"
-      @close="showExtendModal = false"
-      @extended="onLotteryExtended"
-    />
+  <!-- Extend Lottery Modal -->
+  <LotteryExtendModal
+    v-if="showExtendModal"
+    :lottery="selectedLottery"
+    @close="showExtendModal = false"
+    @extended="onLotteryExtended"
+  />
 
-    <!-- Lottery Details Modal -->
-    <LotteryDetailsModal
-      v-if="showDetailsModal"
-      :lottery="selectedLottery"
-      @close="showDetailsModal = false"
-    />
-  </MerchantLayout>
+  <!-- Lottery Details Modal -->
+  <LotteryDetailsModal
+    v-if="showDetailsModal"
+    :lottery="selectedLottery"
+    @close="showDetailsModal = false"
+  />
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useApi } from '@/composables/api'
-import MerchantLayout from '@/components/common/MerchantLayout.vue'
 import LotteryDrawModal from '@/components/merchant/LotteryDrawModal.vue'
 import LotteryExtendModal from '@/components/merchant/LotteryExtendModal.vue'
 import LotteryDetailsModal from '@/components/merchant/LotteryDetailsModal.vue'
@@ -296,7 +293,11 @@ const { get, post } = useApi()
 
 // Data
 const lotteries = ref([])
-const categories = ref([])
+const categories = ref([
+  { id: 1, name: 'Électronique' },
+  { id: 2, name: 'Mode' },
+  { id: 3, name: 'Maison' }
+])
 const loading = ref(false)
 const activeTab = ref('all')
 
@@ -340,17 +341,23 @@ const loadLotteries = async (page = 1) => {
     })
 
     const response = await get(`/merchant/dashboard/lottery-performance?${params}`)
-    lotteries.value = response.data.lotteries || []
     
-    // Update pagination if available
-    if (response.data.pagination) {
-      pagination.value = response.data.pagination
+    // Gestion flexible de la structure de réponse
+    if (response?.data) {
+      lotteries.value = response.data.lotteries || response.data || []
+      // Update pagination if available
+      if (response.data.pagination) {
+        pagination.value = response.data.pagination
+      }
+    } else {
+      lotteries.value = []
     }
     
     // Update tab counts
     updateTabCounts()
   } catch (error) {
     console.error('Erreur lors du chargement des tombolas:', error)
+    lotteries.value = []
   } finally {
     loading.value = false
   }
@@ -366,9 +373,17 @@ const updateTabCounts = () => {
 const loadCategories = async () => {
   try {
     const response = await get('/categories')
-    categories.value = response.data.categories || []
+    // Gestion flexible de la structure de réponse
+    if (response?.data) {
+      categories.value = response.data.categories || response.data || []
+    } else if (Array.isArray(response)) {
+      categories.value = response
+    } else {
+      categories.value = []
+    }
   } catch (error) {
     console.error('Erreur lors du chargement des catégories:', error)
+    categories.value = []
   }
 }
 

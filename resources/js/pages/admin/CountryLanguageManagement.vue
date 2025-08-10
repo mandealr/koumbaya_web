@@ -674,7 +674,7 @@ const languageForm = reactive({
 const generalSettings = reactive({
   app_name: 'Koumbaya',
   app_url: 'https://koumbaya.com',
-  app_description: 'Plateforme de loteries en ligne pour gagner des produits exceptionnels',
+  app_description: 'Plateforme de tombolas en ligne pour gagner des produits exceptionnels',
   default_language: 'fr',
   default_country: 'SN'
 })

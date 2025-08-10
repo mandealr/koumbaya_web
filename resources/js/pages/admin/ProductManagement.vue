@@ -4,7 +4,7 @@
     <div class="mb-8 flex justify-between items-center">
       <div>
         <h1 class="text-3xl font-bold text-gray-900">Gestion des produits</h1>
-        <p class="mt-2 text-gray-600">Gérez les produits disponibles pour les loteries</p>
+        <p class="mt-2 text-gray-600">Gérez les produits disponibles pour les tombolas</p>
       </div>
       <button
         @click="showCreateModal = true"

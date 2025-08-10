@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\LotteryController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\CountryController;
+use App\Http\Controllers\Api\UserProfileController;
 use App\Http\Controllers\Api\LanguageController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\PaymentCallbackController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Api\PublicResultsController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RefundController;
 use App\Http\Controllers\Api\AdminRefundController;
+use App\Http\Controllers\Api\TicketPriceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +41,10 @@ Route::group([
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::post('refresh', [AuthController::class, 'refresh'])->middleware('auth:sanctum');
     Route::get('me', [AuthController::class, 'me'])->middleware('auth:sanctum');
+    
+    // Social Authentication Routes
+    Route::get('{provider}', [AuthController::class, 'redirectToProvider']);
+    Route::get('{provider}/callback', [AuthController::class, 'handleProviderCallback']);
 });
 
 // Routes publiques (sans authentification) avec rate limiting modéré
@@ -95,6 +101,11 @@ Route::group([
         Route::get('/verify/{code}', [PublicResultsController::class, 'verify']);
         Route::get('/{lottery}', [PublicResultsController::class, 'show']);
     });
+
+    // Ticket Price Calculator (public)
+    Route::post('calculate-ticket-price', [TicketPriceController::class, 'calculate']);
+    Route::post('ticket-price-suggestions', [TicketPriceController::class, 'suggestions']);
+    Route::get('ticket-calculation-config', [TicketPriceController::class, 'config']);
 });
 
 // Routes protégées (authentification requise) avec rate limiting
@@ -182,3 +193,13 @@ Route::group([
         Route::post('/{id}/reject', [AdminRefundController::class, 'reject']);
     });
 });
+
+// User profile routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user/profile', [UserProfileController::class, 'show']);
+    Route::put('/user/profile', [UserProfileController::class, 'update']);
+    Route::put('/user/password', [UserProfileController::class, 'updatePassword']);
+    Route::get('/user/preferences', [UserProfileController::class, 'getPreferences']);
+    Route::put('/user/preferences', [UserProfileController::class, 'updatePreferences']);
+});
+

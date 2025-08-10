@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
             $table->string('type'); // lottery_winner, lottery_draw_result, ticket_purchase, etc.
             $table->string('title');
             $table->text('message');
@@ -27,6 +27,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Indexes
+            $table->index('user_id');
             $table->index(['user_id', 'type']);
             $table->index(['user_id', 'read_at']);
             $table->index(['status', 'created_at']);

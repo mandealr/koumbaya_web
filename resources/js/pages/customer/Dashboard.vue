@@ -3,7 +3,7 @@
     <!-- Welcome Section -->
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-gray-900">
-        Bonjour {{ authStore.user?.first_name }} ! 👋
+        Bonjour {{ authStore.user?.first_name }} !
       </h1>
       <p class="mt-2 text-gray-600">
         Voici un aperçu de vos activités sur la plateforme
@@ -35,15 +35,15 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <router-link
           to="/customer/products"
-          class="flex items-center p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors"
+          class="flex items-center p-4 border border-gray-200 rounded-lg hover:border-[#0099cc] hover:bg-[#0099cc]-50 transition-colors"
         >
-          <ShoppingBagIcon class="w-8 h-8 text-green-600 mr-3" />
+          <ShoppingBagIcon class="w-8 h-8 text-[#0099cc] mr-3" />
           <div>
             <p class="font-medium text-gray-900">Acheter des billets</p>
             <p class="text-sm text-gray-600">Découvrir les produits disponibles</p>
           </div>
         </router-link>
-        
+
         <router-link
           to="/customer/tickets"
           class="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
@@ -54,7 +54,7 @@
             <p class="text-sm text-gray-600">Voir mes participations</p>
           </div>
         </router-link>
-        
+
         <router-link
           to="/customer/profile"
           class="flex items-center p-4 border border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-colors"
@@ -76,23 +76,23 @@
           <h3 class="text-lg font-semibold text-gray-900">Mes derniers billets</h3>
           <router-link
             to="/customer/tickets"
-            class="text-sm text-green-600 hover:text-green-700"
+            class="text-sm text-[#0099cc] hover:text-[#0099cc]-700"
           >
             Voir tout
           </router-link>
         </div>
-        
+
         <div v-if="recentTickets.length === 0" class="text-center py-8">
           <TicketIcon class="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <p class="text-gray-600">Aucun billet acheté pour le moment</p>
           <router-link
             to="/customer/products"
-            class="inline-block mt-2 text-green-600 hover:text-green-700"
+            class="inline-block mt-2 text-[#0099cc] hover:text-[#0099cc]-700"
           >
             Acheter des billets
           </router-link>
         </div>
-        
+
         <div v-else class="space-y-4">
           <div
             v-for="ticket in recentTickets"
@@ -114,7 +114,7 @@
             </div>
             <span :class="[
               'px-2 py-1 text-xs font-medium rounded-full',
-              ticket.status === 'active' ? 'bg-green-100 text-green-800' :
+              ticket.status === 'active' ? 'bg-[#0099cc] text-[#fff]' :
               ticket.status === 'won' ? 'bg-yellow-100 text-yellow-800' :
               'bg-gray-100 text-gray-800'
             ]">
@@ -127,20 +127,20 @@
       <!-- Active Lotteries -->
       <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold text-gray-900">Loteries populaires</h3>
+          <h3 class="text-lg font-semibold text-gray-900">Tombolas populaires</h3>
           <router-link
             to="/customer/products"
-            class="text-sm text-green-600 hover:text-green-700"
+            class="text-sm text-[#0099cc] hover:text-[#0099cc]-700"
           >
             Voir tout
           </router-link>
         </div>
-        
+
         <div class="space-y-4">
           <div
             v-for="lottery in activeLotteries"
             :key="lottery.id"
-            class="border border-gray-200 rounded-lg p-4 hover:border-green-500 transition-colors"
+            class="border border-gray-200 rounded-lg p-4 hover:border-[#0099cc] transition-colors"
           >
             <div class="flex items-start space-x-4">
               <img
@@ -151,27 +151,27 @@
               <div class="flex-1">
                 <h4 class="font-medium text-gray-900 mb-1">{{ lottery.product.title }}</h4>
                 <p class="text-sm text-gray-600 mb-2">{{ lottery.product.price }} FCFA</p>
-                
+
                 <div class="mb-3">
                   <div class="flex justify-between text-sm text-gray-600 mb-1">
                     <span>Progression</span>
                     <span>{{ lottery.progress }}%</span>
                   </div>
                   <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      class="bg-green-600 h-2 rounded-full transition-all duration-300" 
+                    <div
+                      class="bg-[#0099cc] h-2 rounded-full transition-all duration-300"
                       :style="{ width: lottery.progress + '%' }"
                     ></div>
                   </div>
                 </div>
-                
+
                 <div class="flex justify-between items-center">
                   <span class="text-xs text-gray-500">
                     Tirage le {{ formatDate(lottery.draw_date) }}
                   </span>
                   <router-link
                     :to="`/customer/products/${lottery.product.id}`"
-                    class="text-sm bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition-colors"
+                    class="text-sm bg-[#0099cc] text-white px-3 py-1 rounded-md hover:bg-[#0099cc]-700 transition-colors"
                   >
                     Participer
                   </router-link>
@@ -207,9 +207,9 @@ const stats = ref([
     icon: TicketIcon
   },
   {
-    label: 'Loteries participées',
+    label: 'Tombolas participées',
     value: '5',
-    color: 'bg-green-500',
+    color: 'bg-[#0099cc]-500',
     icon: GiftIcon
   },
   {

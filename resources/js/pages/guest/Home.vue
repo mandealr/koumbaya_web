@@ -1,246 +1,386 @@
 <template>
-  <div>
-    <!-- Hero Section - Koumbaya Brand -->
-    <section class="bg-gradient-to-br from-[#0099cc] via-[#0088bb] to-[#007799] text-white relative overflow-hidden">
-      <div class="absolute inset-0 bg-black/10"></div>
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
-        <div class="text-center koumbaya-fade-in">
-          <h1 class="text-5xl md:text-7xl font-bold mb-8 leading-tight">
-            Gagnez des
-            <span class="text-cyan-200 bg-gradient-to-r from-cyan-200 to-white bg-clip-text text-transparent">produits incroyables</span>
-          </h1>
-          <p class="text-xl md:text-2xl mb-12 text-blue-100 max-w-4xl mx-auto leading-relaxed font-light">
-            🎯 Koumbaya est la première plateforme de loteries premium au Cameroun.<br>
-            Achetez vos billets et tentez de remporter des prix exceptionnels avec transparence totale.
-          </p>
-          <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <router-link
-              to="/register"
-              class="koumbaya-btn koumbaya-btn-secondary koumbaya-btn-lg shadow-2xl hover:shadow-cyan-500/25 transform hover:scale-105"
-            >
-              🚀 Commencer maintenant
-            </router-link>
-            <button
-              @click="scrollToProducts"
-              class="koumbaya-btn koumbaya-btn-outline koumbaya-btn-lg border-white text-white hover:bg-white hover:text-[#0099cc]"
-            >
-              👀 Voir les produits
-            </button>
-          </div>
-          <div class="mt-16 flex justify-center items-center gap-8 text-blue-200">
-            <div class="text-center">
-              <div class="text-3xl font-bold">1000+</div>
-              <div class="text-sm">Participants</div>
-            </div>
-            <div class="w-px h-12 bg-blue-300/30"></div>
-            <div class="text-center">
-              <div class="text-3xl font-bold">50+</div>
-              <div class="text-sm">Produits gagnés</div>
-            </div>
-            <div class="w-px h-12 bg-blue-300/30"></div>
-            <div class="text-center">
-              <div class="text-3xl font-bold">100%</div>
-              <div class="text-sm">Transparent</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Forme décorative -->
-      <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent"></div>
-    </section>
-
-    <!-- Features Section - Design amélioré -->
-    <section class="py-32 bg-gradient-to-b from-white to-gray-50">
+  <div class="bg-white">
+    <!-- Hero Section - Back Market Style -->
+    <section class="relative bg-gradient-to-br from-blue-50 via-white to-cyan-50 overflow-hidden">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-20">
-          <h2 class="koumbaya-heading-2 text-4xl md:text-5xl text-gray-900 mb-6">
-            Pourquoi choisir <span class="koumbaya-text-primary">Koumbaya</span> ?
-          </h2>
-          <p class="koumbaya-text-body text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Une plateforme moderne, sécurisée et transparente pour tous vos jeux de loterie.<br>
-            Découvrez les avantages qui font la différence.
-          </p>
-        </div>
-        
-        <div class="koumbaya-grid-3 gap-12">
-          <div v-for="feature in features" :key="feature.title" class="koumbaya-card text-center group hover:scale-105 transition-transform">
-            <div class="koumbaya-card-body">
-              <div class="w-20 h-20 bg-gradient-to-br from-[#0099cc] to-[#007799] rounded-2xl flex items-center justify-center mx-auto mb-8 group-hover:shadow-lg group-hover:shadow-cyan-500/25 transition-shadow">
-                <component :is="feature.icon" class="w-10 h-10 text-white" />
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[90vh] py-20">
+          <!-- Left Content -->
+          <div class="space-y-8">
+            <div class="space-y-4">
+              <div class="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
+                <SparklesIcon class="h-4 w-4" />
+                <span>Nouveau au Gabon</span>
               </div>
-              <h3 class="koumbaya-heading-4 text-gray-900 mb-4">{{ feature.title }}</h3>
-              <p class="koumbaya-text-body text-gray-600 leading-relaxed">{{ feature.description }}</p>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Badges de confiance -->
-        <div class="mt-20 pt-12 border-t border-gray-200">
-          <div class="flex flex-wrap justify-center items-center gap-8 text-gray-500">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                </svg>
-              </div>
-              <span class="font-medium">100% Sécurisé</span>
-            </div>
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                </svg>
-              </div>
-              <span class="font-medium">Paiements certifiés</span>
-            </div>
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-              </div>
-              <span class="font-medium">Support 24/7</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Products Section - Design premium -->
-    <section id="products" class="py-32 bg-white">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-20">
-          <h2 class="koumbaya-heading-2 text-4xl md:text-5xl text-gray-900 mb-6">
-            🎁 Produits en <span class="koumbaya-text-primary">loterie</span>
-          </h2>
-          <p class="koumbaya-text-body text-xl text-gray-600 max-w-3xl mx-auto">
-            Découvrez les incroyables produits que vous pouvez gagner.<br>
-            Des marques prestigieuses, des prix exceptionnels !
-          </p>
-        </div>
-        
-        <div class="koumbaya-grid-3 gap-8">
-          <div
-            v-for="product in featuredProducts"
-            :key="product.id"
-            class="koumbaya-card group hover:scale-105 transition-all duration-300 relative overflow-hidden"
-          >
-            <!-- Badge de popularité -->
-            <div v-if="product.progress > 80" class="absolute top-4 left-4 z-10">
-              <div class="koumbaya-badge koumbaya-badge-warning shadow-md">
-                🔥 Populaire
-              </div>
-            </div>
-            
-            <!-- Image du produit avec overlay -->
-            <div class="relative overflow-hidden">
-              <img
-                :src="product.image"
-                :alt="product.title"
-                class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </div>
-            
-            <div class="koumbaya-card-body">
-              <h3 class="koumbaya-heading-4 text-gray-900 mb-3 group-hover:text-[#0099cc] transition-colors">
-                {{ product.title }}
-              </h3>
-              <p class="koumbaya-text-small text-gray-600 mb-6 leading-relaxed">
-                {{ product.description }}
+              <h1 class="text-5xl lg:text-6xl xl:text-7xl font-bold text-black leading-none">
+                Achetez à 
+                <span class="text-[#0099cc]">petit prix</span>
+              </h1>
+              <p class="text-xl lg:text-2xl text-gray-600 leading-relaxed">
+                Des smartphones aux voitures, profitez de nos tombolas pour 
+                <strong class="text-[#0099cc]">acheter malin</strong> et obtenir des produits 
+                <strong class="text-[#0099cc]">à prix réduit</strong>.
               </p>
-              
-              <!-- Prix et informations -->
-              <div class="flex justify-between items-center mb-6">
-                <div class="text-3xl font-bold text-[#0099cc]">{{ product.price }} FCFA</div>
-                <div class="koumbaya-badge koumbaya-badge-primary">
-                  {{ product.ticket_price }} FCFA/billet
-                </div>
-              </div>
-              
-              <!-- Barre de progression stylisée -->
-              <div class="mb-6">
-                <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
-                  <span>🎯 Progression</span>
-                  <span>{{ product.progress }}%</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-3 relative overflow-hidden">
-                  <div 
-                    class="bg-gradient-to-r from-[#0099cc] to-[#00aadd] h-full rounded-full transition-all duration-700 relative" 
-                    :style="{ width: product.progress + '%' }"
-                  >
-                    <div class="absolute inset-0 bg-white/20 animate-pulse rounded-full"></div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Bouton d'action -->
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-4">
               <router-link
-                to="/register"
-                class="koumbaya-btn koumbaya-btn-primary koumbaya-btn-full group-hover:shadow-lg"
+                to="/products"
+                class="inline-flex items-center justify-center gap-2 bg-[#0099cc] hover:bg-[#0088bb] text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                🎫 Acheter des billets
+                <ShoppingBagIcon class="h-5 w-5" />
+                <span>Découvrir les produits</span>
+              </router-link>
+              <router-link
+                to="/how-it-works"
+                class="inline-flex items-center justify-center gap-2 border-2 border-[#0099cc] text-[#0099cc] hover:bg-blue-50 font-semibold px-8 py-4 rounded-2xl transition-all duration-200"
+              >
+                <QuestionMarkCircleIcon class="h-5 w-5" />
+                <span>Comment ça marche</span>
               </router-link>
             </div>
+
+            <!-- Trust Indicators -->
+            <div class="flex items-center gap-8 pt-8">
+              <div class="flex items-center gap-2 text-gray-600">
+                <ShieldCheckIcon class="h-6 w-6 text-[#0099cc]" />
+                <span class="font-medium">100% sécurisé</span>
+              </div>
+              <div class="flex items-center gap-2 text-gray-600">
+                <CheckBadgeIcon class="h-6 w-6 text-[#0099cc]" />
+                <span class="font-medium">Produits authentiques</span>
+              </div>
+              <div class="flex items-center gap-2 text-gray-600">
+                <TruckIcon class="h-6 w-6 text-[#0099cc]" />
+                <span class="font-medium">Livraison gratuite</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Visual -->
+          <div class="relative lg:h-[600px] flex items-center justify-center">
+            <div class="relative">
+              <!-- Main Product Card -->
+              <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm relative z-10 border border-gray-100">
+                <div class="relative mb-6">
+                  <img
+                    :src="placeholderImg"
+                    alt="iPhone 15 Pro"
+                    class="w-full h-48 object-cover rounded-2xl bg-gray-100"
+                  />
+                  <div class="absolute -top-2 -right-2 bg-[#0099cc] text-white px-3 py-1 rounded-full text-sm font-bold">
+                    1500 FCFA
+                  </div>
+                </div>
+                <div class="space-y-4">
+                  <div>
+                    <h3 class="text-xl font-bold text-black">iPhone 15 Pro Max</h3>
+                    <p class="text-gray-600">Valeur: 1 299 000 FCFA</p>
+                  </div>
+                  <div class="space-y-2">
+                    <div class="flex justify-between text-sm text-gray-600">
+                      <span>Progression</span>
+                      <span class="font-semibold">75%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                      <div class="bg-gradient-to-r from-[#0099cc] to-cyan-500 h-3 rounded-full w-3/4 animate-pulse"></div>
+                    </div>
+                    <div class="text-center text-sm text-gray-500">750/1000 tickets</div>
+                  </div>
+                  <button class="w-full bg-[#0099cc] text-white font-semibold py-3 rounded-xl hover:bg-[#0088bb] transition-colors">
+                    Acheter maintenant
+                  </button>
+                </div>
+              </div>
+
+              <!-- Floating Elements -->
+              <div class="absolute -top-8 -left-8 bg-blue-100 text-blue-600 px-4 py-2 rounded-full text-sm font-medium z-20 animate-float">
+                ✨ Nouvelle tombola
+              </div>
+              <div class="absolute -bottom-4 -right-8 bg-yellow-100 text-yellow-600 px-4 py-2 rounded-full text-sm font-medium z-20 animate-float-delayed">
+                🔥 Populaire
+              </div>
+              <div class="absolute top-1/2 -left-12 bg-[#0099cc]/10 text-[#0099cc] px-4 py-2 rounded-full text-sm font-medium z-20 animate-float-slow">
+                💰 Prix réduit
+              </div>
+            </div>
           </div>
         </div>
-        
-        <!-- Call-to-action -->
-        <div class="text-center mt-16">
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-20 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold text-black mb-4">
+            Koumbaya en chiffres
+          </h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Rejoignez des milliers de participants qui ont déjà fait confiance à notre plateforme
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div class="text-center">
+            <div class="w-20 h-20 bg-[#0099cc]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <UsersIcon class="h-10 w-10 text-[#0099cc]" />
+            </div>
+            <div class="text-4xl font-bold text-black mb-2">12 000+</div>
+            <div class="text-gray-600">Participants actifs</div>
+          </div>
+          
+          <div class="text-center">
+            <div class="w-20 h-20 bg-[#0099cc]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <GiftIcon class="h-10 w-10 text-[#0099cc]" />
+            </div>
+            <div class="text-4xl font-bold text-black mb-2">250+</div>
+            <div class="text-gray-600">Produits gagnés</div>
+          </div>
+          
+          <div class="text-center">
+            <div class="w-20 h-20 bg-[#0099cc]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CurrencyDollarIcon class="h-10 w-10 text-[#0099cc]" />
+            </div>
+            <div class="text-4xl font-bold text-black mb-2">500M+</div>
+            <div class="text-gray-600">FCFA distribués</div>
+          </div>
+          
+          <div class="text-center">
+            <div class="w-20 h-20 bg-[#0099cc]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <StarIcon class="h-10 w-10 text-[#0099cc]" />
+            </div>
+            <div class="text-4xl font-bold text-black mb-2">4.9/5</div>
+            <div class="text-gray-600">Note utilisateurs</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold text-black mb-4">
+            Simple comme bonjour
+          </h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            3 étapes suffisent pour obtenir vos produits à prix cassés
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+          <div class="text-center group">
+            <div class="relative mx-auto w-24 h-24 mb-6">
+              <div class="absolute inset-0 bg-[#0099cc]/10 rounded-full group-hover:bg-[#0099cc]/20 transition-colors"></div>
+              <div class="absolute inset-3 bg-[#0099cc] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <span class="text-2xl font-bold text-white">1</span>
+              </div>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-4">Choisissez votre produit</h3>
+            <p class="text-gray-600 leading-relaxed">
+              Parcourez notre catalogue de produits authentiques et sélectionnez celui que vous souhaitez acquérir.
+            </p>
+          </div>
+
+          <div class="text-center group">
+            <div class="relative mx-auto w-24 h-24 mb-6">
+              <div class="absolute inset-0 bg-[#0099cc]/10 rounded-full group-hover:bg-[#0099cc]/20 transition-colors"></div>
+              <div class="absolute inset-3 bg-[#0099cc] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <span class="text-2xl font-bold text-white">2</span>
+              </div>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-4">Achetez vos tickets</h3>
+            <p class="text-gray-600 leading-relaxed">
+              Participez à la tombola avec un petit budget. Plus vous prenez de tickets, meilleures sont vos chances d'obtenir le produit.
+            </p>
+          </div>
+
+          <div class="text-center group">
+            <div class="relative mx-auto w-24 h-24 mb-6">
+              <div class="absolute inset-0 bg-[#0099cc]/10 rounded-full group-hover:bg-[#0099cc]/20 transition-colors"></div>
+              <div class="absolute inset-3 bg-[#0099cc] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <span class="text-2xl font-bold text-white">3</span>
+              </div>
+            </div>
+            <h3 class="text-xl font-bold text-black mb-4">Obtenez votre produit</h3>
+            <p class="text-gray-600 leading-relaxed">
+              Le tirage automatique désigne l'acheteur. Nous livrons gratuitement partout au Gabon !
+            </p>
+          </div>
+        </div>
+
+        <div class="text-center mt-12">
           <router-link
-            to="/register"
-            class="koumbaya-btn koumbaya-btn-outline koumbaya-btn-lg"
+            to="/how-it-works"
+            class="inline-flex items-center gap-2 bg-black hover:bg-gray-800 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-200"
           >
-            Voir tous les produits
-            <ArrowRightIcon class="ml-2 w-6 h-6" />
+            <span>En savoir plus</span>
+            <ArrowRightIcon class="h-5 w-5" />
           </router-link>
         </div>
       </div>
     </section>
 
-    <!-- How it Works Section -->
-    <section id="how-it-works" class="py-24 bg-gray-50">
+    <!-- Featured Products -->
+    <section class="py-20 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between mb-12">
+          <div>
+            <h2 class="text-3xl md:text-4xl font-bold text-black mb-4">
+              Produits en vedette
+            </h2>
+            <p class="text-xl text-gray-600">
+              Découvrez les lots les plus convoités du moment
+            </p>
+          </div>
+          <router-link
+            to="/products"
+            class="hidden md:inline-flex items-center gap-2 text-[#0099cc] hover:text-[#0088bb] font-semibold group"
+          >
+            <span>Voir tout</span>
+            <ArrowRightIcon class="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+          </router-link>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div
+            v-for="product in featuredProducts"
+            :key="product.id"
+            @click="viewProduct(product)"
+            class="bg-white rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group border border-gray-100"
+          >
+            <div class="relative mb-6">
+              <img
+                :src="product.image || '/images/products/placeholder.jpg'"
+                :alt="product.name"
+                class="w-full h-48 object-cover rounded-2xl bg-gray-100 group-hover:scale-105 transition-transform duration-300"
+              />
+              <div class="absolute -top-2 -right-2">
+                <span class="bg-[#0099cc] text-white px-4 py-2 rounded-full font-semibold shadow-lg">
+                  {{ formatPrice(product.ticketPrice) }}
+                </span>
+              </div>
+              <div v-if="product.isNew" class="absolute top-4 left-4">
+                <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  Nouveau
+                </span>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <h3 class="text-xl font-bold text-black group-hover:text-[#0099cc] transition-colors">
+                  {{ product.name }}
+                </h3>
+                <p class="text-gray-600">Valeur: {{ formatPrice(product.value) }}</p>
+              </div>
+
+              <div class="space-y-2">
+                <div class="flex justify-between text-sm text-gray-600">
+                  <span>Progression</span>
+                  <span class="font-semibold">{{ Math.round((product.soldTickets / 1000) * 100) }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    class="bg-gradient-to-r from-[#0099cc] to-cyan-500 h-3 rounded-full transition-all duration-500"
+                    :style="{ width: Math.round((product.soldTickets / 1000) * 100) + '%' }"
+                  ></div>
+                </div>
+                <div class="text-center text-sm text-gray-500">
+                  {{ product.soldTickets }}/1000 tickets
+                </div>
+              </div>
+
+              <button class="w-full bg-[#0099cc] hover:bg-[#0088bb] text-white font-semibold py-3 rounded-xl transition-colors group-hover:scale-105 group-hover:shadow-lg">
+                Acheter maintenant
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mt-12 md:hidden">
+          <router-link
+            to="/products"
+            class="inline-flex items-center gap-2 bg-[#0099cc] hover:bg-[#0088bb] text-white font-semibold px-8 py-4 rounded-2xl transition-all"
+          >
+            <span>Voir tous les produits</span>
+            <ArrowRightIcon class="h-5 w-5" />
+          </router-link>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Comment ça marche ?
+          <h2 class="text-3xl md:text-4xl font-bold text-black mb-4">
+            Ils ont acheté malin avec Koumbaya
           </h2>
-          <p class="text-xl text-gray-600">
-            Participer aux loteries Koumbaya est simple et rapide
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Découvrez les témoignages de nos clients satisfaits
           </p>
         </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div v-for="(step, index) in steps" :key="step.title" class="text-center">
-            <div class="relative">
-              <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span class="text-2xl font-bold text-white">{{ index + 1 }}</span>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div
+            v-for="testimonial in testimonials"
+            :key="testimonial.id"
+            class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
+          >
+            <div class="flex items-center mb-6">
+              <img
+                :src="testimonial.avatar"
+                :alt="testimonial.name"
+                class="w-12 h-12 rounded-full bg-gray-200"
+              />
+              <div class="ml-4">
+                <div class="font-semibold text-gray-900">{{ testimonial.name }}</div>
+                <div class="text-sm text-gray-600">{{ testimonial.location }}</div>
               </div>
-              <div v-if="index < steps.length - 1" class="hidden md:block absolute top-8 left-16 w-full h-0.5 bg-green-200"></div>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900 mb-4">{{ step.title }}</h3>
-            <p class="text-gray-600">{{ step.description }}</p>
+            <div class="flex items-center mb-4">
+              <div class="flex text-yellow-400">
+                <StarIcon v-for="n in 5" :key="n" class="h-5 w-5 fill-current" />
+              </div>
+            </div>
+            <blockquote class="text-gray-700 italic leading-relaxed">
+              "{{ testimonial.review }}"
+            </blockquote>
+            <div class="mt-4 text-sm text-[#0099cc] font-medium">
+              A obtenu: {{ testimonial.won }}
+            </div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- CTA Section -->
-    <section class="py-24 bg-green-600">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
-          Prêt à tenter votre chance ?
+    <section class="py-20 bg-gradient-to-r from-[#0099cc] to-cyan-600">
+      <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+        <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
+          Votre prochain lot vous attend
         </h2>
-        <p class="text-xl text-green-100 mb-8 max-w-2xl mx-auto">
-          Rejoignez des milliers de participants et augmentez vos chances de gagner des produits exceptionnels
+        <p class="text-xl text-blue-100 mb-8 leading-relaxed">
+          Rejoignez la communauté Koumbaya et tentez votre chance dès aujourd'hui. 
+          L'inscription est gratuite et ne prend que quelques minutes.
         </p>
-        <router-link
-          to="/register"
-          class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-green-600 bg-white hover:bg-gray-100 transition-colors"
-        >
-          Créer mon compte gratuitement
-          <ArrowRightIcon class="ml-2 w-6 h-6" />
-        </router-link>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <router-link
+            to="/register"
+            class="inline-flex items-center justify-center gap-2 bg-white text-[#0099cc] hover:text-[#0088bb] font-bold px-10 py-5 rounded-2xl transition-all duration-200 hover:scale-105 shadow-xl"
+          >
+            <UserPlusIcon class="h-6 w-6" />
+            <span>S'inscrire gratuitement</span>
+          </router-link>
+          <router-link
+            to="/products"
+            class="inline-flex items-center justify-center gap-2 border-2 border-white text-white hover:bg-white hover:text-[#0099cc] font-bold px-10 py-5 rounded-2xl transition-all duration-200"
+          >
+            <EyeIcon class="h-6 w-6" />
+            <span>Voir les produits</span>
+          </router-link>
+        </div>
       </div>
     </section>
   </div>
@@ -248,83 +388,124 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import placeholderImg from '@/assets/placeholder.jpg'
+import avatarPlaceholder from '@/assets/avatar-placeholder.jpg'
 import {
+  SparklesIcon,
+  ShoppingBagIcon,
+  QuestionMarkCircleIcon,
   ShieldCheckIcon,
+  CheckBadgeIcon,
+  TruckIcon,
+  UsersIcon,
   GiftIcon,
-  UserGroupIcon,
-  ArrowRightIcon
+  CurrencyDollarIcon,
+  StarIcon,
+  ArrowRightIcon,
+  UserPlusIcon,
+  EyeIcon
 } from '@heroicons/vue/24/outline'
 
-const features = ref([
-  {
-    title: 'Sécurisé & Transparent',
-    description: 'Tous les tirages sont équitables et vérifiables. Vos données personnelles sont protégées.',
-    icon: ShieldCheckIcon
-  },
-  {
-    title: 'Produits de Qualité',
-    description: 'Une sélection rigoureuse de produits neufs et authentiques de grandes marques.',
-    icon: GiftIcon
-  },
-  {
-    title: 'Communauté Active',
-    description: 'Rejoignez des milliers de joueurs satisfaits partout au Cameroun.',
-    icon: UserGroupIcon
-  }
-])
+const router = useRouter()
 
 const featuredProducts = ref([
   {
     id: 1,
-    title: 'iPhone 15 Pro',
-    description: 'Le dernier flagship d\'Apple avec une caméra révolutionnaire',
-    price: '750,000',
-    ticket_price: '1,000',
-    progress: 85,
-    image: '/images/products/iphone15.jpg'
+    name: 'iPhone 15 Pro Max',
+    value: 1299000,
+    ticketPrice: 1500,
+    image: placeholderImg,
+    soldTickets: 750,
+    isNew: true
   },
   {
     id: 2,
-    title: 'MacBook Pro M3',
-    description: 'Puissance et performance pour les créateurs',
-    price: '1,200,000',
-    ticket_price: '2,000',
-    progress: 62,
-    image: '/images/products/macbook.jpg'
+    name: 'MacBook Pro M3',
+    value: 2500000,
+    ticketPrice: 2500,
+    image: placeholderImg,
+    soldTickets: 420,
+    isNew: true
   },
   {
     id: 3,
-    title: 'PlayStation 5',
-    description: 'Console de jeu nouvelle génération',
-    price: '350,000',
-    ticket_price: '500',
-    progress: 95,
-    image: '/images/products/ps5.jpg'
+    name: 'Tesla Model Y',
+    value: 45000000,
+    ticketPrice: 50000,
+    image: placeholderImg,
+    soldTickets: 320,
+    isNew: false
   }
 ])
 
-const steps = ref([
+const testimonials = ref([
   {
-    title: 'Inscrivez-vous',
-    description: 'Créez votre compte gratuitement en quelques clics'
+    id: 1,
+    name: 'Marie Dubois',
+    location: 'Libreville',
+    avatar: avatarPlaceholder,
+    review: 'J\'ai acheté un iPhone 14 Pro avec seulement 5 tickets ! Le processus était transparent et la livraison rapide.',
+    won: 'iPhone 14 Pro'
   },
   {
-    title: 'Choisissez un produit',
-    description: 'Parcourez notre sélection et trouvez votre produit favori'
+    id: 2,
+    name: 'Jean Kamga',
+    location: 'Port-Gentil',
+    avatar: avatarPlaceholder,
+    review: 'Koumbaya a changé ma vie ! J\'ai obtenu une moto à prix réduit et maintenant je participe à toutes les tombolas.',
+    won: 'Yamaha MT-03'
   },
   {
-    title: 'Achetez vos billets',
-    description: 'Sélectionnez le nombre de billets et effectuez le paiement'
-  },
-  {
-    title: 'Gagnez !',
-    description: 'Participez au tirage et remportez votre produit'
+    id: 3,
+    name: 'Fatou Ndongo',
+    location: 'Franceville',
+    avatar: avatarPlaceholder,
+    review: 'Platform très sérieuse, paiement sécurisé et service client réactif. Je recommande vivement !',
+    won: 'MacBook Air M2'
   }
 ])
 
-const scrollToProducts = () => {
-  document.getElementById('products').scrollIntoView({
-    behavior: 'smooth'
-  })
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'XAF',
+    minimumFractionDigits: 0
+  }).format(price).replace('XAF', 'FCFA')
+}
+
+const viewProduct = (product) => {
+  router.push({ name: 'public.product.detail', params: { id: product.id } })
 }
 </script>
+
+<style scoped>
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 8s ease-in-out infinite;
+  animation-delay: -2s;
+}
+
+.animate-float-slow {
+  animation: float-slow 10s ease-in-out infinite;
+  animation-delay: -4s;
+}
+</style>

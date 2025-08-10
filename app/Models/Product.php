@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Services\TicketPriceCalculator;
 
 class Product extends Model
 {
@@ -214,6 +215,78 @@ class Product extends Model
             'has_active_lottery' => $this->has_active_lottery,
             'popularity_score' => $this->popularity_score
         ];
+    }
+
+    /**
+     * Calcul automatique du prix des tickets
+     */
+    public function calculateTicketPrice(int $numberOfTickets = null): float
+    {
+        $numberOfTickets = $numberOfTickets ?? config('koumbaya.ticket_calculation.default_tickets', 1000);
+        
+        return TicketPriceCalculator::calculateTicketPrice(
+            $this->price,
+            $numberOfTickets
+        );
+    }
+
+    /**
+     * Obtenir les détails complets du calcul
+     */
+    public function getTicketCalculationDetails(int $numberOfTickets = null): array
+    {
+        $numberOfTickets = $numberOfTickets ?? config('koumbaya.ticket_calculation.default_tickets', 1000);
+        
+        return TicketPriceCalculator::getCalculationDetails(
+            $this->price,
+            $numberOfTickets
+        );
+    }
+
+    /**
+     * Obtenir des suggestions de prix pour différents nombres de tickets
+     */
+    public function getTicketPriceSuggestions(): array
+    {
+        return TicketPriceCalculator::getSuggestions($this->price, $this->ticket_price);
+    }
+
+    /**
+     * Mettre à jour automatiquement le prix du ticket
+     */
+    public function updateTicketPrice(int $numberOfTickets = null): void
+    {
+        $numberOfTickets = $numberOfTickets ?? config('koumbaya.ticket_calculation.default_tickets', 1000);
+        $this->ticket_price = $this->calculateTicketPrice($numberOfTickets);
+        $this->min_participants = $numberOfTickets;
+        $this->save();
+    }
+
+    /**
+     * Hook pour calculer automatiquement le prix du ticket lors de la sauvegarde
+     */
+    protected static function booted()
+    {
+        // Calcul automatique lors de la création
+        static::creating(function ($product) {
+            if (config('koumbaya.features.auto_calculate_ticket_price', true)) {
+                if ($product->price && (!$product->ticket_price || $product->ticket_price == 0)) {
+                    $product->ticket_price = $product->calculateTicketPrice();
+                }
+                if (!$product->min_participants) {
+                    $product->min_participants = config('koumbaya.ticket_calculation.default_tickets', 1000);
+                }
+            }
+        });
+
+        // Recalcul automatique lors de la modification du prix
+        static::updating(function ($product) {
+            if (config('koumbaya.features.auto_calculate_ticket_price', true)) {
+                if ($product->isDirty('price') && $product->price) {
+                    $product->ticket_price = $product->calculateTicketPrice($product->min_participants);
+                }
+            }
+        });
     }
 
     /**

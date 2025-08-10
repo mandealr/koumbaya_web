@@ -73,7 +73,7 @@
           <!-- Progress Bar -->
           <div class="mb-6">
             <div class="flex justify-between text-sm text-gray-600 mb-2">
-              <span>Progression de la loterie</span>
+              <span>Progression de la tombola</span>
               <span>{{ product.progress }}% ({{ product.sold_tickets }}/{{ product.total_tickets }})</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-3">
@@ -143,7 +143,7 @@
             class="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             <span v-if="purchasing">Achat en cours...</span>
-            <span v-else-if="product.status !== 'active'">Loterie terminée</span>
+            <span v-else-if="product.status !== 'active'">Tombola terminée</span>
             <span v-else>Acheter {{ ticketQuantity }} billet{{ ticketQuantity > 1 ? 's' : '' }}</span>
           </button>
         </div>
@@ -184,7 +184,7 @@
       </div>
 
       <div v-if="activeTab === 'rules'" class="prose max-w-none">
-        <h3 class="text-lg font-semibold mb-3">Règles de la loterie</h3>
+        <h3 class="text-lg font-semibold mb-3">Règles de la tombola</h3>
         <div class="space-y-4 text-gray-600">
           <p>• Chaque billet acheté vous donne une chance de gagner ce produit</p>
           <p>• Le tirage aura lieu à la date indiquée une fois tous les billets vendus</p>

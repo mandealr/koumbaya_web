@@ -1,0 +1,180 @@
+<?php
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Koumbaya Marketplace Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration spécifique à la plateforme Koumbaya
+    |
+    */
+
+    'ticket_calculation' => [
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Taux de Commission Koumbaya
+        |--------------------------------------------------------------------------
+        |
+        | Pourcentage prélevé par Koumbaya sur chaque produit
+        | Valeur par défaut: 10% (0.10)
+        |
+        */
+        'commission_rate' => env('KOUMBAYA_COMMISSION_RATE', 0.10),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Taux de Marge Koumbaya
+        |--------------------------------------------------------------------------
+        |
+        | Pourcentage de marge supplémentaire pour les opérations Koumbaya
+        | Valeur par défaut: 15% (0.15)
+        |
+        */
+        'margin_rate' => env('KOUMBAYA_MARGIN_RATE', 0.15),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Nombre de Tickets par Défaut
+        |--------------------------------------------------------------------------
+        |
+        | Nombre de tickets générés par défaut pour chaque tombola
+        |
+        */
+        'default_tickets' => env('KOUMBAYA_DEFAULT_TICKETS', 1000),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Limites du Nombre de Tickets
+        |--------------------------------------------------------------------------
+        |
+        | Nombre minimum et maximum de tickets autorisés
+        |
+        */
+        'min_tickets' => env('KOUMBAYA_MIN_TICKETS', 100),
+        'max_tickets' => env('KOUMBAYA_MAX_TICKETS', 5000),
+
+        /*
+        |--------------------------------------------------------------------------
+        | Prix de Ticket - Limites
+        |--------------------------------------------------------------------------
+        |
+        | Prix minimum et maximum recommandés pour un ticket (en FCFA)
+        |
+        */
+        'min_ticket_price' => env('KOUMBAYA_MIN_TICKET_PRICE', 100), // 100 FCFA
+        'max_ticket_price' => env('KOUMBAYA_MAX_TICKET_PRICE', 50000), // 50,000 FCFA
+
+        /*
+        |--------------------------------------------------------------------------
+        | Arrondissement des Prix
+        |--------------------------------------------------------------------------
+        |
+        | Mode d'arrondissement: 'ceil', 'floor', 'round'
+        | - ceil: Arrondi vers le haut (recommandé)
+        | - floor: Arrondi vers le bas
+        | - round: Arrondi mathématique
+        |
+        */
+        'rounding_mode' => env('KOUMBAYA_ROUNDING_MODE', 'ceil'),
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Arrondissement par Multiple
+        |--------------------------------------------------------------------------
+        |
+        | Arrondir les prix à un multiple spécifique
+        | Exemple: 25 arrondit à 25, 50, 75, 100, etc.
+        | Valeur 0 ou null désactive cette fonction
+        |
+        */
+        'round_to_multiple' => env('KOUMBAYA_ROUND_TO_MULTIPLE', 25),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Paramètres de la Marketplace
+    |--------------------------------------------------------------------------
+    */
+    'marketplace' => [
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Devise
+        |--------------------------------------------------------------------------
+        */
+        'currency' => env('KOUMBAYA_CURRENCY', 'FCFA'),
+        'currency_symbol' => env('KOUMBAYA_CURRENCY_SYMBOL', 'FCFA'),
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Pays d'opération
+        |--------------------------------------------------------------------------
+        */
+        'country' => env('KOUMBAYA_COUNTRY', 'Gabon'),
+        'country_code' => env('KOUMBAYA_COUNTRY_CODE', 'GA'),
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Durée de tombola par défaut (en jours)
+        |--------------------------------------------------------------------------
+        */
+        'default_lottery_duration' => env('KOUMBAYA_DEFAULT_LOTTERY_DURATION', 30),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Paramètres d'Affichage
+    |--------------------------------------------------------------------------
+    */
+    'display' => [
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Nombre d'éléments par page
+        |--------------------------------------------------------------------------
+        */
+        'products_per_page' => env('KOUMBAYA_PRODUCTS_PER_PAGE', 12),
+        'lotteries_per_page' => env('KOUMBAYA_LOTTERIES_PER_PAGE', 12),
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Images
+        |--------------------------------------------------------------------------
+        */
+        'placeholder_image' => '/images/placeholder.jpg',
+        'logo_url' => '/images/logo.png',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Fonctionnalités
+    |--------------------------------------------------------------------------
+    */
+    'features' => [
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Auto-calcul des prix de tickets
+        |--------------------------------------------------------------------------
+        */
+        'auto_calculate_ticket_price' => env('KOUMBAYA_AUTO_CALCULATE_TICKET_PRICE', true),
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Permettre aux marchands de modifier le nombre de tickets
+        |--------------------------------------------------------------------------
+        */
+        'allow_custom_ticket_count' => env('KOUMBAYA_ALLOW_CUSTOM_TICKET_COUNT', true),
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Afficher les détails de calcul aux marchands
+        |--------------------------------------------------------------------------
+        */
+        'show_calculation_details' => env('KOUMBAYA_SHOW_CALCULATION_DETAILS', true),
+    ],
+
+];

@@ -2,7 +2,7 @@ import axios from 'axios'
 import { ref } from 'vue'
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -27,10 +27,16 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expiré ou invalide
+    // Ne rediriger vers login que si ce n'est pas déjà une tentative de login
+    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/login')) {
+      // Token expiré ou invalide - mais pas lors du login
       localStorage.removeItem('auth_token')
-      window.location.href = '/login'
+      // Éviter le rafraîchissement forcé, utiliser le router Vue à la place
+      if (window.router) {
+        window.router.push('/login')
+      } else {
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   }

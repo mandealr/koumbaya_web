@@ -2,8 +2,8 @@
   <div>
     <!-- Page Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Gestion des loteries</h1>
-      <p class="mt-2 text-gray-600">Gérez les tirages et suivez les résultats des loteries</p>
+      <h1 class="text-3xl font-bold text-gray-900">Gestion des tombolas</h1>
+      <p class="mt-2 text-gray-600">Gérez les tirages et suivez les résultats des tombolas</p>
     </div>
 
     <!-- Stats Cards -->
@@ -51,13 +51,13 @@
       <div class="bg-white rounded-lg shadow-sm border border-gray-200">
         <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900">Tirages en attente</h3>
-          <p class="text-sm text-gray-600">Loteries prêtes pour le tirage</p>
+          <p class="text-sm text-gray-600">Tombolas prêtes pour le tirage</p>
         </div>
         
         <div v-if="pendingDraws.length === 0" class="text-center py-12">
           <ClockIcon class="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun tirage en attente</h3>
-          <p class="text-gray-600">Toutes les loteries sont à jour</p>
+          <p class="text-gray-600">Toutes les tombolas sont à jour</p>
         </div>
         
         <div v-else class="divide-y divide-gray-200">
@@ -124,8 +124,8 @@
       <div class="bg-white rounded-lg shadow-sm border border-gray-200">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <div>
-            <h3 class="text-lg font-semibold text-gray-900">Loteries actives</h3>
-            <p class="text-sm text-gray-600">Loteries en cours de vente</p>
+            <h3 class="text-lg font-semibold text-gray-900">Tombolas actives</h3>
+            <p class="text-sm text-gray-600">Tombolas en cours de vente</p>
           </div>
           <div class="flex space-x-2">
             <input
@@ -224,7 +224,7 @@
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <div>
             <h3 class="text-lg font-semibold text-gray-900">Tirages terminés</h3>
-            <p class="text-sm text-gray-600">Historique des loteries terminées</p>
+            <p class="text-sm text-gray-600">Historique des tombolas terminées</p>
           </div>
           <div class="flex space-x-2">
             <input
@@ -459,7 +459,7 @@ const participantsSearch = ref('')
 
 const tabs = [
   { key: 'pending', label: 'Tirages en attente' },
-  { key: 'active', label: 'Loteries actives' },
+  { key: 'active', label: 'Tombolas actives' },
   { key: 'completed', label: 'Historique' }
 ]
 

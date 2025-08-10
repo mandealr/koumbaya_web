@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('refunds', function (Blueprint $table) {
             $table->id();
             $table->string('refund_number')->unique();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('transaction_id')->constrained()->onDelete('cascade');
-            $table->foreignId('lottery_id')->nullable()->constrained()->onDelete('set null');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('transaction_id');
+            $table->unsignedBigInteger('lottery_id')->nullable();
             
             // Refund details
             $table->decimal('amount', 10, 2);
@@ -28,7 +28,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'approved', 'rejected', 'processed', 'completed', 'failed'])
                   ->default('pending');
             $table->timestamp('processed_at')->nullable();
-            $table->foreignId('processed_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->unsignedBigInteger('processed_by')->nullable();
             
             // Refund method and external tracking
             $table->string('refund_method')->default('mobile_money'); // mobile_money, bank_transfer, wallet_credit
@@ -38,9 +38,9 @@ return new class extends Migration
             // Admin approval workflow
             $table->boolean('auto_processed')->default(false);
             $table->timestamp('approved_at')->nullable();
-            $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->unsignedBigInteger('approved_by')->nullable();
             $table->timestamp('rejected_at')->nullable();
-            $table->foreignId('rejected_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->unsignedBigInteger('rejected_by')->nullable();
             $table->text('rejection_reason')->nullable();
             
             // Additional notes
@@ -49,6 +49,12 @@ return new class extends Migration
             $table->timestamps();
             
             // Indexes
+            $table->index('user_id');
+            $table->index('transaction_id');
+            $table->index('lottery_id');
+            $table->index('processed_by');
+            $table->index('approved_by');
+            $table->index('rejected_by');
             $table->index(['status', 'created_at']);
             $table->index(['user_id', 'status']);
             $table->index(['lottery_id', 'reason']);

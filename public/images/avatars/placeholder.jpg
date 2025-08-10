@@ -1,0 +1,8 @@
+<!-- Placeholder SVG pour les images de produits -->
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="200" fill="#f3f4f6"/>
+  <rect x="50" y="50" width="200" height="100" rx="10" fill="#e5e7eb"/>
+  <circle cx="100" cy="90" r="15" fill="#d1d5db"/>
+  <path d="M125 85 L175 115 L150 140 Z" fill="#d1d5db"/>
+  <text x="150" y="170" font-family="Arial" font-size="14" fill="#9ca3af" text-anchor="middle">Image du produit</text>
+</svg>

@@ -1,0 +1,491 @@
+<template>
+  <div class="min-h-screen bg-gray-50">
+    <div v-if="loading" class="animate-pulse">
+      <div class="bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div class="h-96 bg-gray-200 rounded-2xl"></div>
+            <div class="space-y-4">
+              <div class="h-8 bg-gray-200 rounded"></div>
+              <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div class="h-20 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-else-if="product" class="bg-white">
+      <!-- Breadcrumb -->
+      <div class="bg-gray-50 border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <nav class="flex items-center space-x-2 text-sm">
+            <router-link to="/" class="text-gray-500 hover:text-gray-700">Accueil</router-link>
+            <span class="text-gray-400">/</span>
+            <router-link to="/products" class="text-gray-500 hover:text-gray-700">Produits</router-link>
+            <span class="text-gray-400">/</span>
+            <span class="text-gray-900 font-medium">{{ product.name }}</span>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Product Details -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <!-- Product Images -->
+          <div class="space-y-4">
+            <div class="relative overflow-hidden rounded-2xl bg-gray-100">
+              <img
+                :src="product.image || placeholderImg"
+                :alt="product.name"
+                class="w-full h-96 lg:h-[500px] object-cover"
+              />
+              <div class="absolute top-4 right-4">
+                <span class="bg-[#0099cc] text-white px-4 py-2 rounded-full font-semibold">
+                  {{ formatPrice(product.ticketPrice) }} / ticket
+                </span>
+              </div>
+              <div v-if="product.isNew" class="absolute top-4 left-4">
+                <span class="bg-blue-500 text-white px-4 py-2 rounded-full font-semibold">
+                  Nouveau
+                </span>
+              </div>
+            </div>
+
+            <!-- Thumbnail Gallery -->
+            <div class="grid grid-cols-4 gap-4">
+              <div v-for="n in 4" :key="n" class="relative overflow-hidden rounded-xl bg-gray-100 cursor-pointer hover:ring-2 hover:ring-[#0099cc] transition-all">
+                <img
+                  :src="product.image || placeholderImg"
+                  :alt="`${product.name} - Vue ${n}`"
+                  class="w-full h-20 object-cover"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Product Info -->
+          <div class="space-y-8">
+            <div>
+              <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                {{ product.name }}
+              </h1>
+              <div class="flex items-center gap-4 mb-6">
+                <span class="bg-[#0099cc]/10 text-[#0099cc] px-4 py-2 rounded-full font-semibold">
+                  {{ getCategoryName(product.category) }}
+                </span>
+                <div class="flex items-center text-yellow-500">
+                  <StarIcon v-for="n in 5" :key="n" class="h-5 w-5 fill-current" />
+                  <span class="ml-2 text-gray-600">(4.8)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product Value -->
+            <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6">
+              <div class="text-center">
+                <div class="text-sm text-gray-600 mb-2">Valeur du produit</div>
+                <div class="text-4xl font-bold text-[#0099cc] mb-2">
+                  {{ formatPrice(product.value) }}
+                </div>
+                <div class="text-sm text-gray-600">
+                  Prix d'un ticket : <span class="font-semibold text-[#0099cc]">{{ formatPrice(product.ticketPrice) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Progress -->
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-gray-900">Progression du tirage</h3>
+              <div class="space-y-3">
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Tickets vendus</span>
+                  <span class="font-semibold">{{ product.soldTickets }} / 1000</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-4">
+                  <div 
+                    class="bg-gradient-to-r from-[#0099cc] to-cyan-500 h-4 rounded-full transition-all duration-500"
+                    :style="{ width: Math.round((product.soldTickets / 1000) * 100) + '%' }"
+                  ></div>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-[#0099cc] font-medium">{{ Math.round((product.soldTickets / 1000) * 100) }}% vendu</span>
+                  <span class="text-gray-600">{{ 1000 - product.soldTickets }} tickets restants</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lottery Info -->
+            <div class="bg-gray-50 rounded-2xl p-6 space-y-4">
+              <h3 class="text-lg font-semibold text-gray-900">Informations du tirage</h3>
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span class="text-gray-600">Date limite :</span>
+                  <p class="font-semibold">{{ formatDate(product.drawDate) }}</p>
+                </div>
+                <div>
+                  <span class="text-gray-600">Participants :</span>
+                  <p class="font-semibold">{{ product.participants || 0 }}</p>
+                </div>
+                <div>
+                  <span class="text-gray-600">Chances de gagner :</span>
+                  <p class="font-semibold text-green-600">1 sur 1000</p>
+                </div>
+                <div>
+                  <span class="text-gray-600">Statut :</span>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    En cours
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-4">
+              <button
+                @click="participateNow"
+                class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
+              >
+                Participer maintenant - {{ formatPrice(product.ticketPrice) }}
+              </button>
+              
+              <div class="grid grid-cols-2 gap-4">
+                <button
+                  @click="addToWishlist"
+                  class="flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-green-500 text-gray-700 hover:text-green-600 py-3 rounded-xl transition-all"
+                >
+                  <HeartIcon class="h-5 w-5" />
+                  Favoris
+                </button>
+                <button
+                  @click="shareProduct"
+                  class="flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-green-500 text-gray-700 hover:text-green-600 py-3 rounded-xl transition-all"
+                >
+                  <ShareIcon class="h-5 w-5" />
+                  Partager
+                </button>
+              </div>
+            </div>
+
+            <!-- Trust Badges -->
+            <div class="flex items-center gap-6 pt-6 border-t">
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <ShieldCheckIcon class="h-5 w-5 text-green-500" />
+                <span>Produit garanti</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <TruckIcon class="h-5 w-5 text-green-500" />
+                <span>Livraison gratuite</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <CheckBadgeIcon class="h-5 w-5 text-green-500" />
+                <span>Authentique</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Description -->
+        <div class="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div class="lg:col-span-2">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Description</h2>
+            <div class="prose max-w-none text-gray-700">
+              <p class="text-lg leading-relaxed mb-6">
+                {{ product.description }}
+              </p>
+              
+              <h3 class="text-xl font-semibold text-gray-900 mb-4">Caractéristiques principales</h3>
+              <ul class="space-y-2 mb-6">
+                <li class="flex items-start gap-3">
+                  <CheckIcon class="h-5 w-5 text-green-500 mt-0.5" />
+                  <span>Produit neuf avec garantie constructeur</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <CheckIcon class="h-5 w-5 text-green-500 mt-0.5" />
+                  <span>Livraison express partout au Cameroun</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <CheckIcon class="h-5 w-5 text-green-500 mt-0.5" />
+                  <span>Service client disponible 24h/7j</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <CheckIcon class="h-5 w-5 text-green-500 mt-0.5" />
+                  <span>Certification d'authenticité incluse</span>
+                </li>
+              </ul>
+
+              <h3 class="text-xl font-semibold text-gray-900 mb-4">Comment participer ?</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="text-center p-4 bg-green-50 rounded-xl">
+                  <div class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">1</div>
+                  <h4 class="font-semibold mb-2">Achetez vos tickets</h4>
+                  <p class="text-sm text-gray-600">Choisissez le nombre de tickets que vous souhaitez</p>
+                </div>
+                <div class="text-center p-4 bg-green-50 rounded-xl">
+                  <div class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">2</div>
+                  <h4 class="font-semibold mb-2">Attendez le tirage</h4>
+                  <p class="text-sm text-gray-600">Le tirage se fait automatiquement à la date prévue</p>
+                </div>
+                <div class="text-center p-4 bg-green-50 rounded-xl">
+                  <div class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">3</div>
+                  <h4 class="font-semibold mb-2">Récupérez votre lot</h4>
+                  <p class="text-sm text-gray-600">Si vous gagnez, nous vous livrons gratuitement</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="space-y-6">
+            <div class="bg-gray-50 rounded-2xl p-6">
+              <h3 class="font-semibold text-gray-900 mb-4">Statistiques</h3>
+              <div class="space-y-3 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Participants uniques</span>
+                  <span class="font-medium">{{ product.participants || 0 }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Tickets moyens/personne</span>
+                  <span class="font-medium">{{ Math.round(product.soldTickets / Math.max(product.participants || 1, 1)) }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Temps restant</span>
+                  <span class="font-medium text-green-600">{{ getTimeRemaining() }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-green-50 rounded-2xl p-6">
+              <h3 class="font-semibold text-gray-900 mb-4">Pourquoi Koumbaya ?</h3>
+              <div class="space-y-3 text-sm">
+                <div class="flex items-start gap-3">
+                  <CheckIcon class="h-4 w-4 text-green-500 mt-0.5" />
+                  <span>Tirages transparents et vérifiables</span>
+                </div>
+                <div class="flex items-start gap-3">
+                  <CheckIcon class="h-4 w-4 text-green-500 mt-0.5" />
+                  <span>Paiement 100% sécurisé</span>
+                </div>
+                <div class="flex items-start gap-3">
+                  <CheckIcon class="h-4 w-4 text-green-500 mt-0.5" />
+                  <span>Support client réactif</span>
+                </div>
+                <div class="flex items-start gap-3">
+                  <CheckIcon class="h-4 w-4 text-green-500 mt-0.5" />
+                  <span>Plus de 10 000+ gagnants</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Related Products -->
+      <section class="bg-gray-50 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 class="text-2xl font-bold text-gray-900 mb-8">Produits similaires</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div
+              v-for="relatedProduct in relatedProducts"
+              :key="relatedProduct.id"
+              @click="viewProduct(relatedProduct)"
+              class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all cursor-pointer"
+            >
+              <div class="relative overflow-hidden rounded-xl mb-4">
+                <img
+                  :src="relatedProduct.image || placeholderImg"
+                  :alt="relatedProduct.name"
+                  class="w-full h-40 object-cover"
+                />
+                <div class="absolute top-2 right-2">
+                  <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs">
+                    {{ formatPrice(relatedProduct.ticketPrice) }}
+                  </span>
+                </div>
+              </div>
+              <h3 class="font-semibold text-gray-900 mb-2">{{ relatedProduct.name }}</h3>
+              <div class="text-lg font-bold text-green-600">{{ formatPrice(relatedProduct.value) }}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div v-else class="min-h-screen flex items-center justify-center">
+      <div class="text-center">
+        <div class="w-32 h-32 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+          <ExclamationCircleIcon class="w-16 h-16 text-gray-400" />
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Produit introuvable</h3>
+        <p class="text-gray-600 mb-6">Ce produit n'existe pas ou a été supprimé</p>
+        <router-link
+          to="/products"
+          class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl transition-colors"
+        >
+          Retour aux produits
+        </router-link>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useApi } from '@/composables/api'
+import placeholderImg from '@/assets/placeholder.jpg'
+import {
+  StarIcon,
+  HeartIcon,
+  ShareIcon,
+  ShieldCheckIcon,
+  TruckIcon,
+  CheckBadgeIcon,
+  CheckIcon,
+  ExclamationCircleIcon
+} from '@heroicons/vue/24/outline'
+
+const route = useRoute()
+const router = useRouter()
+const { get } = useApi()
+
+const loading = ref(true)
+const product = ref(null)
+const error = ref(null)
+
+// Mock related products
+const relatedProducts = ref([
+  {
+    id: 2,
+    name: 'MacBook Pro M3',
+    value: 2500000,
+    ticketPrice: 2500,
+    image: placeholderImg
+  },
+  {
+    id: 3,
+    name: 'PlayStation 5',
+    value: 650000,
+    ticketPrice: 1000,
+    image: placeholderImg
+  },
+  {
+    id: 4,
+    name: 'AirPods Pro 2',
+    value: 350000,
+    ticketPrice: 500,
+    image: placeholderImg
+  },
+  {
+    id: 5,
+    name: 'Tesla Model Y',
+    value: 45000000,
+    ticketPrice: 50000,
+    image: placeholderImg
+  }
+])
+
+// Methods
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'XAF',
+    minimumFractionDigits: 0
+  }).format(price).replace('XAF', 'FCFA')
+}
+
+const formatDate = (date) => {
+  if (!date) return 'Non définie'
+  return new Date(date).toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const getCategoryName = (category) => {
+  const categories = {
+    electronics: 'Électronique',
+    fashion: 'Mode',
+    automotive: 'Automobile',
+    home: 'Maison'
+  }
+  return categories[category] || 'Autre'
+}
+
+const getTimeRemaining = () => {
+  // Mock time remaining calculation
+  return '5j 12h'
+}
+
+const participateNow = () => {
+  // Check if user is logged in, redirect to login if not
+  router.push('/login')
+}
+
+const addToWishlist = () => {
+  if (window.$toast) {
+    window.$toast.success('Produit ajouté aux favoris !', 'Favoris')
+  }
+}
+
+const shareProduct = () => {
+  if (navigator.share) {
+    navigator.share({
+      title: product.value.name,
+      text: product.value.description,
+      url: window.location.href,
+    })
+  } else {
+    // Copy to clipboard fallback
+    navigator.clipboard.writeText(window.location.href)
+    if (window.$toast) {
+      window.$toast.success('Lien copié dans le presse-papier !', 'Partage')
+    }
+  }
+}
+
+const viewProduct = (prod) => {
+  router.push({ name: 'public.product.detail', params: { id: prod.id } })
+}
+
+const loadProduct = async () => {
+  try {
+    loading.value = true
+    error.value = null
+    const productId = route.params.id
+    
+    const response = await get(`/products/${productId}`)
+    const productData = response.product
+    
+    // Adapt API response to component format
+    product.value = {
+      id: productData.id,
+      name: productData.name,
+      description: productData.description,
+      value: productData.price,
+      ticketPrice: productData.ticket_price,
+      image: productData.image_url || productData.main_image,
+      category: productData.category?.name,
+      soldTickets: productData.active_lottery?.sold_tickets || 0,
+      participants: productData.active_lottery?.sold_tickets || 0,
+      drawDate: productData.active_lottery?.end_date,
+      isNew: new Date(productData.created_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      activeLottery: productData.active_lottery,
+      lotteries: productData.lotteries
+    }
+  } catch (err) {
+    console.error('Erreur lors du chargement du produit:', err)
+    error.value = err.response?.data?.message || 'Erreur lors du chargement du produit'
+    product.value = null
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  loadProduct()
+})
+</script>
