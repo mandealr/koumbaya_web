@@ -28,10 +28,6 @@ class UserSeeder extends Seeder
                 'phone' => '+24107000001',
                 'password' => Hash::make('SuperAdmin2024!'),
                 'user_type_id' => 1, // MANAGER
-                // Les managers n'ont pas d'account_type dans ce schéma
-                // 'account_type' => 'manager',
-                // 'email_verified_at' => now(), // Colonne supprimée par migration
-                // 'phone_verified_at' => now(), // Colonne n'existe pas
                 'is_active' => true,
                 'country_id' => $gabonId,
                 'city' => 'Libreville',
@@ -47,10 +43,6 @@ class UserSeeder extends Seeder
                 'phone' => '+24107000002',
                 'password' => Hash::make('Admin2024!'),
                 'user_type_id' => 1, // MANAGER
-                // Les managers n'ont pas d'account_type dans ce schéma
-                // 'account_type' => 'manager',
-                // 'email_verified_at' => now(), // Colonne supprimée par migration
-                // 'phone_verified_at' => now(), // Colonne n'existe pas
                 'is_active' => true,
                 'country_id' => $gabonId,
                 'city' => 'Libreville',
@@ -66,10 +58,6 @@ class UserSeeder extends Seeder
                 'phone' => '+24107000003',
                 'password' => Hash::make('Agent2024!'),
                 'user_type_id' => 1, // MANAGER
-                // Les managers n'ont pas d'account_type dans ce schéma
-                // 'account_type' => 'manager',
-                // 'email_verified_at' => now(), // Colonne supprimée par migration
-                // 'phone_verified_at' => now(), // Colonne n'existe pas
                 'is_active' => true,
                 'country_id' => $gabonId,
                 'city' => 'Port-Gentil',
@@ -85,10 +73,6 @@ class UserSeeder extends Seeder
                 'phone' => '+24107000004',
                 'password' => Hash::make('BackOffice2024!'),
                 'user_type_id' => 1, // MANAGER
-                // Les managers n'ont pas d'account_type dans ce schéma
-                // 'account_type' => 'manager',
-                // 'email_verified_at' => now(), // Colonne supprimée par migration
-                // 'phone_verified_at' => now(), // Colonne n'existe pas
                 'is_active' => true,
                 'country_id' => $gabonId,
                 'city' => 'Libreville',
@@ -105,10 +89,6 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('Business2024!'),
                 'user_type_id' => 2, // CUSTOMER
                 'account_type' => 'business',
-                // 'current_mode' => 'seller', // Mode par défaut (colonne n'existe pas)
-                // 'date_of_birth' => '1985-03-15', // Colonne n'existe pas
-                // 'email_verified_at' => now(), // Colonne supprimée par migration
-                // 'phone_verified_at' => now(), // Colonne n'existe pas
                 'is_active' => true,
                 'country_id' => $gabonId,
                 'city' => 'Libreville',
@@ -126,10 +106,6 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('Particulier2024!'),
                 'user_type_id' => 2, // CUSTOMER
                 'account_type' => 'personal',
-                // 'current_mode' => 'buyer', // Colonne n'existe pas
-                // 'date_of_birth' => '1990-07-22', // Colonne n'existe pas
-                // 'email_verified_at' => now(), // Colonne supprimée par migration
-                // 'phone_verified_at' => now(), // Colonne n'existe pas
                 'is_active' => true,
                 'country_id' => $gabonId,
                 'city' => 'Port-Gentil',
@@ -147,10 +123,6 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('Particulier2024!'),
                 'user_type_id' => 2, // CUSTOMER
                 'account_type' => 'personal',
-                // 'current_mode' => 'buyer', // Colonne n'existe pas
-                // 'date_of_birth' => '1992-11-08', // Colonne n'existe pas
-                // 'email_verified_at' => now(), // Colonne supprimée par migration
-                // 'phone_verified_at' => now(), // Colonne n'existe pas
                 'is_active' => true,
                 'country_id' => $gabonId,
                 'city' => 'Franceville',
@@ -168,10 +140,6 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('Business2024!'),
                 'user_type_id' => 2, // CUSTOMER
                 'account_type' => 'business',
-                // 'current_mode' => 'buyer', // Démarré en mode acheteur (colonne n'existe pas)
-                // 'date_of_birth' => '1988-12-03', // Colonne n'existe pas
-                // 'email_verified_at' => now(), // Colonne supprimée par migration
-                // 'phone_verified_at' => now(), // Colonne n'existe pas
                 'is_active' => true,
                 'country_id' => $gabonId,
                 'city' => 'Oyem',
