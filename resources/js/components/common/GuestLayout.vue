@@ -6,7 +6,7 @@
         <div class="flex justify-between items-center h-16">
           <!-- Logo -->
           <router-link to="/" class="flex items-center">
-            <img :src="logoUrl" alt="Koumbaya" class="h-8 w-auto">
+            <img :src="logoUrl" alt="Koumbaya" class="h-12 w-auto">
           </router-link>
 
           <!-- Navigation Links -->
@@ -49,7 +49,7 @@
                 <UserIcon class="w-4 h-4 mr-2" />
                 Mon Espace
               </router-link>
-              
+
               <!-- Menu utilisateur rapide -->
               <div class="relative">
                 <button
@@ -171,7 +171,7 @@
                 Se déconnecter
               </button>
             </div>
-            
+
             <!-- Si utilisateur non connecté -->
             <div v-else class="space-y-2">
               <router-link
@@ -208,7 +208,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { 
+import {
   Bars3Icon,
   UserIcon,
   ArrowRightOnRectangleIcon,
@@ -232,14 +232,14 @@ const userInitials = computed(() => {
 
 const userDashboardPath = computed(() => {
   const redirectTo = authStore.getDefaultRedirect()
-  
+
   // Convertir les noms de route en chemins
   const routePaths = {
     'admin.dashboard': '/admin/dashboard',
-    'merchant.dashboard': '/merchant/dashboard', 
+    'merchant.dashboard': '/merchant/dashboard',
     'customer.dashboard': '/customer/dashboard'
   }
-  
+
   return routePaths[redirectTo] || '/customer/dashboard'
 })
 
