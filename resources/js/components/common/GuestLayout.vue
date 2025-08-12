@@ -6,7 +6,7 @@
         <div class="flex justify-between items-center h-16">
           <!-- Logo -->
           <router-link to="/" class="flex items-center">
-            <img :src="logoUrl" alt="Koumbaya" class="h-12 w-auto">
+            <img :src="logoUrl" alt="Koumbaya" class="h-15 w-auto">
           </router-link>
 
           <!-- Navigation Links -->

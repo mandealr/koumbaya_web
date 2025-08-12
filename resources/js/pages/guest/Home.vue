@@ -12,16 +12,16 @@
                 <span>Nouveau au Gabon</span>
               </div>
               <h1 class="text-5xl lg:text-6xl xl:text-7xl font-bold text-black leading-none">
-                Rendre l'impossible 
+                Rendre l'impossible
                 <span class="text-[#0099cc]">accessible</span>
               </h1>
               <p class="text-xl lg:text-2xl text-gray-600 leading-relaxed">
-                Des smartphones aux voitures, profitez de nos tombolas pour 
-                <strong class="text-[#0099cc]">acheter malin</strong> et obtenir des produits 
+                Des smartphones aux voitures, profitez de nos tombolas pour
+                <strong class="text-[#0099cc]">acheter malin</strong> et obtenir des produits
                 <strong class="text-[#0099cc]">à prix réduit</strong>.
               </p>
             </div>
-            
+
             <div class="flex flex-col sm:flex-row gap-4">
               <router-link
                 to="/products"
@@ -94,13 +94,10 @@
 
               <!-- Floating Elements -->
               <div class="absolute -top-8 -left-8 bg-blue-100 text-blue-600 px-4 py-2 rounded-full text-sm font-medium z-20 animate-float">
-                ✨ Nouvelle tombola
+                <SparklesIcon class="h-4 w-4" /> Nouvelle tombola
               </div>
               <div class="absolute -bottom-4 -right-8 bg-yellow-100 text-yellow-600 px-4 py-2 rounded-full text-sm font-medium z-20 animate-float-delayed">
                 🔥 Populaire
-              </div>
-              <div class="absolute top-1/2 -left-12 bg-[#0099cc]/10 text-[#0099cc] px-4 py-2 rounded-full text-sm font-medium z-20 animate-float-slow">
-                💰 Prix réduit
               </div>
             </div>
           </div>
@@ -128,7 +125,7 @@
             <div class="text-4xl font-bold text-black mb-2">12 000+</div>
             <div class="text-gray-600">Participants actifs</div>
           </div>
-          
+
           <div class="text-center">
             <div class="w-20 h-20 bg-[#0099cc]/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <GiftIcon class="h-10 w-10 text-[#0099cc]" />
@@ -136,7 +133,7 @@
             <div class="text-4xl font-bold text-black mb-2">250+</div>
             <div class="text-gray-600">Produits gagnés</div>
           </div>
-          
+
           <div class="text-center">
             <div class="w-20 h-20 bg-[#0099cc]/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <CurrencyDollarIcon class="h-10 w-10 text-[#0099cc]" />
@@ -144,7 +141,7 @@
             <div class="text-4xl font-bold text-black mb-2">500M+</div>
             <div class="text-gray-600">FCFA distribués</div>
           </div>
-          
+
           <div class="text-center">
             <div class="w-20 h-20 bg-[#0099cc]/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <StarIcon class="h-10 w-10 text-[#0099cc]" />
@@ -281,7 +278,7 @@
                   <span class="font-semibold">{{ Math.round((product.soldTickets / 1000) * 100) }}%</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-3">
-                  <div 
+                  <div
                     class="bg-gradient-to-r from-[#0099cc] to-cyan-500 h-3 rounded-full transition-all duration-500"
                     :style="{ width: Math.round((product.soldTickets / 1000) * 100) + '%' }"
                   ></div>
@@ -362,7 +359,7 @@
           Votre prochain lot vous attend
         </h2>
         <p class="text-xl text-blue-100 mb-8 leading-relaxed">
-          Rejoignez la communauté Koumbaya et tentez votre chance dès aujourd'hui. 
+          Rejoignez la communauté Koumbaya et tentez votre chance dès aujourd'hui.
           L'inscription est gratuite et ne prend que quelques minutes.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
