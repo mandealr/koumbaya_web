@@ -231,7 +231,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Prix par billet (FCFA) *
+              Prix par ticket (FCFA) *
             </label>
             <input
               v-model="form.ticket_price"
@@ -247,7 +247,7 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Nombre de billets *
+              Nombre de tickets *
             </label>
             <input
               v-model="form.total_tickets"
@@ -259,7 +259,7 @@
               placeholder="Ex: 400"
               @input="calculateLotteryMetrics"
             />
-            <p class="text-sm text-gray-500 mt-1">Entre 10 et 10,000 billets</p>
+            <p class="text-sm text-gray-500 mt-1">Entre 10 et 10,000 tickets</p>
           </div>
 
           <div>
@@ -277,7 +277,7 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Billets minimum pour valider *
+              Tickets minimum pour valider *
             </label>
             <input
               v-model="form.min_tickets"
@@ -350,11 +350,11 @@
             <h3 class="font-semibold text-gray-900 mb-4">Configuration tombola</h3>
             <div class="space-y-3">
               <div class="flex justify-between">
-                <span class="text-gray-600">Prix/billet :</span>
+                <span class="text-gray-600">Prix/ticket :</span>
                 <span class="font-medium">{{ formatAmount(form.ticket_price) }} FCFA</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Total billets :</span>
+                <span class="text-gray-600">Total tickets :</span>
                 <span class="font-medium">{{ form.total_tickets }}</span>
               </div>
               <div class="flex justify-between">

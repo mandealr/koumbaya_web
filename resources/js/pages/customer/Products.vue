@@ -101,7 +101,7 @@
             </div>
             <div class="text-right">
               <span class="text-lg font-semibold text-gray-900">{{ product.ticket_price }} FCFA</span>
-              <p class="text-sm text-gray-500">Par billet</p>
+              <p class="text-sm text-gray-500">Par ticket</p>
             </div>
           </div>
 

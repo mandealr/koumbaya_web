@@ -66,7 +66,7 @@
             </div>
             <div class="text-center">
               <div class="text-xl font-semibold text-gray-900">{{ product.ticket_price }} FCFA</div>
-              <div class="text-sm text-gray-500">Prix par billet</div>
+              <div class="text-sm text-gray-500">Prix par ticket</div>
             </div>
           </div>
 
@@ -83,8 +83,8 @@
               ></div>
             </div>
             <div class="flex justify-between text-xs text-gray-500 mt-1">
-              <span>0 billets</span>
-              <span>{{ product.total_tickets }} billets</span>
+              <span>0 tickets</span>
+              <span>{{ product.total_tickets }} tickets</span>
             </div>
           </div>
 
@@ -103,10 +103,10 @@
 
         <!-- Ticket Purchase -->
         <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Acheter des billets</h3>
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Acheter des tickets</h3>
           
           <div class="flex items-center space-x-4 mb-4">
-            <label class="block text-sm font-medium text-gray-700">Nombre de billets:</label>
+            <label class="block text-sm font-medium text-gray-700">Nombre de tickets:</label>
             <div class="flex items-center space-x-2">
               <button
                 @click="decreaseTickets"
@@ -144,7 +144,7 @@
           >
             <span v-if="purchasing">Achat en cours...</span>
             <span v-else-if="product.status !== 'active'">Tombola terminée</span>
-            <span v-else>Acheter {{ ticketQuantity }} billet{{ ticketQuantity > 1 ? 's' : '' }}</span>
+            <span v-else>Acheter {{ ticketQuantity }} ticket{{ ticketQuantity > 1 ? 's' : '' }}</span>
           </button>
         </div>
       </div>
@@ -186,8 +186,8 @@
       <div v-if="activeTab === 'rules'" class="prose max-w-none">
         <h3 class="text-lg font-semibold mb-3">Règles de la tombola</h3>
         <div class="space-y-4 text-gray-600">
-          <p>• Chaque billet acheté vous donne une chance de gagner ce produit</p>
-          <p>• Le tirage aura lieu à la date indiquée une fois tous les billets vendus</p>
+          <p>• Chaque ticket acheté vous donne une chance de gagner ce produit</p>
+          <p>• Le tirage aura lieu à la date indiquée une fois tous les tickets vendus</p>
           <p>• Le gagnant sera choisi de manière aléatoire et équitable</p>
           <p>• Vous serez notifié par email et SMS si vous gagnez</p>
           <p>• Les prix non réclamés dans les 30 jours seront remis en jeu</p>
@@ -212,7 +212,7 @@
               </div>
               <span class="ml-3 text-gray-900">{{ participant.name }}</span>
             </div>
-            <span class="text-sm text-gray-600">{{ participant.tickets }} billet{{ participant.tickets > 1 ? 's' : '' }}</span>
+            <span class="text-sm text-gray-600">{{ participant.tickets }} ticket{{ participant.tickets > 1 ? 's' : '' }}</span>
           </div>
         </div>
       </div>

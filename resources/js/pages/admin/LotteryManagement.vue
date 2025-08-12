@@ -78,7 +78,7 @@
                   <p class="text-sm text-gray-600">{{ lottery.product.description }}</p>
                   <div class="flex items-center space-x-4 mt-2">
                     <span class="text-sm font-medium text-green-600">
-                      {{ lottery.sold_tickets }}/{{ lottery.total_tickets }} billets vendus
+                      {{ lottery.sold_tickets }}/{{ lottery.total_tickets }} tickets vendus
                     </span>
                     <span class="text-sm text-gray-500">
                       Tirage prévu: {{ formatDate(lottery.draw_date) }}
@@ -290,7 +290,7 @@
                   <TrophyIcon class="w-5 h-5 text-green-600 mr-2" />
                   <div>
                     <p class="font-semibold text-green-900">{{ lottery.winner.name }}</p>
-                    <p class="text-sm text-green-800">Billet gagnant: #{{ lottery.winning_ticket }}</p>
+                    <p class="text-sm text-green-800">Ticket gagnant: #{{ lottery.winning_ticket }}</p>
                   </div>
                 </div>
                 <div class="text-right">
@@ -352,7 +352,7 @@
                     Participant
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Billets
+                    Tickets
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Total payé
@@ -405,7 +405,7 @@
           </p>
           <div class="bg-gray-50 p-4 rounded-lg mb-4">
             <p class="text-sm text-gray-600">
-              • {{ selectedLottery?.sold_tickets }} billets vendus<br>
+              • {{ selectedLottery?.sold_tickets }} tickets vendus<br>
               • {{ selectedLottery?.participants?.length }} participants<br>
               • Revenus: {{ (selectedLottery?.sold_tickets * selectedLottery?.ticket_price || 0).toLocaleString() }} FCFA
             </p>

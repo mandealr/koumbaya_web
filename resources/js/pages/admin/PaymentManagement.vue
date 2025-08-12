@@ -157,7 +157,7 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">{{ payment.product_name }}</div>
-                <div class="text-sm text-gray-500">{{ payment.tickets_count }} billets</div>
+                <div class="text-sm text-gray-500">{{ payment.tickets_count }} tickets</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">{{ formatAmount(payment.amount) }}</div>

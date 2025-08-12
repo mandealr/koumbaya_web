@@ -133,7 +133,7 @@
                   Catégorie
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Prix / Billet
+                  Prix / Ticket
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Progression
@@ -170,7 +170,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <div>{{ product.price }} FCFA</div>
-                  <div class="text-gray-500">{{ product.ticket_price }} FCFA/billet</div>
+                  <div class="text-gray-500">{{ product.ticket_price }} FCFA/ticket</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">{{ product.progress }}%</div>
@@ -253,7 +253,7 @@
                 <div class="flex justify-between items-center mb-3">
                   <div class="text-sm">
                     <div class="font-semibold text-gray-900">{{ product.price }} FCFA</div>
-                    <div class="text-gray-500">{{ product.ticket_price }} FCFA/billet</div>
+                    <div class="text-gray-500">{{ product.ticket_price }} FCFA/ticket</div>
                   </div>
                   <div class="text-sm text-gray-600">
                     {{ getCategoryName(product.category_id) }}
@@ -364,7 +364,7 @@
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Prix par billet (FCFA) *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Prix par ticket (FCFA) *</label>
                 <input
                   v-model.number="productForm.ticket_price"
                   type="number"
@@ -375,7 +375,7 @@
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Nombre total de billets *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nombre total de tickets *</label>
                 <input
                   v-model.number="productForm.total_tickets"
                   type="number"

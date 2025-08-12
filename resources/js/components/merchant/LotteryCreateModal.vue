@@ -23,7 +23,7 @@
 
           <div class="grid grid-cols-2 gap-4">
             <div class="koumbaya-form-group">
-              <label class="koumbaya-label">Nombre total de billets</label>
+              <label class="koumbaya-label">Nombre total de tickets</label>
               <input
                 v-model.number="form.totalTickets"
                 type="number"

@@ -39,7 +39,7 @@
         >
           <ShoppingBagIcon class="w-8 h-8 text-[#0099cc] mr-3" />
           <div>
-            <p class="font-medium text-gray-900">Acheter des billets</p>
+            <p class="font-medium text-gray-900">Acheter des tickets</p>
             <p class="text-sm text-gray-600">Découvrir les produits disponibles</p>
           </div>
         </router-link>
@@ -50,7 +50,7 @@
         >
           <TicketIcon class="w-8 h-8 text-black mr-3" />
           <div>
-            <p class="font-medium text-gray-900">Mes billets</p>
+            <p class="font-medium text-gray-900">Mes tickets</p>
             <p class="text-sm text-gray-600">Voir mes participations</p>
           </div>
         </router-link>
@@ -73,7 +73,7 @@
       <!-- My Recent Tickets -->
       <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold text-gray-900">Mes derniers billets</h3>
+          <h3 class="text-lg font-semibold text-gray-900">Mes derniers tickets</h3>
           <router-link
             to="/customer/tickets"
             class="text-sm text-[#0099cc] hover:text-blue-700"
@@ -84,12 +84,12 @@
 
         <div v-if="recentTickets.length === 0" class="text-center py-8">
           <TicketIcon class="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p class="text-gray-600">Aucun billet acheté pour le moment</p>
+          <p class="text-gray-600">Aucun ticket acheté pour le moment</p>
           <router-link
             to="/customer/products"
             class="inline-block mt-2 text-[#0099cc] hover:text-blue-700"
           >
-            Acheter des billets
+            Acheter des tickets
           </router-link>
         </div>
 
@@ -107,7 +107,7 @@
             <div class="flex-1">
               <p class="font-medium text-gray-900">{{ ticket.product.title }}</p>
               <p class="text-sm text-gray-600">
-                {{ ticket.quantity }} billet{{ ticket.quantity > 1 ? 's' : '' }}
+                {{ ticket.quantity }} ticket{{ ticket.quantity > 1 ? 's' : '' }}
                 - {{ ticket.total_price }} FCFA
               </p>
               <p class="text-xs text-gray-500">{{ formatDate(ticket.purchased_at) }}</p>
@@ -201,7 +201,7 @@ const authStore = useAuthStore()
 
 const stats = ref([
   {
-    label: 'Billets achetés',
+    label: 'Tickets achetés',
     value: '12',
     color: 'bg-blue-500',
     icon: TicketIcon

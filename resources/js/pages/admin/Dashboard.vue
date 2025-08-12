@@ -79,7 +79,7 @@
                 <tr>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produit</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Billets</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tickets</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date de fin</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
@@ -182,7 +182,7 @@
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-gray-900 truncate">{{ product.title }}</p>
                 <div class="flex items-center space-x-2 mt-1">
-                  <p class="text-xs text-gray-500">{{ product.sales }} billets</p>
+                  <p class="text-xs text-gray-500">{{ product.sales }} tickets</p>
                   <span :class="[
                     'text-xs font-medium',
                     product.growth > 0 ? 'text-green-600' : 'text-red-600'
@@ -293,7 +293,7 @@ const recentActivities = ref([
     type: 'payment',
     icon: CurrencyDollarIcon,
     title: 'Paiement reçu',
-    description: '2500 FCFA pour un billet de tombola',
+    description: '2500 FCFA pour un ticket de tombola',
     time: new Date(Date.now() - 30 * 60 * 1000)
   },
   {

@@ -199,7 +199,7 @@
             </div>
             <div class="bg-blue-50 p-3 rounded-lg">
               <p class="text-blue-700 font-semibold text-lg">{{ product.ticket_price.toLocaleString() }}</p>
-              <p class="text-blue-600 text-xs">Prix/billet</p>
+              <p class="text-blue-600 text-xs">Prix/ticket</p>
             </div>
           </div>
 
@@ -329,7 +329,7 @@
             <div class="grid grid-cols-3 gap-4 text-center">
               <div class="bg-[#0099cc]/10 p-4 rounded-lg">
                 <p class="text-2xl font-bold text-[#0099cc]">{{ selectedProduct.sold_tickets }}</p>
-                <p class="text-sm text-gray-600">Billets vendus</p>
+                <p class="text-sm text-gray-600">Tickets vendus</p>
               </div>
               <div class="bg-green-100 p-4 rounded-lg">
                 <p class="text-2xl font-bold text-green-600">{{ formatAmount(selectedProduct.revenue) }}</p>
@@ -422,7 +422,7 @@ const productStats = ref([
     color: 'bg-green-500'
   },
   {
-    label: 'Billets vendus',
+    label: 'Tickets vendus',
     value: '1,247',
     change: 8.3,
     icon: ShoppingBagIcon,

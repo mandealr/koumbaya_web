@@ -72,7 +72,7 @@
                   @click="userMenuOpen = false"
                 >
                   <TicketIcon class="w-4 h-4 inline mr-2" />
-                  Mes Billets
+                  Mes Tickets
                 </router-link>
                 <div class="border-t border-gray-100 my-1"></div>
                 <button
@@ -150,7 +150,7 @@ const mobileMenuOpen = ref(false)
 const navigationItems = [
   { name: 'customer.dashboard', to: { name: 'customer.dashboard' }, label: 'Accueil' },
   { name: 'customer.products', to: { name: 'customer.products' }, label: 'Produits' },
-  { name: 'customer.tickets', to: { name: 'customer.tickets' }, label: 'Mes Billets' }
+  { name: 'customer.tickets', to: { name: 'customer.tickets' }, label: 'Mes Tickets' }
 ]
 
 const userInitials = computed(() => {

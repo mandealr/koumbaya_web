@@ -83,7 +83,7 @@
             <TicketIcon class="w-6 h-6 text-purple-600" />
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">Billets vendus</p>
+            <p class="text-sm font-medium text-gray-600">Tickets vendus</p>
             <p class="text-2xl font-bold text-gray-900">{{ lottery.tickets_sold }}</p>
           </div>
         </div>
@@ -130,7 +130,7 @@
                     <p class="text-lg font-semibold text-gray-900">{{ formatCurrency(lottery.product_value) }}</p>
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-gray-500">Prix du billet</p>
+                    <p class="text-sm font-medium text-gray-500">Prix du ticket</p>
                     <p class="text-lg font-semibold text-gray-900">{{ formatCurrency(lottery.ticket_price) }}</p>
                   </div>
                   <div>
@@ -295,7 +295,7 @@
                   <p class="text-xs text-gray-500">{{ formatDate(participant.participated_at) }}</p>
                 </div>
                 <div class="text-sm text-gray-500">
-                  {{ participant.tickets_count }} billet{{ participant.tickets_count > 1 ? 's' : '' }}
+                  {{ participant.tickets_count }} ticket{{ participant.tickets_count > 1 ? 's' : '' }}
                 </div>
               </div>
             </div>

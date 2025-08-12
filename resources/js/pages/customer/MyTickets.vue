@@ -2,7 +2,7 @@
   <div>
     <!-- Page Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Mes billets</h1>
+      <h1 class="text-3xl font-bold text-gray-900">Mes tickets</h1>
       <p class="mt-2 text-gray-600">Suivez vos participations aux tombolas</p>
     </div>
 
@@ -76,13 +76,13 @@
     <!-- Tickets List -->
     <div v-if="loading" class="text-center py-12">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-      <p class="mt-4 text-gray-600">Chargement de vos billets...</p>
+      <p class="mt-4 text-gray-600">Chargement de vos tickets...</p>
     </div>
 
     <div v-else-if="filteredTickets.length === 0" class="text-center py-12">
       <TicketIcon class="w-16 h-16 text-gray-400 mx-auto mb-4" />
       <h3 class="text-lg font-medium text-gray-900 mb-2">
-        {{ tickets.length === 0 ? 'Aucun billet acheté' : 'Aucun résultat trouvé' }}
+        {{ tickets.length === 0 ? 'Aucun ticket acheté' : 'Aucun résultat trouvé' }}
       </h3>
       <p class="text-gray-600 mb-4">
         {{ tickets.length === 0 
@@ -136,7 +136,7 @@
 
               <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 <div>
-                  <p class="text-xs text-gray-500">Billets achetés</p>
+                  <p class="text-xs text-gray-500">Tickets achetés</p>
                   <p class="text-sm font-semibold text-gray-900">{{ ticket.quantity }}</p>
                 </div>
                 <div>
@@ -155,7 +155,7 @@
 
               <!-- Ticket Numbers -->
               <div class="mb-4">
-                <p class="text-xs text-gray-500 mb-2">Vos numéros de billets</p>
+                <p class="text-xs text-gray-500 mb-2">Vos numéros de tickets</p>
                 <div class="flex flex-wrap gap-2">
                   <span
                     v-for="number in ticket.ticket_numbers"
@@ -252,7 +252,7 @@
         @click="loadMore"
         class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-green-600 bg-green-50 hover:bg-green-100"
       >
-        Charger plus de billets
+        Charger plus de tickets
         <ArrowDownIcon class="ml-2 w-5 h-5" />
       </button>
     </div>
@@ -283,7 +283,7 @@ const filters = ref({
 
 const stats = ref([
   {
-    label: 'Total billets',
+    label: 'Total tickets',
     value: '24',
     color: 'bg-blue-500',
     icon: TicketIcon

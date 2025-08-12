@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-3xl font-bold text-gray-900">Mes Commandes</h1>
-        <p class="mt-2 text-gray-600">Suivez et gérez toutes vos ventes de billets de tombola</p>
+        <p class="mt-2 text-gray-600">Suivez et gérez toutes vos ventes de tickets de tombola</p>
       </div>
       <div class="flex space-x-3">
         <button
@@ -157,7 +157,7 @@
                 Produit
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Billets
+                Tickets
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Montant
@@ -199,13 +199,13 @@
                   <img class="h-12 w-12 rounded-lg object-cover" :src="order.product_image" :alt="order.product_name" />
                   <div class="ml-3">
                     <div class="text-sm font-medium text-gray-900">{{ order.product_name }}</div>
-                    <div class="text-sm text-gray-500">{{ order.ticket_price.toLocaleString() }} FCFA/billet</div>
+                    <div class="text-sm text-gray-500">{{ order.ticket_price.toLocaleString() }} FCFA/ticket</div>
                   </div>
                 </div>
               </td>
 
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ order.tickets_count }} billets</div>
+                <div class="text-sm text-gray-900">{{ order.tickets_count }} tickets</div>
                 <div class="text-sm text-gray-500">N° {{ order.ticket_numbers.join(', ') }}</div>
               </td>
 
@@ -335,10 +335,10 @@
 
           <!-- Tickets Info -->
           <div>
-            <h4 class="text-md font-semibold text-gray-900 mb-3">Billets achetés</h4>
+            <h4 class="text-md font-semibold text-gray-900 mb-3">Tickets achetés</h4>
             <div class="bg-gray-50 p-4 rounded-lg">
               <p class="text-sm text-gray-700 mb-2">
-                <strong>{{ selectedOrder.tickets_count }} billets</strong> pour {{ selectedOrder.product_name }}
+                <strong>{{ selectedOrder.tickets_count }} tickets</strong> pour {{ selectedOrder.product_name }}
               </p>
               <div class="flex flex-wrap gap-2">
                 <span
