@@ -12,8 +12,8 @@
                 <span>Nouveau au Gabon</span>
               </div>
               <h1 class="text-5xl lg:text-6xl xl:text-7xl font-bold text-black leading-none">
-                Achetez à 
-                <span class="text-[#0099cc]">petit prix</span>
+                Rendre l'impossible 
+                <span class="text-[#0099cc]">accessible</span>
               </h1>
               <p class="text-xl lg:text-2xl text-gray-600 leading-relaxed">
                 Des smartphones aux voitures, profitez de nos tombolas pour 
