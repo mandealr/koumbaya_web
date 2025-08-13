@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'throttle.api' => \App\Http\Middleware\RateLimitMiddleware::class,
             'security' => \App\Http\Middleware\SecurityHeadersMiddleware::class,
             'validate.json' => \App\Http\Middleware\ValidateJsonMiddleware::class,
+            'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

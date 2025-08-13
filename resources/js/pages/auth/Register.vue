@@ -225,14 +225,19 @@
                   <label for="phone" class="block text-sm font-semibold text-gray-900 mb-2">
                     Numéro de téléphone *
                   </label>
-                  <input
-                    id="phone"
+                  <vue-tel-input 
                     v-model="form.phone"
-                    type="tel"
-                    required
-                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
-                    :class="{ 'border-red-300 bg-red-50': errors.phone }"
-                    placeholder="+241 XX XX XX XX"
+                    :default-country="'GA'"
+                    :preferred-countries="['GA', 'CM', 'CI', 'SN', 'FR']"
+                    :input-options="{
+                      id: 'phone',
+                      placeholder: 'Numéro de téléphone',
+                      required: true,
+                      class: 'w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black' + (errors.phone ? ' border-red-300 bg-red-50' : '')
+                    }"
+                    mode="international"
+                    :validCharactersOnly="true"
+                    @validate="onPhoneValidate"
                   />
                   <p v-if="errors.phone" class="mt-1 text-sm text-red-600">{{ errors.phone }}</p>
                 </div>
@@ -424,6 +429,8 @@ import socialAuth from '@/services/socialAuth'
 import logoUrl from '@/assets/logo.png'
 const logoWhiteUrl = '/logo_white.png'
 import { useApi } from '@/composables/api'
+import VueTelInput from 'vue-tel-input'
+import 'vue-tel-input/vue-tel-input.css'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -433,6 +440,7 @@ const showPassword = ref(false)
 const showPasswordConfirmation = ref(false)
 const countries = ref([])
 const countriesLoading = ref(false)
+const phoneValid = ref(false)
 
 const form = reactive({
   account_type: 'personal',
@@ -497,7 +505,7 @@ const validateForm = () => {
   if (!form.phone) {
     errors.phone = 'Le numéro de téléphone est requis'
     isValid = false
-  } else if (!/^\+?[0-9\s-()]+$/.test(form.phone)) {
+  } else if (!phoneValid.value) {
     errors.phone = 'Format de téléphone invalide'
     isValid = false
   }
@@ -531,6 +539,13 @@ const validateForm = () => {
   }
   
   return isValid
+}
+
+const onPhoneValidate = (phoneObject) => {
+  phoneValid.value = phoneObject.valid
+  if (phoneObject.valid) {
+    errors.phone = ''
+  }
 }
 
 const handleSubmit = async () => {
@@ -627,4 +642,10 @@ const loadCountries = async () => {
 onMounted(() => {
   loadCountries()
 })
+
+// Enregistrer le composant VueTelInput
+import { defineComponent } from 'vue'
+const components = {
+  VueTelInput
+}
 </script>

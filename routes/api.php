@@ -38,6 +38,8 @@ Route::group([
 ], function () {
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
+    Route::post('verify-account', [AuthController::class, 'verifyAccount']);
+    Route::get('verify-email/{token}', [AuthController::class, 'verifyAccountByUrl']);
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::post('refresh', [AuthController::class, 'refresh'])->middleware('auth:sanctum');
     Route::get('me', [AuthController::class, 'me'])->middleware('auth:sanctum');
@@ -118,8 +120,8 @@ Route::group([
         return $request->user();
     });
     
-    // Tickets (Nouveau système d'achat)
-    Route::post('tickets/purchase', [TicketController::class, 'purchase']);
+    // Tickets (Nouveau système d'achat) - Nécessite vérification
+    Route::post('tickets/purchase', [TicketController::class, 'purchase'])->middleware('verified');
     Route::get('tickets/my-tickets', [TicketController::class, 'myTickets']);
     Route::get('tickets/{id}', [TicketController::class, 'show']);
     Route::post('tickets/{id}/cancel', [TicketController::class, 'cancel']);
@@ -127,8 +129,8 @@ Route::group([
     // Transaction status
     Route::get('transactions/{transactionId}/status', [PaymentCallbackController::class, 'checkStatus']);
     
-    // Lotteries (Utilisateurs) - Legacy
-    Route::post('lotteries/{id}/buy-ticket', [LotteryController::class, 'buyTicket']);
+    // Lotteries (Utilisateurs) - Legacy - Nécessite vérification
+    Route::post('lotteries/{id}/buy-ticket', [LotteryController::class, 'buyTicket'])->middleware('verified');
     Route::get('lotteries/{id}/my-tickets', [LotteryController::class, 'myTickets']);
     
     // Payments - Legacy

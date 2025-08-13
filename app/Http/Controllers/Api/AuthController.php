@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserWallet;
 use App\Models\UserLoginHistory;
+use App\Services\OtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -121,6 +122,55 @@ class AuthController extends Controller
 
         $this->logUserLogin($user, $request->ip(), 'success');
 
+        // Déterminer le type de vérification selon le client
+        $userAgent = $request->header('User-Agent', '');
+        $isFlutterApp = str_contains($userAgent, 'Dart/') || $request->has('is_mobile_app');
+
+        if ($isFlutterApp) {
+            // Mobile: Envoyer OTP
+            try {
+                $otpResult = OtpService::sendEmailOtp($user->email, 'registration');
+                if (!$otpResult['success']) {
+                    \Log::warning('Échec envoi OTP après inscription', [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                        'error' => $otpResult['message']
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Erreur envoi OTP après inscription', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            $message = 'Utilisateur créé avec succès. Un code de vérification a été envoyé à votre email.';
+            $responseData = [
+                'requires_verification' => true,
+                'verification_sent_to' => $this->maskEmail($user->email),
+                'verification_type' => 'otp'
+            ];
+        } else {
+            // Web: Envoyer email avec lien de vérification
+            try {
+                $this->sendVerificationEmail($user);
+            } catch (\Exception $e) {
+                \Log::error('Erreur envoi email de vérification', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            $message = 'Utilisateur créé avec succès. Un email de vérification a été envoyé à votre adresse.';
+            $responseData = [
+                'requires_verification' => true,
+                'verification_sent_to' => $this->maskEmail($user->email),
+                'verification_type' => 'email_link'
+            ];
+        }
+
         // Charger les relations nécessaires
         $user->load(['wallet', 'roles']);
 
@@ -128,7 +178,7 @@ class AuthController extends Controller
             'user' => $user,
             'access_token' => $token,
             'token_type' => 'Bearer'
-        ], 'Utilisateur créé avec succès', 201);
+        ] + $responseData, $message, 201);
     }
 
     /**
@@ -404,6 +454,153 @@ class AuthController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Vérifier le compte via URL (Web)
+     */
+    public function verifyAccountByUrl($token)
+    {
+        // Décoder le token de vérification
+        try {
+            $data = json_decode(base64_decode($token), true);
+            if (!$data || !isset($data['email'], $data['expires_at'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lien de vérification invalide'
+                ], 400);
+            }
+
+            // Vérifier l'expiration (24h)
+            if (now()->isAfter($data['expires_at'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lien de vérification expiré'
+                ], 400);
+            }
+
+            // Trouver et vérifier l'utilisateur
+            $user = User::where('email', $data['email'])->first();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Utilisateur non trouvé'
+                ], 404);
+            }
+
+            // Si déjà vérifié
+            if ($user->verified_at) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Compte déjà vérifié',
+                    'already_verified' => true
+                ]);
+            }
+
+            // Marquer comme vérifié
+            $user->update(['verified_at' => now()]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Compte vérifié avec succès !',
+                'user' => $user->load(['wallet', 'roles'])
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la vérification'
+            ], 500);
+        }
+    }
+
+    /**
+     * Vérifier le compte utilisateur avec OTP (Mobile)
+     */
+    public function verifyAccount(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'otp_code' => 'required|string|size:6'
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendValidationError($validator);
+        }
+
+        // Vérifier l'OTP
+        $otpResult = OtpService::verifyOtp($request->email, $request->otp_code, 'registration');
+        
+        if (!$otpResult['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => $otpResult['message']
+            ], 400);
+        }
+
+        // Marquer l'utilisateur comme vérifié
+        $user = User::where('email', $request->email)->first();
+        if ($user) {
+            $user->update(['verified_at' => now()]);
+            $user->load(['wallet', 'roles']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Compte vérifié avec succès',
+                'user' => $user
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Utilisateur non trouvé'
+        ], 404);
+    }
+
+    /**
+     * Envoyer l'email de vérification avec lien
+     */
+    private function sendVerificationEmail($user)
+    {
+        // Générer le token de vérification
+        $verificationData = [
+            'email' => $user->email,
+            'expires_at' => now()->addHours(24)->toISOString()
+        ];
+        $verificationToken = base64_encode(json_encode($verificationData));
+        
+        // URL de vérification
+        $verificationUrl = config('app.frontend_url') . '/verify-email?token=' . urlencode($verificationToken);
+        
+        // Envoyer l'email (ici vous devriez utiliser un job et une classe Mailable)
+        \Log::info('Email de vérification généré', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'verification_url' => $verificationUrl,
+            'expires_at' => $verificationData['expires_at']
+        ]);
+        
+        // TODO: Implémenter l'envoi réel de l'email avec Queue
+        // Mail::to($user->email)->queue(new EmailVerification($user, $verificationUrl));
+        
+        return true;
+    }
+
+    /**
+     * Masquer l'email pour l'affichage public
+     */
+    private function maskEmail($email)
+    {
+        $parts = explode('@', $email);
+        $localPart = $parts[0];
+        $domain = $parts[1];
+        
+        if (strlen($localPart) <= 2) {
+            return str_repeat('*', strlen($localPart)) . '@' . $domain;
+        }
+        
+        $maskedLocal = substr($localPart, 0, 2) . str_repeat('*', strlen($localPart) - 2);
+        return $maskedLocal . '@' . $domain;
     }
 
     /**

@@ -9,6 +9,7 @@ import AdminLayout from '@/components/common/AdminLayout.vue'
 // Guest Pages
 import Login from '@/pages/auth/Login.vue'
 import Register from '@/pages/auth/Register.vue'
+import VerifyEmail from '@/pages/auth/VerifyEmail.vue'
 import Home from '@/pages/guest/Home.vue'
 import Results from '@/pages/public/Results.vue'
 import VerifyWinner from '@/pages/public/VerifyWinner.vue'
@@ -44,6 +45,13 @@ const routes = [
     name: 'register',
     component: Register,
     meta: { requiresGuest: true }
+  },
+  
+  // Email Verification Route (no layout)
+  {
+    path: '/verify-email',
+    name: 'verify-email',
+    component: VerifyEmail
   },
 
   // Guest Routes

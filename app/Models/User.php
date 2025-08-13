@@ -145,6 +145,30 @@ class User extends Authenticatable
         return $this->hasMany(UserLoginHistory::class, 'user_id');
     }
 
+    /**
+     * Vérifier si l'utilisateur a vérifié son compte
+     */
+    public function isVerified(): bool
+    {
+        return $this->verified_at !== null;
+    }
+
+    /**
+     * Vérifier si l'utilisateur peut acheter des produits
+     */
+    public function canPurchase(): bool
+    {
+        return $this->isVerified() && $this->is_active && $this->can_buy;
+    }
+
+    /**
+     * Vérifier si l'utilisateur peut participer aux tombolas
+     */
+    public function canParticipateInLotteries(): bool
+    {
+        return $this->canPurchase();
+    }
+
     public function country()
     {
         return $this->belongsTo(Country::class, 'country_id');
