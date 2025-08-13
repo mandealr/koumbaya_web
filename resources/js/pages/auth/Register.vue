@@ -231,7 +231,7 @@
                     :preferred-countries="['GA', 'CM', 'CI', 'SN', 'FR']"
                     :input-options="{
                       id: 'phone',
-                      placeholder: 'Numéro de téléphone',
+                      placeholder: 'Ex: +241 01 23 45 67',
                       required: true,
                       class: 'w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black' + (errors.phone ? ' border-red-300 bg-red-50' : '')
                     }"
@@ -430,7 +430,6 @@ import logoUrl from '@/assets/logo.png'
 const logoWhiteUrl = '/logo_white.png'
 import { useApi } from '@/composables/api'
 import VueTelInput from 'vue-tel-input'
-import 'vue-tel-input/vue-tel-input.css'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -548,6 +547,17 @@ const onPhoneValidate = (phoneObject) => {
   }
 }
 
+// Fallback function for regular phone input
+const onPhoneInputFallback = () => {
+  // Simple validation for fallback input
+  if (form.phone && form.phone.length > 5) {
+    phoneValid.value = true
+    errors.phone = ''
+  } else {
+    phoneValid.value = false
+  }
+}
+
 const handleSubmit = async () => {
   if (!validateForm()) return
   
@@ -643,9 +653,4 @@ onMounted(() => {
   loadCountries()
 })
 
-// Enregistrer le composant VueTelInput
-import { defineComponent } from 'vue'
-const components = {
-  VueTelInput
-}
 </script>
