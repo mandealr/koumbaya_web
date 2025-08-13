@@ -146,16 +146,20 @@
                 @click="participateNow"
                 class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
               >
-                Participer maintenant - {{ formatPrice(product.ticketPrice) }}
+                {{ authStore.isAuthenticated ? 
+                   `Participer maintenant - ${formatPrice(product.ticketPrice)}` : 
+                   `Se connecter pour participer - ${formatPrice(product.ticketPrice)}` 
+                }}
               </button>
               
               <div class="grid grid-cols-2 gap-4">
                 <button
                   @click="addToWishlist"
                   class="flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-green-500 text-gray-700 hover:text-green-600 py-3 rounded-xl transition-all"
+                  :title="authStore.isAuthenticated ? 'Ajouter aux favoris' : 'Se connecter pour ajouter aux favoris'"
                 >
                   <HeartIcon class="h-5 w-5" />
-                  Favoris
+                  {{ authStore.isAuthenticated ? 'Favoris' : 'Favoris' }}
                 </button>
                 <button
                   @click="shareProduct"
@@ -333,6 +337,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApi } from '@/composables/api'
+import { useAuthStore } from '@/stores/auth'
 import placeholderImg from '@/assets/placeholder.jpg'
 import {
   StarIcon,
@@ -348,6 +353,7 @@ import {
 const route = useRoute()
 const router = useRouter()
 const { get } = useApi()
+const authStore = useAuthStore()
 
 const loading = ref(true)
 const product = ref(null)
@@ -421,11 +427,42 @@ const getTimeRemaining = () => {
 }
 
 const participateNow = () => {
-  // Check if user is logged in, redirect to login if not
-  router.push('/login')
+  // Vérifier si l'utilisateur est connecté
+  if (authStore.isAuthenticated) {
+    // Utilisateur connecté - rediriger vers la page produit de son espace approprié
+    if (authStore.isMerchant) {
+      // Espace marchand (mais ils peuvent aussi participer comme clients)
+      router.push({ name: 'customer.product.detail', params: { id: route.params.id } })
+    } else {
+      // Espace client
+      router.push({ name: 'customer.product.detail', params: { id: route.params.id } })
+    }
+  } else {
+    // Invité - rediriger vers la page de connexion avec redirection de retour
+    router.push({ 
+      name: 'login', 
+      query: { 
+        redirect: `/products/${route.params.id}`,
+        action: 'participate'
+      }
+    })
+  }
 }
 
 const addToWishlist = () => {
+  if (!authStore.isAuthenticated) {
+    // Invité - rediriger vers la page de connexion
+    router.push({ 
+      name: 'login', 
+      query: { 
+        redirect: `/products/${route.params.id}`,
+        action: 'wishlist'
+      }
+    })
+    return
+  }
+  
+  // Utilisateur connecté - ajouter aux favoris
   if (window.$toast) {
     window.$toast.success('Produit ajouté aux favoris !', 'Favoris')
   }

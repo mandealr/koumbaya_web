@@ -160,7 +160,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import logoUrl from '@/assets/logo.png'
 import {
@@ -173,6 +173,7 @@ import {
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 
 const form = reactive({
@@ -248,18 +249,38 @@ const handleSubmit = async (event) => {
       // Debug: Log user data
       console.log('User data après connexion:', authStore.user)
 
-      // Use the centralized redirect logic
-      const redirectTo = authStore.getDefaultRedirect()
-
-      console.log('Redirection logic:', {
-        user: authStore.user,
-        redirectTo,
-        isAdmin: authStore.isAdmin,
-        isMerchant: authStore.isMerchant,
-        isCustomer: authStore.isCustomer
-      })
-
+      // Gérer la redirection - priorité au paramètre redirect, sinon logique par défaut
+      const redirectParam = route.query.redirect
+      const action = route.query.action
+      
       setTimeout(() => {
+        if (redirectParam && (action === 'participate' || action === 'wishlist')) {
+          // L'utilisateur vient de la page publique d'un produit pour participer ou ajouter aux favoris
+          // Rediriger vers la page produit de l'espace client
+          const productId = redirectParam.match(/\/products\/(\d+)/)?.[1]
+          if (productId) {
+            router.push({ name: 'customer.product.detail', params: { id: productId } })
+            return
+          }
+        }
+        
+        if (redirectParam) {
+          // Redirection personnalisée
+          router.push(redirectParam)
+          return
+        }
+        
+        // Use the centralized redirect logic
+        const redirectTo = authStore.getDefaultRedirect()
+
+        console.log('Redirection logic:', {
+          user: authStore.user,
+          redirectTo,
+          isAdmin: authStore.isAdmin,
+          isMerchant: authStore.isMerchant,
+          isCustomer: authStore.isCustomer
+        })
+        
         router.push({ name: redirectTo }).catch(error => {
           console.error('Erreur de redirection vers', redirectTo, ':', error)
           // Fallback: try customer dashboard, then home
