@@ -58,8 +58,8 @@
             margin: 15px 0;
         }
         .winner-info {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            border: 1px solid #28a745;
+            background: linear-gradient(135deg, #e6f7ff, #cce7f0);
+            border: 1px solid #0099cc;
             border-radius: 10px;
             padding: 20px;
             margin: 20px 0;
@@ -175,7 +175,7 @@
             </div>
 
             @if($isWinner)
-                <div style="background: #d4edda; border: 1px solid #28a745; padding: 20px; border-radius: 5px; text-align: center;">
+                <div style="background: #e6f7ff; border: 1px solid #0099cc; padding: 20px; border-radius: 5px; text-align: center;">
                     <h3><span class="emoji">🎉</span> FÉLICITATIONS !</h3>
                     <p>Vous êtes le grand gagnant de cette tombola !</p>
                     <p>Un email spécial avec toutes les instructions vous a été envoyé.</p>

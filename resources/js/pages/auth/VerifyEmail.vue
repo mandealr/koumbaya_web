@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center py-12 px-4">
+  <div class="min-h-screen bg-gradient-to-br from-[#0099cc]/5 via-white to-[#0099cc]/10 flex items-center justify-center py-12 px-4">
     <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl border border-gray-100 p-8">
       <!-- Logo -->
       <div class="text-center mb-8">
@@ -19,12 +19,12 @@
 
       <!-- Success state -->
       <div v-else-if="verificationResult?.success" class="text-center">
-        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="w-16 h-16 bg-[#0099cc]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-[#0099cc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
           </svg>
         </div>
-        <h2 class="text-2xl font-bold text-green-600 mb-2">
+        <h2 class="text-2xl font-bold text-[#0099cc] mb-2">
           {{ verificationResult.already_verified ? 'Déjà vérifié !' : 'Compte vérifié !' }}
         </h2>
         <p class="text-gray-600 mb-6">{{ verificationResult.message }}</p>

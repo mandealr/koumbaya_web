@@ -23,13 +23,13 @@
 
       <router-link
         to="/merchant/orders"
-        class="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+        class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
       >
         <div class="flex items-center">
           <ShoppingBagIcon class="w-8 h-8 mr-4" />
           <div>
             <h3 class="text-lg font-semibold">Commandes</h3>
-            <p class="text-green-100 text-sm">Suivre les ventes</p>
+            <p class="text-blue-100 text-sm">Suivre les ventes</p>
           </div>
         </div>
       </router-link>
@@ -71,7 +71,7 @@
           <div class="flex items-center text-sm">
             <span :class="[
               'font-medium flex items-center px-2 py-1 rounded-full text-xs',
-              stat.change >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              stat.change >= 0 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
             ]">
               <component
                 :is="stat.change >= 0 ? ArrowUpIcon : ArrowDownIcon"
@@ -124,7 +124,7 @@
             <p class="text-sm text-gray-600">Ventes totales (FCFA)</p>
           </div>
           <div class="text-center">
-            <p class="text-2xl font-bold text-green-600">{{ salesSummary.totalOrders }}</p>
+            <p class="text-2xl font-bold text-blue-600">{{ salesSummary.totalOrders }}</p>
             <p class="text-sm text-gray-600">Commandes</p>
           </div>
           <div class="text-center">
@@ -164,7 +164,7 @@
                 <p class="font-semibold text-gray-900">{{ order.amount.toLocaleString() }} FCFA</p>
                 <span :class="[
                   'inline-block px-2 py-1 text-xs font-medium rounded-full',
-                  order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                  order.status === 'completed' ? 'bg-blue-100 text-blue-800' :
                   order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                   'bg-gray-100 text-gray-800'
                 ]">
@@ -200,7 +200,7 @@
                   <span>{{ product.sales }} ventes</span>
                   <span :class="[
                     'font-medium',
-                    product.growth >= 0 ? 'text-green-600' : 'text-red-600'
+                    product.growth >= 0 ? 'text-blue-600' : 'text-red-600'
                   ]">
                     {{ product.growth >= 0 ? '+' : '' }}{{ product.growth }}%
                   </span>
@@ -245,7 +245,7 @@ const stats = ref([
     value: '89',
     change: 8.2,
     icon: ShoppingBagIcon,
-    color: 'bg-green-500'
+    color: 'bg-blue-500'
   },
   {
     label: 'Produits actifs',

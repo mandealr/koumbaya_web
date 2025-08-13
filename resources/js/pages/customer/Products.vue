@@ -15,14 +15,14 @@
             v-model="filters.search"
             type="text" 
             placeholder="Nom du produit..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
           <select 
             v-model="filters.category"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Toutes les catégories</option>
             <option value="electronics">Électronique</option>
@@ -35,7 +35,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Prix max</label>
           <select 
             v-model="filters.maxPrice"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les prix</option>
             <option value="100000">100,000 FCFA</option>
@@ -57,7 +57,7 @@
 
     <!-- Products Grid -->
     <div v-if="loading" class="text-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
       <p class="mt-4 text-gray-600">Chargement des produits...</p>
     </div>
 
@@ -76,7 +76,7 @@
           <div class="absolute top-4 left-4">
             <span :class="[
               'px-2 py-1 text-xs font-medium rounded-full',
-              product.status === 'active' ? 'bg-green-100 text-green-800' :
+              product.status === 'active' ? 'bg-blue-100 text-blue-800' :
               product.status === 'ending_soon' ? 'bg-yellow-100 text-yellow-800' :
               'bg-gray-100 text-gray-800'
             ]">
@@ -96,7 +96,7 @@
 
           <div class="flex justify-between items-center mb-4">
             <div>
-              <span class="text-2xl font-bold text-green-600">{{ product.price }} FCFA</span>
+              <span class="text-2xl font-bold text-blue-600">{{ product.price }} FCFA</span>
               <p class="text-sm text-gray-500">Valeur du produit</p>
             </div>
             <div class="text-right">
@@ -112,7 +112,7 @@
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2">
               <div 
-                class="bg-green-600 h-2 rounded-full transition-all duration-300" 
+                class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
                 :style="{ width: product.progress + '%' }"
               ></div>
             </div>
@@ -131,7 +131,7 @@
 
           <router-link
             :to="`/customer/products/${product.id}`"
-            class="block w-full text-center bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
+            class="block w-full text-center bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
           >
             Voir le produit
           </router-link>
@@ -150,7 +150,7 @@
     <div v-if="!loading && filteredProducts.length > 0 && hasMore" class="text-center mt-8">
       <button
         @click="loadMore"
-        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-green-600 bg-green-50 hover:bg-green-100"
+        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-blue-50 hover:bg-blue-100"
       >
         Charger plus de produits
         <ArrowDownIcon class="ml-2 w-5 h-5" />

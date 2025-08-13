@@ -36,7 +36,7 @@
             :class="[
               'py-2 px-1 border-b-2 font-medium text-sm',
               activeTab === tab.key
-                ? 'border-green-500 text-green-600'
+                ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             ]"
           >
@@ -77,7 +77,7 @@
                   <h4 class="text-lg font-semibold text-gray-900">{{ lottery.product.title }}</h4>
                   <p class="text-sm text-gray-600">{{ lottery.product.description }}</p>
                   <div class="flex items-center space-x-4 mt-2">
-                    <span class="text-sm font-medium text-green-600">
+                    <span class="text-sm font-medium text-blue-600">
                       {{ lottery.sold_tickets }}/{{ lottery.total_tickets }} tickets vendus
                     </span>
                     <span class="text-sm text-gray-500">
@@ -97,7 +97,7 @@
                 <button
                   @click="conductDraw(lottery)"
                   :disabled="conductingDraw"
-                  class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-400"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
                 >
                   <span v-if="conductingDraw">Tirage...</span>
                   <span v-else>Effectuer le tirage</span>
@@ -109,7 +109,7 @@
             <div class="mt-4">
               <div class="w-full bg-gray-200 rounded-full h-2">
                 <div 
-                  class="bg-green-600 h-2 rounded-full transition-all duration-300" 
+                  class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
                   :style="{ width: lottery.progress + '%' }"
                 ></div>
               </div>
@@ -132,7 +132,7 @@
               v-model="activeFilters.search"
               type="text"
               placeholder="Rechercher..."
-              class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
@@ -181,7 +181,7 @@
                   <div class="text-sm text-gray-900">{{ lottery.progress }}%</div>
                   <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
                     <div 
-                      class="bg-green-600 h-2 rounded-full" 
+                      class="bg-blue-600 h-2 rounded-full" 
                       :style="{ width: lottery.progress + '%' }"
                     ></div>
                   </div>
@@ -199,7 +199,7 @@
                   <div class="flex space-x-2">
                     <button
                       @click="editLottery(lottery)"
-                      class="text-green-600 hover:text-green-900"
+                      class="text-blue-600 hover:text-blue-900"
                     >
                       <PencilIcon class="w-4 h-4" />
                     </button>
@@ -231,11 +231,11 @@
               v-model="completedFilters.search"
               type="text"
               placeholder="Rechercher..."
-              class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <select
               v-model="completedFilters.period"
-              class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Toutes les périodes</option>
               <option value="week">Cette semaine</option>
@@ -265,7 +265,7 @@
                     <span class="text-sm text-gray-500">
                       Tirage effectué: {{ formatDate(lottery.draw_date) }}
                     </span>
-                    <span class="text-sm font-medium text-green-600">
+                    <span class="text-sm font-medium text-blue-600">
                       Revenus: {{ (lottery.sold_tickets * lottery.ticket_price).toLocaleString() }} FCFA
                     </span>
                   </div>
@@ -273,7 +273,7 @@
               </div>
               
               <div class="text-right">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
                   <CheckCircleIcon class="w-4 h-4 mr-1" />
                   Terminé
                 </span>
@@ -284,18 +284,18 @@
             </div>
             
             <!-- Winner Details -->
-            <div v-if="lottery.winner" class="mt-4 bg-green-50 p-4 rounded-lg">
+            <div v-if="lottery.winner" class="mt-4 bg-blue-50 p-4 rounded-lg">
               <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                  <TrophyIcon class="w-5 h-5 text-green-600 mr-2" />
+                  <TrophyIcon class="w-5 h-5 text-blue-600 mr-2" />
                   <div>
-                    <p class="font-semibold text-green-900">{{ lottery.winner.name }}</p>
-                    <p class="text-sm text-green-800">Ticket gagnant: #{{ lottery.winning_ticket }}</p>
+                    <p class="font-semibold text-blue-900">{{ lottery.winner.name }}</p>
+                    <p class="text-sm text-blue-800">Ticket gagnant: #{{ lottery.winning_ticket }}</p>
                   </div>
                 </div>
                 <div class="text-right">
-                  <p class="text-sm text-green-800">{{ lottery.winner.email }}</p>
-                  <p class="text-sm text-green-600">{{ lottery.winner.phone }}</p>
+                  <p class="text-sm text-blue-800">{{ lottery.winner.email }}</p>
+                  <p class="text-sm text-blue-600">{{ lottery.winner.phone }}</p>
                 </div>
               </div>
             </div>
@@ -340,7 +340,7 @@
               v-model="participantsSearch"
               type="text"
               placeholder="Rechercher un participant..."
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           
@@ -479,7 +479,7 @@ const stats = ref([
   {
     label: 'Revenus du mois',
     value: '850K FCFA',
-    color: 'bg-green-500',
+    color: 'bg-blue-500',
     icon: CurrencyDollarIcon
   },
   {

@@ -8,7 +8,7 @@
       </div>
       <button
         @click="showCreateModal = true"
-        class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center"
+        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
       >
         <PlusIcon class="w-5 h-5 mr-2" />
         Ajouter un produit
@@ -43,14 +43,14 @@
             v-model="filters.search"
             type="text" 
             placeholder="Nom du produit..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
           <select 
             v-model="filters.category"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Toutes les catégories</option>
             <option v-for="category in categories" :key="category.id" :value="category.id">
@@ -62,7 +62,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
           <select 
             v-model="filters.status"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les statuts</option>
             <option value="active">Actif</option>
@@ -84,7 +84,7 @@
     <!-- Products Table -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div v-if="loading" class="text-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
         <p class="mt-4 text-gray-600">Chargement des produits...</p>
       </div>
 
@@ -100,7 +100,7 @@
                 :class="[
                   'px-3 py-1 rounded-md text-sm font-medium',
                   viewMode === 'table'
-                    ? 'bg-green-100 text-green-700'
+                    ? 'bg-blue-100 text-blue-700'
                     : 'text-gray-500 hover:text-gray-700'
                 ]"
               >
@@ -111,7 +111,7 @@
                 :class="[
                   'px-3 py-1 rounded-md text-sm font-medium',
                   viewMode === 'grid'
-                    ? 'bg-green-100 text-green-700'
+                    ? 'bg-blue-100 text-blue-700'
                     : 'text-gray-500 hover:text-gray-700'
                 ]"
               >
@@ -176,7 +176,7 @@
                   <div class="text-sm text-gray-900">{{ product.progress }}%</div>
                   <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
                     <div 
-                      class="bg-green-600 h-2 rounded-full" 
+                      class="bg-blue-600 h-2 rounded-full" 
                       :style="{ width: product.progress + '%' }"
                     ></div>
                   </div>
@@ -187,7 +187,7 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span :class="[
                     'px-2 py-1 text-xs font-medium rounded-full',
-                    product.status === 'active' ? 'bg-green-100 text-green-800' :
+                    product.status === 'active' ? 'bg-blue-100 text-blue-800' :
                     product.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
                     'bg-gray-100 text-gray-800'
                   ]">
@@ -198,7 +198,7 @@
                   <div class="flex space-x-2">
                     <button
                       @click="editProduct(product)"
-                      class="text-green-600 hover:text-green-900"
+                      class="text-blue-600 hover:text-blue-900"
                     >
                       <PencilIcon class="w-4 h-4" />
                     </button>
@@ -238,7 +238,7 @@
                 <div class="absolute top-2 left-2">
                   <span :class="[
                     'px-2 py-1 text-xs font-medium rounded-full',
-                    product.status === 'active' ? 'bg-green-100 text-green-800' :
+                    product.status === 'active' ? 'bg-blue-100 text-blue-800' :
                     product.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
                     'bg-gray-100 text-gray-800'
                   ]">
@@ -267,7 +267,7 @@
                   </div>
                   <div class="w-full bg-gray-200 rounded-full h-2">
                     <div 
-                      class="bg-green-600 h-2 rounded-full" 
+                      class="bg-blue-600 h-2 rounded-full" 
                       :style="{ width: product.progress + '%' }"
                     ></div>
                   </div>
@@ -280,7 +280,7 @@
                   <div class="flex space-x-1">
                     <button
                       @click="editProduct(product)"
-                      class="p-1 text-green-600 hover:text-green-900"
+                      class="p-1 text-blue-600 hover:text-blue-900"
                     >
                       <PencilIcon class="w-4 h-4" />
                     </button>
@@ -323,7 +323,7 @@
                   v-model="productForm.title"
                   type="text"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
@@ -332,7 +332,7 @@
                 <select
                   v-model="productForm.category_id"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Sélectionner une catégorie</option>
                   <option v-for="category in categories" :key="category.id" :value="category.id">
@@ -347,7 +347,7 @@
               <textarea
                 v-model="productForm.description"
                 rows="3"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               ></textarea>
             </div>
 
@@ -359,7 +359,7 @@
                   type="number"
                   required
                   min="0"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
@@ -370,7 +370,7 @@
                   type="number"
                   required
                   min="0"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
@@ -381,7 +381,7 @@
                   type="number"
                   required
                   min="1"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -393,7 +393,7 @@
                   v-model="productForm.draw_date"
                   type="datetime-local"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
@@ -401,7 +401,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
                 <select
                   v-model="productForm.status"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="draft">Brouillon</option>
                   <option value="active">Actif</option>
@@ -416,7 +416,7 @@
                 type="file"
                 accept="image/*"
                 @change="handleImageUpload"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -424,7 +424,7 @@
               <input
                 v-model="productForm.featured"
                 type="checkbox"
-                class="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <label class="ml-2 text-sm text-gray-700">Produit en vedette</label>
             </div>
@@ -441,7 +441,7 @@
             <button
               type="submit"
               :disabled="submitting"
-              class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400"
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
             >
               <span v-if="submitting">Enregistrement...</span>
               <span v-else>{{ showCreateModal ? 'Créer' : 'Modifier' }}</span>
@@ -490,7 +490,7 @@ const stats = ref([
   {
     label: 'Actifs',
     value: '15',
-    color: 'bg-green-500',
+    color: 'bg-blue-500',
     icon: TrophyIcon
   },
   {

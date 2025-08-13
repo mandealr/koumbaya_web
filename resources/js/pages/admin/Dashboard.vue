@@ -29,7 +29,7 @@
           <div class="flex items-center text-sm">
             <span :class="[
               'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-              stat.change >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              stat.change >= 0 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
             ]">
               <component 
                 :is="stat.change >= 0 ? ArrowUpIcon : ArrowDownIcon" 
@@ -138,7 +138,7 @@
               <div :class="[
                 'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
                 activity.type === 'user' ? 'bg-[#0099cc]/10 text-[#0099cc]' :
-                activity.type === 'product' ? 'bg-green-100 text-green-600' :
+                activity.type === 'product' ? 'bg-blue-100 text-blue-600' :
                 activity.type === 'payment' ? 'bg-yellow-100 text-yellow-600' :
                 'bg-purple-100 text-purple-600'
               ]">
@@ -185,7 +185,7 @@
                   <p class="text-xs text-gray-500">{{ product.sales }} tickets</p>
                   <span :class="[
                     'text-xs font-medium',
-                    product.growth > 0 ? 'text-green-600' : 'text-red-600'
+                    product.growth > 0 ? 'text-blue-600' : 'text-red-600'
                   ]">
                     {{ product.growth > 0 ? '+' : '' }}{{ product.growth }}%
                   </span>
@@ -250,8 +250,8 @@ const stats = ref([
     value: '186',
     change: 8.2,
     icon: ShoppingBagIcon,
-    bgColor: 'bg-green-100',
-    iconColor: 'text-green-600'
+    bgColor: 'bg-blue-100',
+    iconColor: 'text-blue-600'
   },
   {
     label: 'Tombolas actives',

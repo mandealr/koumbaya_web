@@ -11,7 +11,7 @@
           <div class="flex space-x-3">
             <button
               @click="checkEligibleLotteries"
-              class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               🔍 Vérifier les tombolas
             </button>
@@ -41,7 +41,7 @@
 
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="flex items-center">
-            <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+            <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
               ✅
             </div>
             <div>
@@ -267,7 +267,7 @@
                     <button
                       v-if="refund.status === 'pending'"
                       @click="approveRefund(refund)"
-                      class="text-green-600 hover:text-green-900"
+                      class="text-blue-600 hover:text-blue-900"
                     >
                       ✅ Approuver
                     </button>
@@ -726,7 +726,7 @@ const getStatusClass = (status) => {
     pending: 'bg-yellow-100 text-yellow-800',
     approved: 'bg-blue-100 text-blue-800',
     processed: 'bg-purple-100 text-purple-800',
-    completed: 'bg-green-100 text-green-800',
+    completed: 'bg-blue-100 text-blue-800',
     rejected: 'bg-red-100 text-red-800',
     failed: 'bg-red-100 text-red-800'
   }

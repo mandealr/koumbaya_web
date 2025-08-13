@@ -123,28 +123,28 @@
         <div class="px-4 py-3 space-y-1">
           <router-link
             to="/"
-            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-blue-50"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-[#0099cc]/5"
             @click="mobileMenuOpen = false"
           >
             Accueil
           </router-link>
           <router-link
             to="/products"
-            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-blue-50"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-[#0099cc]/5"
             @click="mobileMenuOpen = false"
           >
             Produits
           </router-link>
           <router-link
             to="/how-it-works"
-            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-blue-50"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-[#0099cc]/5"
             @click="mobileMenuOpen = false"
           >
             Comment ça marche
           </router-link>
           <router-link
             to="/contact"
-            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-blue-50"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-[#0099cc]/5"
             @click="mobileMenuOpen = false"
           >
             Contact
@@ -165,7 +165,7 @@
               </div>
               <button
                 @click="handleLogout"
-                class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-blue-50"
+                class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-[#0099cc]/5"
               >
                 <ArrowRightOnRectangleIcon class="w-5 h-5 inline mr-2" />
                 Se déconnecter
@@ -176,7 +176,7 @@
             <div v-else class="space-y-2">
               <router-link
                 to="/login"
-                class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-blue-50"
+                class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-[#0099cc]/5"
                 @click="mobileMenuOpen = false"
               >
                 Se connecter

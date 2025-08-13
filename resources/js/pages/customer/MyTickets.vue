@@ -34,14 +34,14 @@
             v-model="filters.search"
             type="text" 
             placeholder="Nom du produit..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
           <select 
             v-model="filters.status"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les statuts</option>
             <option value="active">En cours</option>
@@ -54,7 +54,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Période</label>
           <select 
             v-model="filters.period"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Toutes les périodes</option>
             <option value="week">Cette semaine</option>
@@ -75,7 +75,7 @@
 
     <!-- Tickets List -->
     <div v-if="loading" class="text-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
       <p class="mt-4 text-gray-600">Chargement de vos tickets...</p>
     </div>
 
@@ -93,7 +93,7 @@
       <router-link
         v-if="tickets.length === 0"
         to="/customer/products"
-        class="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+        class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
       >
         Découvrir les produits
       </router-link>
@@ -125,7 +125,7 @@
                 </div>
                 <span :class="[
                   'px-3 py-1 text-sm font-medium rounded-full',
-                  ticket.status === 'won' ? 'bg-green-100 text-green-800' :
+                  ticket.status === 'won' ? 'bg-blue-100 text-blue-800' :
                   ticket.status === 'lost' ? 'bg-red-100 text-red-800' :
                   ticket.status === 'active' ? 'bg-blue-100 text-blue-800' :
                   'bg-yellow-100 text-yellow-800'
@@ -163,7 +163,7 @@
                     :class="[
                       'px-2 py-1 text-xs font-mono rounded border',
                       ticket.winning_number === number ? 
-                        'bg-green-100 text-green-800 border-green-300' :
+                        'bg-blue-100 text-blue-800 border-blue-300' :
                         'bg-gray-50 text-gray-700 border-gray-300'
                     ]"
                   >
@@ -180,30 +180,30 @@
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2">
                   <div 
-                    class="bg-green-600 h-2 rounded-full transition-all duration-300" 
+                    class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
                     :style="{ width: ticket.lottery.progress + '%' }"
                   ></div>
                 </div>
               </div>
 
               <!-- Winning Details -->
-              <div v-if="ticket.status === 'won'" class="bg-green-50 p-4 rounded-lg mb-4">
+              <div v-if="ticket.status === 'won'" class="bg-blue-50 p-4 rounded-lg mb-4">
                 <div class="flex items-center mb-2">
-                  <TrophyIcon class="w-5 h-5 text-green-600 mr-2" />
-                  <p class="font-semibold text-green-900">Félicitations ! Vous avez gagné !</p>
+                  <TrophyIcon class="w-5 h-5 text-blue-600 mr-2" />
+                  <p class="font-semibold text-blue-900">Félicitations ! Vous avez gagné !</p>
                 </div>
-                <p class="text-sm text-green-800">Numéro gagnant: #{{ ticket.winning_number }}</p>
-                <p class="text-sm text-green-800">Tirage effectué le {{ formatDate(ticket.lottery.draw_date) }}</p>
+                <p class="text-sm text-blue-800">Numéro gagnant: #{{ ticket.winning_number }}</p>
+                <p class="text-sm text-blue-800">Tirage effectué le {{ formatDate(ticket.lottery.draw_date) }}</p>
                 <div v-if="!ticket.prize_claimed" class="mt-3">
                   <button
                     @click="claimPrize(ticket.id)"
-                    class="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700 transition-colors"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors"
                   >
                     Réclamer mon prix
                   </button>
                 </div>
                 <div v-else class="mt-3">
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
                     <CheckCircleIcon class="w-4 h-4 mr-1" />
                     Prix réclamé
                   </span>
@@ -228,7 +228,7 @@
                 <div class="flex space-x-2">
                   <router-link
                     :to="`/customer/products/${ticket.product.id}`"
-                    class="text-sm text-green-600 hover:text-green-700 font-medium"
+                    class="text-sm text-blue-600 hover:text-blue-700 font-medium"
                   >
                     Voir le produit
                   </router-link>
@@ -250,7 +250,7 @@
     <div v-if="!loading && filteredTickets.length > 0 && hasMore" class="text-center mt-8">
       <button
         @click="loadMore"
-        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-green-600 bg-green-50 hover:bg-green-100"
+        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-blue-50 hover:bg-blue-100"
       >
         Charger plus de tickets
         <ArrowDownIcon class="ml-2 w-5 h-5" />
@@ -291,7 +291,7 @@ const stats = ref([
   {
     label: 'Prix gagnés',
     value: '1',
-    color: 'bg-green-500',
+    color: 'bg-blue-500',
     icon: TrophyIcon
   },
   {

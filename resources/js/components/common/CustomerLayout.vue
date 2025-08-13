@@ -21,7 +21,7 @@
                 'px-3 py-2 rounded-md text-sm font-medium transition-colors',
                 $route.name === item.name
                   ? 'text-white bg-[#0099cc]'
-                  : 'text-gray-600 hover:text-[#0099cc] hover:bg-blue-50'
+                  : 'text-gray-600 hover:text-[#0099cc] hover:bg-[#0099cc]/5'
               ]"
             >
               {{ item.label }}

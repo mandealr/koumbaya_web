@@ -22,7 +22,7 @@
             overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #28a745, #007bff);
+            background: linear-gradient(135deg, #0099cc, #007bff);
             color: white;
             padding: 30px;
             text-align: center;
@@ -36,8 +36,8 @@
             padding: 30px;
         }
         .winner-card {
-            background: linear-gradient(135deg, #fff3cd, #d4edda);
-            border: 2px solid #28a745;
+            background: linear-gradient(135deg, #e6f7ff, #cce7f0);
+            border: 2px solid #0099cc;
             border-radius: 10px;
             padding: 20px;
             margin: 20px 0;
@@ -54,7 +54,7 @@
         .product-title {
             font-size: 24px;
             font-weight: bold;
-            color: #28a745;
+            color: #0099cc;
             margin: 15px 0;
         }
         .product-value {

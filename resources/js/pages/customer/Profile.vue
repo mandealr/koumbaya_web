@@ -19,7 +19,7 @@
               />
               <button
                 @click="showAvatarUpload = true"
-                class="absolute bottom-0 right-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center hover:bg-green-700 transition-colors"
+                class="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
               >
                 <CameraIcon class="w-4 h-4" />
               </button>
@@ -38,7 +38,7 @@
               :class="[
                 'w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
                 activeTab === tab.key
-                  ? 'bg-green-50 text-green-600 border-r-2 border-green-600'
+                  ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               ]"
             >
@@ -63,7 +63,7 @@
                   v-model="personalForm.first_name"
                   type="text"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
@@ -73,7 +73,7 @@
                   v-model="personalForm.last_name"
                   type="text"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
@@ -83,7 +83,7 @@
                   v-model="personalForm.email"
                   type="email"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
@@ -92,7 +92,7 @@
                 <input
                   v-model="personalForm.phone"
                   type="tel"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
@@ -101,7 +101,7 @@
                 <input
                   v-model="personalForm.birth_date"
                   type="date"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
@@ -109,7 +109,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Genre</label>
                 <select
                   v-model="personalForm.gender"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Sélectionner...</option>
                   <option value="male">Homme</option>
@@ -123,7 +123,7 @@
               <button
                 type="submit"
                 :disabled="updatingPersonal"
-                class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-400"
+                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
               >
                 <span v-if="updatingPersonal">Mise à jour...</span>
                 <span v-else>Mettre à jour</span>
@@ -143,7 +143,7 @@
                 <input
                   v-model="addressForm.address"
                   type="text"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
@@ -153,7 +153,7 @@
                   <input
                     v-model="addressForm.city"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 
@@ -162,7 +162,7 @@
                   <input
                     v-model="addressForm.postal_code"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -173,7 +173,7 @@
                   <select
                     v-model="addressForm.country_id"
                     @change="loadStates"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Sélectionner un pays...</option>
                     <option
@@ -190,7 +190,7 @@
                   <label class="block text-sm font-medium text-gray-700 mb-2">État/Province</label>
                   <select
                     v-model="addressForm.state"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Sélectionner un état...</option>
                     <option
@@ -209,7 +209,7 @@
               <button
                 type="submit"
                 :disabled="updatingAddress"
-                class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-400"
+                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
               >
                 <span v-if="updatingAddress">Mise à jour...</span>
                 <span v-else>Mettre à jour</span>
@@ -234,7 +234,7 @@
                     v-model="passwordForm.current_password"
                     type="password"
                     required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 
@@ -244,7 +244,7 @@
                     v-model="passwordForm.new_password"
                     type="password"
                     required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 
@@ -254,14 +254,14 @@
                     v-model="passwordForm.confirm_password"
                     type="password"
                     required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 
                 <button
                   type="submit"
                   :disabled="updatingPassword"
-                  class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-400"
+                  class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
                 >
                   <span v-if="updatingPassword">Mise à jour...</span>
                   <span v-else>Changer le mot de passe</span>
@@ -279,8 +279,8 @@
                 <button
                   @click="toggleTwoFactor"
                   :class="[
-                    'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2',
-                    user.two_factor_enabled ? 'bg-green-600' : 'bg-gray-200'
+                    'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2',
+                    user.two_factor_enabled ? 'bg-blue-600' : 'bg-gray-200'
                   ]"
                 >
                   <span
@@ -319,7 +319,7 @@
                   <div class="flex items-center">
                     <span
                       v-if="session.is_current"
-                      class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full mr-3"
+                      class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full mr-3"
                     >
                       Session actuelle
                     </span>
@@ -360,7 +360,7 @@
                         <input
                           v-model="notificationForm[notification.key].email"
                           type="checkbox"
-                          class="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                          class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
                         <span class="ml-2 text-sm text-gray-700">Email</span>
                       </label>
@@ -368,7 +368,7 @@
                         <input
                           v-model="notificationForm[notification.key].sms"
                           type="checkbox"
-                          class="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                          class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
                         <span class="ml-2 text-sm text-gray-700">SMS</span>
                       </label>
@@ -382,7 +382,7 @@
               <button
                 type="submit"
                 :disabled="updatingNotifications"
-                class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-400"
+                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
               >
                 <span v-if="updatingNotifications">Mise à jour...</span>
                 <span v-else>Sauvegarder les préférences</span>
@@ -407,7 +407,7 @@
           />
           <button
             @click="$refs.avatarInput.click()"
-            class="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-green-500 transition-colors"
+            class="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-blue-500 transition-colors"
           >
             <CameraIcon class="w-8 h-8 text-gray-400 mx-auto mb-2" />
             <p class="text-sm text-gray-600">Cliquez pour choisir une image</p>
@@ -423,7 +423,7 @@
           <button
             @click="uploadAvatar"
             :disabled="!selectedAvatar"
-            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
           >
             Sauvegarder
           </button>

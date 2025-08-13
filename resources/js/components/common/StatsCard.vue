@@ -159,7 +159,7 @@ const changeIcon = computed(() => {
 
 const changeColorClass = computed(() => {
   if (props.change === undefined) return 'text-gray-400'
-  return props.change > 0 ? 'text-green-600' : props.change < 0 ? 'text-red-600' : 'text-gray-400'
+  return props.change > 0 ? 'text-blue-600' : props.change < 0 ? 'text-red-600' : 'text-gray-400'
 })
 
 const colorClasses = {
@@ -169,9 +169,9 @@ const colorClasses = {
     progress: 'bg-gradient-to-r from-blue-500 to-blue-600'
   },
   green: {
-    iconBg: 'bg-green-100 group-hover:bg-green-200',
-    iconColor: 'text-green-600',
-    progress: 'bg-gradient-to-r from-green-500 to-green-600'
+    iconBg: 'bg-blue-100 group-hover:bg-blue-200',
+    iconColor: 'text-blue-600',
+    progress: 'bg-gradient-to-r from-blue-500 to-blue-600'
   },
   orange: {
     iconBg: 'bg-orange-100 group-hover:bg-orange-200',

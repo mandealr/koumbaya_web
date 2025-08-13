@@ -22,7 +22,7 @@
             overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, #0099cc, #007799);
             color: white;
             padding: 30px;
             text-align: center;
@@ -36,8 +36,8 @@
             padding: 30px;
         }
         .refund-card {
-            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-            border: 2px solid #10b981;
+            background: linear-gradient(135deg, #e6f7ff, #cce7f0);
+            border: 2px solid #0099cc;
             border-radius: 10px;
             padding: 20px;
             margin: 20px 0;
@@ -46,7 +46,7 @@
         .amount {
             font-size: 32px;
             font-weight: bold;
-            color: #059669;
+            color: #0099cc;
             margin: 15px 0;
         }
         .refund-details {
@@ -101,14 +101,14 @@
             margin: 8px 0;
         }
         .next-steps {
-            background: #d4edda;
-            border-left: 4px solid #28a745;
+            background: #e6f7ff;
+            border-left: 4px solid #0099cc;
             padding: 20px;
             margin: 20px 0;
         }
         .next-steps h3 {
             margin-top: 0;
-            color: #155724;
+            color: #007799;
         }
         .footer {
             background: #343a40;
@@ -120,7 +120,7 @@
         .btn {
             display: inline-block;
             padding: 12px 24px;
-            background: #10b981;
+            background: #0099cc;
             color: white;
             text-decoration: none;
             border-radius: 5px;

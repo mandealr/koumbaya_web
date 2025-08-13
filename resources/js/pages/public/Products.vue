@@ -1,13 +1,13 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-[#0099cc] via-blue-500 to-cyan-600 text-white py-16">
+    <section class="bg-gradient-to-br from-[#0099cc] via-[#0088bb] to-[#0077aa] text-white py-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <h1 class="text-4xl md:text-5xl font-bold mb-4">
-            Découvrez nos <span class="text-blue-200">produits incroyables</span>
+            Découvrez nos <span class="text-white/80">produits incroyables</span>
           </h1>
-          <p class="text-xl text-blue-100 max-w-3xl mx-auto mb-8">
+          <p class="text-xl text-white/80 max-w-3xl mx-auto mb-8">
             Des smartphones dernière génération aux gadgets high-tech, tous nos produits sont garantis et à gagner facilement
           </p>
           <div class="flex flex-wrap justify-center gap-4">

@@ -81,7 +81,7 @@ const getIcon = (type) => iconMap[type] || InformationCircleIcon
 const toastClasses = (type) => {
   const baseClasses = 'bg-white/90 border-l-4'
   const typeClasses = {
-    success: 'border-green-500 text-green-900',
+    success: 'border-blue-500 text-blue-900',
     error: 'border-red-500 text-red-900', 
     warning: 'border-orange-500 text-orange-900',
     info: 'border-blue-500 text-blue-900'
@@ -91,7 +91,7 @@ const toastClasses = (type) => {
 
 const iconClasses = (type) => {
   const classes = {
-    success: 'text-green-600',
+    success: 'text-blue-600',
     error: 'text-red-600',
     warning: 'text-orange-600', 
     info: 'text-blue-600'
@@ -101,7 +101,7 @@ const iconClasses = (type) => {
 
 const progressBarClasses = (type) => {
   const classes = {
-    success: 'bg-green-500',
+    success: 'bg-blue-500',
     error: 'bg-red-500',
     warning: 'bg-orange-500',
     info: 'bg-blue-500'

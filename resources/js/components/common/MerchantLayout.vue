@@ -21,7 +21,7 @@
                 :class="[
                   'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium',
                   $route.path.startsWith(item.href)
-                    ? 'border-green-500 text-gray-900'
+                    ? 'border-[#0099cc] text-gray-900'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 ]"
               >
@@ -46,11 +46,11 @@
               <div>
                 <button
                   @click="userMenuOpen = !userMenuOpen"
-                  class="flex items-center max-w-xs bg-white rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                  class="flex items-center max-w-xs bg-white rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0099cc]"
                 >
                   <span class="sr-only">Open user menu</span>
-                  <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                    <span class="text-sm font-medium text-green-600">
+                  <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                    <span class="text-sm font-medium text-blue-600">
                       {{ userInitials }}
                     </span>
                   </div>
@@ -108,7 +108,7 @@
           :class="[
             'block pl-3 pr-4 py-2 border-l-4 text-base font-medium',
             $route.path.startsWith(item.href)
-              ? 'bg-green-50 border-green-500 text-green-700'
+              ? 'bg-blue-50 border-blue-500 text-blue-700'
               : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
           ]"
         >
@@ -134,7 +134,7 @@
           <div class="text-xs text-gray-600">Produits</div>
         </div>
         <div>
-          <div class="text-lg font-semibold text-green-600">{{ quickStats.lotteries }}</div>
+          <div class="text-lg font-semibold text-blue-600">{{ quickStats.lotteries }}</div>
           <div class="text-xs text-gray-600">Tombolas</div>
         </div>
         <div>

@@ -53,7 +53,7 @@
           <h3 class="koumbaya-heading-4">Évolution des Revenus</h3>
         </div>
         <div class="koumbaya-card-body">
-          <div class="h-64 bg-gradient-to-br from-green-50 to-blue-50 rounded-lg flex items-center justify-center">
+          <div class="h-64 bg-gradient-to-br from-blue-50 to-blue-50 rounded-lg flex items-center justify-center">
             <div class="text-center">
               <ChartBarIcon class="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <p class="text-gray-500">Graphique des revenus</p>
@@ -124,9 +124,9 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <ArrowTrendingUpIcon v-if="product.trend > 0" class="w-4 h-4 text-green-500 mr-1" />
+                    <ArrowTrendingUpIcon v-if="product.trend > 0" class="w-4 h-4 text-blue-500 mr-1" />
                     <ArrowTrendingDownIcon v-else class="w-4 h-4 text-red-500 mr-1" />
-                    <span :class="product.trend > 0 ? 'text-green-600' : 'text-red-600'" class="text-sm font-medium">
+                    <span :class="product.trend > 0 ? 'text-blue-600' : 'text-red-600'" class="text-sm font-medium">
                       {{ Math.abs(product.trend) }}%
                     </span>
                   </div>

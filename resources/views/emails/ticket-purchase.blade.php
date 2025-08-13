@@ -36,8 +36,8 @@
             padding: 30px;
         }
         .success-card {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            border: 2px solid #28a745;
+            background: linear-gradient(135deg, #e6f7ff, #cce7f0);
+            border: 2px solid #0099cc;
             border-radius: 10px;
             padding: 20px;
             margin: 20px 0;
@@ -54,7 +54,7 @@
         .product-title {
             font-size: 20px;
             font-weight: bold;
-            color: #28a745;
+            color: #0099cc;
             margin: 15px 0;
         }
         .ticket-info {
@@ -138,7 +138,7 @@
             margin: 10px 0;
         }
         .progress-fill {
-            background: #28a745;
+            background: #0099cc;
             height: 20px;
             text-align: center;
             color: white;
@@ -231,7 +231,7 @@
                 <a href="{{ config('app.frontend_url') }}/customer/tickets" class="btn">
                     Voir mes tickets
                 </a>
-                <a href="{{ config('app.frontend_url') }}/lotteries/{{ $lottery->id }}" class="btn" style="background: #28a745;">
+                <a href="{{ config('app.frontend_url') }}/lotteries/{{ $lottery->id }}" class="btn" style="background: #0099cc;">
                     Voir la tombola
                 </a>
             </div>

@@ -40,7 +40,7 @@
           <div class="flex items-center text-xs">
             <span :class="[
               'inline-flex items-center px-2 py-1 rounded-full font-medium',
-              stat.change >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              stat.change >= 0 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
             ]">
               <component
                 :is="stat.change >= 0 ? ArrowUpIcon : ArrowDownIcon"
@@ -193,9 +193,9 @@
 
           <!-- Revenue Info -->
           <div class="grid grid-cols-2 gap-4 mb-4 text-center">
-            <div class="bg-green-50 p-3 rounded-lg">
-              <p class="text-green-700 font-semibold text-lg">{{ formatAmount(product.revenue) }}</p>
-              <p class="text-green-600 text-xs">Revenus</p>
+            <div class="bg-blue-50 p-3 rounded-lg">
+              <p class="text-blue-700 font-semibold text-lg">{{ formatAmount(product.revenue) }}</p>
+              <p class="text-blue-600 text-xs">Revenus</p>
             </div>
             <div class="bg-blue-50 p-3 rounded-lg">
               <p class="text-blue-700 font-semibold text-lg">{{ product.ticket_price.toLocaleString() }}</p>
@@ -331,8 +331,8 @@
                 <p class="text-2xl font-bold text-[#0099cc]">{{ selectedProduct.sold_tickets }}</p>
                 <p class="text-sm text-gray-600">Tickets vendus</p>
               </div>
-              <div class="bg-green-100 p-4 rounded-lg">
-                <p class="text-2xl font-bold text-green-600">{{ formatAmount(selectedProduct.revenue) }}</p>
+              <div class="bg-blue-100 p-4 rounded-lg">
+                <p class="text-2xl font-bold text-blue-600">{{ formatAmount(selectedProduct.revenue) }}</p>
                 <p class="text-sm text-gray-600">Revenus (FCFA)</p>
               </div>
               <div class="bg-purple-100 p-4 rounded-lg">
@@ -419,7 +419,7 @@ const productStats = ref([
     value: '45.2K',
     change: 18.7,
     icon: CurrencyDollarIcon,
-    color: 'bg-green-500'
+    color: 'bg-blue-500'
   },
   {
     label: 'Tickets vendus',
@@ -566,7 +566,7 @@ const applyFilters = () => {
 const getStatusClass = (status) => {
   const classes = {
     'draft': 'bg-gray-100 text-gray-800 px-3 py-1 text-xs font-medium rounded-full',
-    'active': 'bg-green-100 text-green-800 px-3 py-1 text-xs font-medium rounded-full',
+    'active': 'bg-blue-100 text-blue-800 px-3 py-1 text-xs font-medium rounded-full',
     'completed': 'bg-blue-100 text-blue-800 px-3 py-1 text-xs font-medium rounded-full',
     'cancelled': 'bg-red-100 text-red-800 px-3 py-1 text-xs font-medium rounded-full'
   }

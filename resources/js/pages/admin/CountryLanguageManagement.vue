@@ -17,7 +17,7 @@
             :class="[
               'py-2 px-1 border-b-2 font-medium text-sm',
               activeTab === tab.key
-                ? 'border-green-500 text-green-600'
+                ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             ]"
           >
@@ -38,7 +38,7 @@
           </div>
           <button
             @click="showCountryModal = true"
-            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
           >
             <PlusIcon class="w-4 h-4 mr-2" />
             Ajouter un pays
@@ -52,7 +52,7 @@
               v-model="countryFilters.search"
               type="text"
               placeholder="Rechercher un pays..."
-              class="w-full md:w-1/3 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              class="w-full md:w-1/3 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -104,7 +104,7 @@
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span :class="[
                       'px-2 py-1 text-xs font-medium rounded-full',
-                      country.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      country.is_active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
                     ]">
                       {{ country.is_active ? 'Actif' : 'Inactif' }}
                     </span>
@@ -113,7 +113,7 @@
                     <div class="flex space-x-2">
                       <button
                         @click="editCountry(country)"
-                        class="text-green-600 hover:text-green-900"
+                        class="text-blue-600 hover:text-blue-900"
                       >
                         <PencilIcon class="w-4 h-4" />
                       </button>
@@ -149,7 +149,7 @@
           </div>
           <button
             @click="showLanguageModal = true"
-            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
           >
             <PlusIcon class="w-4 h-4 mr-2" />
             Ajouter une langue
@@ -163,7 +163,7 @@
               v-model="languageFilters.search"
               type="text"
               placeholder="Rechercher une langue..."
-              class="w-full md:w-1/3 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              class="w-full md:w-1/3 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -213,7 +213,7 @@
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span :class="[
                       'px-2 py-1 text-xs font-medium rounded-full',
-                      language.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      language.is_active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
                     ]">
                       {{ language.is_active ? 'Actif' : 'Inactif' }}
                     </span>
@@ -222,7 +222,7 @@
                     <div class="flex space-x-2">
                       <button
                         @click="editLanguage(language)"
-                        class="text-green-600 hover:text-green-900"
+                        class="text-blue-600 hover:text-blue-900"
                       >
                         <PencilIcon class="w-4 h-4" />
                       </button>
@@ -264,7 +264,7 @@
                   <input
                     v-model="generalSettings.app_name"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -272,14 +272,14 @@
                   <input
                     v-model="generalSettings.app_url"
                     type="url"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Langue par défaut</label>
                   <select
                     v-model="generalSettings.default_language"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option v-for="language in activeLanguages" :key="language.id" :value="language.code">
                       {{ language.name }}
@@ -290,7 +290,7 @@
                   <label class="block text-sm font-medium text-gray-700 mb-2">Pays par défaut</label>
                   <select
                     v-model="generalSettings.default_country"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option v-for="country in activeCountries" :key="country.id" :value="country.code">
                       {{ country.name }}
@@ -303,14 +303,14 @@
                 <textarea
                   v-model="generalSettings.app_description"
                   rows="3"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 ></textarea>
               </div>
               <div class="mt-6 flex justify-end">
                 <button
                   type="submit"
                   :disabled="updatingSettings"
-                  class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400"
+                  class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
                 >
                   <span v-if="updatingSettings">Mise à jour...</span>
                   <span v-else>Sauvegarder</span>
@@ -333,7 +333,7 @@
                   <input
                     v-model="emailSettings.from_email"
                     type="email"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -341,7 +341,7 @@
                   <input
                     v-model="emailSettings.from_name"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -349,7 +349,7 @@
                   <input
                     v-model="emailSettings.support_email"
                     type="email"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -357,7 +357,7 @@
                   <input
                     v-model="emailSettings.admin_email"
                     type="email"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -365,7 +365,7 @@
                 <button
                   type="submit"
                   :disabled="updatingSettings"
-                  class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400"
+                  class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
                 >
                   <span v-if="updatingSettings">Mise à jour...</span>
                   <span v-else>Sauvegarder</span>
@@ -394,7 +394,7 @@
                 v-model="countryForm.name"
                 type="text"
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -404,7 +404,7 @@
                 type="text"
                 required
                 maxlength="2"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -412,7 +412,7 @@
               <input
                 v-model="countryForm.currency"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -420,14 +420,14 @@
               <input
                 v-model="countryForm.flag"
                 type="url"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div class="flex items-center">
               <input
                 v-model="countryForm.is_active"
                 type="checkbox"
-                class="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <label class="ml-2 text-sm text-gray-700">Actif</label>
             </div>
@@ -444,7 +444,7 @@
             <button
               type="submit"
               :disabled="submitting"
-              class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400"
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
             >
               <span v-if="submitting">Enregistrement...</span>
               <span v-else>{{ showCountryModal ? 'Créer' : 'Modifier' }}</span>
@@ -471,7 +471,7 @@
                 v-model="languageForm.name"
                 type="text"
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -479,7 +479,7 @@
               <input
                 v-model="languageForm.native_name"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -489,7 +489,7 @@
                 type="text"
                 required
                 maxlength="2"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -498,14 +498,14 @@
                 v-model="languageForm.flag"
                 type="text"
                 maxlength="2"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Direction</label>
               <select
                 v-model="languageForm.direction"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="ltr">Gauche à droite</option>
                 <option value="rtl">Droite à gauche</option>
@@ -515,7 +515,7 @@
               <input
                 v-model="languageForm.is_active"
                 type="checkbox"
-                class="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <label class="ml-2 text-sm text-gray-700">Actif</label>
             </div>
@@ -532,7 +532,7 @@
             <button
               type="submit"
               :disabled="submitting"
-              class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400"
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
             >
               <span v-if="submitting">Enregistrement...</span>
               <span v-else>{{ showLanguageModal ? 'Créer' : 'Modifier' }}</span>

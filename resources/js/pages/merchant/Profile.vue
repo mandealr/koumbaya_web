@@ -12,8 +12,8 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div class="text-center">
             <!-- Avatar -->
-            <div class="mx-auto h-24 w-24 rounded-full bg-green-100 flex items-center justify-center mb-4">
-              <span class="text-2xl font-bold text-green-600">
+            <div class="mx-auto h-24 w-24 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+              <span class="text-2xl font-bold text-blue-600">
                 {{ userInitials }}
               </span>
             </div>
@@ -27,7 +27,7 @@
               <div class="flex items-center text-sm text-gray-600">
                 <div :class="[
                   'w-2 h-2 rounded-full mr-2',
-                  user?.is_active ? 'bg-green-400' : 'bg-red-400'
+                  user?.is_active ? 'bg-blue-400' : 'bg-red-400'
                 ]"></div>
                 {{ user?.is_active ? 'Compte actif' : 'Compte inactif' }}
               </div>
@@ -58,7 +58,7 @@
             </div>
             <div class="flex justify-between items-center">
               <span class="text-sm text-gray-600">Revenus ce mois</span>
-              <span class="font-semibold text-green-600">{{ formatCurrency(stats.revenue || 0) }}</span>
+              <span class="font-semibold text-blue-600">{{ formatCurrency(stats.revenue || 0) }}</span>
             </div>
           </div>
         </div>
@@ -80,7 +80,7 @@
                     v-model="profileForm.first_name"
                     type="text" 
                     required
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                 </div>
                 
@@ -92,7 +92,7 @@
                     v-model="profileForm.last_name"
                     type="text" 
                     required
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                 </div>
               </div>
@@ -106,7 +106,7 @@
                     v-model="profileForm.email"
                     type="email" 
                     required
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                 </div>
                 
@@ -118,7 +118,7 @@
                     v-model="profileForm.phone"
                     type="tel" 
                     required
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                 </div>
               </div>
@@ -128,7 +128,7 @@
                 <input 
                   v-model="profileForm.city"
                   type="text" 
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
               </div>
 
@@ -137,7 +137,7 @@
                 <textarea 
                   v-model="profileForm.address"
                   rows="3"
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Votre adresse complète..."
                 ></textarea>
               </div>
@@ -167,7 +167,7 @@
                   <textarea 
                     v-model="profileForm.bio"
                     rows="4"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Décrivez votre activité, vos produits, votre expertise..."
                   ></textarea>
                 </div>
@@ -186,7 +186,7 @@
               <button 
                 type="submit"
                 :disabled="loading"
-                class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
               >
                 {{ loading ? 'Sauvegarde...' : 'Sauvegarder' }}
               </button>

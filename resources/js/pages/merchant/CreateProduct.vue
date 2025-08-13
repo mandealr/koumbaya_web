@@ -300,7 +300,7 @@
                   <p class="text-sm text-gray-600">Revenus potentiels</p>
                 </div>
                 <div class="text-center">
-                  <p class="text-2xl font-bold text-green-600">{{ lotteryMetrics.profitMargin }}%</p>
+                  <p class="text-2xl font-bold text-blue-600">{{ lotteryMetrics.profitMargin }}%</p>
                   <p class="text-sm text-gray-600">Marge bénéficiaire</p>
                 </div>
                 <div class="text-center">
@@ -423,7 +423,7 @@
           v-if="currentStep === steps.length"
           type="submit"
           :disabled="loading || !canProceed"
-          class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-lg transition-colors"
+          class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg transition-colors"
         >
           <span v-if="loading" class="flex items-center">
             <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>

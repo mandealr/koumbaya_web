@@ -86,7 +86,7 @@
                 class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 text-black"
                 :class="{ 
                   'border-red-300 focus:border-red-500 focus:ring-red-500/10': errors.email,
-                  'border-green-300 focus:border-green-500': !errors.email && form.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)
+                  'border-blue-300 focus:border-blue-500': !errors.email && form.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)
                 }"
                 placeholder="exemple@koumbaya.com"
               />
@@ -94,7 +94,7 @@
                 <ExclamationCircleIcon class="w-4 h-4 mr-1" />
                 {{ errors.email }}
               </p>
-              <p v-else-if="!errors.email && form.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)" class="mt-2 text-sm text-green-600 flex items-center">
+              <p v-else-if="!errors.email && form.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)" class="mt-2 text-sm text-blue-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                 </svg>
@@ -119,7 +119,7 @@
                   class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 pr-12 text-black"
                   :class="{ 
                     'border-red-300 focus:border-red-500 focus:ring-red-500/10': errors.password,
-                    'border-green-300 focus:border-green-500': !errors.password && form.password && form.password.length >= 6
+                    'border-blue-300 focus:border-blue-500': !errors.password && form.password && form.password.length >= 6
                   }"
                   placeholder="••••••••"
                 />
@@ -136,7 +136,7 @@
                 <ExclamationCircleIcon class="w-4 h-4 mr-1" />
                 {{ errors.password }}
               </p>
-              <p v-else-if="!errors.password && form.password && form.password.length >= 6" class="mt-2 text-sm text-green-600 flex items-center">
+              <p v-else-if="!errors.password && form.password && form.password.length >= 6" class="mt-2 text-sm text-blue-600 flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                 </svg>

@@ -1,6 +1,6 @@
 <template>
   <div v-if="loading" class="text-center py-12">
-    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
     <p class="mt-4 text-gray-600">Chargement du produit...</p>
   </div>
 
@@ -28,7 +28,7 @@
           <div class="absolute top-4 left-4">
             <span :class="[
               'px-3 py-1 text-sm font-medium rounded-full',
-              product.status === 'active' ? 'bg-green-100 text-green-800' :
+              product.status === 'active' ? 'bg-blue-100 text-blue-800' :
               product.status === 'ending_soon' ? 'bg-yellow-100 text-yellow-800' :
               'bg-gray-100 text-gray-800'
             ]">
@@ -61,7 +61,7 @@
           
           <div class="flex items-center space-x-4 mb-6">
             <div class="text-center">
-              <div class="text-3xl font-bold text-green-600">{{ product.price }} FCFA</div>
+              <div class="text-3xl font-bold text-blue-600">{{ product.price }} FCFA</div>
               <div class="text-sm text-gray-500">Valeur du produit</div>
             </div>
             <div class="text-center">
@@ -78,7 +78,7 @@
             </div>
             <div class="w-full bg-gray-200 rounded-full h-3">
               <div 
-                class="bg-green-600 h-3 rounded-full transition-all duration-300" 
+                class="bg-blue-600 h-3 rounded-full transition-all duration-300" 
                 :style="{ width: product.progress + '%' }"
               ></div>
             </div>
@@ -120,7 +120,7 @@
                 type="number"
                 min="1"
                 :max="product.total_tickets - product.sold_tickets"
-                class="w-20 text-center border border-gray-300 rounded-md py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="w-20 text-center border border-gray-300 rounded-md py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
                 @click="increaseTickets"
@@ -134,13 +134,13 @@
 
           <div class="flex justify-between items-center mb-4">
             <span class="text-gray-600">Total à payer:</span>
-            <span class="text-2xl font-bold text-green-600">{{ totalPrice }} FCFA</span>
+            <span class="text-2xl font-bold text-blue-600">{{ totalPrice }} FCFA</span>
           </div>
 
           <button
             @click="purchaseTickets"
             :disabled="purchasing || product.status !== 'active'"
-            class="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             <span v-if="purchasing">Achat en cours...</span>
             <span v-else-if="product.status !== 'active'">Tombola terminée</span>
@@ -161,7 +161,7 @@
             :class="[
               'py-2 px-1 border-b-2 font-medium text-sm',
               activeTab === tab.key
-                ? 'border-green-500 text-green-600'
+                ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             ]"
           >
@@ -177,7 +177,7 @@
         <h4 class="text-md font-semibold mt-6 mb-3">Caractéristiques</h4>
         <ul v-if="product.features" class="space-y-2">
           <li v-for="feature in product.features" :key="feature" class="flex items-center">
-            <CheckCircleIcon class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" />
+            <CheckCircleIcon class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0" />
             <span class="text-gray-600">{{ feature }}</span>
           </li>
         </ul>
@@ -207,7 +207,7 @@
             class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
           >
             <div class="flex items-center">
-              <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+              <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
                 {{ participant.name.charAt(0).toUpperCase() }}
               </div>
               <span class="ml-3 text-gray-900">{{ participant.name }}</span>
@@ -225,7 +225,7 @@
     <p class="text-gray-600 mb-4">Le produit que vous cherchez n'existe pas ou a été supprimé</p>
     <router-link
       to="/customer/products"
-      class="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+      class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
     >
       Retour aux produits
     </router-link>

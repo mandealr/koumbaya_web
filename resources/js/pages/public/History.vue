@@ -127,7 +127,7 @@
                 class="w-full h-full object-cover"
               />
               <div class="absolute top-3 right-3">
-                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                   ✅ Terminé
                 </span>
               </div>
@@ -147,14 +147,14 @@
               </div>
 
               <!-- Winner Info -->
-              <div class="bg-green-50 rounded-lg p-4 mb-4">
+              <div class="bg-blue-50 rounded-lg p-4 mb-4">
                 <div class="flex items-center">
-                  <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mr-3">
+                  <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3">
                     {{ lottery.winner.initial }}
                   </div>
                   <div class="flex-1">
-                    <div class="text-sm font-medium text-green-900">🏆 Gagnant</div>
-                    <div class="text-sm text-green-700">
+                    <div class="text-sm font-medium text-blue-900">🏆 Gagnant</div>
+                    <div class="text-sm text-blue-700">
                       {{ lottery.winner.name }} • {{ lottery.winner.city }}
                     </div>
                   </div>
@@ -176,7 +176,7 @@
               <!-- Progress Bar -->
               <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
                 <div
-                  class="bg-green-500 h-2 rounded-full"
+                  class="bg-blue-500 h-2 rounded-full"
                   :style="{ width: lottery.participation_rate + '%' }"
                 ></div>
               </div>
@@ -267,16 +267,16 @@
               </div>
               
               <!-- Winner -->
-              <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h5 class="font-medium text-green-900 mb-2">🏆 Gagnant officiel</h5>
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h5 class="font-medium text-blue-900 mb-2">🏆 Gagnant officiel</h5>
                 <div class="flex items-center">
-                  <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mr-4 text-lg font-bold">
+                  <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-4 text-lg font-bold">
                     {{ selectedLottery.winner.initial }}
                   </div>
                   <div>
-                    <p class="font-medium text-green-900">{{ selectedLottery.winner.name }}</p>
-                    <p class="text-sm text-green-700">{{ selectedLottery.winner.city }}</p>
-                    <p class="text-sm text-green-600">Ticket: {{ selectedLottery.winning_ticket }}</p>
+                    <p class="font-medium text-blue-900">{{ selectedLottery.winner.name }}</p>
+                    <p class="text-sm text-blue-700">{{ selectedLottery.winner.city }}</p>
+                    <p class="text-sm text-blue-600">Ticket: {{ selectedLottery.winning_ticket }}</p>
                   </div>
                 </div>
               </div>

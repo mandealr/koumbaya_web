@@ -13,7 +13,7 @@
           <h1 class="text-3xl font-bold text-gray-900">{{ lottery.title }}</h1>
           <span :class="[
             'px-3 py-1 rounded-full text-sm font-medium',
-            lottery.status === 'active' ? 'bg-green-100 text-green-800' :
+            lottery.status === 'active' ? 'bg-blue-100 text-blue-800' :
             lottery.status === 'completed' ? 'bg-blue-100 text-blue-800' :
             lottery.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
             'bg-gray-100 text-gray-800'
@@ -36,7 +36,7 @@
         <button 
           v-if="lottery.status === 'active' && canDraw"
           @click="showDrawModal = true"
-          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
         >
           <GiftIcon class="w-4 h-4 mr-2" />
           Effectuer le tirage
@@ -67,8 +67,8 @@
 
       <div class="bg-white p-6 rounded-xl shadow-sm border">
         <div class="flex items-center">
-          <div class="p-3 bg-green-100 rounded-lg">
-            <CurrencyDollarIcon class="w-6 h-6 text-green-600" />
+          <div class="p-3 bg-blue-100 rounded-lg">
+            <CurrencyDollarIcon class="w-6 h-6 text-blue-600" />
           </div>
           <div class="ml-4">
             <p class="text-sm font-medium text-gray-600">Revenus générés</p>
@@ -175,7 +175,7 @@
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2">
                   <div 
-                    class="bg-green-600 h-2 rounded-full transition-all duration-300"
+                    class="bg-blue-600 h-2 rounded-full transition-all duration-300"
                     :style="{ width: revenueProgress + '%' }"
                   ></div>
                 </div>
@@ -187,9 +187,9 @@
                 <p class="text-2xl font-bold text-blue-600">{{ participationProgress }}%</p>
                 <p class="text-sm text-blue-600">Participation</p>
               </div>
-              <div class="p-4 bg-green-50 rounded-lg">
-                <p class="text-2xl font-bold text-green-600">{{ conversionRate }}%</p>
-                <p class="text-sm text-green-600">Conversion</p>
+              <div class="p-4 bg-blue-50 rounded-lg">
+                <p class="text-2xl font-bold text-blue-600">{{ conversionRate }}%</p>
+                <p class="text-sm text-blue-600">Conversion</p>
               </div>
               <div class="p-4 bg-yellow-50 rounded-lg">
                 <p class="text-2xl font-bold text-yellow-600">{{ daysRemaining }}</p>
@@ -324,7 +324,7 @@
               </div>
               <div class="flex justify-between">
                 <span class="text-sm text-gray-600">Retour sur investissement</span>
-                <span class="text-sm font-medium text-green-600">+{{ roi }}%</span>
+                <span class="text-sm font-medium text-blue-600">+{{ roi }}%</span>
               </div>
             </div>
           </div>

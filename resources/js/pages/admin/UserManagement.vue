@@ -8,7 +8,7 @@
         </div>
         <button 
           @click="showCreateModal = true"
-          class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
         >
           <PlusIcon class="w-5 h-5 inline mr-2" />
           Nouvel Utilisateur
@@ -25,14 +25,14 @@
             v-model="filters.search"
             type="text" 
             placeholder="Nom, email..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Rôle</label>
           <select 
             v-model="filters.role"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les rôles</option>
             <option value="CUSTOMER">Client</option>
@@ -44,7 +44,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
           <select 
             v-model="filters.status"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les statuts</option>
             <option value="active">Actif</option>
@@ -80,7 +80,7 @@
       </div>
 
       <div v-if="loading" class="p-8 text-center">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
         <p class="mt-2 text-gray-600">Chargement...</p>
       </div>
 
@@ -135,7 +135,7 @@
                   'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
                   user.role === 'ADMIN' ? 'bg-red-100 text-red-800' :
                   user.role === 'MERCHANT' ? 'bg-blue-100 text-blue-800' :
-                  'bg-green-100 text-green-800'
+                  'bg-blue-100 text-blue-800'
                 ]">
                   {{ user.role === 'ADMIN' ? 'Administrateur' :
                      user.role === 'MERCHANT' ? 'Marchand' : 'Client' }}
@@ -145,7 +145,7 @@
                 <div class="flex items-center space-x-2">
                   <span :class="[
                     'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
-                    user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    user.is_active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
                   ]">
                     {{ user.is_active ? 'Actif' : 'Inactif' }}
                   </span>
@@ -167,7 +167,7 @@
                   </button>
                   <button 
                     @click="toggleUserStatus(user)"
-                    :class="user.is_active ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'"
+                    :class="user.is_active ? 'text-red-600 hover:text-red-900' : 'text-blue-600 hover:text-blue-900'"
                   >
                     {{ user.is_active ? 'Désactiver' : 'Activer' }}
                   </button>

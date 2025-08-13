@@ -45,7 +45,7 @@
           <div class="flex items-center text-xs">
             <span :class="[
               'inline-flex items-center px-2 py-1 rounded-full font-medium',
-              stat.change >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              stat.change >= 0 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
             ]">
               <component
                 :is="stat.change >= 0 ? ArrowUpIcon : ArrowDownIcon"
@@ -237,7 +237,7 @@
                   <button
                     v-if="order.status === 'pending'"
                     @click="confirmOrder(order)"
-                    class="text-green-600 hover:text-green-800 transition-colors"
+                    class="text-blue-600 hover:text-blue-800 transition-colors"
                     title="Confirmer"
                   >
                     <CheckCircleIcon class="w-4 h-4" />
@@ -360,7 +360,7 @@
           <button
             v-if="selectedOrder?.status === 'pending'"
             @click="confirmOrder(selectedOrder)"
-            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             Confirmer la commande
           </button>
@@ -418,7 +418,7 @@ const orderStats = ref([
     value: '156,200',
     change: 8.7,
     icon: CurrencyDollarIcon,
-    color: 'bg-green-500'
+    color: 'bg-blue-500'
   },
   {
     label: 'En attente',
@@ -561,7 +561,7 @@ const getStatusClass = (status) => {
   const classes = {
     'pending': 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800',
     'confirmed': 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800',
-    'completed': 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800',
+    'completed': 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800',
     'cancelled': 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800'
   }
   return classes[status] || 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800'

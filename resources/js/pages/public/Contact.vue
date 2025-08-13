@@ -165,7 +165,7 @@
                   v-model="form.message"
                   required
                   rows="6"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-none"
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
                   placeholder="Décrivez votre demande en détail..."
                 ></textarea>
                 <div v-if="errors.message" class="text-red-500 text-sm mt-1">{{ errors.message }}</div>

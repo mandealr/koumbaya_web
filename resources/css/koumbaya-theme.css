@@ -11,7 +11,7 @@
   --admin-secondary: #000000;
   --admin-accent: #0099cc;
   --admin-accent-light: #33aadd;
-  --admin-success: #059669;
+  --admin-success: #0099cc;
   --admin-warning: #d97706;
   --admin-danger: #dc2626;
   --admin-info: #0284c7;
@@ -261,7 +261,7 @@
   --koumbaya-primary-darker: #007799;
   
   /* Couleurs utilitaires */
-  --koumbaya-success: #4caf50;
+  --koumbaya-success: #0099cc;
   --koumbaya-warning: #ff9800;
   --koumbaya-error: #f44336;
   --koumbaya-info: #2196f3;
@@ -575,7 +575,7 @@ body {
 }
 
 .koumbaya-badge-success {
-  background-color: #e8f5e8;
+  background-color: #e6f7ff;
   color: var(--koumbaya-success);
 }
 

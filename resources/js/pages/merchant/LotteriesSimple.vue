@@ -18,7 +18,7 @@
           :class="[
             'py-2 px-1 border-b-2 font-medium text-sm',
             activeTab === tab.key
-              ? 'border-green-500 text-green-600'
+              ? 'border-blue-500 text-blue-600'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
           ]"
         >
@@ -34,7 +34,7 @@
     <div class="bg-white rounded-lg shadow">
       <div class="p-6">
         <div v-if="loading" class="text-center py-12">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p class="mt-4 text-gray-600">Chargement des tombolas...</p>
         </div>
 
@@ -53,7 +53,7 @@
               <h4 class="font-semibold text-gray-900">{{ lottery.title }}</h4>
               <p class="text-sm text-gray-600 mt-1">{{ lottery.description }}</p>
               <div class="mt-4 flex justify-between items-center">
-                <span class="text-sm font-medium text-green-600">{{ lottery.status }}</span>
+                <span class="text-sm font-medium text-blue-600">{{ lottery.status }}</span>
                 <router-link 
                   :to="{ name: 'merchant.lottery.view', params: { id: lottery.id } }"
                   class="text-sm text-blue-600 hover:text-blue-700"

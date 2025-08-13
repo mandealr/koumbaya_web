@@ -55,7 +55,7 @@
                 </div>
                 
                 <div class="bg-gray-50 p-4 rounded-lg">
-                  <div class="text-2xl font-bold text-green-600">{{ formatPrice(lottery.revenue) }}</div>
+                  <div class="text-2xl font-bold text-blue-600">{{ formatPrice(lottery.revenue) }}</div>
                   <div class="text-sm text-gray-600">Revenus</div>
                 </div>
                 

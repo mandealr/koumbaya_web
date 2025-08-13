@@ -1,13 +1,13 @@
 <template>
   <div class="bg-white">
     <!-- Hero Section - Back Market Style -->
-    <section class="relative bg-gradient-to-br from-blue-50 via-white to-cyan-50 overflow-hidden">
+    <section class="relative bg-gradient-to-br from-[#0099cc]/5 via-white to-[#0099cc]/10 overflow-hidden">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[90vh] py-20">
           <!-- Left Content -->
           <div class="space-y-8">
             <div class="space-y-4">
-              <div class="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
+              <div class="inline-flex items-center gap-2 bg-[#0099cc]/10 text-[#0099cc] px-4 py-2 rounded-full text-sm font-medium">
                 <SparklesIcon class="h-4 w-4" />
                 <span>Nouveau au Gabon</span>
               </div>
@@ -32,7 +32,7 @@
               </router-link>
               <router-link
                 to="/how-it-works"
-                class="inline-flex items-center justify-center gap-2 border-2 border-[#0099cc] text-[#0099cc] hover:bg-blue-50 font-semibold px-8 py-4 rounded-2xl transition-all duration-200"
+                class="inline-flex items-center justify-center gap-2 border-2 border-[#0099cc] text-[#0099cc] hover:bg-[#0099cc]/5 font-semibold px-8 py-4 rounded-2xl transition-all duration-200"
               >
                 <QuestionMarkCircleIcon class="h-5 w-5" />
                 <span>Comment ça marche</span>
@@ -82,7 +82,7 @@
                       <span class="font-semibold">75%</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-3">
-                      <div class="bg-gradient-to-r from-[#0099cc] to-cyan-500 h-3 rounded-full w-3/4 animate-pulse"></div>
+                      <div class="bg-gradient-to-r from-[#0099cc] to-[#0088bb] h-3 rounded-full w-3/4 animate-pulse"></div>
                     </div>
                     <div class="text-center text-sm text-gray-500">750/1000 tickets</div>
                   </div>
@@ -93,7 +93,7 @@
               </div>
 
               <!-- Floating Elements -->
-              <div class="absolute inline-flex items-center -top-8 -left-8 bg-blue-100 text-blue-600 px-4 py-2 rounded-full text-sm font-medium z-20 animate-float">
+              <div class="absolute inline-flex items-center -top-8 -left-8 bg-[#0099cc]/10 text-[#0099cc] px-4 py-2 rounded-full text-sm font-medium z-20 animate-float">
                 <SparklesIcon class="h-4 w-4" /> Nouvelle tombola
               </div>
               <div class="absolute -bottom-4 -right-8 bg-yellow-100 text-yellow-600 px-4 py-2 rounded-full text-sm font-medium z-20 animate-float-delayed">

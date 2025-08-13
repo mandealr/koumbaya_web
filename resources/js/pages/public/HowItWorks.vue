@@ -1,12 +1,12 @@
 <template>
   <div class="min-h-screen bg-white">
     <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-[#0099cc] via-blue-500 to-cyan-600 text-white py-20">
+    <section class="bg-gradient-to-br from-[#0099cc] via-[#0088bb] to-[#0099cc] text-white py-20">
       <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
         <h1 class="text-4xl md:text-6xl font-bold mb-6">
           Comment ça marche ?
         </h1>
-        <p class="text-xl md:text-2xl text-blue-100 leading-relaxed max-w-3xl mx-auto">
+        <p class="text-xl md:text-2xl text-[#0099cc]/70 leading-relaxed max-w-3xl mx-auto">
           Découvrez comment obtenir des produits incroyables à prix réduit en quelques clics seulement. 
           C'est simple, transparent et malin !
         </p>
@@ -54,13 +54,13 @@
           <!-- Step 2 -->
           <div class="relative text-center group">
             <div class="relative mx-auto w-32 h-32 mb-8">
-              <div class="absolute inset-0 bg-blue-100 rounded-full"></div>
-              <div class="absolute inset-2 bg-blue-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <div class="absolute inset-0 bg-[#0099cc]/10 rounded-full"></div>
+              <div class="absolute inset-2 bg-[#0099cc] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <span class="text-4xl font-bold text-white">2</span>
               </div>
               <!-- Arrow -->
               <div class="hidden lg:block absolute -right-16 top-1/2 transform -translate-y-1/2">
-                <ArrowRightIcon class="h-8 w-8 text-blue-300" />
+                <ArrowRightIcon class="h-8 w-8 text-[#0099cc]/30" />
               </div>
             </div>
             <h3 class="text-2xl font-bold text-gray-900 mb-4">Achetez vos tickets</h3>
@@ -68,8 +68,8 @@
               Chaque produit a un prix de ticket unique. Plus vous achetez de tickets, 
               plus vous augmentez vos chances d'obtenir le produit à prix réduit.
             </p>
-            <div class="mt-6 bg-blue-50 rounded-xl p-4">
-              <div class="flex items-center justify-center gap-2 text-blue-700 font-medium">
+            <div class="mt-6 bg-[#0099cc]/5 rounded-xl p-4">
+              <div class="flex items-center justify-center gap-2 text-[#0099cc] font-medium">
                 <TicketIcon class="h-5 w-5" />
                 <span>Tickets à partir de 500 FCFA</span>
               </div>
@@ -231,25 +231,25 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <!-- Payment Methods -->
           <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CreditCardIcon class="h-8 w-8 text-blue-500" />
+            <div class="w-16 h-16 bg-[#0099cc]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CreditCardIcon class="h-8 w-8 text-[#0099cc]" />
             </div>
             <h3 class="text-xl font-semibold text-gray-900 text-center mb-4">Moyens de paiement</h3>
             <ul class="space-y-3 text-gray-600">
               <li class="flex items-center gap-3">
-                <CheckIcon class="h-4 w-4 text-green-500" />
+                <CheckIcon class="h-4 w-4 text-[#0099cc]" />
                 <span>Mobile Money (MTN, Orange)</span>
               </li>
               <li class="flex items-center gap-3">
-                <CheckIcon class="h-4 w-4 text-green-500" />
+                <CheckIcon class="h-4 w-4 text-[#0099cc]" />
                 <span>Carte bancaire Visa/Mastercard</span>
               </li>
               <li class="flex items-center gap-3">
-                <CheckIcon class="h-4 w-4 text-green-500" />
+                <CheckIcon class="h-4 w-4 text-[#0099cc]" />
                 <span>Virement bancaire</span>
               </li>
               <li class="flex items-center gap-3">
-                <CheckIcon class="h-4 w-4 text-green-500" />
+                <CheckIcon class="h-4 w-4 text-[#0099cc]" />
                 <span>Portefeuille électronique</span>
               </li>
             </ul>
@@ -257,25 +257,25 @@
 
           <!-- Security -->
           <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <LockClosedIcon class="h-8 w-8 text-green-500" />
+            <div class="w-16 h-16 bg-[#0099cc]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <LockClosedIcon class="h-8 w-8 text-[#0099cc]" />
             </div>
             <h3 class="text-xl font-semibold text-gray-900 text-center mb-4">Sécurité des données</h3>
             <ul class="space-y-3 text-gray-600">
               <li class="flex items-center gap-3">
-                <CheckIcon class="h-4 w-4 text-green-500" />
+                <CheckIcon class="h-4 w-4 text-[#0099cc]" />
                 <span>Chiffrement SSL 256 bits</span>
               </li>
               <li class="flex items-center gap-3">
-                <CheckIcon class="h-4 w-4 text-green-500" />
+                <CheckIcon class="h-4 w-4 text-[#0099cc]" />
                 <span>Conformité PCI DSS</span>
               </li>
               <li class="flex items-center gap-3">
-                <CheckIcon class="h-4 w-4 text-green-500" />
+                <CheckIcon class="h-4 w-4 text-[#0099cc]" />
                 <span>Authentification 2 facteurs</span>
               </li>
               <li class="flex items-center gap-3">
-                <CheckIcon class="h-4 w-4 text-green-500" />
+                <CheckIcon class="h-4 w-4 text-[#0099cc]" />
                 <span>Protection anti-fraude</span>
               </li>
             </ul>
@@ -289,19 +289,19 @@
             <h3 class="text-xl font-semibold text-gray-900 text-center mb-4">Livraison gratuite</h3>
             <ul class="space-y-3 text-gray-600">
               <li class="flex items-center gap-3">
-                <CheckIcon class="h-4 w-4 text-green-500" />
+                <CheckIcon class="h-4 w-4 text-[#0099cc]" />
                 <span>Livraison partout au Gabon</span>
               </li>
               <li class="flex items-center gap-3">
-                <CheckIcon class="h-4 w-4 text-green-500" />
+                <CheckIcon class="h-4 w-4 text-[#0099cc]" />
                 <span>Suivi en temps réel</span>
               </li>
               <li class="flex items-center gap-3">
-                <CheckIcon class="h-4 w-4 text-green-500" />
+                <CheckIcon class="h-4 w-4 text-[#0099cc]" />
                 <span>Délai 24-48h en ville</span>
               </li>
               <li class="flex items-center gap-3">
-                <CheckIcon class="h-4 w-4 text-green-500" />
+                <CheckIcon class="h-4 w-4 text-[#0099cc]" />
                 <span>Assurance colis incluse</span>
               </li>
             </ul>
@@ -349,12 +349,12 @@
     </section>
 
     <!-- CTA -->
-    <section class="py-20 bg-gradient-to-r from-[#0099cc] to-cyan-600">
+    <section class="py-20 bg-gradient-to-r from-[#0099cc] to-[#0088bb]">
       <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
           Prêt à acheter malin ?
         </h2>
-        <p class="text-xl text-blue-100 mb-8">
+        <p class="text-xl text-[#0099cc]/70 mb-8">
           Rejoignez les milliers de participants qui ont déjà acheté malin
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">

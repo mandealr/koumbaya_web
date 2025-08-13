@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Hero Section -->
-    <div class="bg-gradient-to-r from-green-600 to-blue-600 text-white">
+    <div class="bg-gradient-to-r from-blue-600 to-blue-600 text-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="text-center">
           <h1 class="text-4xl font-bold mb-4">🏆 Résultats des Tombolas</h1>
@@ -48,7 +48,7 @@
               :class="[
                 'px-4 py-2 rounded-md text-sm font-medium',
                 selectedPeriod === period.value
-                  ? 'bg-green-100 text-green-700'
+                  ? 'bg-blue-100 text-blue-700'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               ]"
             >
@@ -66,13 +66,13 @@
             v-model="verificationCode"
             type="text"
             placeholder="Entrez le code de vérification..."
-            class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+            class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             @keyup.enter="verifyCode"
           />
           <button
             @click="verifyCode"
             :disabled="!verificationCode || verifying"
-            class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ verifying ? 'Vérification...' : 'Vérifier' }}
           </button>
@@ -80,9 +80,9 @@
         
         <!-- Verification Result -->
         <div v-if="verificationResult" class="mt-4 p-4 rounded-lg" :class="[
-          verificationResult.valid ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+          verificationResult.valid ? 'bg-blue-50 border border-blue-200' : 'bg-red-50 border border-red-200'
         ]">
-          <div v-if="verificationResult.valid" class="flex items-center text-green-800">
+          <div v-if="verificationResult.valid" class="flex items-center text-blue-800">
             <CheckCircleIcon class="w-5 h-5 mr-2" />
             <div>
               <div class="font-medium">✅ Résultat vérifié</div>
@@ -105,14 +105,14 @@
           <h3 class="text-lg font-semibold text-gray-900">🎉 Gagnants Récents</h3>
         </div>
         <div v-if="loadingRecentWinners" class="p-8 text-center">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
         </div>
         <div v-else class="p-6">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div
               v-for="winner in recentWinners"
               :key="winner.lottery_number"
-              class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border border-green-100"
+              class="bg-gradient-to-r from-blue-50 to-blue-50 rounded-lg p-4 border border-blue-100"
             >
               <div class="flex items-center space-x-4">
                 <img
@@ -123,7 +123,7 @@
                 <div class="flex-1">
                   <div class="font-medium text-gray-900">{{ winner.product_title }}</div>
                   <div class="text-sm text-gray-600 mb-1">{{ formatCurrency(winner.product_value) }}</div>
-                  <div class="text-sm font-medium text-green-600">
+                  <div class="text-sm font-medium text-blue-600">
                     Gagnant: {{ winner.winner_initial }}**** ({{ winner.winner_city }})
                   </div>
                   <div class="text-xs text-gray-500">
@@ -143,7 +143,7 @@
         </div>
         
         <div v-if="loading" class="p-8 text-center">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p class="mt-4 text-gray-600">Chargement des résultats...</p>
         </div>
 
@@ -197,7 +197,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center mr-3">
+                    <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3">
                       {{ result.winner.initial }}
                     </div>
                     <div>
@@ -217,7 +217,7 @@
                   </div>
                   <div class="w-16 bg-gray-200 rounded-full h-1.5 mt-1">
                     <div
-                      class="bg-green-600 h-1.5 rounded-full"
+                      class="bg-blue-600 h-1.5 rounded-full"
                       :style="{ width: result.participation_rate + '%' }"
                     ></div>
                   </div>
@@ -235,7 +235,7 @@
                   </div>
                   <button
                     @click="copyVerificationCode(result.verification_code)"
-                    class="text-xs text-green-600 hover:text-green-700 mt-1"
+                    class="text-xs text-blue-600 hover:text-blue-700 mt-1"
                   >
                     Copier
                   </button>

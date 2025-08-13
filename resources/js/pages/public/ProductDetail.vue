@@ -46,7 +46,7 @@
                 </span>
               </div>
               <div v-if="product.isNew" class="absolute top-4 left-4">
-                <span class="bg-blue-500 text-white px-4 py-2 rounded-full font-semibold">
+                <span class="bg-[#0099cc] text-white px-4 py-2 rounded-full font-semibold">
                   Nouveau
                 </span>
               </div>
@@ -82,7 +82,7 @@
             </div>
 
             <!-- Product Value -->
-            <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6">
+            <div class="bg-gradient-to-r from-[#0099cc]/5 to-[#0099cc]/10 rounded-2xl p-6">
               <div class="text-center">
                 <div class="text-sm text-gray-600 mb-2">Valeur du produit</div>
                 <div class="text-4xl font-bold text-[#0099cc] mb-2">
@@ -104,7 +104,7 @@
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-4">
                   <div 
-                    class="bg-gradient-to-r from-[#0099cc] to-cyan-500 h-4 rounded-full transition-all duration-500"
+                    class="bg-gradient-to-r from-[#0099cc] to-[#0088bb] h-4 rounded-full transition-all duration-500"
                     :style="{ width: Math.round((product.soldTickets / 1000) * 100) + '%' }"
                   ></div>
                 </div>
@@ -129,11 +129,11 @@
                 </div>
                 <div>
                   <span class="text-gray-600">Chances de gagner :</span>
-                  <p class="font-semibold text-green-600">1 sur 1000</p>
+                  <p class="font-semibold text-[#0099cc]">1 sur 1000</p>
                 </div>
                 <div>
                   <span class="text-gray-600">Statut :</span>
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#0099cc]/10 text-[#0099cc]">
                     En cours
                   </span>
                 </div>
@@ -144,7 +144,7 @@
             <div class="space-y-4">
               <button
                 @click="participateNow"
-                class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                class="w-full bg-[#0099cc] hover:bg-[#0088bb] text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
               >
                 {{ authStore.isAuthenticated ? 
                    `Participer maintenant - ${formatPrice(product.ticketPrice)}` : 
@@ -155,7 +155,7 @@
               <div class="grid grid-cols-2 gap-4">
                 <button
                   @click="addToWishlist"
-                  class="flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-green-500 text-gray-700 hover:text-green-600 py-3 rounded-xl transition-all"
+                  class="flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-[#0099cc] text-gray-700 hover:text-[#0099cc] py-3 rounded-xl transition-all"
                   :title="authStore.isAuthenticated ? 'Ajouter aux favoris' : 'Se connecter pour ajouter aux favoris'"
                 >
                   <HeartIcon class="h-5 w-5" />
@@ -163,7 +163,7 @@
                 </button>
                 <button
                   @click="shareProduct"
-                  class="flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-green-500 text-gray-700 hover:text-green-600 py-3 rounded-xl transition-all"
+                  class="flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-[#0099cc] text-gray-700 hover:text-[#0099cc] py-3 rounded-xl transition-all"
                 >
                   <ShareIcon class="h-5 w-5" />
                   Partager
@@ -174,15 +174,15 @@
             <!-- Trust Badges -->
             <div class="flex items-center gap-6 pt-6 border-t">
               <div class="flex items-center gap-2 text-sm text-gray-600">
-                <ShieldCheckIcon class="h-5 w-5 text-green-500" />
+                <ShieldCheckIcon class="h-5 w-5 text-[#0099cc]" />
                 <span>Produit garanti</span>
               </div>
               <div class="flex items-center gap-2 text-sm text-gray-600">
-                <TruckIcon class="h-5 w-5 text-green-500" />
+                <TruckIcon class="h-5 w-5 text-[#0099cc]" />
                 <span>Livraison gratuite</span>
               </div>
               <div class="flex items-center gap-2 text-sm text-gray-600">
-                <CheckBadgeIcon class="h-5 w-5 text-green-500" />
+                <CheckBadgeIcon class="h-5 w-5 text-[#0099cc]" />
                 <span>Authentique</span>
               </div>
             </div>
@@ -201,37 +201,37 @@
               <h3 class="text-xl font-semibold text-gray-900 mb-4">Caractéristiques principales</h3>
               <ul class="space-y-2 mb-6">
                 <li class="flex items-start gap-3">
-                  <CheckIcon class="h-5 w-5 text-green-500 mt-0.5" />
+                  <CheckIcon class="h-5 w-5 text-[#0099cc] mt-0.5" />
                   <span>Produit neuf avec garantie constructeur</span>
                 </li>
                 <li class="flex items-start gap-3">
-                  <CheckIcon class="h-5 w-5 text-green-500 mt-0.5" />
+                  <CheckIcon class="h-5 w-5 text-[#0099cc] mt-0.5" />
                   <span>Livraison express partout au Cameroun</span>
                 </li>
                 <li class="flex items-start gap-3">
-                  <CheckIcon class="h-5 w-5 text-green-500 mt-0.5" />
+                  <CheckIcon class="h-5 w-5 text-[#0099cc] mt-0.5" />
                   <span>Service client disponible 24h/7j</span>
                 </li>
                 <li class="flex items-start gap-3">
-                  <CheckIcon class="h-5 w-5 text-green-500 mt-0.5" />
+                  <CheckIcon class="h-5 w-5 text-[#0099cc] mt-0.5" />
                   <span>Certification d'authenticité incluse</span>
                 </li>
               </ul>
 
               <h3 class="text-xl font-semibold text-gray-900 mb-4">Comment participer ?</h3>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div class="text-center p-4 bg-green-50 rounded-xl">
-                  <div class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">1</div>
+                <div class="text-center p-4 bg-[#0099cc]/5 rounded-xl">
+                  <div class="w-12 h-12 bg-[#0099cc] text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">1</div>
                   <h4 class="font-semibold mb-2">Achetez vos tickets</h4>
                   <p class="text-sm text-gray-600">Choisissez le nombre de tickets que vous souhaitez</p>
                 </div>
-                <div class="text-center p-4 bg-green-50 rounded-xl">
-                  <div class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">2</div>
+                <div class="text-center p-4 bg-[#0099cc]/5 rounded-xl">
+                  <div class="w-12 h-12 bg-[#0099cc] text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">2</div>
                   <h4 class="font-semibold mb-2">Attendez le tirage</h4>
                   <p class="text-sm text-gray-600">Le tirage se fait automatiquement à la date prévue</p>
                 </div>
-                <div class="text-center p-4 bg-green-50 rounded-xl">
-                  <div class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">3</div>
+                <div class="text-center p-4 bg-[#0099cc]/5 rounded-xl">
+                  <div class="w-12 h-12 bg-[#0099cc] text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">3</div>
                   <h4 class="font-semibold mb-2">Récupérez votre lot</h4>
                   <p class="text-sm text-gray-600">Si vous gagnez, nous vous livrons gratuitement</p>
                 </div>
@@ -254,28 +254,28 @@
                 </div>
                 <div class="flex justify-between">
                   <span class="text-gray-600">Temps restant</span>
-                  <span class="font-medium text-green-600">{{ getTimeRemaining() }}</span>
+                  <span class="font-medium text-[#0099cc]">{{ getTimeRemaining() }}</span>
                 </div>
               </div>
             </div>
 
-            <div class="bg-green-50 rounded-2xl p-6">
+            <div class="bg-[#0099cc]/5 rounded-2xl p-6">
               <h3 class="font-semibold text-gray-900 mb-4">Pourquoi Koumbaya ?</h3>
               <div class="space-y-3 text-sm">
                 <div class="flex items-start gap-3">
-                  <CheckIcon class="h-4 w-4 text-green-500 mt-0.5" />
+                  <CheckIcon class="h-4 w-4 text-[#0099cc] mt-0.5" />
                   <span>Tirages transparents et vérifiables</span>
                 </div>
                 <div class="flex items-start gap-3">
-                  <CheckIcon class="h-4 w-4 text-green-500 mt-0.5" />
+                  <CheckIcon class="h-4 w-4 text-[#0099cc] mt-0.5" />
                   <span>Paiement 100% sécurisé</span>
                 </div>
                 <div class="flex items-start gap-3">
-                  <CheckIcon class="h-4 w-4 text-green-500 mt-0.5" />
+                  <CheckIcon class="h-4 w-4 text-[#0099cc] mt-0.5" />
                   <span>Support client réactif</span>
                 </div>
                 <div class="flex items-start gap-3">
-                  <CheckIcon class="h-4 w-4 text-green-500 mt-0.5" />
+                  <CheckIcon class="h-4 w-4 text-[#0099cc] mt-0.5" />
                   <span>Plus de 10 000+ gagnants</span>
                 </div>
               </div>
@@ -302,13 +302,13 @@
                   class="w-full h-40 object-cover"
                 />
                 <div class="absolute top-2 right-2">
-                  <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs">
+                  <span class="bg-[#0099cc] text-white px-2 py-1 rounded-full text-xs">
                     {{ formatPrice(relatedProduct.ticketPrice) }}
                   </span>
                 </div>
               </div>
               <h3 class="font-semibold text-gray-900 mb-2">{{ relatedProduct.name }}</h3>
-              <div class="text-lg font-bold text-green-600">{{ formatPrice(relatedProduct.value) }}</div>
+              <div class="text-lg font-bold text-[#0099cc]">{{ formatPrice(relatedProduct.value) }}</div>
             </div>
           </div>
         </div>
@@ -329,14 +329,14 @@
         <div class="space-y-3">
           <button
             @click="loadProduct"
-            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl transition-colors mr-4"
+            class="bg-[#0099cc] hover:bg-[#0088bb] text-white px-6 py-3 rounded-xl transition-colors mr-4"
             v-if="error"
           >
             Réessayer
           </button>
           <router-link
             to="/products"
-            class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl transition-colors"
+            class="bg-[#0099cc] hover:bg-[#0088bb] text-white px-6 py-3 rounded-xl transition-colors"
           >
             Retour aux produits
           </router-link>

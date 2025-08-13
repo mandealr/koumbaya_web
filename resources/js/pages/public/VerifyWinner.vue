@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Hero Section -->
-    <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white">
+    <div class="bg-gradient-to-r from-blue-600 to-blue-600 text-white">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="text-center">
           <h1 class="text-4xl font-bold mb-4">🔍 Vérification de Gain</h1>
@@ -61,13 +61,13 @@
       <!-- Verification Result -->
       <div v-if="verificationResult" class="mb-8">
         <!-- Valid Result -->
-        <div v-if="verificationResult.valid" class="bg-white rounded-lg shadow-lg border-2 border-green-200 overflow-hidden">
-          <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6">
+        <div v-if="verificationResult.valid" class="bg-white rounded-lg shadow-lg border-2 border-blue-200 overflow-hidden">
+          <div class="bg-gradient-to-r from-blue-500 to-emerald-500 text-white p-6">
             <div class="flex items-center justify-center">
               <CheckCircleIcon class="w-12 h-12 mr-4" />
               <div>
                 <h3 class="text-2xl font-bold">✅ GAIN VÉRIFIÉ</h3>
-                <p class="text-green-100">Ce résultat est authentique et officiel</p>
+                <p class="text-blue-100">Ce résultat est authentique et officiel</p>
               </div>
             </div>
           </div>
@@ -216,7 +216,7 @@
             <div>
               <span class="font-mono text-sm text-gray-600">{{ verification.code }}</span>
               <span class="mx-2">→</span>
-              <span class="text-sm" :class="verification.valid ? 'text-green-600' : 'text-red-600'">
+              <span class="text-sm" :class="verification.valid ? 'text-blue-600' : 'text-red-600'">
                 {{ verification.valid ? '✅ Valide' : '❌ Invalide' }}
               </span>
             </div>

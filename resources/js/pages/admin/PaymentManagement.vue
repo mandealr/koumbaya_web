@@ -38,7 +38,7 @@
           <div class="flex items-center text-sm">
             <span :class="[
               'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-              stat.change >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              stat.change >= 0 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
             ]">
               <component 
                 :is="stat.change >= 0 ? ArrowUpIcon : ArrowDownIcon" 
@@ -307,8 +307,8 @@ const paymentStats = ref([
     value: '45,2M FCFA',
     change: 15.3,
     icon: CurrencyDollarIcon,
-    bgColor: 'bg-green-100',
-    iconColor: 'text-green-600'
+    bgColor: 'bg-blue-100',
+    iconColor: 'text-blue-600'
   },
   {
     label: 'Transactions réussies',
