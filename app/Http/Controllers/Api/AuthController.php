@@ -86,7 +86,8 @@ class AuthController extends Controller
         // Déterminer le rôle basé sur account_type ou utiliser celui fourni
         $role = $request->role;
         if (!$role) {
-            $role = ($request->account_type === 'business' || $request->can_sell) ? 'MERCHANT' : 'CUSTOMER';
+            $role = ($request->account_type === 'business' || $request->can_sell) ? 'MERCHANT' : 'MERCHANT';
+            // TODO: Changer 'MERCHANT' en 'CUSTOMER' une fois la migration appliquée pour ajouter CUSTOMER à l'enum
         }
 
         $user = User::create([

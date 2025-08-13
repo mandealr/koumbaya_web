@@ -549,7 +549,7 @@ const handleSubmit = async () => {
     country_id: parseInt(form.country_id),
     password: form.password,
     password_confirmation: form.password_confirmation,
-    role: form.account_type === 'business' ? 'MERCHANT' : 'CUSTOMER', // Ajout du rôle selon le type de compte
+    // Le rôle sera déterminé côté serveur selon account_type
     can_sell: true,
     can_buy: true
   }
