@@ -655,6 +655,65 @@ body {
   }
 }
 
+/* Améliorations responsives pour logos */
+.koumbaya-logo-container {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.koumbaya-logo-img {
+  height: 2rem; /* 32px */
+  width: auto;
+  object-fit: contain;
+  max-width: none;
+}
+
+.koumbaya-logo-fallback {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.koumbaya-logo-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: var(--koumbaya-primary);
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.koumbaya-logo-text {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--koumbaya-primary);
+  white-space: nowrap;
+}
+
+/* Tailles responsives */
+@media (min-width: 640px) {
+  .koumbaya-logo-img {
+    height: 2.5rem; /* 40px */
+  }
+  
+  .koumbaya-logo-fallback {
+    gap: 0.5rem;
+  }
+  
+  .koumbaya-logo-icon {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .koumbaya-logo-text {
+    font-size: 1.25rem;
+  }
+}
+
 /* Mode sombre */
 @media (prefers-color-scheme: dark) {
   :root {

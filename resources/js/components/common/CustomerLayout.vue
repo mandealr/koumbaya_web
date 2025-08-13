@@ -5,9 +5,24 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <!-- Logo -->
-          <div class="flex items-center">
+          <div class="flex items-center min-w-0 flex-shrink-0">
             <router-link to="/customer" class="flex items-center">
-              <img class="h-8 w-auto" :src="logoUrl" alt="Koumbaya" />
+              <img 
+                v-if="!logoError"
+                class="h-8 sm:h-10 w-auto object-contain max-w-none" 
+                src="/logo.png" 
+                alt="Koumbaya Marketplace"
+                @error="handleImageError"
+              />
+              <div 
+                v-else
+                class="flex items-center space-x-1 sm:space-x-2"
+              >
+                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-[#0099cc] rounded flex items-center justify-center flex-shrink-0">
+                  <span class="text-white font-bold text-sm sm:text-lg">K</span>
+                </div>
+                <span class="text-lg sm:text-xl font-bold text-[#0099cc] whitespace-nowrap">Koumbaya</span>
+              </div>
             </router-link>
           </div>
 
@@ -29,10 +44,10 @@
           </nav>
 
           <!-- User Menu -->
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-2 sm:space-x-4">
             <!-- Notifications -->
-            <button class="p-2 text-gray-400 hover:text-gray-600 relative">
-              <BellIcon class="w-6 h-6" />
+            <button class="p-1 sm:p-2 text-gray-400 hover:text-gray-600 relative">
+              <BellIcon class="w-5 h-5 sm:w-6 sm:h-6" />
               <span class="absolute top-0 right-0 block h-2 w-2 bg-red-400 rounded-full"></span>
             </button>
 
@@ -40,16 +55,16 @@
             <div class="relative">
               <button
                 @click="userMenuOpen = !userMenuOpen"
-                class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50"
+                class="flex items-center space-x-1 sm:space-x-3 p-1 sm:p-2 rounded-lg hover:bg-gray-50"
               >
-                <div class="w-8 h-8 bg-[#0099cc] rounded-full flex items-center justify-center">
-                  <span class="text-sm font-medium text-white">{{ userInitials }}</span>
+                <div class="w-7 h-7 sm:w-8 sm:h-8 bg-[#0099cc] rounded-full flex items-center justify-center flex-shrink-0">
+                  <span class="text-xs sm:text-sm font-medium text-white">{{ userInitials }}</span>
                 </div>
-                <div class="hidden md:block text-left">
-                  <p class="text-sm font-medium text-gray-700">{{ authStore.user?.first_name }}</p>
-                  <p class="text-xs text-gray-500">{{ authStore.user?.email }}</p>
+                <div class="hidden md:block text-left min-w-0">
+                  <p class="text-sm font-medium text-gray-700 truncate">{{ authStore.user?.first_name }}</p>
+                  <p class="text-xs text-gray-500 truncate">{{ authStore.user?.email }}</p>
                 </div>
-                <ChevronDownIcon class="w-4 h-4 text-gray-500" />
+                <ChevronDownIcon class="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 flex-shrink-0" />
               </button>
 
               <!-- Dropdown Menu -->
@@ -88,9 +103,9 @@
             <!-- Mobile menu button -->
             <button
               @click="mobileMenuOpen = !mobileMenuOpen"
-              class="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-600"
+              class="md:hidden p-1 sm:p-2 rounded-md text-gray-400 hover:text-gray-600 flex-shrink-0"
             >
-              <Bars3Icon class="w-6 h-6" />
+              <Bars3Icon class="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
         </div>
@@ -146,6 +161,7 @@ const router = useRouter()
 
 const userMenuOpen = ref(false)
 const mobileMenuOpen = ref(false)
+const logoError = ref(false)
 
 const navigationItems = [
   { name: 'customer.dashboard', to: { name: 'customer.dashboard' }, label: 'Accueil' },
@@ -162,6 +178,10 @@ const userInitials = computed(() => {
 const handleLogout = async () => {
   await authStore.logout()
   router.push({ name: 'login' })
+}
+
+const handleImageError = () => {
+  logoError.value = true
 }
 
 const handleClickOutside = (event) => {

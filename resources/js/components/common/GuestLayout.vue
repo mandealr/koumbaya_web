@@ -5,8 +5,23 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <!-- Logo -->
-          <router-link to="/" class="flex items-center">
-            <img :src="logoUrl" alt="Koumbaya" class="h-15 w-auto">
+          <router-link to="/" class="flex items-center min-w-0 flex-shrink-0">
+            <img 
+              v-if="!logoError"
+              src="/logo.png" 
+              alt="Koumbaya" 
+              class="h-8 sm:h-10 w-auto object-contain max-w-none"
+              @error="handleImageError"
+            >
+            <div 
+              v-else
+              class="flex items-center space-x-1 sm:space-x-2"
+            >
+              <div class="w-6 h-6 sm:w-8 sm:h-8 bg-[#0099cc] rounded flex items-center justify-center flex-shrink-0">
+                <span class="text-white font-bold text-sm sm:text-lg">K</span>
+              </div>
+              <span class="text-lg sm:text-xl font-bold text-[#0099cc] whitespace-nowrap">Koumbaya</span>
+            </div>
           </router-link>
 
           <!-- Navigation Links -->
@@ -38,16 +53,17 @@
           </nav>
 
           <!-- Auth Buttons / User Menu -->
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-2 sm:space-x-4">
             <!-- Si utilisateur connecté -->
-            <div v-if="authStore.isAuthenticated" class="flex items-center space-x-4">
+            <div v-if="authStore.isAuthenticated" class="flex items-center space-x-2 sm:space-x-4">
               <!-- Bouton Mon Espace -->
               <router-link
                 :to="userDashboardPath"
-                class="bg-[#0099cc] hover:bg-[#0088bb] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
+                class="bg-[#0099cc] hover:bg-[#0088bb] text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex items-center whitespace-nowrap"
               >
-                <UserIcon class="w-4 h-4 mr-2" />
-                Mon Espace
+                <UserIcon class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
+                <span class="hidden sm:inline">Mon Espace</span>
+                <span class="sm:hidden">Espace</span>
               </router-link>
 
               <!-- Menu utilisateur rapide -->
@@ -92,16 +108,17 @@
             </div>
 
             <!-- Si utilisateur non connecté -->
-            <div v-else class="flex items-center space-x-4">
+            <div v-else class="flex items-center space-x-2 sm:space-x-4">
               <router-link
                 to="/login"
-                class="text-gray-600 hover:text-[#0099cc] px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                class="text-gray-600 hover:text-[#0099cc] px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap"
               >
-                Se connecter
+                <span class="hidden sm:inline">Se connecter</span>
+                <span class="sm:hidden">Connexion</span>
               </router-link>
               <router-link
                 to="/register"
-                class="bg-[#0099cc] hover:bg-[#0088bb] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                class="bg-[#0099cc] hover:bg-[#0088bb] text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap"
               >
                 S'inscrire
               </router-link>
@@ -110,9 +127,9 @@
             <!-- Mobile menu button -->
             <button
               @click="mobileMenuOpen = !mobileMenuOpen"
-              class="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-600"
+              class="md:hidden p-1 sm:p-2 rounded-md text-gray-400 hover:text-gray-600 flex-shrink-0"
             >
-              <Bars3Icon class="w-6 h-6" />
+              <Bars3Icon class="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
         </div>
@@ -215,13 +232,13 @@ import {
   ChevronDownIcon
 } from '@heroicons/vue/24/outline'
 import KoumbayaFooter from './KoumbayaFooter.vue'
-import logoUrl from '@/assets/logo.png'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
 const mobileMenuOpen = ref(false)
 const userMenuOpen = ref(false)
+const logoError = ref(false)
 
 // Computed
 const userInitials = computed(() => {
@@ -248,6 +265,10 @@ const handleLogout = async () => {
   userMenuOpen.value = false
   await authStore.logout()
   router.push({ name: 'login' })
+}
+
+const handleImageError = () => {
+  logoError.value = true
 }
 
 const handleClickOutside = (event) => {

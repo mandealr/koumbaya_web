@@ -6,10 +6,25 @@
         <div class="flex justify-between h-16">
           <!-- Logo and main nav -->
           <div class="flex">
-            <div class="flex-shrink-0 flex items-center">
+            <div class="flex-shrink-0 flex items-center min-w-0">
               <router-link to="/merchant/dashboard" class="flex items-center">
-                <img class="h-8 w-auto" :src="logoUrl" alt="Koumbaya" />
-                <span class="ml-1 text-sm text-[#0099cc] font-medium">Marchand</span>
+                <img 
+                  v-if="!logoError"
+                  class="h-6 sm:h-8 w-auto object-contain max-w-none" 
+                  src="/logo.png" 
+                  alt="Koumbaya"
+                  @error="handleImageError"
+                />
+                <div 
+                  v-else
+                  class="flex items-center space-x-1"
+                >
+                  <div class="w-5 h-5 sm:w-6 sm:h-6 bg-[#0099cc] rounded flex items-center justify-center flex-shrink-0">
+                    <span class="text-white font-bold text-xs sm:text-sm">K</span>
+                  </div>
+                  <span class="text-sm sm:text-lg font-bold text-[#0099cc] whitespace-nowrap">Koumbaya</span>
+                </div>
+                <span class="ml-1 sm:ml-2 text-xs sm:text-sm text-[#0099cc] font-medium whitespace-nowrap">Marchand</span>
               </router-link>
             </div>
 
@@ -32,32 +47,32 @@
           </div>
 
           <!-- Right side -->
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-2 sm:space-x-4">
             <!-- Notifications -->
-            <button class="relative p-2 text-gray-400 hover:text-gray-500">
-              <BellIcon class="h-6 w-6" />
-              <span v-if="unreadNotifications > 0" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+            <button class="relative p-1 sm:p-2 text-gray-400 hover:text-gray-500">
+              <BellIcon class="h-5 w-5 sm:h-6 sm:w-6" />
+              <span v-if="unreadNotifications > 0" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full min-w-[1rem] h-4">
                 {{ unreadNotifications }}
               </span>
             </button>
 
             <!-- User menu -->
-            <div class="relative ml-3">
+            <div class="relative ml-1 sm:ml-3">
               <div>
                 <button
                   @click="userMenuOpen = !userMenuOpen"
                   class="flex items-center max-w-xs bg-white rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0099cc]"
                 >
                   <span class="sr-only">Open user menu</span>
-                  <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                    <span class="text-sm font-medium text-blue-600">
+                  <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                    <span class="text-xs sm:text-sm font-medium text-blue-600">
                       {{ userInitials }}
                     </span>
                   </div>
-                  <span class="ml-3 text-gray-700 text-sm font-medium hidden lg:block">
+                  <span class="ml-2 sm:ml-3 text-gray-700 text-xs sm:text-sm font-medium hidden lg:block min-w-0 truncate">
                     {{ user?.first_name }} {{ user?.last_name }}
                   </span>
-                  <ChevronDownIcon class="ml-2 h-4 w-4 text-gray-500" />
+                  <ChevronDownIcon class="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 text-gray-500 flex-shrink-0" />
                 </button>
               </div>
 
@@ -152,7 +167,6 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/api'
 import KoumbayaFooter from './KoumbayaFooter.vue'
-import logoUrl from '@/assets/logo.png'
 import {
   HomeIcon,
   ShoppingBagIcon,
@@ -174,6 +188,7 @@ const { get } = useApi()
 // Data
 const userMenuOpen = ref(false)
 const mobileMenuOpen = ref(false)
+const logoError = ref(false)
 const unreadNotifications = ref(0)
 const quickStats = ref({
   products: '0',
@@ -213,6 +228,10 @@ const showQuickStats = computed(() => {
 const logout = async () => {
   await authStore.logout()
   router.push({ name: 'login' })
+}
+
+const handleImageError = () => {
+  logoError.value = true
 }
 
 const loadQuickStats = async () => {
