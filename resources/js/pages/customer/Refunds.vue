@@ -195,7 +195,7 @@
     <!-- Create Refund Modal -->
     <div v-if="showCreateRefund" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-black bg-opacity-50" @click="closeCreateRefund"></div>
+        <div class="fixed inset-0 bg-black bg-opacity-30" @click="closeCreateRefund"></div>
         <div class="relative bg-white rounded-lg max-w-lg w-full">
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
@@ -274,7 +274,7 @@
     <!-- Details Modal -->
     <div v-if="selectedRefund" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-black bg-opacity-50" @click="selectedRefund = null"></div>
+        <div class="fixed inset-0 bg-black bg-opacity-30" @click="selectedRefund = null"></div>
         <div class="relative bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
           <div class="p-6">
             <div class="flex items-center justify-between mb-6">

@@ -714,6 +714,69 @@ body {
   }
 }
 
+/* Styles pour les modals */
+.koumbaya-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 50;
+  transition: all 0.3s ease;
+}
+
+.koumbaya-modal-overlay.light {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.koumbaya-modal-overlay.dark {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.koumbaya-modal-content {
+  position: relative;
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: scale(1);
+  transition: all 0.3s ease;
+}
+
+.koumbaya-modal-backdrop {
+  backdrop-filter: blur(2px);
+}
+
+.koumbaya-modal-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.koumbaya-modal-enter-active {
+  transition: all 0.3s ease;
+}
+
+.koumbaya-modal-enter-to {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.koumbaya-modal-leave {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.koumbaya-modal-leave-active {
+  transition: all 0.2s ease;
+}
+
+.koumbaya-modal-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
 /* Mode sombre */
 @media (prefers-color-scheme: dark) {
   :root {
@@ -724,6 +787,11 @@ body {
   }
   
   body {
+    background-color: var(--koumbaya-gray-100);
+    color: var(--koumbaya-gray-800);
+  }
+  
+  .koumbaya-modal-content {
     background-color: var(--koumbaya-gray-100);
     color: var(--koumbaya-gray-800);
   }

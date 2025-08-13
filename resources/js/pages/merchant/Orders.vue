@@ -284,7 +284,7 @@
     </div>
 
     <!-- Order Details Modal -->
-    <div v-if="showOrderModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div v-if="showOrderModal" class="fixed inset-0 bg-black bg-opacity-20 overflow-y-auto h-full w-full z-50">
       <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-xl bg-white">
         <div class="flex items-center justify-between mb-6">
           <h3 class="text-lg font-semibold text-gray-900">Détails de la commande</h3>
