@@ -22,10 +22,51 @@
       <div class="koumbaya-card bg-white/80 backdrop-blur-sm border-0 shadow-2xl">
         <div class="koumbaya-card-body p-8">
           <form @submit.prevent="handleSubmit" class="space-y-6">
-            <div v-if="errors.general" class="rounded-xl bg-red-50 border border-red-200 p-4">
-              <div class="flex items-center">
-                <ExclamationCircleIcon class="w-5 h-5 text-red-500 mr-3 flex-shrink-0" />
-                <div class="text-sm text-red-700 font-medium">{{ errors.general }}</div>
+            <!-- Zone d'erreur améliorée -->
+            <div v-if="errors.general" class="rounded-xl bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 p-4 shadow-lg">
+              <div class="flex items-start">
+                <div class="flex-shrink-0">
+                  <ExclamationCircleIcon class="w-6 h-6 text-red-500 animate-pulse" />
+                </div>
+                <div class="ml-3 flex-1">
+                  <div class="text-sm text-red-800 font-semibold leading-relaxed">
+                    {{ errors.general }}
+                  </div>
+                  <!-- Conseils selon le type d'erreur -->
+                  <div v-if="errors.general.includes('Identifiants incorrects')" class="mt-2 text-xs text-red-600 bg-red-100 rounded-lg p-2">
+                    <div class="font-medium mb-1">💡 Conseils :</div>
+                    <ul class="space-y-1 list-disc list-inside ml-2">
+                      <li>Vérifiez que votre adresse email est correcte</li>
+                      <li>Assurez-vous que les majuscules/minuscules sont respectées</li>
+                      <li>Essayez de réinitialiser votre mot de passe si nécessaire</li>
+                    </ul>
+                  </div>
+                  <div v-else-if="errors.general.includes('connexion internet')" class="mt-2 text-xs text-red-600 bg-red-100 rounded-lg p-2">
+                    <div class="font-medium mb-1">💡 Conseils :</div>
+                    <ul class="space-y-1 list-disc list-inside ml-2">
+                      <li>Vérifiez votre connexion WiFi ou données mobiles</li>
+                      <li>Essayez de rafraîchir la page</li>
+                      <li>Contactez votre fournisseur internet si le problème persiste</li>
+                    </ul>
+                  </div>
+                  <div v-else-if="errors.general.includes('Trop de tentatives')" class="mt-2 text-xs text-red-600 bg-red-100 rounded-lg p-2">
+                    <div class="font-medium mb-1">💡 Que faire :</div>
+                    <ul class="space-y-1 list-disc list-inside ml-2">
+                      <li>Attendez 15 minutes avant de réessayer</li>
+                      <li>Utilisez ce temps pour vérifier vos identifiants</li>
+                      <li>Réinitialisez votre mot de passe si nécessaire</li>
+                    </ul>
+                  </div>
+                </div>
+                <button 
+                  @click="errors.general = ''" 
+                  class="flex-shrink-0 ml-2 text-red-400 hover:text-red-600 transition-colors"
+                  title="Fermer ce message"
+                >
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
               </div>
             </div>
 
@@ -43,12 +84,21 @@
                 v-model="form.email"
                 required
                 class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 text-black"
-                :class="{ 'border-red-300 focus:border-red-500': errors.email }"
+                :class="{ 
+                  'border-red-300 focus:border-red-500 focus:ring-red-500/10': errors.email,
+                  'border-green-300 focus:border-green-500': !errors.email && form.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)
+                }"
                 placeholder="exemple@koumbaya.com"
               />
               <p v-if="errors.email" class="mt-2 text-sm text-red-600 flex items-center">
                 <ExclamationCircleIcon class="w-4 h-4 mr-1" />
                 {{ errors.email }}
+              </p>
+              <p v-else-if="!errors.email && form.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)" class="mt-2 text-sm text-green-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                ✓ Adresse email valide
               </p>
             </div>
 
@@ -67,7 +117,10 @@
                   v-model="form.password"
                   required
                   class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 pr-12 text-black"
-                  :class="{ 'border-red-300 focus:border-red-500': errors.password }"
+                  :class="{ 
+                    'border-red-300 focus:border-red-500 focus:ring-red-500/10': errors.password,
+                    'border-green-300 focus:border-green-500': !errors.password && form.password && form.password.length >= 6
+                  }"
                   placeholder="••••••••"
                 />
                 <button
@@ -82,6 +135,12 @@
               <p v-if="errors.password" class="mt-2 text-sm text-red-600 flex items-center">
                 <ExclamationCircleIcon class="w-4 h-4 mr-1" />
                 {{ errors.password }}
+              </p>
+              <p v-else-if="!errors.password && form.password && form.password.length >= 6" class="mt-2 text-sm text-green-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                ✓ Mot de passe valide
               </p>
             </div>
 
@@ -159,7 +218,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import logoUrl from '@/assets/logo.png'
@@ -199,21 +258,33 @@ const validateForm = () => {
     errors[key] = ''
   })
 
-  // Email validation
+  // Email validation avec messages détaillés
   if (!form.email) {
-    errors.email = 'L\'adresse email est requise'
+    errors.email = '📧 L\'adresse email est obligatoire'
+    isValid = false
+  } else if (!form.email.includes('@')) {
+    errors.email = '⚠️ L\'adresse email doit contenir le symbole @'
     isValid = false
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = 'Adresse email invalide'
+    errors.email = '❌ Format d\'email invalide (exemple: nom@domaine.com)'
+    isValid = false
+  } else if (form.email.length > 100) {
+    errors.email = '📏 L\'adresse email est trop longue (max 100 caractères)'
     isValid = false
   }
 
-  // Password validation
+  // Password validation avec messages détaillés
   if (!form.password) {
-    errors.password = 'Le mot de passe est requis'
+    errors.password = '🔒 Le mot de passe est obligatoire'
     isValid = false
   } else if (form.password.length < 6) {
-    errors.password = 'Le mot de passe doit contenir au moins 6 caractères'
+    errors.password = '📏 Le mot de passe doit contenir au moins 6 caractères'
+    isValid = false
+  } else if (form.password.length > 50) {
+    errors.password = '📏 Le mot de passe est trop long (max 50 caractères)'
+    isValid = false
+  } else if (form.password.includes(' ')) {
+    errors.password = '⚠️ Le mot de passe ne doit pas contenir d\'espaces'
     isValid = false
   }
 
@@ -241,9 +312,10 @@ const handleSubmit = async (event) => {
     })
 
     if (result.success) {
-      // Success toast
+      // Success toast avec informations personnalisées
       if (window.$toast) {
-        window.$toast.success('Connexion réussie ! Redirection en cours...', 'Bienvenue !')
+        const userName = authStore.user?.name || authStore.user?.first_name || 'utilisateur'
+        window.$toast.success(`🎉 Bienvenue ${userName} ! Redirection en cours...`, '✅ Connexion réussie')
       }
 
       // Debug: Log user data
@@ -290,50 +362,136 @@ const handleSubmit = async (event) => {
         })
       }, 100)
     } else {
-      // Gestion des erreurs de connexion sans rafraîchissement
-      errors.general = result.error || 'Identifiants incorrects. Veuillez vérifier votre email et mot de passe.'
-
-      // Messages d'erreur plus spécifiques selon le type d'erreur
-      if (result.error?.includes('401') || result.error?.includes('Unauthorized') || result.error?.includes('Invalid credentials')) {
-        errors.general = 'Identifiants incorrects. Veuillez vérifier votre email et mot de passe.'
-      } else if (result.error?.includes('429') || result.error?.includes('too many')) {
-        errors.general = 'Trop de tentatives. Veuillez patienter quelques minutes.'
-      } else if (result.error?.includes('network') || result.error?.includes('Network')) {
-        errors.general = 'Problème de connexion. Vérifiez votre connexion internet.'
+      // Gestion des erreurs de connexion avec messages spécifiques et clairs
+      const errorMsg = result.error || 'Erreur de connexion inconnue'
+      
+      // Messages d'erreur plus spécifiques et informatifs
+      if (errorMsg.toLowerCase().includes('identifiants incorrects') || 
+          errorMsg.toLowerCase().includes('invalid credentials') ||
+          errorMsg.includes('401')) {
+        errors.general = '🚫 Identifiants incorrects. Vérifiez votre adresse email et votre mot de passe.'
+        errors.email = 'Adresse email ou mot de passe incorrect'
+        errors.password = 'Adresse email ou mot de passe incorrect'
+      } else if (errorMsg.toLowerCase().includes('trop de tentatives') || 
+                 errorMsg.toLowerCase().includes('too many') ||
+                 errorMsg.includes('429')) {
+        errors.general = '⏳ Trop de tentatives de connexion. Veuillez patienter 15 minutes avant de réessayer.'
+      } else if (errorMsg.toLowerCase().includes('network') || 
+                 errorMsg.toLowerCase().includes('réseau') ||
+                 errorMsg.toLowerCase().includes('connexion')) {
+        errors.general = '🌐 Problème de connexion internet. Vérifiez votre connexion et réessayez.'
+      } else if (errorMsg.toLowerCase().includes('email') && errorMsg.toLowerCase().includes('verify')) {
+        errors.general = '📧 Votre compte n\'est pas encore vérifié. Vérifiez votre boîte email et cliquez sur le lien de vérification.'
+      } else if (errorMsg.toLowerCase().includes('blocked') || errorMsg.toLowerCase().includes('suspendu')) {
+        errors.general = '🔒 Votre compte est temporairement suspendu. Contactez le support client.'
+      } else {
+        errors.general = `❌ ${errorMsg}`
       }
 
       if (window.$toast) {
-        window.$toast.error(errors.general, 'Erreur de connexion')
+        window.$toast.error(errors.general, '🚫 Erreur de connexion')
       }
 
-      // Focus sur le champ email pour faciliter la correction
-      document.getElementById('email')?.focus()
+      // Focus sur le champ approprié selon l'erreur
+      setTimeout(() => {
+        if (errors.email) {
+          document.getElementById('email')?.focus()
+        } else {
+          document.getElementById('email')?.focus()
+        }
+      }, 100)
     }
   } catch (error) {
     console.error('Erreur lors de la connexion:', error)
 
-    // Gestion d'erreurs plus détaillée
-    let errorMessage = 'Une erreur est survenue. Veuillez réessayer.'
+    // Gestion d'erreurs système avec messages clairs
+    let errorMessage = '❌ Une erreur technique est survenue. Veuillez réessayer.'
 
     if (error.response?.status === 401) {
-      errorMessage = 'Identifiants incorrects. Veuillez vérifier votre email et mot de passe.'
+      errorMessage = '🚫 Identifiants incorrects. Vérifiez votre adresse email et votre mot de passe.'
+      errors.email = 'Adresse email ou mot de passe incorrect'
+      errors.password = 'Adresse email ou mot de passe incorrect'
+    } else if (error.response?.status === 422) {
+      // Erreurs de validation détaillées
+      if (error.response.data?.errors) {
+        const validationErrors = error.response.data.errors
+        if (validationErrors.email) {
+          errors.email = validationErrors.email[0]
+        }
+        if (validationErrors.password) {
+          errors.password = validationErrors.password[0]
+        }
+        errorMessage = '⚠️ Veuillez corriger les erreurs ci-dessous.'
+      } else {
+        errorMessage = '⚠️ Données invalides. Vérifiez vos informations.'
+      }
     } else if (error.response?.status === 429) {
-      errorMessage = 'Trop de tentatives. Veuillez patienter quelques minutes.'
+      errorMessage = '⏳ Trop de tentatives de connexion. Veuillez patienter 15 minutes avant de réessayer.'
+    } else if (error.response?.status === 500) {
+      errorMessage = '🔧 Erreur du serveur. Nos équipes sont notifiées. Veuillez réessayer dans quelques minutes.'
+    } else if (error.response?.status === 503) {
+      errorMessage = '⚙️ Service temporairement indisponible. Maintenance en cours.'
     } else if (error.code === 'NETWORK_ERROR' || !error.response) {
-      errorMessage = 'Problème de connexion. Vérifiez votre connexion internet.'
+      errorMessage = '🌐 Impossible de joindre le serveur. Vérifiez votre connexion internet.'
     } else if (error.response?.data?.message) {
-      errorMessage = error.response.data.message
+      errorMessage = `❌ ${error.response.data.message}`
+    } else if (error.message) {
+      errorMessage = `❌ ${error.message}`
     }
 
     errors.general = errorMessage
 
+    // Toast avec titre approprié
     if (window.$toast) {
-      window.$toast.error(errorMessage, 'Erreur de connexion')
+      let title = '🚫 Erreur de connexion'
+      if (error.response?.status === 500) {
+        title = '🔧 Erreur serveur'
+      } else if (error.code === 'NETWORK_ERROR') {
+        title = '🌐 Problème réseau'
+      }
+      window.$toast.error(errorMessage, title)
     }
+
+    // Focus sur le champ approprié
+    setTimeout(() => {
+      if (errors.email) {
+        document.getElementById('email')?.focus()
+      } else if (errors.password) {
+        document.getElementById('password')?.focus()
+      } else {
+        document.getElementById('email')?.focus()
+      }
+    }, 100)
   } finally {
     loading.value = false
   }
 }
+
+// Validation en temps réel pour améliorer l'UX
+watch(() => form.email, (newEmail) => {
+  if (errors.email && newEmail) {
+    // Révalider seulement si il y avait une erreur et que l'utilisateur tape
+    if (newEmail.includes('@') && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+      errors.email = '' // Clear error si maintenant valide
+    }
+  }
+}, { debounce: 300 })
+
+watch(() => form.password, (newPassword) => {
+  if (errors.password && newPassword) {
+    // Révalider seulement si il y avait une erreur et que l'utilisateur tape
+    if (newPassword.length >= 6 && newPassword.length <= 50 && !newPassword.includes(' ')) {
+      errors.password = '' // Clear error si maintenant valide
+    }
+  }
+}, { debounce: 300 })
+
+// Clear les erreurs générales quand l'utilisateur commence à retaper
+watch([() => form.email, () => form.password], () => {
+  if (errors.general) {
+    errors.general = ''
+  }
+})
 </script>
 
 <style scoped>

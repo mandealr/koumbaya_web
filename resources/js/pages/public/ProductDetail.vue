@@ -430,11 +430,15 @@ const participateNow = () => {
   // Vérifier si l'utilisateur est connecté
   if (authStore.isAuthenticated) {
     // Utilisateur connecté - rediriger vers la page produit de son espace approprié
-    if (authStore.isMerchant) {
-      // Espace marchand (mais ils peuvent aussi participer comme clients)
+    // Les Business (marchands) ne participent pas aux tombolas, seuls les Particuliers (clients)
+    if (authStore.isCustomer) {
+      // Espace client pour participer
       router.push({ name: 'customer.product.detail', params: { id: route.params.id } })
+    } else if (authStore.isMerchant) {
+      // Les marchands ne peuvent pas participer, rediriger vers leur espace pour voir le produit
+      router.push({ name: 'merchant.dashboard' })
     } else {
-      // Espace client
+      // Fallback vers espace client
       router.push({ name: 'customer.product.detail', params: { id: route.params.id } })
     }
   } else {

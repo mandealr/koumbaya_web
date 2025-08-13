@@ -193,7 +193,7 @@ class User extends Authenticatable
 
     public function getIsMerchantAttribute()
     {
-        return $this->hasRole('Particulier') && $this->hasRole('Business');
+        return $this->hasRole('Business');
     }
 
     /**

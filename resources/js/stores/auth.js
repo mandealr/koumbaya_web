@@ -82,19 +82,15 @@ export const useAuthStore = defineStore('auth', () => {
   })
   
   const isMerchant = computed(() => {
-    // Vérification par les rôles du système hybride Koumbaya
-    // Un merchant doit avoir les 2 rôles: Particulier + Business
+    // Système de rôles simplifié : Business = marchand uniquement
     if (user.value?.roles && Array.isArray(user.value.roles)) {
-      const hasParticulier = user.value.roles.some(role => role.name === 'Particulier')
-      const hasBusiness = user.value.roles.some(role => role.name === 'Business')
-      
-      if (hasParticulier && hasBusiness) return true
+      return user.value.roles.some(role => role.name === 'Business')
     }
     
-    // Fallback : vérifications classiques (peut être retiré plus tard)
+    // Fallback : vérifications classiques (pour compatibilité transitoire)
     if (user.value?.can_sell && user.value?.account_type === 'business') return true
     
-    // Fallback : vérification par email
+    // Fallback : vérification par email (pour comptes existants)
     if (user.value?.email) {
       const businessEmails = ['business@koumbaya.ga', 'business2@koumbaya.ga']
       return businessEmails.includes(user.value.email)
@@ -107,19 +103,16 @@ export const useAuthStore = defineStore('auth', () => {
     // Les managers ne sont pas des customers
     if (isManager.value) return false
     
-    // Vérification par les rôles du système hybride Koumbaya
+    // Système de rôles simplifié : Particulier = client uniquement
     if (user.value?.roles && Array.isArray(user.value.roles)) {
-      const hasCustomerRole = user.value.roles.some(role => 
-        role.name === 'Particulier' // Nom du rôle selon le seeder
-      )
-      if (hasCustomerRole) return true
+      return user.value.roles.some(role => role.name === 'Particulier')
     }
     
-    // Fallback : vérifications classiques (peut être retiré plus tard)
+    // Fallback : vérifications classiques (pour compatibilité transitoire)
     if (user.value?.account_type === 'personal') return true
     
-    // Par défaut, si ce n'est pas un manager, c'est un customer (même les merchants sont des customers avec rôle "Particulier")
-    return !isManager.value
+    // Par défaut, si ce n'est ni un manager ni un business, c'est un customer
+    return !isManager.value && !isMerchant.value
   })
   
   const isBusiness = computed(() => 
@@ -284,18 +277,17 @@ export const useAuthStore = defineStore('auth', () => {
       return 'admin.dashboard'
     }
     
-    // 2. BUSINESS (a les 2 rôles: Particulier + Business) → Merchant Dashboard  
+    // 2. BUSINESS (rôle Business uniquement) → Merchant Dashboard  
     if (user.value?.roles && Array.isArray(user.value.roles)) {
-      const hasParticulier = user.value.roles.some(role => role.name === 'Particulier')
       const hasBusiness = user.value.roles.some(role => role.name === 'Business')
       
-      if (hasParticulier && hasBusiness) {
-        console.log('✅ Redirection vers merchant.dashboard (Particulier + Business)')
+      if (hasBusiness) {
+        console.log('✅ Redirection vers merchant.dashboard (Business)')
         return 'merchant.dashboard'
       }
     }
     
-    // 3. CUSTOMERS (Particulier uniquement ou par défaut) → Customer Dashboard
+    // 3. CUSTOMERS (rôle Particulier ou par défaut) → Customer Dashboard
     console.log('✅ Redirection vers customer.dashboard (Customer par défaut)')
     return 'customer.dashboard'
   }

@@ -611,27 +611,28 @@ class AuthController extends Controller
     }
 
     /**
-     * Assigner les rôles selon la logique des seeders (système hybride Koumbaya)
+     * Assigner les rôles selon la logique simplifiée :
+     * - Particulier = client uniquement (achats, tombolas)
+     * - Business = marchand uniquement (vente, gestion)
      */
     private function assignUserRoles(User $user, Request $request): void
     {
-        $rolesToAssign = [];
-
-        // Logique selon le type de compte (comme dans UserSeeder)
+        // Système de rôles simplifié :
+        // - Particulier = client uniquement (achats, participation aux tombolas)
+        // - Business = marchand uniquement (vente, gestion des produits/tombolas)
+        
         if ($request->account_type === 'business' || $request->can_sell) {
-            // Business = Particulier + Business (règle hybride)
-            $rolesToAssign = ['Particulier', 'Business'];
+            // Compte business = rôle Business uniquement
+            $roleName = 'Business';
         } else {
-            // Personnel = Particulier uniquement
-            $rolesToAssign = ['Particulier'];
+            // Compte particulier = rôle Particulier uniquement
+            $roleName = 'Particulier';
         }
 
-        // Assigner les rôles via les relations
-        foreach ($rolesToAssign as $roleName) {
-            $role = Role::where('name', $roleName)->first();
-            if ($role && !$user->roles->contains($role->id)) {
-                $user->roles()->attach($role->id);
-            }
+        // Assigner le rôle approprié
+        $role = Role::where('name', $roleName)->first();
+        if ($role && !$user->roles->contains($role->id)) {
+            $user->roles()->attach($role->id);
         }
     }
 
