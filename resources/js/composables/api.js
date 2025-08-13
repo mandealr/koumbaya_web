@@ -27,9 +27,16 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Ne rediriger vers login que si ce n'est pas déjà une tentative de login
-    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/login')) {
-      // Token expiré ou invalide - mais pas lors du login
+    // Ne rediriger vers login que si :
+    // 1. C'est une erreur 401 
+    // 2. Ce n'est pas une tentative de login
+    // 3. ET l'utilisateur avait un token (donc était connecté)
+    const hadToken = localStorage.getItem('auth_token')
+    
+    if (error.response?.status === 401 && 
+        !error.config?.url?.includes('/auth/login') && 
+        hadToken) {
+      // Token expiré ou invalide - mais seulement pour les utilisateurs connectés
       localStorage.removeItem('auth_token')
       // Éviter le rafraîchissement forcé, utiliser le router Vue à la place
       if (window.router) {

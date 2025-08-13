@@ -85,8 +85,7 @@ class AuthController extends Controller
         // TODO: Réimplémenter la vérification OTP si nécessaire
         // Pour le moment, on skip l'OTP pour permettre l'inscription directe
 
-        // Déterminer le rôle basé sur account_type
-        $roleName = ($request->account_type === 'business' || $request->can_sell) ? 'MERCHANT' : 'CUSTOMER';
+        // Le système de rôles est géré via les relations et seeders, pas d'assignation manuelle ici
 
         $user = User::create([
             'first_name' => $request->first_name,
@@ -107,9 +106,8 @@ class AuthController extends Controller
             'source_server_info' => $request->userAgent(),
         ]);
 
-        // Assigner le rôle via la relation (créer le rôle s'il n'existe pas)
-        $this->ensureRoleExists($roleName);
-        $user->assignRole($roleName);
+        // Assigner les rôles selon la logique des seeders
+        $this->assignUserRoles($user, $request);
 
         // Créer le portefeuille utilisateur
         UserWallet::create([
@@ -613,33 +611,28 @@ class AuthController extends Controller
     }
 
     /**
-     * S'assurer qu'un rôle existe, le créer sinon
+     * Assigner les rôles selon la logique des seeders (système hybride Koumbaya)
      */
-    private function ensureRoleExists(string $roleName): void
+    private function assignUserRoles(User $user, Request $request): void
     {
-        if (!Role::where('name', $roleName)->exists()) {
-            Role::create([
-                'name' => $roleName,
-                'description' => $this->getRoleDescription($roleName),
-                'active' => true,
-                'mutable' => true
-            ]);
-        }
-    }
+        $rolesToAssign = [];
 
-    /**
-     * Obtenir la description d'un rôle
-     */
-    private function getRoleDescription(string $roleName): string
-    {
-        return match($roleName) {
-            'CUSTOMER' => 'Client de la plateforme',
-            'MERCHANT' => 'Marchand pouvant vendre des produits',
-            'MANAGER' => 'Gestionnaire de la plateforme',
-            'ADMIN' => 'Administrateur',
-            'SUPER_ADMIN' => 'Super administrateur',
-            default => $roleName
-        };
+        // Logique selon le type de compte (comme dans UserSeeder)
+        if ($request->account_type === 'business' || $request->can_sell) {
+            // Business = Particulier + Business (règle hybride)
+            $rolesToAssign = ['Particulier', 'Business'];
+        } else {
+            // Personnel = Particulier uniquement
+            $rolesToAssign = ['Particulier'];
+        }
+
+        // Assigner les rôles via les relations
+        foreach ($rolesToAssign as $roleName) {
+            $role = Role::where('name', $roleName)->first();
+            if ($role && !$user->roles->contains($role->id)) {
+                $user->roles()->attach($role->id);
+            }
+        }
     }
 
     /**

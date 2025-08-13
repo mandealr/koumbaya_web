@@ -193,7 +193,7 @@ class User extends Authenticatable
 
     public function getIsMerchantAttribute()
     {
-        return $this->hasRole('MERCHANT') || $this->can_sell;
+        return $this->hasRole('Particulier') && $this->hasRole('Business');
     }
 
     /**
@@ -237,20 +237,26 @@ class User extends Authenticatable
     }
 
     /**
-     * Helpers pour les types d'utilisateurs
+     * Helpers pour les types d'utilisateurs (système hybride Koumbaya)
      */
     public function isAdmin(): bool
     {
-        return $this->hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER']);
+        return $this->hasAnyRole(['Super Admin', 'Admin']);
+    }
+
+    public function isManager(): bool
+    {
+        return $this->hasAnyRole(['Super Admin', 'Admin', 'Agent', 'Agent Back Office']);
     }
 
     public function isCustomer(): bool
     {
-        return $this->hasRole('CUSTOMER') || (!$this->hasAnyRole(['MANAGER', 'MERCHANT', 'RESELLER', 'PARTNER', 'SUPER_ADMIN', 'ADMIN']) && !$this->can_sell);
+        return $this->hasRole('Particulier') || (!$this->isManager() && !$this->can_sell);
     }
 
     public function isMerchant(): bool
     {
-        return $this->hasRole('MERCHANT') || $this->can_sell;
+        // Un merchant doit avoir les 2 rôles: Particulier + Business
+        return $this->hasRole('Particulier') && $this->hasRole('Business');
     }
 }
