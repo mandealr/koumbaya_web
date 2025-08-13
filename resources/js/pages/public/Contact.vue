@@ -307,7 +307,7 @@
     <!-- Success Modal -->
     <div v-if="showSuccessModal" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen px-4 text-center">
-        <div class="fixed inset-0 bg-black bg-opacity-30 transition-opacity" @click="showSuccessModal = false"></div>
+        <div class="fixed inset-0 bg-black bg-opacity-20 transition-opacity" @click="showSuccessModal = false"></div>
         
         <div class="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle bg-white shadow-xl rounded-2xl transform transition-all">
           <div class="text-center">

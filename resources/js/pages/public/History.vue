@@ -237,7 +237,7 @@
     <!-- Detail Modal -->
     <div v-if="selectedLottery" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-black bg-opacity-30" @click="selectedLottery = null"></div>
+        <div class="fixed inset-0 bg-black bg-opacity-20" @click="selectedLottery = null"></div>
         <div class="relative bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
