@@ -51,8 +51,8 @@ export const useAuthStore = defineStore('auth', () => {
       return user.value.roles.some(role => adminRoles.includes(role.name))
     }
     
-    // Fallback : vérification classique
-    if (user.value?.role === 'ADMIN' || user.value?.email?.includes('superadmin')) {
+    // Fallback : vérification classique par email
+    if (user.value?.email?.includes('superadmin')) {
       return true
     }
     
@@ -82,14 +82,15 @@ export const useAuthStore = defineStore('auth', () => {
   })
   
   const isMerchant = computed(() => {
-    // Vérification par les rôles hybrides
+    // Vérification par les rôles standardisés
     if (user.value?.roles && Array.isArray(user.value.roles)) {
-      const businessRole = user.value.roles.some(role => role.name === 'Business')
-      if (businessRole) return true
+      const merchantRole = user.value.roles.some(role => 
+        role.name === 'MERCHANT' || role.name === 'Business'
+      )
+      if (merchantRole) return true
     }
     
-    // Fallback : vérifications classiques
-    if (user.value?.role === 'MERCHANT') return true
+    // Fallback : vérifications classiques (peut être retiré plus tard)
     if (user.value?.can_sell && user.value?.account_type === 'business') return true
     
     // Fallback : vérification par email
@@ -105,14 +106,15 @@ export const useAuthStore = defineStore('auth', () => {
     // Les managers ne sont pas des customers
     if (isManager.value) return false
     
-    // Vérification par les rôles hybrides
+    // Vérification par les rôles standardisés
     if (user.value?.roles && Array.isArray(user.value.roles)) {
-      const hasParticulierRole = user.value.roles.some(role => role.name === 'Particulier')
-      if (hasParticulierRole) return true
+      const hasCustomerRole = user.value.roles.some(role => 
+        role.name === 'CUSTOMER' || role.name === 'Particulier'
+      )
+      if (hasCustomerRole) return true
     }
     
-    // Fallback : vérifications classiques
-    if (user.value?.role === 'CUSTOMER') return true
+    // Fallback : vérifications classiques (peut être retiré plus tard)
     if (user.value?.account_type === 'personal') return true
     
     // Par défaut, si ce n'est pas un manager ni un merchant, c'est un customer
@@ -272,7 +274,7 @@ export const useAuthStore = defineStore('auth', () => {
       isMerchant: isMerchant.value,
       isCustomer: isCustomer.value,
       account_type: user.value?.account_type,
-      role: user.value?.role
+      roles: user.value?.roles?.map(r => r.name)
     })
     
     // 1. MANAGERS → Admin Dashboard

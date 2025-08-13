@@ -212,7 +212,7 @@ const showQuickStats = computed(() => {
 // Methods
 const logout = async () => {
   await authStore.logout()
-  router.push('/auth/login')
+  router.push({ name: 'login' })
 }
 
 const loadQuickStats = async () => {

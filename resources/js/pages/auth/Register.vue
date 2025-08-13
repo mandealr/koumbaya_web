@@ -572,19 +572,34 @@ const handleSubmit = async () => {
   const result = await authStore.register(registrationData)
   
   if (result.success) {
+    console.log('Inscription réussie, données utilisateur:', authStore.user)
+    
+    // Attendre un peu que les données utilisateur soient bien chargées
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
     // Use the centralized redirect logic
     const redirectTo = authStore.getDefaultRedirect()
     
     console.log('Redirection après inscription:', {
       account_type: form.account_type,
       can_sell: registrationData.can_sell,
+      user: authStore.user,
       redirectTo,
       isAdmin: authStore.isAdmin,
       isMerchant: authStore.isMerchant,
       isCustomer: authStore.isCustomer
     })
     
+    // Vérifier si l'utilisateur a besoin de vérifier son compte
+    if (authStore.user && !authStore.user.verified_at && result.requires_verification) {
+      console.log('Utilisateur doit vérifier son compte par email')
+      // Afficher un message à l'utilisateur
+      alert('Inscription réussie ! Veuillez vérifier votre email pour activer votre compte.')
+    }
+    
     router.push({ name: redirectTo })
+  } else {
+    console.error('Erreur lors de l\'inscription:', result)
   }
 }
 

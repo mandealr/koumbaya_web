@@ -20,7 +20,6 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
-        'role',
         'account_type',
         'can_sell',
         'can_buy',
@@ -194,6 +193,64 @@ class User extends Authenticatable
 
     public function getIsMerchantAttribute()
     {
-        return $this->role === 'MERCHANT';
+        return $this->hasRole('MERCHANT') || $this->can_sell;
+    }
+
+    /**
+     * Méthodes pour la gestion des rôles
+     */
+    public function hasRole(string $roleName): bool
+    {
+        return $this->roles()->where('name', $roleName)->exists();
+    }
+
+    public function hasAnyRole(array $roleNames): bool
+    {
+        return $this->roles()->whereIn('name', $roleNames)->exists();
+    }
+
+    public function assignRole(string $roleName): void
+    {
+        $role = Role::where('name', $roleName)->first();
+        if ($role && !$this->hasRole($roleName)) {
+            $this->roles()->attach($role->id);
+        }
+    }
+
+    public function removeRole(string $roleName): void
+    {
+        $role = Role::where('name', $roleName)->first();
+        if ($role) {
+            $this->roles()->detach($role->id);
+        }
+    }
+
+    public function getPrimaryRole(): ?string
+    {
+        $role = $this->roles()->orderBy('id')->first();
+        return $role ? $role->name : null;
+    }
+
+    public function getRoleNames(): array
+    {
+        return $this->roles()->pluck('name')->toArray();
+    }
+
+    /**
+     * Helpers pour les types d'utilisateurs
+     */
+    public function isAdmin(): bool
+    {
+        return $this->hasAnyRole(['SUPER_ADMIN', 'ADMIN', 'MANAGER']);
+    }
+
+    public function isCustomer(): bool
+    {
+        return $this->hasRole('CUSTOMER') || (!$this->hasAnyRole(['MANAGER', 'MERCHANT', 'RESELLER', 'PARTNER', 'SUPER_ADMIN', 'ADMIN']) && !$this->can_sell);
+    }
+
+    public function isMerchant(): bool
+    {
+        return $this->hasRole('MERCHANT') || $this->can_sell;
     }
 }

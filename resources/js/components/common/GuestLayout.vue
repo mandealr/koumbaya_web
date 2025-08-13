@@ -247,7 +247,7 @@ const userDashboardPath = computed(() => {
 const handleLogout = async () => {
   userMenuOpen.value = false
   await authStore.logout()
-  router.push('/login')
+  router.push({ name: 'login' })
 }
 
 const handleClickOutside = (event) => {

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserWallet;
 use App\Models\UserLoginHistory;
+use App\Models\Role;
 use App\Services\OtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -84,12 +85,8 @@ class AuthController extends Controller
         // TODO: Réimplémenter la vérification OTP si nécessaire
         // Pour le moment, on skip l'OTP pour permettre l'inscription directe
 
-        // Déterminer le rôle basé sur account_type ou utiliser celui fourni
-        $role = $request->role;
-        if (!$role) {
-            $role = ($request->account_type === 'business' || $request->can_sell) ? 'MERCHANT' : 'MERCHANT';
-            // TODO: Changer 'MERCHANT' en 'CUSTOMER' une fois la migration appliquée pour ajouter CUSTOMER à l'enum
-        }
+        // Déterminer le rôle basé sur account_type
+        $roleName = ($request->account_type === 'business' || $request->can_sell) ? 'MERCHANT' : 'CUSTOMER';
 
         $user = User::create([
             'first_name' => $request->first_name,
@@ -97,7 +94,6 @@ class AuthController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
-            'role' => $role,
             'account_type' => $request->account_type ?? 'personal',
             'can_sell' => $request->can_sell ?? false,
             'can_buy' => $request->can_buy ?? true,
@@ -110,6 +106,10 @@ class AuthController extends Controller
             'source_ip_address' => $request->ip(),
             'source_server_info' => $request->userAgent(),
         ]);
+
+        // Assigner le rôle via la relation (créer le rôle s'il n'existe pas)
+        $this->ensureRoleExists($roleName);
+        $user->assignRole($roleName);
 
         // Créer le portefeuille utilisateur
         UserWallet::create([
@@ -572,7 +572,7 @@ class AuthController extends Controller
         // URL de vérification
         $verificationUrl = config('app.frontend_url') . '/verify-email?token=' . urlencode($verificationToken);
         
-        // Envoyer l'email (ici vous devriez utiliser un job et une classe Mailable)
+        // Envoyer l'email (implémentation simple pour le moment)
         \Log::info('Email de vérification généré', [
             'user_id' => $user->id,
             'email' => $user->email,
@@ -580,10 +580,66 @@ class AuthController extends Controller
             'expires_at' => $verificationData['expires_at']
         ]);
         
-        // TODO: Implémenter l'envoi réel de l'email avec Queue
-        // Mail::to($user->email)->queue(new EmailVerification($user, $verificationUrl));
+        try {
+            // Envoyer l'email avec Mail::raw pour une implémentation simple
+            \Mail::raw(
+                "Bonjour {$user->first_name} {$user->last_name},\n\n" .
+                "Merci de vous être inscrit sur Koumbaya MarketPlace.\n\n" .
+                "Veuillez cliquer sur le lien suivant pour vérifier votre compte :\n" .
+                $verificationUrl . "\n\n" .
+                "Ce lien expire dans 24 heures.\n\n" .
+                "Cordialement,\n" .
+                "L'équipe Koumbaya",
+                function ($message) use ($user) {
+                    $message->to($user->email, $user->first_name . ' ' . $user->last_name)
+                           ->subject('Vérification de votre compte Koumbaya MarketPlace');
+                }
+            );
+            
+            \Log::info('Email de vérification envoyé avec succès', [
+                'user_id' => $user->id,
+                'email' => $user->email
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de l\'envoi de l\'email de vérification', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $e->getMessage()
+            ]);
+            // Ne pas faire échouer l'inscription si l'email ne peut pas être envoyé
+        }
         
         return true;
+    }
+
+    /**
+     * S'assurer qu'un rôle existe, le créer sinon
+     */
+    private function ensureRoleExists(string $roleName): void
+    {
+        if (!Role::where('name', $roleName)->exists()) {
+            Role::create([
+                'name' => $roleName,
+                'description' => $this->getRoleDescription($roleName),
+                'active' => true,
+                'mutable' => true
+            ]);
+        }
+    }
+
+    /**
+     * Obtenir la description d'un rôle
+     */
+    private function getRoleDescription(string $roleName): string
+    {
+        return match($roleName) {
+            'CUSTOMER' => 'Client de la plateforme',
+            'MERCHANT' => 'Marchand pouvant vendre des produits',
+            'MANAGER' => 'Gestionnaire de la plateforme',
+            'ADMIN' => 'Administrateur',
+            'SUPER_ADMIN' => 'Super administrateur',
+            default => $roleName
+        };
     }
 
     /**
