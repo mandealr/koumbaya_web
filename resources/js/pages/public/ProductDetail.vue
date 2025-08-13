@@ -320,14 +320,27 @@
         <div class="w-32 h-32 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
           <ExclamationCircleIcon class="w-16 h-16 text-gray-400" />
         </div>
-        <h3 class="text-xl font-semibold text-gray-900 mb-2">Produit introuvable</h3>
-        <p class="text-gray-600 mb-6">Ce produit n'existe pas ou a été supprimé</p>
-        <router-link
-          to="/products"
-          class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl transition-colors"
-        >
-          Retour aux produits
-        </router-link>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">
+          {{ error ? 'Erreur de chargement' : 'Produit introuvable' }}
+        </h3>
+        <p class="text-gray-600 mb-6">
+          {{ error || 'Ce produit n\'existe pas ou a été supprimé' }}
+        </p>
+        <div class="space-y-3">
+          <button
+            @click="loadProduct"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl transition-colors mr-4"
+            v-if="error"
+          >
+            Réessayer
+          </button>
+          <router-link
+            to="/products"
+            class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl transition-colors"
+          >
+            Retour aux produits
+          </router-link>
+        </div>
       </div>
     </div>
   </div>
@@ -499,24 +512,38 @@ const loadProduct = async () => {
     const productId = route.params.id
     
     const response = await get(`/products/${productId}`)
-    const productData = response.product
+    console.log('🔍 API Response structure:', response)
+    
+    // La réponse API a la structure: {success: true, data: {product: {...}}}
+    // Le composable useApi retourne directement response.data
+    let productData = response.data?.product || response.product
+    
+    console.log('📦 Product data:', productData)
+    
+    if (!productData) {
+      console.error('❌ Product data is null/undefined')
+      console.error('📋 Full response:', JSON.stringify(response, null, 2))
+      throw new Error('Produit non trouvé dans la réponse API')
+    }
     
     // Adapt API response to component format
     product.value = {
       id: productData.id,
-      name: productData.name,
-      description: productData.description,
-      value: productData.price,
-      ticketPrice: productData.ticket_price,
-      image: productData.image_url || productData.main_image,
-      category: productData.category?.name,
+      name: productData.name || 'Produit sans nom',
+      description: productData.description || 'Aucune description disponible',
+      value: productData.price || 0,
+      ticketPrice: productData.ticket_price || 0,
+      image: productData.image_url || productData.main_image || placeholderImg,
+      category: productData.category?.name || 'Catégorie inconnue',
       soldTickets: productData.active_lottery?.sold_tickets || 0,
       participants: productData.active_lottery?.sold_tickets || 0,
       drawDate: productData.active_lottery?.end_date,
-      isNew: new Date(productData.created_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      isNew: productData.created_at ? new Date(productData.created_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) : false,
       activeLottery: productData.active_lottery,
-      lotteries: productData.lotteries
+      lotteries: productData.lotteries || []
     }
+    
+    console.log('✅ Product loaded successfully:', product.value.name)
   } catch (err) {
     console.error('Erreur lors du chargement du produit:', err)
     error.value = err.response?.data?.message || 'Erreur lors du chargement du produit'
