@@ -225,19 +225,14 @@
                   <label for="phone" class="block text-sm font-semibold text-gray-900 mb-2">
                     Numéro de téléphone *
                   </label>
-                  <vue-tel-input 
+                  <input
+                    id="phone"
                     v-model="form.phone"
-                    :default-country="'GA'"
-                    :preferred-countries="['GA', 'CM', 'CI', 'SN', 'FR']"
-                    :input-options="{
-                      id: 'phone',
-                      placeholder: 'Ex: +241 01 23 45 67',
-                      required: true,
-                      class: 'w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black' + (errors.phone ? ' border-red-300 bg-red-50' : '')
-                    }"
-                    mode="international"
-                    :validCharactersOnly="true"
-                    @validate="onPhoneValidate"
+                    type="tel"
+                    placeholder="Ex: +241 01 23 45 67"
+                    required
+                    :class="'w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black' + (errors.phone ? ' border-red-300 bg-red-50' : '')"
+                    @input="validatePhoneInput"
                   />
                   <p v-if="errors.phone" class="mt-1 text-sm text-red-600">{{ errors.phone }}</p>
                 </div>
@@ -262,7 +257,7 @@
                         :key="country.id" 
                         :value="country.id"
                       >
-                        {{ country.flag }} {{ country.name }}
+                        {{ country.name }}
                       </option>
                     </select>
                     <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
@@ -429,7 +424,6 @@ import socialAuth from '@/services/socialAuth'
 import logoUrl from '@/assets/logo.png'
 const logoWhiteUrl = '/logo_white.png'
 import { useApi } from '@/composables/api'
-import VueTelInput from 'vue-tel-input'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -540,17 +534,9 @@ const validateForm = () => {
   return isValid
 }
 
-const onPhoneValidate = (phoneObject) => {
-  phoneValid.value = phoneObject.valid
-  if (phoneObject.valid) {
-    errors.phone = ''
-  }
-}
-
-// Fallback function for regular phone input
-const onPhoneInputFallback = () => {
-  // Simple validation for fallback input
-  if (form.phone && form.phone.length > 5) {
+const validatePhoneInput = () => {
+  // Simple validation for phone input
+  if (form.phone && form.phone.length >= 8) {
     phoneValid.value = true
     errors.phone = ''
   } else {
