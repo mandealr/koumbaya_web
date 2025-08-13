@@ -62,7 +62,16 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'required|string|max:20|unique:users',
             'password' => 'required|string|min:6',
-            'role' => 'required|in:MERCHANT,RESELLER,PARTNER',
+            'password_confirmation' => 'required|string|same:password',
+            'role' => 'nullable|in:CUSTOMER,MERCHANT,RESELLER,PARTNER',
+            'account_type' => 'nullable|in:personal,business',
+            'can_sell' => 'nullable|boolean',
+            'can_buy' => 'nullable|boolean',
+            'business_name' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:500',
+            'country_id' => 'nullable|integer|exists:countries,id',
+            'language_id' => 'nullable|integer|exists:languages,id',
             'otp_code' => 'nullable|string|size:6',
             'skip_otp' => 'nullable|boolean'
         ]);
@@ -71,32 +80,13 @@ class AuthController extends Controller
             return $this->sendValidationError($validator);
         }
 
-        // Vérification OTP si requis (sauf en dev mode avec skip_otp)
-        if (!$request->skip_otp || config('app.env') !== 'local') {
-            if (!$request->otp_code) {
-                // Envoyer OTP par email
-                $otpResult = OtpService::sendEmailOtp($request->email, Otp::PURPOSE_REGISTRATION);
-                
-                if ($otpResult['success']) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Vérification OTP requise',
-                        'otp_required' => true,
-                        'identifier' => $request->email,
-                        'masked_identifier' => $otpResult['masked_identifier'],
-                        'expires_at' => $otpResult['expires_at']
-                    ], 400);
-                }
-                
-                return $this->sendError('Erreur lors de l\'envoi du code de vérification');
-            }
+        // TODO: Réimplémenter la vérification OTP si nécessaire
+        // Pour le moment, on skip l'OTP pour permettre l'inscription directe
 
-            // Vérifier le code OTP
-            $otpVerification = OtpService::verifyOtp($request->email, $request->otp_code, Otp::PURPOSE_REGISTRATION);
-            
-            if (!$otpVerification['success']) {
-                return $this->sendError($otpVerification['message'], [], 400);
-            }
+        // Déterminer le rôle basé sur account_type ou utiliser celui fourni
+        $role = $request->role;
+        if (!$role) {
+            $role = ($request->account_type === 'business' || $request->can_sell) ? 'MERCHANT' : 'CUSTOMER';
         }
 
         $user = User::create([
@@ -105,7 +95,15 @@ class AuthController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
+            'role' => $role,
+            'account_type' => $request->account_type ?? 'personal',
+            'can_sell' => $request->can_sell ?? false,
+            'can_buy' => $request->can_buy ?? true,
+            'business_name' => $request->business_name,
+            'city' => $request->city,
+            'address' => $request->address,
+            'country_id' => $request->country_id,
+            'language_id' => $request->language_id,
             'is_active' => true,
             'source_ip_address' => $request->ip(),
             'source_server_info' => $request->userAgent(),

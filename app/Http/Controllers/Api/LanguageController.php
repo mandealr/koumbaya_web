@@ -98,12 +98,75 @@ class LanguageController extends Controller
      */
     public function default()
     {
+        // Essayer de trouver une langue marquée comme par défaut
         $language = Language::where('is_default', true)
             ->where('is_active', true)
-            ->firstOrFail();
+            ->first();
+
+        // Si aucune langue par défaut n'est trouvée, prendre la première langue active
+        if (!$language) {
+            $language = Language::where('is_active', true)
+                ->orderBy('name')
+                ->first();
+        }
+
+        // Si toujours aucune langue trouvée, retourner une erreur appropriée
+        if (!$language) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucune langue disponible'
+            ], 404);
+        }
 
         return response()->json([
             'language' => $language
+        ]);
+    }
+
+    /**
+     * Initialize default languages if none exist
+     */
+    public function initialize()
+    {
+        // Vérifier s'il y a déjà des langues
+        $existingCount = Language::count();
+        
+        if ($existingCount > 0) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Langues already exist',
+                'count' => $existingCount
+            ]);
+        }
+
+        // Créer les langues par défaut
+        $languages = [
+            [
+                'name' => 'Français',
+                'code' => 'fr',
+                'native_name' => 'Français',
+                'is_active' => true,
+                'is_default' => true,
+            ],
+            [
+                'name' => 'Anglais',
+                'code' => 'en',
+                'native_name' => 'English',
+                'is_active' => true,
+                'is_default' => false,
+            ],
+        ];
+
+        $created = [];
+        foreach ($languages as $language) {
+            $created[] = Language::create($language);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Langues initialized successfully',
+            'languages' => $created,
+            'count' => count($created)
         ]);
     }
 }

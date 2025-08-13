@@ -64,6 +64,7 @@ Route::group([
     Route::get('languages', [LanguageController::class, 'index']);
     Route::get('languages/{id}', [LanguageController::class, 'show']);
     Route::get('languages/default', [LanguageController::class, 'default']);
+    Route::post('languages/initialize', [LanguageController::class, 'initialize']);
     
     // Products
     Route::get('products', [ProductController::class, 'index']);
