@@ -99,13 +99,13 @@
             <!-- Product Image -->
             <div class="relative overflow-hidden rounded-xl mb-4">
               <img
-                :src="product.image || placeholderImg"
-                :alt="product.title"
+                :src="product.image_url || product.main_image || placeholderImg"
+                :alt="product.name"
                 class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <div class="absolute top-3 right-3">
                 <span class="bg-[#0099cc] text-white px-3 py-1 rounded-full text-xs font-medium">
-                  {{ formatPrice(product.lottery?.ticket_price || 1000) }} FCFA
+                  {{ formatPrice(product.active_lottery?.ticket_price || product.ticket_price || 1000) }} FCFA
                 </span>
               </div>
               <div v-if="product.featured" class="absolute top-3 left-3">
@@ -118,7 +118,7 @@
             <!-- Product Info -->
             <div class="space-y-2">
               <h3 class="font-bold text-lg text-black group-hover:text-[#0099cc] transition-colors">
-                {{ product.title }}
+                {{ product.name }}
               </h3>
               <p class="text-gray-600 text-sm line-clamp-2">
                 {{ product.description }}
@@ -146,9 +146,9 @@
                     :style="{ width: calculateProgress(product) + '%' }"
                   ></div>
                 </div>
-                <div class="flex justify-between text-xs text-gray-500" v-if="product.lottery">
-                  <span>{{ product.lottery.sold_tickets || 0 }} vendus</span>
-                  <span>{{ product.lottery.total_tickets || 1000 }} tickets total</span>
+                <div class="flex justify-between text-xs text-gray-500" v-if="product.active_lottery">
+                  <span>{{ product.active_lottery.sold_tickets || 0 }} vendus</span>
+                  <span>{{ product.active_lottery.total_tickets || 1000 }} tickets total</span>
                 </div>
               </div>
 
@@ -226,7 +226,13 @@ const categories = ref([])
 const loadProducts = async () => {
   try {
     const response = await get('/products')
-    products.value = response.data || []
+    console.log('Response from /products:', response)
+    if (response && response.success && response.data) {
+      products.value = response.data.products || []
+      console.log('Products loaded:', products.value.length)
+    } else {
+      console.log('Response structure not as expected:', response)
+    }
   } catch (err) {
     console.error('Erreur lors du chargement des produits:', err)
   }
@@ -235,7 +241,9 @@ const loadProducts = async () => {
 const loadCategories = async () => {
   try {
     const response = await get('/categories')
-    categories.value = response.data || []
+    if (response && response.success) {
+      categories.value = response.data || []
+    }
   } catch (err) {
     console.error('Erreur lors du chargement des catégories:', err)
   }
@@ -254,7 +262,7 @@ const filteredProducts = computed(() => {
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(p => 
-      p.title.toLowerCase().includes(query) || 
+      p.name.toLowerCase().includes(query) || 
       p.description.toLowerCase().includes(query)
     )
   }
@@ -265,7 +273,7 @@ const filteredProducts = computed(() => {
   } else if (sortBy.value === 'price-desc') {
     filtered.sort((a, b) => b.price - a.price)
   } else if (sortBy.value === 'popular') {
-    filtered.sort((a, b) => (b.lottery?.sold_tickets || 0) - (a.lottery?.sold_tickets || 0))
+    filtered.sort((a, b) => (b.active_lottery?.sold_tickets || 0) - (a.active_lottery?.sold_tickets || 0))
   } else if (sortBy.value === 'newest') {
     filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
   }
@@ -279,9 +287,9 @@ const formatPrice = (price) => {
 }
 
 const calculateProgress = (product) => {
-  if (!product.lottery) return 0
-  const sold = product.lottery.sold_tickets || 0
-  const total = product.lottery.total_tickets || 1
+  if (!product.active_lottery) return 0
+  const sold = product.active_lottery.sold_tickets || 0
+  const total = product.active_lottery.total_tickets || 1
   return Math.round((sold / total) * 100)
 }
 
