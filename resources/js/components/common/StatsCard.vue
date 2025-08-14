@@ -1,7 +1,10 @@
 <template>
   <div class="koumbaya-card group hover:scale-105 transition-all duration-300 cursor-pointer">
     <div class="koumbaya-card-body">
-      <div class="flex items-center justify-between">
+      <div v-if="loading" class="flex items-center justify-center h-24">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+      <div v-else class="flex items-center justify-between">
         <div class="flex-1">
           <!-- Titre et valeur -->
           <div class="space-y-1">
@@ -130,6 +133,10 @@ const props = defineProps({
   actions: {
     type: Array,
     default: () => []
+  },
+  loading: {
+    type: Boolean,
+    default: false
   }
 })
 

@@ -216,6 +216,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useApi } from '@/composables/api'
 import {
   PlusIcon,
   ShoppingBagIcon,
@@ -228,97 +229,103 @@ import {
   TruckIcon
 } from '@heroicons/vue/24/outline'
 
+// API
+const { get, loading, error } = useApi()
+
 // Reactive data
 const selectedPeriod = ref('30j')
-const loading = ref(false)
+const stats = ref([])
+const salesSummary = ref({})
+const recentOrders = ref([])
+const topProducts = ref([])
 
-const stats = ref([
-  {
-    label: 'Revenus du mois',
-    value: '125,400',
-    change: 12.5,
-    icon: CurrencyDollarIcon,
-    color: 'bg-[#0099cc]'
-  },
-  {
-    label: 'Commandes',
-    value: '89',
-    change: 8.2,
-    icon: ShoppingBagIcon,
-    color: 'bg-blue-500'
-  },
-  {
-    label: 'Produits actifs',
-    value: '24',
-    change: -2.1,
-    icon: GiftIcon,
-    color: 'bg-yellow-500'
-  },
-  {
-    label: 'Clients',
-    value: '156',
-    change: 15.3,
-    icon: UsersIcon,
-    color: 'bg-purple-500'
+// API Functions
+const loadDashboardStats = async () => {
+  try {
+    const response = await get('/merchant/dashboard/stats')
+    if (response && response.data) {
+      const data = response.data
+      
+      stats.value = [
+        {
+          label: 'Revenus du mois',
+          value: formatPrice(data.monthly_revenue || 0),
+          change: data.revenue_change || 0,
+          icon: CurrencyDollarIcon,
+          color: 'bg-[#0099cc]'
+        },
+        {
+          label: 'Commandes',
+          value: data.total_orders || 0,
+          change: data.orders_change || 0,
+          icon: ShoppingBagIcon,
+          color: 'bg-blue-500'
+        },
+        {
+          label: 'Produits actifs',
+          value: data.active_products || 0,
+          change: data.products_change || 0,
+          icon: GiftIcon,
+          color: 'bg-yellow-500'
+        },
+        {
+          label: 'Clients',
+          value: data.total_customers || 0,
+          change: data.customers_change || 0,
+          icon: UsersIcon,
+          color: 'bg-purple-500'
+        }
+      ]
+
+      salesSummary.value = {
+        totalSales: data.total_sales || 0,
+        totalOrders: data.total_orders || 0,
+        avgOrder: data.average_order || 0
+      }
+    }
+  } catch (err) {
+    console.error('Erreur lors du chargement des statistiques:', err)
   }
-])
+}
 
-const salesSummary = ref({
-  totalSales: 1254000,
-  totalOrders: 89,
-  avgOrder: 14090
-})
-
-const recentOrders = ref([
-  {
-    id: 1,
-    product_name: 'iPhone 15 Pro',
-    customer_name: 'Jean Dupont',
-    amount: 5000,
-    status: 'completed',
-    created_at: new Date()
-  },
-  {
-    id: 2,
-    product_name: 'MacBook Pro M3',
-    customer_name: 'Marie Martin',
-    amount: 15000,
-    status: 'pending',
-    created_at: new Date()
-  },
-  {
-    id: 3,
-    product_name: 'AirPods Pro',
-    customer_name: 'Paul Durant',
-    amount: 2500,
-    status: 'completed',
-    created_at: new Date()
+const loadRecentOrders = async () => {
+  try {
+    const response = await get('/merchant/dashboard/recent-transactions')
+    if (response && response.data) {
+      recentOrders.value = response.data.map(order => ({
+        id: order.id,
+        product_name: order.product?.name || 'Produit inconnu',
+        customer_name: order.user?.first_name + ' ' + order.user?.last_name || 'Client inconnu',
+        amount: order.amount || 0,
+        status: order.status || 'pending',
+        created_at: new Date(order.created_at)
+      }))
+    }
+  } catch (err) {
+    console.error('Erreur lors du chargement des commandes récentes:', err)
   }
-])
+}
 
-const topProducts = ref([
-  {
-    id: 1,
-    name: 'iPhone 15 Pro Max',
-    sales: 45,
-    growth: 23.5,
-    image: '/images/products/placeholder.jpg'
-  },
-  {
-    id: 2,
-    name: 'MacBook Pro M3',
-    sales: 28,
-    growth: 18.2,
-    image: '/images/products/placeholder.jpg'
-  },
-  {
-    id: 3,
-    name: 'AirPods Pro 2',
-    sales: 21,
-    growth: -5.1,
-    image: '/images/products/placeholder.jpg'
+const loadTopProducts = async () => {
+  try {
+    const response = await get('/merchant/dashboard/top-products')
+    if (response && response.data) {
+      topProducts.value = response.data.map(product => ({
+        id: product.id,
+        name: product.name,
+        sales: product.sales_count || 0,
+        growth: product.growth_percentage || 0,
+        image: product.image || '/images/products/placeholder.jpg'
+      }))
+    }
+  } catch (err) {
+    console.error('Erreur lors du chargement des produits populaires:', err)
   }
-])
+}
+
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('fr-FR').format(price)
+}
 
 // Methods
 const getOrderStatusLabel = (status) => {
@@ -331,8 +338,11 @@ const getOrderStatusLabel = (status) => {
   return labels[status] || status
 }
 
-onMounted(() => {
-  // Load dashboard data
-  console.log('Merchant dashboard loaded')
+onMounted(async () => {
+  await Promise.all([
+    loadDashboardStats(),
+    loadRecentOrders(),
+    loadTopProducts()
+  ])
 })
 </script>

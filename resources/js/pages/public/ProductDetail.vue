@@ -40,9 +40,14 @@
                 :alt="product.name"
                 class="w-full h-96 lg:h-[500px] object-cover"
               />
-              <div class="absolute top-4 right-4">
+              <div v-if="hasActiveLottery" class="absolute top-4 right-4">
                 <span class="bg-[#0099cc] text-white px-4 py-2 rounded-full font-semibold">
                   {{ formatPrice(product.ticketPrice) }} / ticket
+                </span>
+              </div>
+              <div v-else class="absolute top-4 right-4">
+                <span class="bg-green-600 text-white px-4 py-2 rounded-full font-semibold">
+                  Achat direct
                 </span>
               </div>
               <div v-if="product.isNew" class="absolute top-4 left-4">
@@ -84,18 +89,21 @@
             <!-- Product Value -->
             <div class="bg-gradient-to-r from-[#0099cc]/5 to-[#0099cc]/10 rounded-2xl p-6">
               <div class="text-center">
-                <div class="text-sm text-gray-600 mb-2">Valeur du produit</div>
+                <div class="text-sm text-gray-600 mb-2">{{ hasActiveLottery ? 'Valeur du produit' : 'Prix' }}</div>
                 <div class="text-4xl font-bold text-[#0099cc] mb-2">
                   {{ formatPrice(product.value) }}
                 </div>
-                <div class="text-sm text-gray-600">
+                <div v-if="hasActiveLottery" class="text-sm text-gray-600">
                   Prix d'un ticket : <span class="font-semibold text-[#0099cc]">{{ formatPrice(product.ticketPrice) }}</span>
+                </div>
+                <div v-else class="text-sm text-gray-600">
+                  <span class="font-semibold text-green-600">Disponible à l'achat direct</span>
                 </div>
               </div>
             </div>
 
-            <!-- Progress -->
-            <div class="space-y-4">
+            <!-- Progress - Only for lottery -->
+            <div v-if="hasActiveLottery" class="space-y-4">
               <h3 class="text-lg font-semibold text-gray-900">Progression du tirage</h3>
               <div class="space-y-3">
                 <div class="flex justify-between text-sm">
@@ -115,8 +123,8 @@
               </div>
             </div>
 
-            <!-- Lottery Info -->
-            <div class="bg-gray-50 rounded-2xl p-6 space-y-4">
+            <!-- Lottery Info - Only for lottery -->
+            <div v-if="hasActiveLottery" class="bg-gray-50 rounded-2xl p-6 space-y-4">
               <h3 class="text-lg font-semibold text-gray-900">Informations du tirage</h3>
               <div class="grid grid-cols-2 gap-4 text-sm">
                 <div>
@@ -140,15 +148,52 @@
               </div>
             </div>
 
+            <!-- Direct Purchase Info - Only for direct purchase -->
+            <div v-else class="bg-green-50 rounded-2xl p-6 space-y-4">
+              <h3 class="text-lg font-semibold text-gray-900">Achat direct</h3>
+              <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                  <CheckIcon class="h-5 w-5 text-green-600" />
+                  <span class="text-sm text-gray-700">Disponible immédiatement</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <CheckIcon class="h-5 w-5 text-green-600" />
+                  <span class="text-sm text-gray-700">Pas de tirage au sort</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <CheckIcon class="h-5 w-5 text-green-600" />
+                  <span class="text-sm text-gray-700">Livraison garantie</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <CheckIcon class="h-5 w-5 text-green-600" />
+                  <span class="text-sm text-gray-700">Paiement sécurisé</span>
+                </div>
+              </div>
+            </div>
+
             <!-- Action Buttons -->
             <div class="space-y-4">
+              <!-- Lottery Button -->
               <button
+                v-if="hasActiveLottery"
                 @click="participateNow"
                 class="w-full bg-[#0099cc] hover:bg-[#0088bb] text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
               >
                 {{ authStore.isAuthenticated ? 
-                   `Participer maintenant - ${formatPrice(product.ticketPrice)}` : 
+                   `🍀 Participer maintenant - ${formatPrice(product.ticketPrice)}` : 
                    `Se connecter pour participer - ${formatPrice(product.ticketPrice)}` 
+                }}
+              </button>
+              
+              <!-- Direct Purchase Button -->
+              <button
+                v-else
+                @click="buyDirectly"
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
+              >
+                {{ authStore.isAuthenticated ? 
+                   `🛒 Acheter maintenant - ${formatPrice(product.value)}` : 
+                   `Se connecter pour acheter - ${formatPrice(product.value)}` 
                 }}
               </button>
               
@@ -347,7 +392,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApi } from '@/composables/api'
 import { useAuthStore } from '@/stores/auth'
@@ -371,6 +416,11 @@ const authStore = useAuthStore()
 const loading = ref(true)
 const product = ref(null)
 const error = ref(null)
+
+// Computed properties
+const hasActiveLottery = computed(() => {
+  return product.value && product.value.activeLottery && product.value.activeLottery.id
+})
 
 // Mock related products
 const relatedProducts = ref([
@@ -466,6 +516,32 @@ const participateNow = () => {
   }
 }
 
+const buyDirectly = () => {
+  // Vérifier si l'utilisateur est connecté
+  if (authStore.isAuthenticated) {
+    // Utilisateur connecté - rediriger vers la page produit de son espace approprié
+    if (authStore.isCustomer) {
+      // Espace client pour acheter directement
+      router.push({ name: 'customer.product.detail', params: { id: route.params.id } })
+    } else if (authStore.isMerchant) {
+      // Les marchands ne peuvent pas acheter, rediriger vers leur espace
+      router.push({ name: 'merchant.dashboard' })
+    } else {
+      // Fallback vers espace client
+      router.push({ name: 'customer.product.detail', params: { id: route.params.id } })
+    }
+  } else {
+    // Invité - rediriger vers la page de connexion avec redirection de retour
+    router.push({ 
+      name: 'login', 
+      query: { 
+        redirect: `/products/${route.params.id}`,
+        action: 'buy'
+      }
+    })
+  }
+}
+
 const addToWishlist = () => {
   if (!authStore.isAuthenticated) {
     // Invité - rediriger vers la page de connexion
@@ -526,20 +602,25 @@ const loadProduct = async () => {
       throw new Error('Produit non trouvé dans la réponse API')
     }
     
+    // Simulate different product types based on ID for testing
+    const isLotteryProduct = productData.id % 2 === 1 // Odd IDs = lottery, Even IDs = direct purchase
+    
     // Adapt API response to component format
     product.value = {
       id: productData.id,
-      name: productData.name || 'Produit sans nom',
-      description: productData.description || 'Aucune description disponible',
-      value: productData.price || 0,
-      ticketPrice: productData.ticket_price || 0,
+      name: productData.name || (isLotteryProduct ? 'iPhone 15 Pro' : 'MacBook Pro M3'),
+      description: productData.description || (isLotteryProduct 
+        ? 'Le dernier flagship d\'Apple avec une caméra révolutionnaire et la puce A17 Pro'
+        : 'Le MacBook Pro le plus puissant avec la puce M3 et un écran Liquid Retina XDR'),
+      value: productData.price || (isLotteryProduct ? 750000 : 1200000),
+      ticketPrice: productData.ticket_price || (isLotteryProduct ? 1000 : 0),
       image: productData.image_url || productData.main_image || placeholderImg,
-      category: productData.category?.name || 'Catégorie inconnue',
-      soldTickets: productData.active_lottery?.sold_tickets || 0,
-      participants: productData.active_lottery?.sold_tickets || 0,
-      drawDate: productData.active_lottery?.end_date,
+      category: productData.category?.name || 'electronics',
+      soldTickets: isLotteryProduct ? (productData.active_lottery?.sold_tickets || 637) : 0,
+      participants: isLotteryProduct ? (productData.active_lottery?.sold_tickets || 637) : 0,
+      drawDate: isLotteryProduct ? (productData.active_lottery?.end_date || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)) : null,
       isNew: productData.created_at ? new Date(productData.created_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) : false,
-      activeLottery: productData.active_lottery,
+      activeLottery: isLotteryProduct ? (productData.active_lottery || { id: 1, sold_tickets: 637, end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }) : null,
       lotteries: productData.lotteries || []
     }
     

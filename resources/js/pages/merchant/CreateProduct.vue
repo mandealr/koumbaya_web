@@ -73,6 +73,7 @@
               placeholder="Ex: iPhone 15 Pro Max 256GB"
             />
             <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
+            <p v-else-if="form.name && form.name.length < 3" class="mt-1 text-sm text-orange-600">Le nom doit contenir au moins 3 caractères</p>
           </div>
 
           <div class="lg:col-span-2">
@@ -87,6 +88,7 @@
               placeholder="Décrivez votre produit en détail..."
             ></textarea>
             <p v-if="errors.description" class="mt-1 text-sm text-red-600">{{ errors.description }}</p>
+            <p v-else-if="form.description && form.description.length < 10" class="mt-1 text-sm text-orange-600">La description doit contenir au moins 10 caractères</p>
           </div>
 
           <div>
@@ -96,13 +98,16 @@
             <select
               v-model="form.category_id"
               required
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
+              :disabled="apiLoading"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black disabled:opacity-50"
             >
               <option value="">Sélectionner une catégorie</option>
+              <option v-if="apiLoading" disabled>Chargement des catégories...</option>
               <option v-for="category in categories" :key="category.id" :value="category.id">
                 {{ category.name }}
               </option>
             </select>
+            <p v-if="errors.category_id" class="mt-1 text-sm text-red-600">{{ errors.category_id }}</p>
           </div>
 
           <div>
@@ -116,9 +121,8 @@
             >
               <option value="">État du produit</option>
               <option value="new">Neuf</option>
-              <option value="like_new">Comme neuf</option>
-              <option value="good">Bon état</option>
-              <option value="fair">État correct</option>
+              <option value="used">Occasion</option>
+              <option value="refurbished">Reconditionné</option>
             </select>
           </div>
 
@@ -127,13 +131,15 @@
               Valeur du produit (FCFA) *
             </label>
             <input
-              v-model="form.value"
+              v-model="form.price"
               type="number"
               required
               min="0"
               class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
               placeholder="Ex: 800000"
             />
+            <p v-if="errors.price" class="mt-1 text-sm text-red-600">{{ errors.price }}</p>
+            <p v-else-if="form.price && parseFloat(form.price) < 1000" class="mt-1 text-sm text-orange-600">La valeur minimum est de 1000 FCFA</p>
           </div>
 
           <div>
@@ -176,7 +182,7 @@
               ref="fileInput"
               type="file"
               multiple
-              accept="image/*"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
               @change="handleFileSelect"
               class="hidden"
             />
@@ -217,6 +223,8 @@
                   <li>• Prenez plusieurs angles du produit</li>
                   <li>• La première image sera la photo principale</li>
                   <li>• Maximum 10 images par produit</li>
+                  <li>• Formats acceptés : JPG, PNG, WebP</li>
+                  <li>• Taille maximum : 5MB par image</li>
                 </ul>
               </div>
             </div>
@@ -241,8 +249,11 @@
               class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
               placeholder="Ex: 2500"
               @input="calculateLotteryMetrics"
+              @blur="validateTicketPrice"
             />
-            <p class="text-sm text-gray-500 mt-1">Minimum 100 FCFA</p>
+            <p v-if="errors.ticket_price" class="mt-1 text-sm text-red-600">{{ errors.ticket_price }}</p>
+            <p v-else-if="form.ticket_price && parseFloat(form.ticket_price) < 100" class="mt-1 text-sm text-orange-600">Le prix minimum est de 100 FCFA</p>
+            <p v-else class="text-sm text-gray-500 mt-1">Minimum 100 FCFA</p>
           </div>
 
           <div>
@@ -258,8 +269,11 @@
               class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
               placeholder="Ex: 400"
               @input="calculateLotteryMetrics"
+              @blur="validateTotalTickets"
             />
-            <p class="text-sm text-gray-500 mt-1">Entre 10 et 10,000 tickets</p>
+            <p v-if="errors.total_tickets" class="mt-1 text-sm text-red-600">{{ errors.total_tickets }}</p>
+            <p v-else-if="form.total_tickets && (parseInt(form.total_tickets) < 10 || parseInt(form.total_tickets) > 10000)" class="mt-1 text-sm text-orange-600">Entre 10 et 10,000 tickets</p>
+            <p v-else class="text-sm text-gray-500 mt-1">Entre 10 et 10,000 tickets</p>
           </div>
 
           <div>
@@ -271,8 +285,11 @@
               type="datetime-local"
               required
               :min="minDate"
+              @change="validateEndDate"
               class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
             />
+            <p v-if="errors.end_date" class="mt-1 text-sm text-red-600">{{ errors.end_date }}</p>
+            <p v-else-if="form.end_date && new Date(form.end_date) <= new Date()" class="mt-1 text-sm text-orange-600">La date de fin doit être dans le futur</p>
           </div>
 
           <div>
@@ -287,7 +304,9 @@
               class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
               placeholder="Ex: 200"
             />
-            <p class="text-sm text-gray-500 mt-1">Si pas atteint, remboursement automatique</p>
+            <p v-if="errors.min_tickets" class="mt-1 text-sm text-red-600">{{ errors.min_tickets }}</p>
+            <p v-else-if="form.min_tickets && form.total_tickets && parseInt(form.min_tickets) > parseInt(form.total_tickets)" class="mt-1 text-sm text-orange-600">Ne peut pas dépasser le nombre total de tickets</p>
+            <p v-else class="text-sm text-gray-500 mt-1">Si pas atteint, remboursement automatique</p>
           </div>
 
           <!-- Lottery Metrics -->
@@ -328,7 +347,7 @@
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-600">Valeur :</span>
-                <span class="font-medium">{{ formatAmount(form.value) }} FCFA</span>
+                <span class="font-medium">{{ formatAmount(form.price) }} FCFA</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-600">Condition :</span>
@@ -412,8 +431,8 @@
           v-if="currentStep < steps.length"
           @click="nextStep"
           type="button"
-          class="inline-flex items-center px-6 py-3 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-lg transition-colors"
-          :disabled="!canProceed"
+          class="inline-flex items-center px-6 py-3 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="!canProceed || apiLoading"
         >
           Suivant
           <ArrowRightIcon class="w-4 h-4 ml-2" />
@@ -422,12 +441,12 @@
         <button
           v-if="currentStep === steps.length"
           type="submit"
-          :disabled="loading || !canProceed"
-          class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg transition-colors"
+          :disabled="loading || !canProceed || apiLoading"
+          class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
         >
-          <span v-if="loading" class="flex items-center">
+          <span v-if="loading || apiLoading" class="flex items-center">
             <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-            Publication...
+            {{ loading ? 'Publication...' : 'Chargement...' }}
           </span>
           <span v-else class="flex items-center">
             <RocketLaunchIcon class="w-4 h-4 mr-2" />
@@ -442,6 +461,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useApi } from '../../composables/api'
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -453,6 +473,7 @@ import {
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
+const { get, post, loading: apiLoading, error: apiError } = useApi()
 
 // State
 const currentStep = ref(1)
@@ -466,28 +487,22 @@ const steps = [
   { id: 4, title: 'Publication', description: 'Vérification', icon: RocketLaunchIcon }
 ]
 
-const categories = ref([
-  { id: 1, name: 'Électronique' },
-  { id: 2, name: 'Mode & Accessoires' },
-  { id: 3, name: 'Maison & Jardin' },
-  { id: 4, name: 'Sport & Loisirs' },
-  { id: 5, name: 'Automobile' },
-  { id: 6, name: 'Autres' }
-])
+const categories = ref([])
 
 const form = reactive({
   name: '',
   description: '',
   category_id: '',
   condition: '',
-  value: '',
+  price: '', // Changed from 'value' to 'price' to match API
   location: '',
   images: [],
   ticket_price: '',
   total_tickets: '',
-  min_tickets: '',
+  min_tickets: '', // This will be 'min_participants' in the API
   end_date: '',
-  terms_accepted: false
+  terms_accepted: false,
+  duration_days: 7 // Pour la création de la tombola
 })
 
 const errors = reactive({
@@ -515,7 +530,7 @@ const lotteryMetrics = computed(() => {
   const totalRevenue = (form.ticket_price || 0) * (form.total_tickets || 0)
   const platformFee = totalRevenue * 0.05
   const netRevenue = totalRevenue - platformFee
-  const profitMargin = form.value ? Math.round(((netRevenue - form.value) / form.value) * 100) : 0
+  const profitMargin = form.price ? Math.round(((netRevenue - form.price) / form.price) * 100) : 0
 
   return {
     totalRevenue,
@@ -528,17 +543,62 @@ const lotteryMetrics = computed(() => {
 const canProceed = computed(() => {
   switch (currentStep.value) {
     case 1:
-      return form.name && form.description && form.category_id && form.condition && form.value && form.location
+      return validateStep1()
     case 2:
-      return form.images.length > 0
+      return true // Images are optional according to API
     case 3:
-      return form.ticket_price && form.total_tickets && form.min_tickets && form.end_date
+      return validateStep3()
     case 4:
       return form.terms_accepted
     default:
       return false
   }
 })
+
+// Validation functions
+const validateStep1 = () => {
+  const isValid = form.name && 
+                  form.description && 
+                  form.category_id && 
+                  form.condition && 
+                  form.price && 
+                  form.location &&
+                  parseFloat(form.price) >= 1000 // Minimum price according to API
+  
+  // Clear step 1 errors if valid
+  if (isValid) {
+    errors.name = ''
+    errors.description = ''
+    errors.category_id = ''
+    errors.condition = ''
+    errors.price = ''
+    errors.location = ''
+  }
+  
+  return isValid
+}
+
+const validateStep3 = () => {
+  const isValid = form.ticket_price && 
+                  form.total_tickets && 
+                  form.min_tickets && 
+                  form.end_date &&
+                  parseFloat(form.ticket_price) >= 100 && // Minimum ticket price
+                  parseInt(form.total_tickets) >= 10 && // Minimum tickets
+                  parseInt(form.min_tickets) >= 10 &&
+                  parseInt(form.min_tickets) <= parseInt(form.total_tickets) &&
+                  new Date(form.end_date) > new Date() // End date in future
+  
+  // Clear step 3 errors if valid
+  if (isValid) {
+    errors.ticket_price = ''
+    errors.total_tickets = ''
+    errors.min_tickets = ''
+    errors.end_date = ''
+  }
+  
+  return isValid
+}
 
 // Methods
 const nextStep = () => {
@@ -568,10 +628,24 @@ const handleFileDrop = (event) => {
 }
 
 const handleFiles = (files) => {
-  const validFiles = files.filter(file => file.type.startsWith('image/'))
+  const validFiles = files.filter(file => {
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      showErrorToast(`Le fichier ${file.name} n'est pas une image valide`)
+      return false
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showErrorToast(`Le fichier ${file.name} est trop volumineux (max 5MB)`)
+      return false
+    }
+    
+    return true
+  })
 
   if (form.images.length + validFiles.length > 10) {
-    alert('Maximum 10 images autorisées')
+    showErrorToast('Maximum 10 images autorisées')
     return
   }
 
@@ -581,11 +655,21 @@ const handleFiles = (files) => {
       form.images.push({
         file: file,
         preview: e.target?.result,
-        name: file.name
+        name: file.name,
+        size: file.size,
+        type: file.type
       })
+    }
+    reader.onerror = () => {
+      showErrorToast(`Erreur lors de la lecture du fichier ${file.name}`)
     }
     reader.readAsDataURL(file)
   })
+
+  // Clear the file input
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
 }
 
 const removeImage = (index) => {
@@ -614,32 +698,168 @@ const formatDate = (dateString) => {
 const getConditionLabel = (condition) => {
   const labels = {
     'new': 'Neuf',
-    'like_new': 'Comme neuf',
-    'good': 'Bon état',
-    'fair': 'État correct'
+    'used': 'Occasion',
+    'refurbished': 'Reconditionné'
   }
   return labels[condition] || condition
 }
 
 const handleSubmit = async () => {
   loading.value = true
+  clearErrors()
 
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    // Calculate total tickets based on price and ticket price
+    const calculatedTotalTickets = Math.ceil(form.price / form.ticket_price)
+    
+    // Prepare product data
+    const productData = {
+      name: form.name,
+      description: form.description,
+      category_id: parseInt(form.category_id),
+      price: parseFloat(form.price),
+      ticket_price: parseFloat(form.ticket_price),
+      min_participants: parseInt(form.min_tickets),
+      images: form.images.map(img => img.preview) // For now, use base64 images
+    }
 
-    alert('Produit publié avec succès ! Votre tombola est maintenant en ligne.')
-    router.push('/merchant/products')
+    // Create product
+    const productResponse = await post('/products', productData)
+    
+    if (productResponse.product) {
+      // Create lottery for the product
+      const lotteryData = {
+        duration_days: calculateDurationDays()
+      }
+      
+      try {
+        await post(`/products/${productResponse.product.id}/create-lottery`, lotteryData)
+        showSuccessToast('Produit et tombola créés avec succès !')
+      } catch (lotteryError) {
+        console.error('Error creating lottery:', lotteryError)
+        showWarningToast('Produit créé mais erreur lors de la création de la tombola')
+      }
+      
+      // Redirect to products list
+      setTimeout(() => {
+        router.push('/merchant/products')
+      }, 1500)
+    }
 
   } catch (error) {
     console.error('Error creating product:', error)
-    alert('Erreur lors de la publication. Veuillez réessayer.')
+    handleApiError(error)
   } finally {
     loading.value = false
   }
 }
 
+// Helper functions
+const clearErrors = () => {
+  Object.keys(errors).forEach(key => {
+    errors[key] = ''
+  })
+}
+
+const handleApiError = (error) => {
+  if (error.response?.data?.errors) {
+    // Validation errors
+    const validationErrors = error.response.data.errors
+    Object.keys(validationErrors).forEach(key => {
+      if (errors[key] !== undefined) {
+        errors[key] = validationErrors[key][0]
+      }
+    })
+    showErrorToast('Veuillez corriger les erreurs dans le formulaire')
+  } else if (error.response?.data?.message) {
+    showErrorToast(error.response.data.message)
+  } else {
+    showErrorToast('Une erreur est survenue. Veuillez réessayer.')
+  }
+}
+
+const calculateDurationDays = () => {
+  if (!form.end_date) return 7
+  const endDate = new Date(form.end_date)
+  const now = new Date()
+  const diffTime = Math.abs(endDate - now)
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  return Math.min(Math.max(diffDays, 1), 30) // Between 1 and 30 days
+}
+
+const showSuccessToast = (message) => {
+  // TODO: Implement toast notification
+  alert(message)
+}
+
+const showErrorToast = (message) => {
+  // TODO: Implement toast notification
+  alert('Erreur: ' + message)
+}
+
+const showWarningToast = (message) => {
+  // TODO: Implement toast notification
+  alert('Attention: ' + message)
+}
+
+// Validation helper
+const validateEndDate = () => {
+  if (form.end_date) {
+    const selectedDate = new Date(form.end_date)
+    const now = new Date()
+    const maxDate = new Date()
+    maxDate.setDate(maxDate.getDate() + 30)
+    
+    if (selectedDate <= now) {
+      errors.end_date = 'La date de fin doit être dans le futur'
+    } else if (selectedDate > maxDate) {
+      errors.end_date = 'La date de fin ne peut pas dépasser 30 jours'
+    } else {
+      errors.end_date = ''
+    }
+  }
+}
+
+// Additional validation helpers
+const validateTicketPrice = () => {
+  if (form.ticket_price) {
+    const price = parseFloat(form.ticket_price)
+    if (price < 100) {
+      errors.ticket_price = 'Le prix minimum est de 100 FCFA'
+    } else {
+      errors.ticket_price = ''
+    }
+  }
+}
+
+const validateTotalTickets = () => {
+  if (form.total_tickets) {
+    const tickets = parseInt(form.total_tickets)
+    if (tickets < 10) {
+      errors.total_tickets = 'Minimum 10 tickets requis'
+    } else if (tickets > 10000) {
+      errors.total_tickets = 'Maximum 10,000 tickets autorisés'
+    } else {
+      errors.total_tickets = ''
+    }
+  }
+}
+
+// Load categories on mount
+const loadCategories = async () => {
+  try {
+    const response = await get('/categories')
+    if (response.data) {
+      categories.value = response.data
+    }
+  } catch (error) {
+    console.error('Error loading categories:', error)
+    showErrorToast('Erreur lors du chargement des catégories')
+  }
+}
+
 onMounted(() => {
-  console.log('Create product page loaded')
+  loadCategories()
+  console.log('CreateProduct page loaded')
 })
 </script>

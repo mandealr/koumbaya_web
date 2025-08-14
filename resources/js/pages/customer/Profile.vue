@@ -445,9 +445,10 @@ import {
   DevicePhoneMobileIcon,
   ComputerDesktopIcon
 } from '@heroicons/vue/24/outline'
-import api from '@/composables/api'
+import { useApi } from '@/composables/api'
 
 const authStore = useAuthStore()
+const { get, put, post, loading, error } = useApi()
 
 const activeTab = ref('personal')
 const updatingPersonal = ref(false)
@@ -465,21 +466,21 @@ const tabs = [
 ]
 
 const user = reactive({
-  id: 1,
-  first_name: 'Jean',
-  last_name: 'Dupont',
-  email: 'jean.dupont@example.com',
-  phone: '+33 6 12 34 56 78',
-  birth_date: '1990-01-15',
-  gender: 'male',
+  id: null,
+  first_name: '',
+  last_name: '',
+  email: '',
+  phone: '',
+  birth_date: '',
+  gender: '',
   avatar: null,
   two_factor_enabled: false,
   address: {
-    address: '123 Rue de la Paix',
-    city: 'Paris',
-    postal_code: '75001',
-    country_id: 1,
-    state: 'Île-de-France'
+    address: '',
+    city: '',
+    postal_code: '',
+    country_id: null,
+    state: ''
   }
 })
 
@@ -506,33 +507,10 @@ const passwordForm = reactive({
   confirm_password: ''
 })
 
-const countries = ref([
-  { id: 1, name: 'France' },
-  { id: 2, name: 'Sénégal' },
-  { id: 3, name: 'Côte d\'Ivoire' },
-  { id: 4, name: 'Mali' }
-])
+const countries = ref([])
+const states = ref([])
 
-const states = ref(['Île-de-France', 'Provence-Alpes-Côte d\'Azur', 'Nouvelle-Aquitaine', 'Occitanie'])
-
-const loginSessions = ref([
-  {
-    id: 1,
-    device_name: 'Chrome sur Windows',
-    device_type: 'desktop',
-    location: 'Paris, France',
-    last_active: new Date(),
-    is_current: true
-  },
-  {
-    id: 2,
-    device_name: 'Safari sur iPhone',
-    device_type: 'mobile',
-    location: 'Lyon, France',
-    last_active: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    is_current: false
-  }
-])
+const loginSessions = ref([])
 
 const notificationCategories = [
   {
@@ -585,11 +563,16 @@ const notificationForm = reactive({
 const updatePersonalInfo = async () => {
   updatingPersonal.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    Object.assign(user, personalForm)
-    console.log('Personal info updated')
+    const response = await put('/user/profile', personalForm)
+    if (response && response.success) {
+      Object.assign(user, personalForm)
+      alert('✅ Informations personnelles mises à jour avec succès')
+    } else {
+      throw new Error(response?.message || 'Erreur lors de la mise à jour')
+    }
   } catch (error) {
     console.error('Error updating personal info:', error)
+    alert('❌ Erreur lors de la mise à jour des informations personnelles')
   } finally {
     updatingPersonal.value = false
   }
@@ -598,11 +581,16 @@ const updatePersonalInfo = async () => {
 const updateAddress = async () => {
   updatingAddress.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    Object.assign(user.address, addressForm)
-    console.log('Address updated')
+    const response = await put('/user/profile', { address: addressForm })
+    if (response && response.success) {
+      Object.assign(user.address, addressForm)
+      alert('✅ Adresse mise à jour avec succès')
+    } else {
+      throw new Error(response?.message || 'Erreur lors de la mise à jour')
+    }
   } catch (error) {
     console.error('Error updating address:', error)
+    alert('❌ Erreur lors de la mise à jour de l\'adresse')
   } finally {
     updatingAddress.value = false
   }
@@ -610,21 +598,31 @@ const updateAddress = async () => {
 
 const updatePassword = async () => {
   if (passwordForm.new_password !== passwordForm.confirm_password) {
-    alert('Les mots de passe ne correspondent pas')
+    alert('❌ Les mots de passe ne correspondent pas')
     return
   }
 
   updatingPassword.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    Object.assign(passwordForm, {
-      current_password: '',
-      new_password: '',
-      confirm_password: ''
+    const response = await put('/user/password', {
+      current_password: passwordForm.current_password,
+      new_password: passwordForm.new_password,
+      new_password_confirmation: passwordForm.confirm_password
     })
-    console.log('Password updated')
+    
+    if (response && response.success) {
+      Object.assign(passwordForm, {
+        current_password: '',
+        new_password: '',
+        confirm_password: ''
+      })
+      alert('✅ Mot de passe mis à jour avec succès')
+    } else {
+      throw new Error(response?.message || 'Erreur lors de la mise à jour')
+    }
   } catch (error) {
     console.error('Error updating password:', error)
+    alert('❌ Erreur lors de la mise à jour du mot de passe')
   } finally {
     updatingPassword.value = false
   }
@@ -633,10 +631,15 @@ const updatePassword = async () => {
 const updateNotifications = async () => {
   updatingNotifications.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    console.log('Notifications updated')
+    const response = await put('/user/preferences', { notifications: notificationForm })
+    if (response && response.success) {
+      alert('✅ Préférences de notifications mises à jour')
+    } else {
+      throw new Error(response?.message || 'Erreur lors de la mise à jour')
+    }
   } catch (error) {
     console.error('Error updating notifications:', error)
+    alert('❌ Erreur lors de la mise à jour des notifications')
   } finally {
     updatingNotifications.value = false
   }
@@ -686,8 +689,54 @@ const uploadAvatar = async () => {
   }
 }
 
+// API Loading functions
+const loadUserProfile = async () => {
+  try {
+    const response = await get('/user/profile')
+    if (response && response.data) {
+      Object.assign(user, response.data)
+      // Sync forms with loaded data
+      Object.assign(personalForm, {
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        phone: user.phone,
+        birth_date: user.birth_date,
+        gender: user.gender
+      })
+      if (user.address) {
+        Object.assign(addressForm, user.address)
+      }
+    }
+  } catch (error) {
+    console.error('Error loading user profile:', error)
+  }
+}
+
+const loadCountries = async () => {
+  try {
+    const response = await get('/countries')
+    if (response && response.data) {
+      countries.value = response.data
+    }
+  } catch (error) {
+    console.error('Error loading countries:', error)
+  }
+}
+
+const loadUserPreferences = async () => {
+  try {
+    const response = await get('/user/preferences')
+    if (response && response.data) {
+      Object.assign(notificationForm, response.data.notifications || {})
+    }
+  } catch (error) {
+    console.error('Error loading user preferences:', error)
+  }
+}
+
 const loadStates = () => {
-  // Mock loading states based on country
+  // This could be enhanced to load states from API based on country
   if (addressForm.country_id === 1) {
     states.value = ['Île-de-France', 'Provence-Alpes-Côte d\'Azur', 'Nouvelle-Aquitaine', 'Occitanie']
   } else {
@@ -705,8 +754,11 @@ const formatDate = (date) => {
   }).format(new Date(date))
 }
 
-onMounted(() => {
-  // Load user profile data
-  console.log('Profile page mounted')
+onMounted(async () => {
+  await Promise.all([
+    loadUserProfile(),
+    loadCountries(),
+    loadUserPreferences()
+  ])
 })
 </script>

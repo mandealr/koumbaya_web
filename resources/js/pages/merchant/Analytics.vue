@@ -5,59 +5,126 @@
       <p class="mt-2 text-gray-600">Analyse de vos performances de vente</p>
     </div>
 
+    <!-- Filtres de période -->
+    <div class="mb-6">
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Période</label>
+            <select v-model="selectedPeriod" @change="loadAnalytics" 
+                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+              <option value="today">Aujourd'hui</option>
+              <option value="yesterday">Hier</option>
+              <option value="this_week">Cette semaine</option>
+              <option value="last_week">Semaine dernière</option>
+              <option value="this_month">Ce mois</option>
+              <option value="last_month">Mois dernier</option>
+              <option value="this_year">Cette année</option>
+              <option value="custom">Période personnalisée</option>
+            </select>
+          </div>
+          
+          <div v-if="selectedPeriod === 'custom'" class="flex gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Date début</label>
+              <input v-model="customDateStart" @change="loadAnalytics" type="date"
+                     class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Date fin</label>
+              <input v-model="customDateEnd" @change="loadAnalytics" type="date"
+                     class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+          </div>
+          
+          <div class="flex items-end">
+            <button @click="loadAnalytics" :disabled="loading"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+              <span v-if="loading">Chargement...</span>
+              <span v-else>Actualiser</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
       <StatsCard
         title="Revenus Totaux"
-        :value="2850000"
+        :value="stats.total_revenue || 0"
         format="currency"
-        :change="12.5"
+        :change="stats.revenue_change || 0"
         color="green"
         :icon="CurrencyDollarIcon"
+        :loading="loading"
         :actions="[{label: 'Détails', primary: true}]"
       />
       
       <StatsCard
         title="Ventes ce mois"
-        :value="156"
-        :change="8.2"
+        :value="stats.monthly_sales || 0"
+        :change="stats.sales_change || 0"
         color="blue"
         :icon="ShoppingBagIcon"
+        :loading="loading"
         :show-progress="true"
-        :progress-value="156"
-        :progress-target="200"
+        :progress-value="stats.monthly_sales || 0"
+        :progress-target="stats.sales_target || 200"
       />
       
       <StatsCard
         title="Produits Actifs"
-        :value="24"
-        :change="-2.1"
+        :value="stats.active_products || 0"
+        :change="stats.products_change || 0"
         color="purple"
         :icon="GiftIcon"
+        :loading="loading"
       />
       
       <StatsCard
         title="Taux Conversion"
-        :value="24.8"
+        :value="stats.conversion_rate || 0"
         format="percentage"
-        :change="5.4"
+        :change="stats.conversion_change || 0"
         color="orange"
         :icon="ChartBarIcon"
+        :loading="loading"
       />
     </div>
 
-    <!-- Charts Placeholder -->
+    <!-- Charts -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       <div class="koumbaya-card">
         <div class="koumbaya-card-header">
-          <h3 class="koumbaya-heading-4">Évolution des Revenus</h3>
+          <h3 class="koumbaya-heading-4">Évolution des Ventes</h3>
         </div>
         <div class="koumbaya-card-body">
-          <div class="h-64 bg-gradient-to-br from-blue-50 to-blue-50 rounded-lg flex items-center justify-center">
+          <div v-if="loading" class="h-64 bg-gradient-to-br from-blue-50 to-blue-50 rounded-lg flex items-center justify-center">
+            <div class="text-center">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p class="text-gray-500">Chargement...</p>
+            </div>
+          </div>
+          <div v-else-if="salesChart && salesChart.length > 0" class="h-64">
+            <!-- Graphique simple en barres avec les données de l'API -->
+            <div class="h-full flex items-end justify-between space-x-2 p-4">
+              <div v-for="(data, index) in salesChart.slice(-7)" :key="index" class="flex-1 flex flex-col items-center">
+                <div class="w-full bg-blue-200 rounded-t" 
+                     :style="{ height: `${Math.max(10, (data.sales / Math.max(...salesChart.map(d => d.sales)) * 180))}px` }">
+                  <div class="w-full bg-blue-600 rounded-t" 
+                       :style="{ height: `${Math.max(5, (data.sales / Math.max(...salesChart.map(d => d.sales)) * 180))}px` }">
+                  </div>
+                </div>
+                <span class="text-xs text-gray-600 mt-2">{{ formatDate(data.date) }}</span>
+                <span class="text-xs font-medium text-gray-900">{{ data.sales }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-else class="h-64 bg-gradient-to-br from-blue-50 to-blue-50 rounded-lg flex items-center justify-center">
             <div class="text-center">
               <ChartBarIcon class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p class="text-gray-500">Graphique des revenus</p>
-              <p class="text-sm text-gray-400">Chart.js sera intégré prochainement</p>
+              <p class="text-gray-500">Aucune donnée disponible</p>
             </div>
           </div>
         </div>
@@ -65,14 +132,36 @@
 
       <div class="koumbaya-card">
         <div class="koumbaya-card-header">
-          <h3 class="koumbaya-heading-4">Répartition par Catégorie</h3>
+          <h3 class="koumbaya-heading-4">Performance des Tombolas</h3>
         </div>
         <div class="koumbaya-card-body">
-          <div class="h-64 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg flex items-center justify-center">
+          <div v-if="loading" class="h-64 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg flex items-center justify-center">
+            <div class="text-center">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+              <p class="text-gray-500">Chargement...</p>
+            </div>
+          </div>
+          <div v-else-if="lotteryPerformance && lotteryPerformance.length > 0" class="h-64 overflow-y-auto">
+            <div class="space-y-3">
+              <div v-for="lottery in lotteryPerformance.slice(0, 5)" :key="lottery.id" 
+                   class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <h4 class="font-medium text-gray-900">{{ lottery.name }}</h4>
+                  <p class="text-sm text-gray-600">{{ lottery.tickets_sold }} tickets vendus</p>
+                </div>
+                <div class="text-right">
+                  <p class="font-medium text-gray-900">{{ formatPrice(lottery.revenue) }}</p>
+                  <p class="text-sm" :class="lottery.performance_change >= 0 ? 'text-green-600' : 'text-red-600'">
+                    {{ lottery.performance_change >= 0 ? '+' : '' }}{{ lottery.performance_change }}%
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="h-64 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg flex items-center justify-center">
             <div class="text-center">
               <ChartPieIcon class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p class="text-gray-500">Graphique en camembert</p>
-              <p class="text-sm text-gray-400">Chart.js sera intégré prochainement</p>
+              <p class="text-gray-500">Aucune tombola disponible</p>
             </div>
           </div>
         </div>
@@ -85,7 +174,11 @@
         <h3 class="koumbaya-heading-4">Top Produits</h3>
       </div>
       <div class="koumbaya-card-body">
-        <div class="overflow-x-auto">
+        <div v-if="loading" class="flex justify-center items-center h-32">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span class="ml-2 text-gray-600">Chargement des produits...</span>
+        </div>
+        <div v-else-if="topProducts && topProducts.length > 0" class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -108,7 +201,9 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="flex-shrink-0 h-10 w-10">
-                      <img :src="product.image" :alt="product.name" class="h-10 w-10 rounded-lg object-cover">
+                      <img :src="product.image || '/images/products/placeholder.jpg'" 
+                           :alt="product.name" 
+                           class="h-10 w-10 rounded-lg object-cover bg-gray-100">
                     </div>
                     <div class="ml-4">
                       <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
@@ -117,23 +212,32 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ product.sales }}
+                  {{ product.sales_count || product.sales || 0 }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ formatPrice(product.revenue) }}
+                  {{ formatPrice(product.total_revenue || product.revenue || 0) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <ArrowTrendingUpIcon v-if="product.trend > 0" class="w-4 h-4 text-blue-500 mr-1" />
-                    <ArrowTrendingDownIcon v-else class="w-4 h-4 text-red-500 mr-1" />
-                    <span :class="product.trend > 0 ? 'text-blue-600' : 'text-red-600'" class="text-sm font-medium">
-                      {{ Math.abs(product.trend) }}%
+                    <ArrowTrendingUpIcon v-if="(product.trend || product.performance_change || 0) > 0" 
+                                         class="w-4 h-4 text-green-500 mr-1" />
+                    <ArrowTrendingDownIcon v-else-if="(product.trend || product.performance_change || 0) < 0" 
+                                           class="w-4 h-4 text-red-500 mr-1" />
+                    <span v-if="(product.trend || product.performance_change || 0) !== 0"
+                          :class="(product.trend || product.performance_change || 0) > 0 ? 'text-green-600' : 'text-red-600'" 
+                          class="text-sm font-medium">
+                      {{ Math.abs(product.trend || product.performance_change || 0) }}%
                     </span>
+                    <span v-else class="text-sm text-gray-500">-</span>
                   </div>
                 </td>
               </tr>
             </tbody>
           </table>
+        </div>
+        <div v-else class="text-center py-8">
+          <GiftIcon class="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p class="text-gray-500">Aucun produit trouvé pour cette période</p>
         </div>
       </div>
     </div>
@@ -141,7 +245,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useApi } from '@/composables/api.js'
 import StatsCard from '@/components/common/StatsCard.vue'
 import {
   CurrencyDollarIcon,
@@ -153,45 +258,85 @@ import {
 } from '@heroicons/vue/24/outline'
 import { ShoppingBagIcon } from '@heroicons/vue/24/solid'
 
-// Données mockées
-const topProducts = ref([
-  {
-    id: 1,
-    name: 'iPhone 15 Pro',
-    category: 'Électronique',
-    sales: 45,
-    revenue: 850000,
-    trend: 12.5,
-    image: '/images/products/placeholder.jpg'
-  },
-  {
-    id: 2,
-    name: 'MacBook Pro M3',
-    category: 'Informatique',
-    sales: 28,
-    revenue: 1200000,
-    trend: 8.2,
-    image: '/images/products/placeholder.jpg'
-  },
-  {
-    id: 3,
-    name: 'PlayStation 5',
-    category: 'Gaming',
-    sales: 62,
-    revenue: 750000,
-    trend: -2.3,
-    image: '/images/products/placeholder.jpg'
-  },
-  {
-    id: 4,
-    name: 'Samsung Galaxy S24',
-    category: 'Électronique',
-    sales: 21,
-    revenue: 450000,
-    trend: 15.8,
-    image: '/images/products/placeholder.jpg'
+// Composables
+const { loading, error, get } = useApi()
+
+// State
+const stats = ref({})
+const salesChart = ref([])
+const topProducts = ref([])
+const lotteryPerformance = ref([])
+
+// Filtres
+const selectedPeriod = ref('this_month')
+const customDateStart = ref('')
+const customDateEnd = ref('')
+
+// Computed
+const filterParams = computed(() => {
+  const params = { period: selectedPeriod.value }
+  
+  if (selectedPeriod.value === 'custom') {
+    if (customDateStart.value) params.start_date = customDateStart.value
+    if (customDateEnd.value) params.end_date = customDateEnd.value
   }
-])
+  
+  return params
+})
+
+// Methods
+const loadAnalytics = async () => {
+  try {
+    await Promise.all([
+      loadStats(),
+      loadSalesChart(),
+      loadTopProducts(),
+      loadLotteryPerformance()
+    ])
+  } catch (err) {
+    console.error('Erreur lors du chargement des analytics:', err)
+  }
+}
+
+const loadStats = async () => {
+  try {
+    const response = await get('/merchant/dashboard/stats', { params: filterParams.value })
+    stats.value = response
+  } catch (err) {
+    console.error('Erreur lors du chargement des stats:', err)
+    stats.value = {}
+  }
+}
+
+const loadSalesChart = async () => {
+  try {
+    const response = await get('/merchant/dashboard/sales-chart', { params: filterParams.value })
+    salesChart.value = response.data || []
+  } catch (err) {
+    console.error('Erreur lors du chargement du graphique des ventes:', err)
+    salesChart.value = []
+  }
+}
+
+const loadTopProducts = async () => {
+  try {
+    const response = await get('/merchant/dashboard/top-products', { params: filterParams.value })
+    topProducts.value = response.data || []
+  } catch (err) {
+    console.error('Erreur lors du chargement des top produits:', err)
+    topProducts.value = []
+  }
+}
+
+const loadLotteryPerformance = async () => {
+  try {
+    const response = await get('/merchant/dashboard/lottery-performance', { params: filterParams.value })
+    lotteryPerformance.value = response.data || []
+  } catch (err) {
+    console.error('Erreur lors du chargement de la performance des tombolas:', err)
+    lotteryPerformance.value = []
+  }
+}
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('fr-FR', {
@@ -200,4 +345,18 @@ const formatPrice = (price) => {
     minimumFractionDigits: 0
   }).format(price || 0).replace('XAF', 'FCFA')
 }
+
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('fr-FR', { 
+    month: 'short', 
+    day: 'numeric' 
+  })
+}
+
+// Lifecycle
+onMounted(() => {
+  loadAnalytics()
+})
 </script>

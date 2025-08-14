@@ -49,10 +49,13 @@
               class="w-full py-3 px-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all"
             >
               <option value="">Toutes catégories</option>
-              <option value="electronics">Électronique</option>
-              <option value="fashion">Mode</option>
-              <option value="automotive">Automobile</option>
-              <option value="home">Maison</option>
+              <option 
+                v-for="category in categories" 
+                :key="category.id" 
+                :value="category.id"
+              >
+                {{ category.name }}
+              </option>
             </select>
           </div>
 
@@ -97,17 +100,17 @@
             <div class="relative overflow-hidden rounded-xl mb-4">
               <img
                 :src="product.image || placeholderImg"
-                :alt="product.name"
+                :alt="product.title"
                 class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <div class="absolute top-3 right-3">
                 <span class="bg-[#0099cc] text-white px-3 py-1 rounded-full text-xs font-medium">
-                  {{ product.ticketPrice }} FCFA
+                  {{ formatPrice(product.lottery?.ticket_price || 1000) }} FCFA
                 </span>
               </div>
-              <div v-if="product.isNew" class="absolute top-3 left-3">
+              <div v-if="product.featured" class="absolute top-3 left-3">
                 <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                  Nouveau
+                  Vedette
                 </span>
               </div>
             </div>
@@ -115,7 +118,7 @@
             <!-- Product Info -->
             <div class="space-y-2">
               <h3 class="font-bold text-lg text-black group-hover:text-[#0099cc] transition-colors">
-                {{ product.name }}
+                {{ product.title }}
               </h3>
               <p class="text-gray-600 text-sm line-clamp-2">
                 {{ product.description }}
@@ -124,7 +127,7 @@
               <!-- Product Value -->
               <div class="flex items-center justify-between">
                 <div class="text-2xl font-bold text-[#0099cc]">
-                  {{ formatPrice(product.value) }}
+                  {{ formatPrice(product.price) }}
                 </div>
                 <div class="text-sm text-gray-500">
                   Valeur du lot
@@ -135,17 +138,17 @@
               <div class="space-y-2">
                 <div class="flex justify-between text-sm">
                   <span class="text-gray-600">Progression</span>
-                  <span class="font-medium">{{ Math.round((product.soldTickets / 1000) * 100) }}%</span>
+                  <span class="font-medium">{{ calculateProgress(product) }}%</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2">
                   <div 
                     class="bg-gradient-to-r from-[#0099cc] to-cyan-500 h-2 rounded-full transition-all duration-500"
-                    :style="{ width: Math.round((product.soldTickets / 1000) * 100) + '%' }"
+                    :style="{ width: calculateProgress(product) + '%' }"
                   ></div>
                 </div>
-                <div class="flex justify-between text-xs text-gray-500">
-                  <span>{{ product.soldTickets }} vendus</span>
-                  <span>1000 tickets total</span>
+                <div class="flex justify-between text-xs text-gray-500" v-if="product.lottery">
+                  <span>{{ product.lottery.sold_tickets || 0 }} vendus</span>
+                  <span>{{ product.lottery.total_tickets || 1000 }} tickets total</span>
                 </div>
               </div>
 
@@ -205,86 +208,38 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useApi } from '@/composables/api'
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 import placeholderImg from '@/assets/placeholder.jpg'
 
 const router = useRouter()
+const { get, loading, error } = useApi()
 
 // Reactive data
-const loading = ref(true)
 const searchQuery = ref('')
 const selectedCategory = ref('')
 const sortBy = ref('newest')
+const products = ref([])
+const categories = ref([])
 
-// Mock products data
-const products = ref([
-  {
-    id: 1,
-    name: 'iPhone 15 Pro Max',
-    description: 'Le dernier smartphone Apple avec puce A17 Pro et appareil photo révolutionnaire',
-    value: 1299000,
-    ticketPrice: 1500,
-    image: placeholderImg,
-    category: 'electronics',
-    soldTickets: 750,
-    isNew: true
-  },
-  {
-    id: 2,
-    name: 'MacBook Pro M3',
-    description: 'Ordinateur portable professionnel avec puce M3 et écran Liquid Retina XDR',
-    value: 2500000,
-    ticketPrice: 2500,
-    image: placeholderImg,
-    category: 'electronics',
-    soldTickets: 420,
-    isNew: true
-  },
-  {
-    id: 3,
-    name: 'PlayStation 5',
-    description: 'Console de jeu nouvelle génération avec SSD ultra-rapide',
-    value: 650000,
-    ticketPrice: 1000,
-    image: placeholderImg,
-    category: 'electronics',
-    soldTickets: 890,
-    isNew: false
-  },
-  {
-    id: 4,
-    name: 'AirPods Pro 2',
-    description: 'Écouteurs sans fil avec réduction de bruit active et audio spatial',
-    value: 350000,
-    ticketPrice: 500,
-    image: placeholderImg,
-    category: 'electronics',
-    soldTickets: 600,
-    isNew: false
-  },
-  {
-    id: 5,
-    name: 'Tesla Model Y',
-    description: 'SUV électrique premium avec pilotage automatique et autonomie 500km',
-    value: 45000000,
-    ticketPrice: 50000,
-    image: placeholderImg,
-    category: 'automotive',
-    soldTickets: 320,
-    isNew: true
-  },
-  {
-    id: 6,
-    name: 'Rolex Submariner',
-    description: 'Montre de luxe suisse étanche avec mouvement automatique',
-    value: 8500000,
-    ticketPrice: 10000,
-    image: placeholderImg,
-    category: 'fashion',
-    soldTickets: 150,
-    isNew: false
+// API Functions
+const loadProducts = async () => {
+  try {
+    const response = await get('/products')
+    products.value = response.data || []
+  } catch (err) {
+    console.error('Erreur lors du chargement des produits:', err)
   }
-])
+}
+
+const loadCategories = async () => {
+  try {
+    const response = await get('/categories')
+    categories.value = response.data || []
+  } catch (err) {
+    console.error('Erreur lors du chargement des catégories:', err)
+  }
+}
 
 // Computed properties
 const filteredProducts = computed(() => {
@@ -292,27 +247,27 @@ const filteredProducts = computed(() => {
 
   // Filter by category
   if (selectedCategory.value) {
-    filtered = filtered.filter(p => p.category === selectedCategory.value)
+    filtered = filtered.filter(p => p.category_id == selectedCategory.value)
   }
 
   // Filter by search query
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(p => 
-      p.name.toLowerCase().includes(query) || 
+      p.title.toLowerCase().includes(query) || 
       p.description.toLowerCase().includes(query)
     )
   }
 
   // Sort products
   if (sortBy.value === 'price-asc') {
-    filtered.sort((a, b) => a.value - b.value)
+    filtered.sort((a, b) => a.price - b.price)
   } else if (sortBy.value === 'price-desc') {
-    filtered.sort((a, b) => b.value - a.value)
+    filtered.sort((a, b) => b.price - a.price)
   } else if (sortBy.value === 'popular') {
-    filtered.sort((a, b) => b.soldTickets - a.soldTickets)
+    filtered.sort((a, b) => (b.lottery?.sold_tickets || 0) - (a.lottery?.sold_tickets || 0))
   } else if (sortBy.value === 'newest') {
-    filtered.sort((a, b) => b.isNew - a.isNew)
+    filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
   }
 
   return filtered
@@ -320,11 +275,14 @@ const filteredProducts = computed(() => {
 
 // Methods
 const formatPrice = (price) => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XAF',
-    minimumFractionDigits: 0
-  }).format(price).replace('XAF', 'FCFA')
+  return new Intl.NumberFormat('fr-FR').format(price)
+}
+
+const calculateProgress = (product) => {
+  if (!product.lottery) return 0
+  const sold = product.lottery.sold_tickets || 0
+  const total = product.lottery.total_tickets || 1
+  return Math.round((sold / total) * 100)
 }
 
 const viewProduct = (product) => {
@@ -338,11 +296,11 @@ const clearFilters = () => {
 }
 
 // Lifecycle
-onMounted(() => {
-  // Simulate loading
-  setTimeout(() => {
-    loading.value = false
-  }, 1000)
+onMounted(async () => {
+  await Promise.all([
+    loadProducts(),
+    loadCategories()
+  ])
 })
 </script>
 

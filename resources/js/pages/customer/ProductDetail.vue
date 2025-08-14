@@ -61,91 +61,126 @@
           
           <div class="flex items-center space-x-4 mb-6">
             <div class="text-center">
-              <div class="text-3xl font-bold text-blue-600">{{ product.price }} FCFA</div>
-              <div class="text-sm text-gray-500">Valeur du produit</div>
+              <div class="text-3xl font-bold text-blue-600">{{ formatPrice(product.price) }} FCFA</div>
+              <div class="text-sm text-gray-500">{{ hasActiveLottery ? 'Valeur du produit' : 'Prix' }}</div>
             </div>
-            <div class="text-center">
-              <div class="text-xl font-semibold text-gray-900">{{ product.ticket_price }} FCFA</div>
+            <div v-if="hasActiveLottery" class="text-center">
+              <div class="text-xl font-semibold text-gray-900">{{ formatPrice(product.lottery?.ticket_price || 0) }} FCFA</div>
               <div class="text-sm text-gray-500">Prix par ticket</div>
             </div>
           </div>
 
-          <!-- Progress Bar -->
-          <div class="mb-6">
+          <!-- Progress Bar - Only for lottery -->
+          <div v-if="hasActiveLottery" class="mb-6">
             <div class="flex justify-between text-sm text-gray-600 mb-2">
               <span>Progression de la tombola</span>
-              <span>{{ product.progress }}% ({{ product.sold_tickets }}/{{ product.total_tickets }})</span>
+              <span>{{ calculateProgress() }}% ({{ product.lottery?.sold_tickets || 0 }}/{{ product.lottery?.total_tickets || 0 }})</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-3">
               <div 
                 class="bg-blue-600 h-3 rounded-full transition-all duration-300" 
-                :style="{ width: product.progress + '%' }"
+                :style="{ width: calculateProgress() + '%' }"
               ></div>
             </div>
             <div class="flex justify-between text-xs text-gray-500 mt-1">
               <span>0 tickets</span>
-              <span>{{ product.total_tickets }} tickets</span>
+              <span>{{ product.lottery?.total_tickets || 0 }} tickets</span>
             </div>
           </div>
 
-          <!-- Time Remaining -->
-          <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+          <!-- Time Remaining - Only for lottery -->
+          <div v-if="hasActiveLottery" class="mb-6 p-4 bg-gray-50 rounded-lg">
             <div class="flex items-center mb-2">
               <CalendarIcon class="w-5 h-5 text-gray-600 mr-2" />
-              <span class="font-medium text-gray-900">Date de tirage: {{ formatDate(product.draw_date) }}</span>
+              <span class="font-medium text-gray-900">Date de tirage: {{ formatDate(product.lottery?.draw_date) }}</span>
             </div>
             <div class="flex items-center">
               <ClockIcon class="w-5 h-5 text-gray-600 mr-2" />
-              <span class="text-gray-600">{{ getRemainingTime(product.draw_date) }}</span>
+              <span class="text-gray-600">{{ getRemainingTime(product.lottery?.draw_date) }}</span>
             </div>
           </div>
         </div>
 
-        <!-- Ticket Purchase -->
+        <!-- Purchase Section -->
         <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Acheter des tickets</h3>
-          
-          <div class="flex items-center space-x-4 mb-4">
-            <label class="block text-sm font-medium text-gray-700">Nombre de tickets:</label>
-            <div class="flex items-center space-x-2">
-              <button
-                @click="decreaseTickets"
-                class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
-                :disabled="ticketQuantity <= 1"
-              >
-                <MinusIcon class="w-4 h-4" />
-              </button>
-              <input
-                v-model="ticketQuantity"
-                type="number"
-                min="1"
-                :max="product.total_tickets - product.sold_tickets"
-                class="w-20 text-center border border-gray-300 rounded-md py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                @click="increaseTickets"
-                class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
-                :disabled="ticketQuantity >= (product.total_tickets - product.sold_tickets)"
-              >
-                <PlusIcon class="w-4 h-4" />
-              </button>
+          <!-- Lottery Purchase -->
+          <div v-if="hasActiveLottery">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Acheter des tickets</h3>
+            
+            <div class="flex items-center space-x-4 mb-4">
+              <label class="block text-sm font-medium text-gray-700">Nombre de tickets:</label>
+              <div class="flex items-center space-x-2">
+                <button
+                  @click="decreaseTickets"
+                  class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                  :disabled="ticketQuantity <= 1"
+                >
+                  <MinusIcon class="w-4 h-4" />
+                </button>
+                <input
+                  v-model="ticketQuantity"
+                  type="number"
+                  min="1"
+                  :max="(product.lottery?.total_tickets || 0) - (product.lottery?.sold_tickets || 0)"
+                  class="w-20 text-center border border-gray-300 rounded-md py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  @click="increaseTickets"
+                  class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                  :disabled="ticketQuantity >= ((product.lottery?.total_tickets || 0) - (product.lottery?.sold_tickets || 0))"
+                >
+                  <PlusIcon class="w-4 h-4" />
+                </button>
+              </div>
             </div>
+
+            <div class="flex justify-between items-center mb-4">
+              <span class="text-gray-600">Total à payer:</span>
+              <span class="text-2xl font-bold text-blue-600">{{ formatPrice(totalPrice) }} FCFA</span>
+            </div>
+
+            <button
+              @click="purchaseTickets"
+              :disabled="purchasing || product.status !== 'active'"
+              class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              <span v-if="purchasing">Achat en cours...</span>
+              <span v-else-if="product.status !== 'active'">Tombola terminée</span>
+              <span v-else>🍀 Acheter {{ ticketQuantity }} ticket{{ ticketQuantity > 1 ? 's' : '' }}</span>
+            </button>
           </div>
 
-          <div class="flex justify-between items-center mb-4">
-            <span class="text-gray-600">Total à payer:</span>
-            <span class="text-2xl font-bold text-blue-600">{{ totalPrice }} FCFA</span>
-          </div>
+          <!-- Direct Purchase -->
+          <div v-else>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Acheter ce produit</h3>
+            
+            <div class="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+              <div class="flex items-center mb-2">
+                <CheckCircleIcon class="w-5 h-5 text-green-600 mr-2" />
+                <span class="font-medium text-green-900">Achat direct disponible</span>
+              </div>
+              <p class="text-sm text-green-700">
+                Ce produit peut être acheté directement sans passer par une tombola.
+              </p>
+            </div>
 
-          <button
-            @click="purchaseTickets"
-            :disabled="purchasing || product.status !== 'active'"
-            class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            <span v-if="purchasing">Achat en cours...</span>
-            <span v-else-if="product.status !== 'active'">Tombola terminée</span>
-            <span v-else>Acheter {{ ticketQuantity }} ticket{{ ticketQuantity > 1 ? 's' : '' }}</span>
-          </button>
+            <div class="flex justify-between items-center mb-6">
+              <span class="text-gray-600 text-lg">Prix:</span>
+              <span class="text-3xl font-bold text-blue-600">{{ product.price }} FCFA</span>
+            </div>
+
+            <button
+              @click="purchaseDirectly"
+              :disabled="purchasing"
+              class="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            >
+              <span v-if="purchasing">Achat en cours...</span>
+              <template v-else>
+                <span>🛒</span>
+                <span>Acheter maintenant</span>
+              </template>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -235,6 +270,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useApi } from '@/composables/api'
 import {
   ArrowLeftIcon,
   StarIcon,
@@ -246,12 +282,11 @@ import {
   UsersIcon,
   ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
-import api from '@/composables/api'
 
 const route = useRoute()
 const router = useRouter()
+const { get, post, loading, error } = useApi()
 
-const loading = ref(true)
 const purchasing = ref(false)
 const product = ref(null)
 const ticketQuantity = ref(1)
@@ -265,13 +300,28 @@ const tabs = [
   { key: 'participants', label: 'Participants' }
 ]
 
-const totalPrice = computed(() => {
-  if (!product.value) return 0
-  return (parseInt(product.value.ticket_price.replace(',', '')) * ticketQuantity.value).toLocaleString()
+const hasActiveLottery = computed(() => {
+  return product.value && product.value.lottery && product.value.lottery.total_tickets > 0
 })
 
+const totalPrice = computed(() => {
+  if (!product.value || !product.value.lottery) return 0
+  return (product.value.lottery.ticket_price || 0) * ticketQuantity.value
+})
+
+const calculateProgress = () => {
+  if (!product.value || !product.value.lottery) return 0
+  const sold = product.value.lottery.sold_tickets || 0
+  const total = product.value.lottery.total_tickets || 1
+  return Math.round((sold / total) * 100)
+}
+
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('fr-FR').format(price)
+}
+
 const increaseTickets = () => {
-  const maxTickets = product.value.total_tickets - product.value.sold_tickets
+  const maxTickets = (product.value.lottery?.total_tickets || 0) - (product.value.lottery?.sold_tickets || 0)
   if (ticketQuantity.value < maxTickets) {
     ticketQuantity.value++
   }
@@ -283,19 +333,22 @@ const decreaseTickets = () => {
   }
 }
 
-const formatDate = (date) => {
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
   return new Intl.DateTimeFormat('fr-FR', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
-  }).format(new Date(date))
+  }).format(date)
 }
 
-const getRemainingTime = (date) => {
+const getRemainingTime = (dateString) => {
+  if (!dateString) return ''
   const now = new Date()
-  const drawDate = new Date(date)
+  const drawDate = new Date(dateString)
   const diff = drawDate - now
   const days = Math.floor(diff / (1000 * 60 * 60 * 24))
   
@@ -322,82 +375,93 @@ const purchaseTickets = async () => {
   purchasing.value = true
   
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    const response = await post('/tickets/purchase', {
+      product_id: product.value.id,
+      lottery_id: product.value.lottery.id,
+      quantity: ticketQuantity.value
+    })
     
-    // Add success notification logic here
-    console.log(`Purchased ${ticketQuantity.value} tickets for product ${product.value.id}`)
-    
-    // Refresh product data
-    await loadProduct()
-    
-    // Reset quantity
-    ticketQuantity.value = 1
+    if (response && response.success) {
+      alert('🎉 Tickets achetés avec succès ! Bonne chance pour le tirage !')
+      
+      // Refresh product data
+      await loadProduct()
+      
+      // Reset quantity
+      ticketQuantity.value = 1
+    } else {
+      throw new Error(response?.message || 'Erreur lors de l\'achat des tickets')
+    }
     
   } catch (error) {
     console.error('Error purchasing tickets:', error)
-    // Add error handling here
+    alert('❌ Erreur lors de l\'achat des tickets. Veuillez réessayer.')
+  } finally {
+    purchasing.value = false
+  }
+}
+
+const purchaseDirectly = async () => {
+  purchasing.value = true
+  
+  try {
+    const response = await post('/payments/initiate', {
+      product_id: product.value.id,
+      type: 'product_purchase',
+      amount: product.value.price
+    })
+    
+    if (response && response.success) {
+      alert('🎉 Produit acheté avec succès ! Vous recevrez une confirmation par SMS.')
+      
+      // Refresh product data
+      await loadProduct()
+    } else {
+      throw new Error(response?.message || 'Erreur lors de l\'achat')
+    }
+    
+  } catch (error) {
+    console.error('Error purchasing product directly:', error)
+    alert('❌ Erreur lors de l\'achat. Veuillez réessayer.')
   } finally {
     purchasing.value = false
   }
 }
 
 const loadProduct = async () => {
-  loading.value = true
-  
   try {
-    // Simulate API call - replace with actual API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const productId = route.params.id
+    const response = await get(`/products/${productId}`)
     
-    // Mock product data
-    const mockProduct = {
-      id: parseInt(route.params.id),
-      title: 'iPhone 15 Pro',
-      description: 'Le dernier flagship d\'Apple avec une caméra révolutionnaire et la puce A17 Pro',
-      detailed_description: 'L\'iPhone 15 Pro redéfinit ce qui est possible avec un smartphone. Doté de la puce A17 Pro révolutionnaire et d\'un système de caméra professionnel, il offre des performances exceptionnelles pour la photographie, la vidéo et les jeux.',
-      price: '750,000',
-      ticket_price: '1,000',
-      category: 'electronics',
-      progress: 85,
-      sold_tickets: 637,
-      total_tickets: 750,
-      status: 'active',
-      featured: true,
-      draw_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      image: '/images/products/iphone15.jpg',
-      gallery: [
-        '/images/products/iphone15-2.jpg',
-        '/images/products/iphone15-3.jpg',
-        '/images/products/iphone15-4.jpg',
-        '/images/products/iphone15-5.jpg'
-      ],
-      features: [
-        'Écran Super Retina XDR 6,1 pouces',
-        'Puce A17 Pro avec GPU 6 cœurs',
-        'Système de caméra Pro avec téléobjectif 3x',
-        'Action Button personnalisable',
-        'Connecteur USB-C',
-        'Résistant aux éclaboussures, à l\'eau et à la poussière'
-      ]
+    if (response && response.data) {
+      product.value = response.data
+      currentImage.value = product.value.image || '/images/products/placeholder.jpg'
+      
+      // Load participants if it's a lottery product
+      if (product.value.lottery) {
+        await loadParticipants()
+      }
+    } else {
+      product.value = null
     }
-    
-    product.value = mockProduct
-    currentImage.value = mockProduct.image
-    
-    // Mock participants data
-    participants.value = [
-      { id: 1, name: 'Marie Dubois', tickets: 5 },
-      { id: 2, name: 'Jean Martin', tickets: 3 },
-      { id: 3, name: 'Sophie Laurent', tickets: 8 },
-      { id: 4, name: 'Pierre Durand', tickets: 2 },
-      { id: 5, name: 'Anne Moreau', tickets: 4 }
-    ]
     
   } catch (error) {
     console.error('Error loading product:', error)
     product.value = null
-  } finally {
-    loading.value = false
+  }
+}
+
+const loadParticipants = async () => {
+  try {
+    if (product.value.lottery) {
+      const response = await get(`/lotteries/${product.value.lottery.id}/participants`)
+      if (response && response.data) {
+        participants.value = response.data
+      }
+    }
+  } catch (error) {
+    console.error('Error loading participants:', error)
+    participants.value = []
   }
 }
 

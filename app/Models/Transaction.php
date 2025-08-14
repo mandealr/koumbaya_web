@@ -75,6 +75,11 @@ class Transaction extends Model
     {
         return $this->hasMany(LotteryTicket::class);
     }
+    
+    public function lottery_tickets()
+    {
+        return $this->hasMany(LotteryTicket::class, 'transaction_id');
+    }
 
     public function payments()
     {

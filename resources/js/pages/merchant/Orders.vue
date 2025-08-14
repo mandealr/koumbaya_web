@@ -9,9 +9,10 @@
       <div class="flex space-x-3">
         <button
           @click="refreshOrders"
-          class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
-          <ArrowPathIcon class="w-4 h-4 mr-2" />
-          Actualiser
+          :disabled="isRefreshing"
+          class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50">
+          <ArrowPathIcon :class="['w-4 h-4 mr-2', { 'animate-spin': isRefreshing }]" />
+          {{ isRefreshing ? 'Actualisation...' : 'Actualiser' }}
         </button>
         <button
           @click="exportOrders"
@@ -38,7 +39,7 @@
             'p-3 rounded-xl',
             stat.color
           ]">
-            <component :is="stat.icon" class="w-6 h-6 text-white" />
+            <component :is="getStatIcon(stat.icon)" class="w-6 h-6 text-white" />
           </div>
         </div>
         <div class="mt-4 pt-4 border-t border-gray-100">
@@ -371,7 +372,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import {
   ArrowPathIcon,
   DocumentArrowDownIcon,
@@ -389,13 +390,32 @@ import {
   CheckIcon,
   ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
+import { useMerchantOrders } from '@/composables/useMerchantOrders'
+import { useToast } from '@/composables/useToast'
+
+// Composables
+const { 
+  orders, 
+  products, 
+  orderStats, 
+  loading, 
+  error,
+  loadStats,
+  loadOrders,
+  loadProducts,
+  confirmOrder: confirmOrderApi,
+  cancelOrder: cancelOrderApi,
+  exportOrders: exportOrdersApi
+} = useMerchantOrders()
+
+const toast = useToast()
 
 // State
-const loading = ref(false)
 const showOrderModal = ref(false)
 const selectedOrder = ref(null)
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
+const isRefreshing = ref(false)
 
 const filters = reactive({
   search: '',
@@ -404,94 +424,6 @@ const filters = reactive({
   startDate: '',
   endDate: ''
 })
-
-const orderStats = ref([
-  {
-    label: 'Total commandes',
-    value: '247',
-    change: 15.3,
-    icon: ShoppingBagIcon,
-    color: 'bg-[#0099cc]'
-  },
-  {
-    label: 'Revenus',
-    value: '156,200',
-    change: 8.7,
-    icon: CurrencyDollarIcon,
-    color: 'bg-blue-500'
-  },
-  {
-    label: 'En attente',
-    value: '12',
-    change: -2.1,
-    icon: ClockIcon,
-    color: 'bg-yellow-500'
-  },
-  {
-    label: 'Taux confirmation',
-    value: '94.2%',
-    change: 3.2,
-    icon: CheckIcon,
-    color: 'bg-purple-500'
-  }
-])
-
-const products = ref([
-  { id: 1, name: 'iPhone 15 Pro' },
-  { id: 2, name: 'MacBook Pro M3' },
-  { id: 3, name: 'PlayStation 5' }
-])
-
-const orders = ref([
-  {
-    id: 1,
-    order_number: 'ORD-2025-001',
-    customer_name: 'Jean Dupont',
-    customer_email: 'jean@example.com',
-    product_name: 'iPhone 15 Pro',
-    product_image: '/images/products/placeholder.jpg',
-    tickets_count: 3,
-    ticket_numbers: ['001', '045', '112'],
-    ticket_price: 2500,
-    total_amount: 7500,
-    currency: 'FCFA',
-    payment_method: 'Mobile Money',
-    status: 'completed',
-    created_at: '2025-01-09T10:30:00Z'
-  },
-  {
-    id: 2,
-    order_number: 'ORD-2025-002',
-    customer_name: 'Marie Martin',
-    customer_email: 'marie@example.com',
-    product_name: 'MacBook Pro M3',
-    product_image: '/images/products/placeholder.jpg',
-    tickets_count: 1,
-    ticket_numbers: ['278'],
-    ticket_price: 5000,
-    total_amount: 5000,
-    currency: 'FCFA',
-    payment_method: 'Carte bancaire',
-    status: 'pending',
-    created_at: '2025-01-09T09:15:00Z'
-  },
-  {
-    id: 3,
-    order_number: 'ORD-2025-003',
-    customer_name: 'Paul Durant',
-    customer_email: 'paul@example.com',
-    product_name: 'PlayStation 5',
-    product_image: '/images/products/placeholder.jpg',
-    tickets_count: 2,
-    ticket_numbers: ['089', '156'],
-    ticket_price: 1500,
-    total_amount: 3000,
-    currency: 'FCFA',
-    payment_method: 'Mobile Money',
-    status: 'confirmed',
-    created_at: '2025-01-09T08:45:00Z'
-  }
-])
 
 // Computed
 const filteredOrders = computed(() => {
@@ -541,8 +473,17 @@ const endIndex = computed(() => {
 })
 
 // Methods
-const applyFilters = () => {
+const applyFilters = async () => {
   currentPage.value = 1
+  await loadFilteredOrders()
+}
+
+const loadFilteredOrders = async () => {
+  try {
+    await loadOrders(filters)
+  } catch (err) {
+    toast.error('Erreur lors du chargement des commandes')
+  }
 }
 
 const previousPage = () => {
@@ -605,12 +546,13 @@ const closeOrderModal = () => {
 const confirmOrder = async (order) => {
   if (confirm(`Confirmer la commande ${order.order_number} ?`)) {
     try {
-      // Simulate API call
-      order.status = 'confirmed'
-      alert('Commande confirmée avec succès !')
+      await confirmOrderApi(order)
+      toast.success('Commande confirmée avec succès !')
       closeOrderModal()
+      // Recharger les commandes
+      await loadFilteredOrders()
     } catch (error) {
-      alert('Erreur lors de la confirmation')
+      toast.error('Erreur lors de la confirmation')
     }
   }
 }
@@ -618,29 +560,73 @@ const confirmOrder = async (order) => {
 const cancelOrder = async (order) => {
   if (confirm(`Annuler la commande ${order.order_number} ? Cette action est irréversible.`)) {
     try {
-      // Simulate API call
-      order.status = 'cancelled'
-      alert('Commande annulée')
+      await cancelOrderApi(order)
+      toast.success('Commande annulée')
       closeOrderModal()
+      // Recharger les commandes
+      await loadFilteredOrders()
     } catch (error) {
-      alert('Erreur lors de l\'annulation')
+      toast.error('Erreur lors de l\'annulation')
     }
   }
 }
 
-const refreshOrders = () => {
-  loading.value = true
-  setTimeout(() => {
-    loading.value = false
-    alert('Commandes actualisées')
-  }, 1000)
+const refreshOrders = async () => {
+  isRefreshing.value = true
+  try {
+    await Promise.all([
+      loadStats(),
+      loadFilteredOrders(),
+      loadProducts()
+    ])
+    toast.success('Commandes actualisées')
+  } catch (error) {
+    toast.error('Erreur lors de l\'actualisation')
+  } finally {
+    isRefreshing.value = false
+  }
 }
 
-const exportOrders = () => {
-  alert('Export des commandes en cours de développement')
+const exportOrders = async () => {
+  try {
+    await exportOrdersApi('csv')
+    toast.success('Export des commandes démarré')
+  } catch (error) {
+    toast.error('Erreur lors de l\'export des commandes')
+  }
 }
 
-onMounted(() => {
-  console.log('Orders page loaded')
+// Charger les données au montage
+onMounted(async () => {
+  try {
+    await Promise.all([
+      loadStats(),
+      loadOrders(),
+      loadProducts()
+    ])
+  } catch (error) {
+    console.error('Erreur lors du chargement initial:', error)
+    toast.error('Erreur lors du chargement des données')
+  }
 })
+
+// Observer les changements de filtres avec debounce pour la recherche
+let searchTimeout = null
+watch(() => filters.search, (newValue) => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    applyFilters()
+  }, 500)
+})
+
+// Helper pour obtenir le composant icône
+const getStatIcon = (iconName) => {
+  const icons = {
+    ShoppingBagIcon,
+    CurrencyDollarIcon,
+    ClockIcon,
+    CheckIcon
+  }
+  return icons[iconName] || ShoppingBagIcon
+}
 </script>

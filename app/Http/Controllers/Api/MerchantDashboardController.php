@@ -68,6 +68,11 @@ class MerchantDashboardController extends Controller
             ? (($revenueThisMonth - $revenueLastMonth) / $revenueLastMonth) * 100
             : 0;
 
+        // Compter les commandes en attente
+        $pendingOrders = Transaction::whereHas('lottery.product', function ($query) use ($merchantId) {
+            $query->where('merchant_id', $merchantId);
+        })->where('status', 'pending')->count();
+
         return $this->sendResponse([
             'total_products' => $totalProducts,
             'active_lotteries' => $activeLotteries,
@@ -78,6 +83,7 @@ class MerchantDashboardController extends Controller
             'growth_rate' => round($growthRate, 2),
             'conversion_rate' => $this->getConversionRate($merchantId),
             'avg_ticket_price' => $this->getAverageTicketPrice($merchantId),
+            'pending_orders' => $pendingOrders,
         ]);
     }
 
@@ -219,30 +225,73 @@ class MerchantDashboardController extends Controller
     {
         $merchantId = auth()->id();
         $limit = $request->get('limit', 20);
-
-        $transactions = Transaction::with(['user', 'lottery.product'])
+        
+        $query = Transaction::with(['user', 'lottery.product', 'lottery_tickets'])
             ->whereHas('lottery.product', function ($query) use ($merchantId) {
                 $query->where('merchant_id', $merchantId);
-            })
-            ->where('status', 'completed')
-            ->orderBy('completed_at', 'desc')
-            ->limit($limit)
-            ->get();
+            });
+        
+        // Filtres
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('transaction_id', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('first_name', 'like', "%{$search}%")
+                               ->orWhere('last_name', 'like', "%{$search}%")
+                               ->orWhere('email', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('lottery.product', function ($productQuery) use ($search) {
+                      $productQuery->where('title', 'like', "%{$search}%");
+                  });
+            });
+        }
+        
+        if ($request->has('status') && $request->status) {
+            $query->where('status', $request->status);
+        } else {
+            // Par défaut, on montre toutes les transactions complétées
+            $query->whereIn('status', ['completed', 'pending', 'confirmed', 'cancelled']);
+        }
+        
+        if ($request->has('product_id') && $request->product_id) {
+            $query->whereHas('lottery.product', function ($q) use ($request) {
+                $q->where('id', $request->product_id);
+            });
+        }
+        
+        if ($request->has('start_date') && $request->start_date) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        
+        if ($request->has('end_date') && $request->end_date) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+        
+        $transactions = $query->orderBy('created_at', 'desc')
+                             ->limit($limit)
+                             ->get();
 
         return $this->sendResponse([
             'transactions' => $transactions->map(function ($transaction) {
+                // Récupérer les numéros de tickets
+                $ticketNumbers = $transaction->lottery_tickets->pluck('ticket_number')->toArray();
+                
                 return [
                     'id' => $transaction->id,
                     'transaction_id' => $transaction->transaction_id,
                     'amount' => $transaction->amount,
                     'quantity' => $transaction->quantity,
-                    'completed_at' => $transaction->completed_at,
+                    'ticket_numbers' => $ticketNumbers,
+                    'status' => $transaction->status,
+                    'completed_at' => $transaction->completed_at ?? $transaction->created_at,
                     'user' => [
                         'name' => $transaction->user->first_name . ' ' . $transaction->user->last_name,
                         'email' => $transaction->user->email,
                     ],
                     'product' => [
                         'title' => $transaction->lottery->product->title,
+                        'image_url' => $transaction->lottery->product->images ?? null,
                         'lottery_number' => $transaction->lottery->lottery_number,
                     ],
                     'payment_method' => $transaction->payment_provider ?? 'Mobile Money',
@@ -377,5 +426,73 @@ class MerchantDashboardController extends Controller
         ->sum('quantity');
         
         return round(($sales / $views) * 100, 2);
+    }
+    
+    /**
+     * Update transaction status
+     */
+    public function updateTransactionStatus(Request $request, $id)
+    {
+        $merchantId = auth()->id();
+        
+        // Validation
+        $request->validate([
+            'status' => 'required|in:pending,confirmed,completed,cancelled'
+        ]);
+        
+        // Vérifier que la transaction appartient au marchand
+        $transaction = Transaction::whereHas('lottery.product', function ($query) use ($merchantId) {
+            $query->where('merchant_id', $merchantId);
+        })->find($id);
+        
+        if (!$transaction) {
+            return $this->sendError('Transaction non trouvée', 404);
+        }
+        
+        // Vérifier les transitions de statut autorisées
+        $allowedTransitions = [
+            'pending' => ['confirmed', 'cancelled'],
+            'confirmed' => ['completed', 'cancelled'],
+            'completed' => [], // Aucune transition autorisée
+            'cancelled' => []  // Aucune transition autorisée
+        ];
+        
+        if (!in_array($request->status, $allowedTransitions[$transaction->status] ?? [])) {
+            return $this->sendError('Transition de statut non autorisée', 400);
+        }
+        
+        // Mettre à jour le statut
+        $transaction->status = $request->status;
+        
+        if ($request->status === 'completed' && !$transaction->completed_at) {
+            $transaction->completed_at = now();
+        }
+        
+        $transaction->save();
+        
+        return $this->sendResponse([
+            'message' => 'Statut mis à jour avec succès',
+            'transaction' => [
+                'id' => $transaction->id,
+                'status' => $transaction->status
+            ]
+        ]);
+    }
+    
+    /**
+     * Export orders to CSV
+     */
+    public function exportOrders(Request $request)
+    {
+        $merchantId = auth()->id();
+        $format = $request->get('format', 'csv');
+        
+        // Pour l'instant, on retourne juste un message
+        // Dans une vraie implémentation, on générerait le fichier et retournerait l'URL de téléchargement
+        return $this->sendResponse([
+            'message' => 'Export en cours de traitement',
+            'format' => $format,
+            'status' => 'processing'
+        ]);
     }
 }

@@ -12,10 +12,23 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Loading skeleton -->
+      <div v-if="loading" v-for="n in 4" :key="n" class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 animate-pulse">
+        <div class="flex items-center">
+          <div class="p-3 rounded-lg bg-gray-200"></div>
+          <div class="ml-4 flex-1">
+            <div class="h-4 bg-gray-200 rounded w-20 mb-2"></div>
+            <div class="h-6 bg-gray-200 rounded w-16"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats cards -->
       <div
-        v-for="stat in stats"
+        v-else
+        v-for="stat in dashboardStats"
         :key="stat.label"
-        class="bg-white p-6 rounded-lg shadow-sm border border-gray-200"
+        class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
       >
         <div class="flex items-center">
           <div :class="['p-3 rounded-lg', stat.color]">
@@ -25,6 +38,22 @@
             <p class="text-sm font-medium text-gray-600">{{ stat.label }}</p>
             <p class="text-2xl font-bold text-gray-900">{{ stat.value }}</p>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error message -->
+    <div v-if="error && !loading" class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+      <div class="flex">
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">Erreur de chargement</h3>
+          <p class="mt-1 text-sm text-red-700">{{ error }}</p>
+          <button 
+            @click="refreshDashboard"
+            class="mt-2 text-sm bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded"
+          >
+            Réessayer
+          </button>
         </div>
       </div>
     </div>
@@ -186,8 +215,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useCustomerDashboard } from '@/composables/useCustomerDashboard'
 import {
   TicketIcon,
   GiftIcon,
@@ -199,103 +229,32 @@ import {
 
 const authStore = useAuthStore()
 
-const stats = ref([
-  {
-    label: 'Tickets achetés',
-    value: '12',
-    color: 'bg-blue-500',
-    icon: TicketIcon
-  },
-  {
-    label: 'Tombolas participées',
-    value: '5',
-    color: 'bg-[#0099cc]',
-    icon: GiftIcon
-  },
-  {
-    label: 'Total dépensé',
-    value: '15,000 FCFA',
-    color: 'bg-yellow-500',
-    icon: CurrencyDollarIcon
-  },
-  {
-    label: 'Prix gagnés',
-    value: '0',
-    color: 'bg-purple-500',
-    icon: TrophyIcon
-  }
-])
+// Composables
+const {
+  stats,
+  recentTickets,
+  activeLotteries,
+  loading,
+  error,
+  loadDashboardData,
+  formatDate
+} = useCustomerDashboard()
 
-const recentTickets = ref([
-  {
-    id: 1,
-    product: {
-      id: 1,
-      title: 'iPhone 15 Pro',
-      image: '/images/products/iphone.jpg'
-    },
-    quantity: 3,
-    total_price: '3,000',
-    status: 'active',
-    purchased_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
-  },
-  {
-    id: 2,
-    product: {
-      id: 2,
-      title: 'MacBook Pro M3',
-      image: '/images/products/macbook.jpg'
-    },
-    quantity: 1,
-    total_price: '2,000',
-    status: 'active',
-    purchased_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
-  }
-])
-
-const activeLotteries = ref([
-  {
-    id: 1,
-    product: {
-      id: 1,
-      title: 'iPhone 15 Pro',
-      price: '750,000',
-      image: '/images/products/iphone.jpg'
-    },
-    progress: 85,
-    draw_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-  },
-  {
-    id: 2,
-    product: {
-      id: 3,
-      title: 'PlayStation 5',
-      price: '350,000',
-      image: '/images/products/ps5.jpg'
-    },
-    progress: 95,
-    draw_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
-  },
-  {
-    id: 3,
-    product: {
-      id: 4,
-      title: 'AirPods Pro',
-      price: '150,000',
-      image: '/images/products/airpods.jpg'
-    },
-    progress: 45,
-    draw_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
-  }
-])
-
-const formatDate = (date) => {
-  return new Intl.DateTimeFormat('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  }).format(date)
+// Icon mapping for dynamic components
+const iconComponents = {
+  TicketIcon,
+  GiftIcon,
+  CurrencyDollarIcon,
+  TrophyIcon
 }
+
+// Computed stats with resolved icons
+const dashboardStats = computed(() => {
+  return stats.value.map(stat => ({
+    ...stat,
+    icon: iconComponents[stat.icon] || TicketIcon
+  }))
+})
 
 const getStatusLabel = (status) => {
   const labels = {
@@ -307,8 +266,12 @@ const getStatusLabel = (status) => {
   return labels[status] || status
 }
 
-onMounted(() => {
-  // Load user dashboard data
-  console.log('Customer dashboard mounted')
+// Refresh data
+const refreshDashboard = async () => {
+  await loadDashboardData()
+}
+
+onMounted(async () => {
+  await loadDashboardData()
 })
 </script>

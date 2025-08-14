@@ -15,7 +15,7 @@
       >
         <div class="flex items-center">
           <div :class="['p-3 rounded-lg', stat.color]">
-            <component :is="stat.icon" class="w-6 h-6 text-white" />
+            <component :is="iconMap[stat.icon]" class="w-6 h-6 text-white" />
           </div>
           <div class="ml-4">
             <p class="text-sm font-medium text-gray-600">{{ stat.label }}</p>
@@ -73,6 +73,29 @@
       </div>
     </div>
 
+    <!-- Error Message -->
+    <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <div class="flex">
+        <ExclamationCircleIcon class="h-5 w-5 text-red-400" />
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">
+            Erreur de chargement
+          </h3>
+          <div class="mt-2 text-sm text-red-700">
+            <p>{{ error }}</p>
+          </div>
+          <div class="mt-4">
+            <button
+              @click="loadTickets()"
+              class="text-sm bg-red-100 text-red-800 px-3 py-1 rounded-md hover:bg-red-200 transition-colors"
+            >
+              Réessayer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Tickets List -->
     <div v-if="loading" class="text-center py-12">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -82,16 +105,16 @@
     <div v-else-if="filteredTickets.length === 0" class="text-center py-12">
       <TicketIcon class="w-16 h-16 text-gray-400 mx-auto mb-4" />
       <h3 class="text-lg font-medium text-gray-900 mb-2">
-        {{ tickets.length === 0 ? 'Aucun ticket acheté' : 'Aucun résultat trouvé' }}
+        {{ filteredTickets.length === 0 && !filters.search && !filters.status && !filters.period ? 'Aucun ticket acheté' : 'Aucun résultat trouvé' }}
       </h3>
       <p class="text-gray-600 mb-4">
-        {{ tickets.length === 0 
+        {{ filteredTickets.length === 0 && !filters.search && !filters.status && !filters.period
           ? 'Vous n\'avez pas encore participé à des tombolas'
           : 'Essayez de modifier vos filtres de recherche'
         }}
       </p>
       <router-link
-        v-if="tickets.length === 0"
+        v-if="filteredTickets.length === 0 && !filters.search && !filters.status && !filters.period"
         to="/customer/products"
         class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
       >
@@ -141,7 +164,7 @@
                 </div>
                 <div>
                   <p class="text-xs text-gray-500">Total payé</p>
-                  <p class="text-sm font-semibold text-gray-900">{{ ticket.total_price }} FCFA</p>
+                  <p class="text-sm font-semibold text-gray-900">{{ formatCurrency(ticket.total_price) }}</p>
                 </div>
                 <div>
                   <p class="text-xs text-gray-500">Date d'achat</p>
@@ -196,10 +219,11 @@
                 <p class="text-sm text-blue-800">Tirage effectué le {{ formatDate(ticket.lottery.draw_date) }}</p>
                 <div v-if="!ticket.prize_claimed" class="mt-3">
                   <button
-                    @click="claimPrize(ticket.id)"
-                    class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors"
+                    @click="handleClaimPrize(ticket.id)"
+                    :disabled="loading"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Réclamer mon prix
+                    {{ loading ? 'Réclamation...' : 'Réclamer mon prix' }}
                   </button>
                 </div>
                 <div v-else class="mt-3">
@@ -233,10 +257,11 @@
                     Voir le produit
                   </router-link>
                   <button
-                    @click="downloadTicket(ticket.id)"
-                    class="text-sm text-gray-600 hover:text-gray-700 font-medium"
+                    @click="handleDownloadTicket(ticket.id)"
+                    :disabled="loading"
+                    class="text-sm text-gray-600 hover:text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Télécharger
+                    {{ loading ? 'Téléchargement...' : 'Télécharger' }}
                   </button>
                 </div>
               </div>
@@ -260,7 +285,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import {
   TicketIcon,
   TrophyIcon,
@@ -270,282 +295,67 @@ import {
   ExclamationCircleIcon,
   ArrowDownIcon
 } from '@heroicons/vue/24/outline'
-import api from '@/composables/api'
+import { useMyTickets } from '@/composables/useMyTickets'
 
-const loading = ref(false)
-const hasMore = ref(true)
+const {
+  // Data
+  filteredTickets,
+  stats,
+  filters,
+  
+  // Pagination
+  hasMore,
+  
+  // State
+  loading,
+  error,
+  
+  // Methods
+  loadTickets,
+  loadMore,
+  claimPrize,
+  downloadTicket,
+  resetFilters,
+  
+  // Utilities
+  formatCurrency,
+  formatDate,
+  getRemainingTime,
+  getStatusLabel
+} = useMyTickets()
 
-const filters = ref({
-  search: '',
-  status: '',
-  period: ''
-})
-
-const stats = ref([
-  {
-    label: 'Total tickets',
-    value: '24',
-    color: 'bg-blue-500',
-    icon: TicketIcon
-  },
-  {
-    label: 'Prix gagnés',
-    value: '1',
-    color: 'bg-blue-500',
-    icon: TrophyIcon
-  },
-  {
-    label: 'Total dépensé',
-    value: '36,500 FCFA',
-    color: 'bg-yellow-500',
-    icon: CurrencyDollarIcon
-  },
-  {
-    label: 'En cours',
-    value: '8',
-    color: 'bg-purple-500',
-    icon: ClockIcon
-  }
-])
-
-const tickets = ref([
-  {
-    id: 1,
-    product: {
-      id: 1,
-      title: 'iPhone 15 Pro',
-      description: 'Le dernier flagship d\'Apple',
-      image: '/images/products/iphone15.jpg'
-    },
-    lottery: {
-      id: 1,
-      draw_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-      progress: 85,
-      winning_number: null
-    },
-    quantity: 3,
-    total_price: '3,000',
-    status: 'active',
-    purchased_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    ticket_numbers: ['000123', '000124', '000125'],
-    winning_number: null,
-    prize_claimed: false
-  },
-  {
-    id: 2,
-    product: {
-      id: 2,
-      title: 'MacBook Pro M3',
-      description: 'Puissance et performance',
-      image: '/images/products/macbook.jpg'
-    },
-    lottery: {
-      id: 2,
-      draw_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-      progress: 100,
-      winning_number: '000501'
-    },
-    quantity: 2,
-    total_price: '4,000',
-    status: 'won',
-    purchased_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-    ticket_numbers: ['000456', '000501'],
-    winning_number: '000501',
-    prize_claimed: false
-  },
-  {
-    id: 3,
-    product: {
-      id: 3,
-      title: 'PlayStation 5',
-      description: 'Console de jeu nouvelle génération',
-      image: '/images/products/ps5.jpg'
-    },
-    lottery: {
-      id: 3,
-      draw_date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
-      progress: 100,
-      winning_number: '000789'
-    },
-    quantity: 5,
-    total_price: '2,500',
-    status: 'lost',
-    purchased_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
-    ticket_numbers: ['000234', '000235', '000236', '000237', '000238'],
-    winning_number: '000789',
-    prize_claimed: false
-  },
-  {
-    id: 4,
-    product: {
-      id: 4,
-      title: 'AirPods Pro',
-      description: 'Audio haute qualité',
-      image: '/images/products/airpods.jpg'
-    },
-    lottery: {
-      id: 4,
-      draw_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      progress: 65,
-      winning_number: null
-    },
-    quantity: 2,
-    total_price: '600',
-    status: 'active',
-    purchased_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-    ticket_numbers: ['000345', '000346'],
-    winning_number: null,
-    prize_claimed: false
-  },
-  {
-    id: 5,
-    product: {
-      id: 5,
-      title: 'Samsung Galaxy S24',
-      description: 'Smartphone Android premium',
-      image: '/images/products/samsung.jpg'
-    },
-    lottery: {
-      id: 5,
-      draw_date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
-      progress: 98,
-      winning_number: null
-    },
-    quantity: 4,
-    total_price: '3,200',
-    status: 'pending',
-    purchased_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-    ticket_numbers: ['000567', '000568', '000569', '000570'],
-    winning_number: null,
-    prize_claimed: false
-  }
-])
-
-const filteredTickets = computed(() => {
-  let filtered = tickets.value
-
-  if (filters.value.search) {
-    const search = filters.value.search.toLowerCase()
-    filtered = filtered.filter(ticket => 
-      ticket.product.title.toLowerCase().includes(search) ||
-      ticket.product.description.toLowerCase().includes(search)
-    )
-  }
-
-  if (filters.value.status) {
-    filtered = filtered.filter(ticket => ticket.status === filters.value.status)
-  }
-
-  if (filters.value.period) {
-    const now = new Date()
-    const period = filters.value.period
-    
-    filtered = filtered.filter(ticket => {
-      const purchaseDate = new Date(ticket.purchased_at)
-      
-      if (period === 'week') {
-        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-        return purchaseDate >= weekAgo
-      } else if (period === 'month') {
-        const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
-        return purchaseDate >= monthAgo
-      } else if (period === 'quarter') {
-        const quarterAgo = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate())
-        return purchaseDate >= quarterAgo
-      }
-      
-      return true
-    })
-  }
-
-  return filtered.sort((a, b) => new Date(b.purchased_at) - new Date(a.purchased_at))
-})
-
-const resetFilters = () => {
-  filters.value = {
-    search: '',
-    status: '',
-    period: ''
-  }
+// Map icon names to actual components for stats
+const iconMap = {
+  'TicketIcon': TicketIcon,
+  'TrophyIcon': TrophyIcon,
+  'CurrencyDollarIcon': CurrencyDollarIcon,
+  'ClockIcon': ClockIcon
 }
 
-const formatDate = (date) => {
-  return new Intl.DateTimeFormat('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(new Date(date))
-}
-
-const getRemainingTime = (date, status) => {
-  if (status === 'lost' || status === 'won') {
-    return 'Tirage terminé'
-  }
-  
-  const now = new Date()
-  const drawDate = new Date(date)
-  const diff = drawDate - now
-  
-  if (diff <= 0) {
-    return 'Tirage en cours'
-  }
-  
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-  
-  if (days > 0) {
-    return `Tirage dans ${days} jour${days > 1 ? 's' : ''}`
-  } else if (hours > 0) {
-    return `Tirage dans ${hours}h`
-  } else {
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-    return `Tirage dans ${minutes}min`
-  }
-}
-
-const getStatusLabel = (status) => {
-  const labels = {
-    'active': 'En cours',
-    'won': 'Gagné',
-    'lost': 'Perdu',
-    'pending': 'Tirage imminent'
-  }
-  return labels[status] || status
-}
-
-const claimPrize = async (ticketId) => {
+// Error handling wrappers
+const handleClaimPrize = async (ticketId) => {
   try {
-    const ticket = tickets.value.find(t => t.id === ticketId)
-    if (ticket) {
-      ticket.prize_claimed = true
-    }
-    console.log(`Prize claimed for ticket ${ticketId}`)
-  } catch (error) {
-    console.error('Error claiming prize:', error)
+    await claimPrize(ticketId)
+    // Show success message or notification here
+    console.log('Prix réclamé avec succès')
+  } catch (err) {
+    // Show error message or notification here
+    console.error('Erreur lors de la réclamation du prix:', err)
+    alert('Erreur lors de la réclamation du prix. Veuillez réessayer.')
   }
 }
 
-const downloadTicket = async (ticketId) => {
+const handleDownloadTicket = async (ticketId) => {
   try {
-    console.log(`Downloading ticket ${ticketId}`)
-    // Implement ticket download logic
-  } catch (error) {
-    console.error('Error downloading ticket:', error)
+    await downloadTicket(ticketId)
+  } catch (err) {
+    // Show error message or notification here
+    console.error('Erreur lors du téléchargement:', err)
+    alert('Erreur lors du téléchargement. Veuillez réessayer.')
   }
-}
-
-const loadMore = () => {
-  // Simulate loading more tickets
-  console.log('Loading more tickets...')
-  hasMore.value = false
 }
 
 onMounted(() => {
-  loading.value = true
-  setTimeout(() => {
-    loading.value = false
-  }, 1000)
+  loadTickets()
 })
 </script>

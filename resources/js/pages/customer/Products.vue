@@ -25,10 +25,13 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Toutes les catégories</option>
-            <option value="electronics">Électronique</option>
-            <option value="fashion">Mode</option>
-            <option value="automotive">Automobile</option>
-            <option value="home">Maison</option>
+            <option 
+              v-for="category in categories" 
+              :key="category.id" 
+              :value="category.id"
+            >
+              {{ category.name }}
+            </option>
           </select>
         </div>
         <div>
@@ -69,18 +72,16 @@
       >
         <div class="relative">
           <img
-            :src="product.image"
+            :src="product.image || '/images/products/placeholder.jpg'"
             :alt="product.title"
             class="w-full h-48 object-cover"
           />
           <div class="absolute top-4 left-4">
             <span :class="[
               'px-2 py-1 text-xs font-medium rounded-full',
-              product.status === 'active' ? 'bg-blue-100 text-blue-800' :
-              product.status === 'ending_soon' ? 'bg-yellow-100 text-yellow-800' :
-              'bg-gray-100 text-gray-800'
+              'bg-blue-100 text-blue-800'
             ]">
-              {{ getStatusLabel(product.status) }}
+              Actif
             </span>
           </div>
           <div v-if="product.featured" class="absolute top-4 right-4">
@@ -96,11 +97,11 @@
 
           <div class="flex justify-between items-center mb-4">
             <div>
-              <span class="text-2xl font-bold text-blue-600">{{ product.price }} FCFA</span>
+              <span class="text-2xl font-bold text-blue-600">{{ formatPrice(product.price) }} FCFA</span>
               <p class="text-sm text-gray-500">Valeur du produit</p>
             </div>
             <div class="text-right">
-              <span class="text-lg font-semibold text-gray-900">{{ product.ticket_price }} FCFA</span>
+              <span class="text-lg font-semibold text-gray-900">{{ formatPrice(product.lottery?.ticket_price || 1000) }} FCFA</span>
               <p class="text-sm text-gray-500">Par ticket</p>
             </div>
           </div>
@@ -108,24 +109,24 @@
           <div class="mb-4">
             <div class="flex justify-between text-sm text-gray-600 mb-1">
               <span>Progression</span>
-              <span>{{ product.progress }}% ({{ product.sold_tickets }}/{{ product.total_tickets }})</span>
+              <span>{{ calculateProgress(product) }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2">
               <div 
                 class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                :style="{ width: product.progress + '%' }"
+                :style="{ width: calculateProgress(product) + '%' }"
               ></div>
             </div>
           </div>
 
-          <div class="mb-4 text-sm text-gray-600">
+          <div class="mb-4 text-sm text-gray-600" v-if="product.lottery">
             <div class="flex items-center mb-1">
               <CalendarIcon class="w-4 h-4 mr-2" />
-              <span>Tirage le {{ formatDate(product.draw_date) }}</span>
+              <span>Tirage le {{ formatDate(product.lottery.draw_date) }}</span>
             </div>
             <div class="flex items-center">
               <ClockIcon class="w-4 h-4 mr-2" />
-              <span>{{ getRemainingTime(product.draw_date) }}</span>
+              <span>{{ getRemainingTime(product.lottery.draw_date) }}</span>
             </div>
           </div>
 
@@ -160,7 +161,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useApi } from '@/composables/api'
 import {
   ShoppingBagIcon,
   StarIcon,
@@ -169,107 +171,16 @@ import {
   ArrowDownIcon
 } from '@heroicons/vue/24/outline'
 
-const loading = ref(false)
+const { get, loading, error } = useApi()
 const hasMore = ref(true)
+const products = ref([])
+const categories = ref([])
 
 const filters = ref({
   search: '',
   category: '',
   maxPrice: ''
 })
-
-const products = ref([
-  {
-    id: 1,
-    title: 'iPhone 15 Pro',
-    description: 'Le dernier flagship d\'Apple avec une caméra révolutionnaire',
-    price: '750,000',
-    ticket_price: '1,000',
-    category: 'electronics',
-    progress: 85,
-    sold_tickets: 637,
-    total_tickets: 750,
-    status: 'active',
-    featured: true,
-    draw_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    image: '/images/products/iphone15.jpg'
-  },
-  {
-    id: 2,
-    title: 'MacBook Pro M3',
-    description: 'Puissance et performance pour les créateurs',
-    price: '1,200,000',
-    ticket_price: '2,000',
-    category: 'electronics',
-    progress: 62,
-    sold_tickets: 372,
-    total_tickets: 600,
-    status: 'active',
-    featured: false,
-    draw_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-    image: '/images/products/macbook.jpg'
-  },
-  {
-    id: 3,
-    title: 'PlayStation 5',
-    description: 'Console de jeu nouvelle génération',
-    price: '350,000',
-    ticket_price: '500',
-    category: 'electronics',
-    progress: 95,
-    sold_tickets: 665,
-    total_tickets: 700,
-    status: 'ending_soon',
-    featured: true,
-    draw_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-    image: '/images/products/ps5.jpg'
-  },
-  {
-    id: 4,
-    title: 'AirPods Pro',
-    description: 'Audio haute qualité avec réduction de bruit',
-    price: '150,000',
-    ticket_price: '300',
-    category: 'electronics',
-    progress: 45,
-    sold_tickets: 225,
-    total_tickets: 500,
-    status: 'active',
-    featured: false,
-    draw_date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
-    image: '/images/products/airpods.jpg'
-  },
-  {
-    id: 5,
-    title: 'Tesla Model 3',
-    description: 'Voiture électrique révolutionnaire',
-    price: '15,000,000',
-    ticket_price: '5,000',
-    category: 'automotive',
-    progress: 15,
-    sold_tickets: 450,
-    total_tickets: 3000,
-    status: 'active',
-    featured: true,
-    draw_date: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
-    image: '/images/products/tesla.jpg'
-  },
-  {
-    id: 6,
-    title: 'Nike Air Jordan',
-    description: 'Sneakers exclusives en édition limitée',
-    price: '85,000',
-    ticket_price: '200',
-    category: 'fashion',
-    progress: 78,
-    sold_tickets: 332,
-    total_tickets: 425,
-    status: 'active',
-    featured: false,
-    draw_date: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
-    image: '/images/products/jordan.jpg'
-  }
-])
 
 const filteredProducts = computed(() => {
   let filtered = products.value
@@ -283,16 +194,35 @@ const filteredProducts = computed(() => {
   }
 
   if (filters.value.category) {
-    filtered = filtered.filter(product => product.category === filters.value.category)
+    filtered = filtered.filter(product => product.category_id == filters.value.category)
   }
 
   if (filters.value.maxPrice) {
     const maxPrice = parseInt(filters.value.maxPrice)
-    filtered = filtered.filter(product => parseInt(product.price.replace(',', '')) <= maxPrice)
+    filtered = filtered.filter(product => product.price <= maxPrice)
   }
 
   return filtered
 })
+
+// API Functions
+const loadProducts = async () => {
+  try {
+    const response = await get('/products')
+    products.value = response.data || []
+  } catch (err) {
+    console.error('Erreur lors du chargement des produits:', err)
+  }
+}
+
+const loadCategories = async () => {
+  try {
+    const response = await get('/categories')
+    categories.value = response.data || []
+  } catch (err) {
+    console.error('Erreur lors du chargement des catégories:', err)
+  }
+}
 
 const resetFilters = () => {
   filters.value = {
@@ -302,7 +232,9 @@ const resetFilters = () => {
   }
 }
 
-const formatDate = (date) => {
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
   return new Intl.DateTimeFormat('fr-FR', {
     day: '2-digit',
     month: '2-digit',
@@ -310,8 +242,10 @@ const formatDate = (date) => {
   }).format(date)
 }
 
-const getRemainingTime = (date) => {
+const getRemainingTime = (dateString) => {
+  if (!dateString) return ''
   const now = new Date()
+  const date = new Date(dateString)
   const diff = date - now
   const days = Math.floor(diff / (1000 * 60 * 60 * 24))
   
@@ -325,25 +259,27 @@ const getRemainingTime = (date) => {
   }
 }
 
-const getStatusLabel = (status) => {
-  const labels = {
-    'active': 'Actif',
-    'ending_soon': 'Bientôt terminé',
-    'completed': 'Terminé'
-  }
-  return labels[status] || status
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('fr-FR').format(price)
 }
 
-const loadMore = () => {
-  // Simulate loading more products
+const calculateProgress = (product) => {
+  if (!product.lottery) return 0
+  const sold = product.lottery.sold_tickets || 0
+  const total = product.lottery.total_tickets || 1
+  return Math.round((sold / total) * 100)
+}
+
+const loadMore = async () => {
+  // Implémenter la pagination si nécessaire
   console.log('Loading more products...')
   hasMore.value = false
 }
 
-onMounted(() => {
-  loading.value = true
-  setTimeout(() => {
-    loading.value = false
-  }, 1000)
+onMounted(async () => {
+  await Promise.all([
+    loadProducts(),
+    loadCategories()
+  ])
 })
 </script>

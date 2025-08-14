@@ -8,8 +8,24 @@
 
     <!-- Key Metrics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Loading skeleton -->
+      <div v-if="loading" v-for="n in 4" :key="n" class="admin-card animate-pulse">
+        <div class="flex items-center">
+          <div class="p-3 rounded-lg bg-gray-200"></div>
+          <div class="ml-4 flex-1">
+            <div class="h-4 bg-gray-200 rounded w-20 mb-2"></div>
+            <div class="h-6 bg-gray-200 rounded w-16"></div>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-100">
+          <div class="h-4 bg-gray-200 rounded w-24"></div>
+        </div>
+      </div>
+
+      <!-- Stats cards -->
       <div 
-        v-for="stat in stats" 
+        v-else
+        v-for="stat in dashboardStats" 
         :key="stat.label"
         class="admin-card hover:shadow-md transition-shadow duration-200"
       >
@@ -39,6 +55,22 @@
             </span>
             <span class="ml-2 text-gray-500">vs mois dernier</span>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error message -->
+    <div v-if="error && !loading" class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+      <div class="flex">
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">Erreur de chargement</h3>
+          <p class="mt-1 text-sm text-red-700">{{ error }}</p>
+          <button 
+            @click="refreshDashboard"
+            class="mt-2 text-sm bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded"
+          >
+            Réessayer
+          </button>
         </div>
       </div>
     </div>
@@ -129,9 +161,23 @@
           <div class="admin-card-header">
             <h3 class="text-lg font-semibold text-gray-900">Activités récentes</h3>
           </div>
-          <div class="space-y-4">
+          
+          <!-- Loading skeleton -->
+          <div v-if="loading" class="space-y-4">
+            <div v-for="n in 4" :key="n" class="flex items-start space-x-3 p-3 animate-pulse">
+              <div class="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0"></div>
+              <div class="flex-1 min-w-0 space-y-2">
+                <div class="h-4 bg-gray-200 rounded w-32"></div>
+                <div class="h-3 bg-gray-200 rounded w-48"></div>
+                <div class="h-3 bg-gray-200 rounded w-16"></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Activities list -->
+          <div v-else-if="activityIconComponents.length > 0" class="space-y-4">
             <div 
-              v-for="activity in recentActivities" 
+              v-for="activity in activityIconComponents" 
               :key="activity.id"
               class="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors"
             >
@@ -151,6 +197,13 @@
               </div>
             </div>
           </div>
+          
+          <!-- Empty state -->
+          <div v-else class="text-center py-6 text-gray-500">
+            <InformationCircleIcon class="w-8 h-8 mx-auto mb-2 text-gray-400" />
+            <p class="text-sm">Aucune activité récente</p>
+          </div>
+          
           <div class="mt-4 pt-4 border-t border-gray-100">
             <button class="admin-btn-secondary w-full text-sm">
               Voir toutes les activités
@@ -221,7 +274,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import {
   UsersIcon,
   ShoppingBagIcon,
@@ -232,152 +285,48 @@ import {
   ChartBarIcon,
   PlusIcon,
   UserPlusIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  BanknotesIcon,
+  InformationCircleIcon
 } from '@heroicons/vue/24/outline'
+import { useAdminStats } from '@/composables/useAdminStats'
 
-// Data
-const stats = ref([
-  {
-    label: 'Utilisateurs actifs',
-    value: '2,543',
-    change: 12.5,
-    icon: UsersIcon,
-    bgColor: 'bg-[#0099cc]/10',
-    iconColor: 'text-[#0099cc]'
-  },
-  {
-    label: 'Produits en vente',
-    value: '186',
-    change: 8.2,
-    icon: ShoppingBagIcon,
-    bgColor: 'bg-blue-100',
-    iconColor: 'text-blue-600'
-  },
-  {
-    label: 'Tombolas actives',
-    value: '24',
-    change: -2.1,
-    icon: GiftIcon,
-    bgColor: 'bg-yellow-100',
-    iconColor: 'text-yellow-600'
-  },
-  {
-    label: 'Revenus mensuel',
-    value: '45,2M',
-    change: 15.3,
-    icon: CurrencyDollarIcon,
-    bgColor: 'bg-purple-100',
-    iconColor: 'text-purple-600'
-  }
-])
+// Composables
+const {
+  stats,
+  recentLotteries,
+  recentActivities,
+  topProducts,
+  loading,
+  error,
+  loadDashboardData
+} = useAdminStats()
 
-const recentActivities = ref([
-  {
-    id: 1,
-    type: 'user',
-    icon: UsersIcon,
-    title: 'Nouvel utilisateur inscrit',
-    description: 'Marie Dubois a créé un compte',
-    time: new Date(Date.now() - 5 * 60 * 1000)
-  },
-  {
-    id: 2,
-    type: 'product',
-    icon: ShoppingBagIcon,
-    title: 'Produit ajouté',
-    description: 'iPhone 15 Pro a été publié',
-    time: new Date(Date.now() - 15 * 60 * 1000)
-  },
-  {
-    id: 3,
-    type: 'payment',
-    icon: CurrencyDollarIcon,
-    title: 'Paiement reçu',
-    description: '2500 FCFA pour un ticket de tombola',
-    time: new Date(Date.now() - 30 * 60 * 1000)
-  },
-  {
-    id: 4,
-    type: 'lottery',
-    icon: GiftIcon,
-    title: 'Tombola terminée',
-    description: 'MacBook Pro - Gagnant sélectionné',
-    time: new Date(Date.now() - 45 * 60 * 1000)
-  }
-])
+// Icon mapping for dynamic components
+const iconComponents = {
+  UsersIcon,
+  ShoppingBagIcon,
+  GiftIcon,
+  CurrencyDollarIcon,
+  BanknotesIcon,
+  InformationCircleIcon
+}
 
-const topProducts = ref([
-  {
-    id: 1,
-    title: 'iPhone 15 Pro Max',
-    sales: 156,
-    growth: 23.5,
-    image: '/images/products/placeholder.jpg'
-  },
-  {
-    id: 2,
-    title: 'MacBook Pro M3',
-    sales: 89,
-    growth: 18.2,
-    image: '/images/products/placeholder.jpg'
-  },
-  {
-    id: 3,
-    title: 'PlayStation 5',
-    sales: 67,
-    growth: -5.1,
-    image: '/images/products/placeholder.jpg'
-  },
-  {
-    id: 4,
-    title: 'AirPods Pro 2',
-    sales: 45,
-    growth: 12.8,
-    image: '/images/products/placeholder.jpg'
-  }
-])
+// Computed stats with resolved icons
+const dashboardStats = computed(() => {
+  return stats.value.map(stat => ({
+    ...stat,
+    icon: iconComponents[stat.icon] || InformationCircleIcon
+  }))
+})
 
-const recentLotteries = ref([
-  {
-    id: 1,
-    lottery_number: 'KMB-2025-000001',
-    product: {
-      name: 'iPhone 15 Pro Max',
-      image: '/images/products/placeholder.jpg'
-    },
-    status: 'active',
-    statusLabel: 'Active',
-    sold_tickets: 145,
-    total_tickets: 200,
-    end_date: '2025-01-15T15:00:00'
-  },
-  {
-    id: 2,
-    lottery_number: 'KMB-2025-000002',
-    product: {
-      name: 'MacBook Pro M3',
-      image: '/images/products/placeholder.jpg'
-    },
-    status: 'completed',
-    statusLabel: 'Terminée',
-    sold_tickets: 180,
-    total_tickets: 180,
-    end_date: '2025-01-10T18:00:00'
-  },
-  {
-    id: 3,
-    lottery_number: 'KMB-2025-000003',
-    product: {
-      name: 'PlayStation 5',
-      image: '/images/products/placeholder.jpg'
-    },
-    status: 'pending',
-    statusLabel: 'En attente',
-    sold_tickets: 67,
-    total_tickets: 150,
-    end_date: '2025-01-20T20:00:00'
-  }
-])
+// Activity icons mapping
+const activityIconComponents = computed(() => {
+  return recentActivities.value.map(activity => ({
+    ...activity,
+    icon: iconComponents[activity.icon] || InformationCircleIcon
+  }))
+})
 
 // Methods
 const formatDate = (dateString) => {
@@ -399,8 +348,12 @@ const formatTime = (date) => {
   return `il y a ${Math.floor(diff / 86400)}j`
 }
 
-onMounted(() => {
-  // Load dashboard data
-  console.log('Dashboard admin chargé')
+// Refresh data
+const refreshDashboard = async () => {
+  await loadDashboardData()
+}
+
+onMounted(async () => {
+  await loadDashboardData()
 })
 </script>

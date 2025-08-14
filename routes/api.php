@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RefundController;
 use App\Http\Controllers\Api\AdminRefundController;
 use App\Http\Controllers\Api\TicketPriceController;
+use App\Http\Controllers\Api\AdminDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -168,7 +169,8 @@ Route::group([
     Route::put('products/{id}', [ProductController::class, 'update']);
     Route::post('products/{id}/create-lottery', [ProductController::class, 'createLottery']);
     
-    // Lottery draw (Marchands seulement)
+    // Lotteries (Marchands seulement)
+    Route::get('lotteries/my-lotteries', [LotteryController::class, 'myLotteries']);
     Route::post('lotteries/{id}/draw', [LotteryController::class, 'drawLottery']);
     
     // Merchant Dashboard
@@ -178,7 +180,11 @@ Route::group([
         Route::get('top-products', [MerchantDashboardController::class, 'getTopProducts']);
         Route::get('recent-transactions', [MerchantDashboardController::class, 'getRecentTransactions']);
         Route::get('lottery-performance', [MerchantDashboardController::class, 'getLotteryPerformance']);
+        Route::get('export-orders', [MerchantDashboardController::class, 'exportOrders']);
     });
+    
+    // Transaction management
+    Route::put('transactions/{id}/status', [MerchantDashboardController::class, 'updateTransactionStatus']);
 });
 
 // Routes Admin avec rate limiting strict
@@ -186,6 +192,16 @@ Route::group([
     'middleware' => ['auth:sanctum', 'admin', 'throttle.api:200,1'],
     'prefix' => 'admin'
 ], function () {
+    // Admin Dashboard
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/stats', [AdminDashboardController::class, 'getStats']);
+    });
+    
+    // Admin Dashboard Data Endpoints
+    Route::get('/lotteries/recent', [AdminDashboardController::class, 'getRecentLotteries']);
+    Route::get('/activities/recent', [AdminDashboardController::class, 'getRecentActivities']);
+    Route::get('/products/top', [AdminDashboardController::class, 'getTopProducts']);
+    
     // Admin Refunds
     Route::prefix('refunds')->group(function () {
         Route::get('/', [AdminRefundController::class, 'index']);

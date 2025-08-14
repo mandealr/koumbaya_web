@@ -138,6 +138,96 @@ class LotteryController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/lotteries/my-lotteries",
+     *     tags={"Lotteries"},
+     *     summary="Lister mes tombolas en tant que merchant",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Filtrer par statut",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"pending","active","completed","cancelled"})
+     *     ),
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Recherche par nom ou description",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort_by",
+     *         in="query",
+     *         description="Trier par",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"end_date_asc", "end_date_desc", "ticket_price_asc", "ticket_price_desc", "popularity"})
+     *     ),
+     *     @OA\Response(response=200, description="Liste de mes tombolas")
+     * )
+     */
+    public function myLotteries(Request $request)
+    {
+        $user = auth('sanctum')->user();
+        
+        // Vérifier que l'utilisateur est un merchant
+        if ($user->role !== 'MERCHANT') {
+            return response()->json(['error' => 'Accès réservé aux merchants'], 403);
+        }
+
+        $query = Lottery::with(['product.category', 'tickets'])
+            ->whereHas('product', function ($productQuery) use ($user) {
+                $productQuery->where('merchant_id', $user->id);
+            });
+
+        // Filtres de base
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        // Recherche par nom ou description du produit
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('product', function ($productQuery) use ($search) {
+                $productQuery->where('name', 'LIKE', "%{$search}%")
+                            ->orWhere('description', 'LIKE', "%{$search}%");
+            })->orWhere('lottery_number', 'LIKE', "%{$search}%");
+        }
+
+        // Tri des résultats
+        $this->applyLotterySorting($query, $request->get('sort_by', 'end_date_asc'));
+
+        $perPage = min($request->get('per_page', 15), 50);
+        $lotteries = $query->paginate($perPage);
+
+        // Ajouter des informations utiles
+        $lotteries->getCollection()->transform(function ($lottery) {
+            $lottery->append(['time_remaining', 'participation_rate', 'is_ending_soon', 'can_draw']);
+            return $lottery;
+        });
+
+        // Calculer les statistiques
+        $totalQuery = Lottery::whereHas('product', function ($productQuery) use ($user) {
+            $productQuery->where('merchant_id', $user->id);
+        });
+
+        $stats = [
+            'total' => $totalQuery->count(),
+            'active' => $totalQuery->where('status', 'active')->count(),
+            'pending' => $totalQuery->where('status', 'pending')->count(),
+            'completed' => $totalQuery->where('status', 'completed')->count(),
+            'cancelled' => $totalQuery->where('status', 'cancelled')->count(),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $lotteries,
+            'stats' => $stats
+        ]);
+    }
+
+    /**
      * Appliquer le tri aux tombolas
      */
     private function applyLotterySorting($query, $sortBy)

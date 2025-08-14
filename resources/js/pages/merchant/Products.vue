@@ -363,6 +363,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useApi } from '@/composables/api'
 import {
   PlusIcon,
   MagnifyingGlassIcon,
@@ -384,9 +385,9 @@ import {
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
+const { get, post, put, delete: del, loading, error } = useApi()
 
 // State
-const loading = ref(false)
 const showProductModal = ref(false)
 const selectedProduct = ref(null)
 const showProductMenu = ref(null)
@@ -398,128 +399,9 @@ const filters = reactive({
   sortBy: 'created_at'
 })
 
-const categories = ref([
-  { id: 1, name: 'Électronique' },
-  { id: 2, name: 'Mode & Accessoires' },
-  { id: 3, name: 'Maison & Jardin' },
-  { id: 4, name: 'Sport & Loisirs' },
-  { id: 5, name: 'Automobile' }
-])
-
-const productStats = ref([
-  {
-    label: 'Produits actifs',
-    value: '8',
-    change: 12.5,
-    icon: GiftIcon,
-    color: 'bg-[#0099cc]'
-  },
-  {
-    label: 'Total revenus',
-    value: '45.2K',
-    change: 18.7,
-    icon: CurrencyDollarIcon,
-    color: 'bg-blue-500'
-  },
-  {
-    label: 'Tickets vendus',
-    value: '1,247',
-    change: 8.3,
-    icon: ShoppingBagIcon,
-    color: 'bg-purple-500'
-  },
-  {
-    label: 'Taux succès',
-    value: '89%',
-    change: 5.2,
-    icon: CheckCircleIcon,
-    color: 'bg-yellow-500'
-  }
-])
-
-const products = ref([
-  {
-    id: 1,
-    name: 'iPhone 15 Pro Max 256GB',
-    description: 'Smartphone Apple dernière génération, état impeccable avec tous les accessoires d\'origine.',
-    category: 'Électronique',
-    condition: 'new',
-    value: 850000,
-    ticket_price: 2500,
-    total_tickets: 400,
-    sold_tickets: 287,
-    progress: 72,
-    revenue: 717500,
-    status: 'active',
-    end_date: '2025-01-15T18:00:00Z',
-    created_at: '2025-01-01T10:00:00Z',
-    image: '/images/products/placeholder.jpg',
-    images: [
-      '/images/products/placeholder.jpg',
-      '/images/products/placeholder.jpg',
-      '/images/products/placeholder.jpg'
-    ]
-  },
-  {
-    id: 2,
-    name: 'MacBook Pro M3 14"',
-    description: 'Ordinateur portable professionnel Apple avec processeur M3, parfait pour le travail et la créativité.',
-    category: 'Électronique',
-    condition: 'like_new',
-    value: 1200000,
-    ticket_price: 5000,
-    total_tickets: 300,
-    sold_tickets: 156,
-    progress: 52,
-    revenue: 780000,
-    status: 'active',
-    end_date: '2025-01-20T20:00:00Z',
-    created_at: '2025-01-05T14:30:00Z',
-    image: '/images/products/placeholder.jpg',
-    images: [
-      '/images/products/placeholder.jpg',
-      '/images/products/placeholder.jpg'
-    ]
-  },
-  {
-    id: 3,
-    name: 'PlayStation 5 + Accessoires',
-    description: 'Console de jeu nouvelle génération avec manette supplémentaire et 3 jeux inclus.',
-    category: 'Électronique',
-    condition: 'good',
-    value: 450000,
-    ticket_price: 1500,
-    total_tickets: 350,
-    sold_tickets: 298,
-    progress: 85,
-    revenue: 447000,
-    status: 'active',
-    end_date: '2025-01-12T16:00:00Z',
-    created_at: '2025-01-03T09:15:00Z',
-    image: '/images/products/placeholder.jpg',
-    images: [
-      '/images/products/placeholder.jpg'
-    ]
-  },
-  {
-    id: 4,
-    name: 'Apple Watch Series 9',
-    description: 'Montre connectée Apple avec toutes les fonctionnalités de santé et sport.',
-    category: 'Électronique',
-    condition: 'new',
-    value: 280000,
-    ticket_price: 1000,
-    total_tickets: 350,
-    sold_tickets: 89,
-    progress: 25,
-    revenue: 89000,
-    status: 'draft',
-    end_date: null,
-    created_at: '2025-01-08T11:20:00Z',
-    image: '/images/products/placeholder.jpg',
-    images: []
-  }
-])
+const categories = ref([])
+const productStats = ref([])
+const products = ref([])
 
 // Computed
 const filteredProducts = computed(() => {
@@ -622,33 +504,123 @@ const editProduct = (product) => {
   router.push(`/merchant/products/${product.id}/edit`)
 }
 
+// API Functions
+const loadProducts = async () => {
+  try {
+    const params = new URLSearchParams()
+    if (filters.search) params.append('search', filters.search)
+    if (filters.category) params.append('category_id', filters.category)
+    if (filters.status) params.append('status', filters.status)
+    if (filters.sortBy) params.append('sort_by', filters.sortBy)
+    
+    const response = await get(`/products?${params.toString()}`)
+    if (response && response.data) {
+      products.value = response.data.map(product => ({
+        ...product,
+        lottery: product.lottery || null,
+        progress: product.lottery ? 
+          Math.round((product.lottery.sold_tickets / product.lottery.total_tickets) * 100) : 0
+      }))
+    }
+  } catch (error) {
+    console.error('Error loading products:', error)
+  }
+}
+
+const loadCategories = async () => {
+  try {
+    const response = await get('/categories')
+    if (response && response.data) {
+      categories.value = response.data
+    }
+  } catch (error) {
+    console.error('Error loading categories:', error)
+  }
+}
+
+const loadProductStats = async () => {
+  try {
+    const response = await get('/merchant/dashboard/stats')
+    if (response && response.data) {
+      const data = response.data
+      productStats.value = [
+        {
+          label: 'Produits actifs',
+          value: data.active_products || 0,
+          change: data.products_change || 0,
+          icon: GiftIcon,
+          color: 'bg-[#0099cc]'
+        },
+        {
+          label: 'Total revenus',
+          value: formatCurrency(data.total_revenue || 0),
+          change: data.revenue_change || 0,
+          icon: CurrencyDollarIcon,
+          color: 'bg-blue-500'
+        },
+        {
+          label: 'Tickets vendus',
+          value: data.tickets_sold || 0,
+          change: data.tickets_change || 0,
+          icon: ShoppingBagIcon,
+          color: 'bg-purple-500'
+        },
+        {
+          label: 'Taux succès',
+          value: (data.success_rate || 0) + '%',
+          change: data.success_change || 0,
+          icon: CheckCircleIcon,
+          color: 'bg-yellow-500'
+        }
+      ]
+    }
+  } catch (error) {
+    console.error('Error loading product stats:', error)
+  }
+}
+
 const publishProduct = async (product) => {
-  if (confirm(`Publier la tombola pour "${product.name}" ?`)) {
+  if (confirm(`Publier la tombola pour "${product.title || product.name}" ?`)) {
     try {
-      product.status = 'active'
-      product.end_date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-      alert('Produit publié avec succès !')
+      const response = await post(`/products/${product.id}/create-lottery`, {
+        total_tickets: 1000,
+        ticket_price: product.ticket_price || 1000
+      })
+      
+      if (response && response.success) {
+        await loadProducts() // Refresh products
+        alert('✅ Tombola publiée avec succès !')
+      } else {
+        throw new Error(response?.message || 'Erreur lors de la publication')
+      }
     } catch (error) {
-      alert('Erreur lors de la publication')
+      console.error('Error publishing product:', error)
+      alert('❌ Erreur lors de la publication')
     }
   }
 }
 
-const duplicateProduct = (product) => {
-  const duplicate = {
-    ...product,
-    id: Date.now(),
-    name: product.name + ' (Copie)',
-    status: 'draft',
-    sold_tickets: 0,
-    progress: 0,
-    revenue: 0,
-    end_date: null,
-    created_at: new Date().toISOString()
+const duplicateProduct = async (product) => {
+  try {
+    const response = await post('/products', {
+      title: (product.title || product.name) + ' (Copie)',
+      description: product.description,
+      price: product.price || product.value,
+      category_id: product.category_id,
+      image: product.image
+    })
+    
+    if (response && response.success) {
+      await loadProducts() // Refresh products
+      alert('✅ Produit dupliqué avec succès !')
+    } else {
+      throw new Error(response?.message || 'Erreur lors de la duplication')
+    }
+  } catch (error) {
+    console.error('Error duplicating product:', error)
+    alert('❌ Erreur lors de la duplication')
   }
-  products.value.unshift(duplicate)
   showProductMenu.value = null
-  alert('Produit dupliqué avec succès !')
 }
 
 const viewAnalytics = (product) => {
@@ -657,18 +629,25 @@ const viewAnalytics = (product) => {
 }
 
 const deleteProduct = async (product) => {
-  if (confirm(`Supprimer définitivement "${product.name}" ? Cette action est irréversible.`)) {
+  if (confirm(`Supprimer définitivement "${product.title || product.name}" ? Cette action est irréversible.`)) {
     try {
-      const index = products.value.findIndex(p => p.id === product.id)
-      if (index !== -1) {
-        products.value.splice(index, 1)
-        alert('Produit supprimé')
+      const response = await del(`/products/${product.id}`)
+      if (response && response.success) {
+        await loadProducts() // Refresh products
+        alert('✅ Produit supprimé')
+      } else {
+        throw new Error(response?.message || 'Erreur lors de la suppression')
       }
     } catch (error) {
-      alert('Erreur lors de la suppression')
+      console.error('Error deleting product:', error)
+      alert('❌ Erreur lors de la suppression')
     }
     showProductMenu.value = null
   }
+}
+
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat('fr-FR').format(amount)
 }
 
 const toggleProductMenu = (productId) => {
@@ -682,9 +661,13 @@ const handleClickOutside = (event) => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
-  console.log('Products page loaded')
+  await Promise.all([
+    loadProducts(),
+    loadCategories(),
+    loadProductStats()
+  ])
 })
 
 onUnmounted(() => {
