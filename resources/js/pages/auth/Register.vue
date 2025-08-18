@@ -261,7 +261,7 @@
                           </svg>
                         </div>
                       </div>
-                      
+
                       <!-- Phone Number Input -->
                       <input
                         id="phone"
@@ -313,7 +313,7 @@
                 </div>
 
                 <!-- Location Fields - only for business accounts -->
-                <div v-if="form.account_type === 'business'" class="grid grid-cols-2 gap-4 transition-all duration-300">
+                <div v-if="form.account_type == 'business'" class="grid grid-cols-2 gap-4 transition-all duration-300">
                   <div>
                     <label for="city" class="block text-sm font-semibold text-gray-900 mb-2">
                       Ville *
@@ -608,7 +608,7 @@ const onPhoneInput = (event) => {
 // Validation du numéro de téléphone
 const validatePhoneNumber = () => {
   const phone = form.phone.trim()
-  
+
   if (!phone) {
     phoneValid.value = false
     errors.phone = ''
@@ -618,7 +618,7 @@ const validatePhoneNumber = () => {
   // Validation basique selon le pays sélectionné
   const dialCode = countryDialCodes[selectedCountryCode.value]
   let isValid = false
-  
+
   // Si le numéro commence par l'indicatif du pays
   if (phone.startsWith(dialCode)) {
     isValid = phone.length >= dialCode.length + 8 // Indicatif + au moins 8 chiffres
@@ -626,9 +626,9 @@ const validatePhoneNumber = () => {
     // Numéro local (sans indicatif)
     isValid = phone.length >= 8 && phone.length <= 12
   }
-  
+
   phoneValid.value = isValid
-  
+
   if (isValid) {
     errors.phone = ''
   } else if (phone.length > 0) {
@@ -681,7 +681,7 @@ const handleSubmit = async () => {
 
     // Préparer les données pour la page de connexion
     const accountType = form.account_type === 'business' ? 'marchand' : 'client'
-    const verificationMessage = result.verification_type === 'email_link' 
+    const verificationMessage = result.verification_type === 'email_link'
       ? `Un email de vérification a été envoyé à ${result.verification_sent_to}. Veuillez cliquer sur le lien dans votre email, puis vous connecter ci-dessous.`
       : `Un code de vérification a été envoyé à ${result.verification_sent_to}. Veuillez vérifier votre compte, puis vous connecter ci-dessous.`
 
@@ -697,16 +697,16 @@ const handleSubmit = async () => {
     console.log('Redirection vers la page de connexion après inscription')
 
     // Rediriger vers la page de connexion
-    router.push({ 
+    router.push({
       name: 'login',
-      query: { 
+      query: {
         registered: 'true',
         email: form.email.trim()
       }
     })
   } else {
     console.error('Erreur lors de l\'inscription:', result)
-    
+
     // Afficher l'erreur dans un toast
     if (window.$toast) {
       const errorMessage = result.message || 'Une erreur est survenue lors de l\'inscription'

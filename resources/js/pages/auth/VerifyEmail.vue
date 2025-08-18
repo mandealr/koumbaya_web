@@ -119,7 +119,7 @@ const verifyEmail = async () => {
       
       // Si l'utilisateur est connecté, actualiser ses informations
       if (authStore.isAuthenticated) {
-        await authStore.fetchUser()
+        await authStore.refreshUser()
       }
     } else {
       throw new Error(response.message || 'Erreur de vérification')
@@ -135,7 +135,11 @@ const verifyEmail = async () => {
 
 const redirectToDashboard = () => {
   if (authStore.isAuthenticated) {
-    router.push('/dashboard')
+    // Utiliser la logique de redirection centralisée
+    const redirectTo = authStore.getDefaultRedirect()
+    router.push({ name: redirectTo }).catch(() => {
+      router.push('/dashboard')
+    })
   } else {
     router.push('/login')
   }

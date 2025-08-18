@@ -59,9 +59,11 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useApi } from '@/composables/api'
 import { ExclamationTriangleIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 
 const authStore = useAuthStore()
+const { post } = useApi()
 const loading = ref(false)
 const bannerHidden = ref(false)
 
@@ -72,30 +74,38 @@ const resendVerification = async () => {
   loading.value = true
   
   try {
-    // Ici vous pouvez ajouter la logique pour renvoyer l'email de vérification
-    // const response = await api.post('/auth/resend-verification')
+    // Appel API pour renvoyer l'email de vérification
+    const response = await post('/auth/resend-verification', {
+      email: user.value.email
+    })
     
     if (window.$toast) {
-      window.$toast.info(
-        'Un nouvel email de vérification a été envoyé à votre adresse.',
-        'Email envoyé',
-        6000
+      window.$toast.success(
+        `Un nouvel email de vérification a été envoyé à ${user.value.email}. Vérifiez votre boîte email.`,
+        '✅ Email envoyé',
+        8000
       )
     }
     
     // Masquer temporairement le banner après envoi
     setTimeout(() => {
       bannerHidden.value = true
+      localStorage.setItem('verification_banner_hidden_until', Date.now() + (30 * 60 * 1000)) // 30 minutes
     }, 2000)
     
   } catch (error) {
     console.error('Erreur lors de l\'envoi de l\'email de vérification:', error)
     
+    let errorMessage = 'Une erreur est survenue lors de l\'envoi de l\'email.'
+    
+    if (error.response?.status === 429) {
+      errorMessage = 'Trop de tentatives. Veuillez patienter avant de renvoyer un email.'
+    } else if (error.response?.data?.message) {
+      errorMessage = error.response.data.message
+    }
+    
     if (window.$toast) {
-      window.$toast.error(
-        'Une erreur est survenue lors de l\'envoi de l\'email.',
-        'Erreur'
-      )
+      window.$toast.error(errorMessage, '❌ Erreur')
     }
   } finally {
     loading.value = false
@@ -104,12 +114,13 @@ const resendVerification = async () => {
 
 const hideBanner = () => {
   bannerHidden.value = true
-  // Sauvegarder dans localStorage pour ne pas réafficher dans cette session
-  localStorage.setItem('verification_banner_hidden', 'true')
+  // Sauvegarder dans localStorage pour ne pas réafficher pendant 1 heure
+  localStorage.setItem('verification_banner_hidden_until', Date.now() + (60 * 60 * 1000))
 }
 
-// Restaurer l'état du banner depuis localStorage
-if (localStorage.getItem('verification_banner_hidden') === 'true') {
+// Restaurer l'état du banner depuis localStorage avec expiration
+const hiddenUntil = localStorage.getItem('verification_banner_hidden_until')
+if (hiddenUntil && Date.now() < parseInt(hiddenUntil)) {
   bannerHidden.value = true
 }
 </script>

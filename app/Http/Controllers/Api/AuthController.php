@@ -611,6 +611,52 @@ class AuthController extends Controller
     }
 
     /**
+     * Renvoyer l'email de vérification
+     */
+    public function resendVerificationEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucun compte trouvé avec cette adresse email.'
+            ], 404);
+        }
+
+        if ($user->verified_at) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ce compte est déjà vérifié.'
+            ], 400);
+        }
+
+        try {
+            $this->sendVerificationEmail($user);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Un nouvel email de vérification a été envoyé.',
+                'verification_sent_to' => $user->email
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de l\'envoi de l\'email de vérification:', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'envoi de l\'email de vérification.'
+            ], 500);
+        }
+    }
+
+    /**
      * Assigner les rôles selon la logique simplifiée :
      * - Particulier = client uniquement (achats, tombolas)
      * - Business = marchand uniquement (vente, gestion)

@@ -41,6 +41,7 @@ Route::group([
     Route::post('register', [AuthController::class, 'register']);
     Route::post('verify-account', [AuthController::class, 'verifyAccount']);
     Route::get('verify-email/{token}', [AuthController::class, 'verifyAccountByUrl']);
+    Route::post('resend-verification', [AuthController::class, 'resendVerificationEmail']);
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::post('refresh', [AuthController::class, 'refresh'])->middleware('auth:sanctum');
     Route::get('me', [AuthController::class, 'me'])->middleware('auth:sanctum');
