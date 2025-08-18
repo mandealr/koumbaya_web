@@ -138,29 +138,29 @@ class UserProfileController extends Controller
     /**
      * Send success response
      */
-    protected function sendResponse($result, $message)
+    protected function sendResponse($data, $message = 'Success', $code = 200)
     {
         $response = [
             'success' => true,
-            'data'    => $result,
+            'data'    => $data,
             'message' => $message,
         ];
 
-        return response()->json($response, 200);
+        return response()->json($response, $code);
     }
 
     /**
      * Send error response
      */
-    protected function sendError($error, $errorMessages = [], $code = 404)
+    protected function sendError($message = 'Error', $errors = [], $code = 400)
     {
         $response = [
             'success' => false,
-            'message' => $error,
+            'message' => $message,
         ];
 
-        if(!empty($errorMessages)){
-            $response['errors'] = $errorMessages;
+        if(!empty($errors)){
+            $response['errors'] = $errors;
         }
 
         return response()->json($response, $code);

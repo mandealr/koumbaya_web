@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-[#0099cc]/5 via-white to-[#0099cc]/10 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-gradient-to-br flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl w-full">
       <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
         <div class="grid grid-cols-1 lg:grid-cols-2">
@@ -9,26 +9,26 @@
               <div class="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full"></div>
               <div class="absolute -bottom-16 -left-16 w-60 h-60 bg-white rounded-full"></div>
             </div>
-            
+
             <div class="relative z-10">
               <div class="flex items-center mb-8">
-                <img 
-                  :src="logoWhiteUrl" 
-                  alt="Logo Koumbaya" 
+                <img
+                  :src="logoWhiteUrl"
+                  alt="Logo Koumbaya"
                   class="h-16 w-auto mr-4"
                 />
               </div>
-              
+
               <h2 class="text-4xl lg:text-5xl font-bold text-white mb-6">
                 Rejoignez notre marketplace !
               </h2>
-              
+
               <p class="text-blue-100 text-lg leading-relaxed mb-8">
-                Créez votre compte hybride et profitez d'une expérience unique : 
-                <strong class="text-white">achetez malin</strong> et 
+                Créez votre compte hybride et profitez d'une expérience unique :
+                <strong class="text-white">achetez malin</strong> et
                 <strong class="text-white">vendez facilement</strong> sur la même plateforme.
               </p>
-              
+
               <div class="space-y-4">
                 <div class="flex items-center text-blue-100">
                   <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center mr-3">
@@ -57,7 +57,7 @@
             <div class="max-w-md mx-auto">
               <h3 class="text-3xl font-bold text-black mb-2">Créer un compte</h3>
               <p class="text-gray-600 mb-8">
-                Déjà membre ? 
+                Déjà membre ?
                 <router-link to="/login" class="text-[#0099cc] hover:text-[#0088bb] font-semibold">
                   Se connecter
                 </router-link>
@@ -129,7 +129,7 @@
                       </div>
                     </div>
                   </div>
-                  
+
                   <div
                     @click="form.account_type = 'business'"
                     class="relative cursor-pointer p-4 border-2 rounded-xl transition-all duration-200 hover:border-[#0099cc]/50"
@@ -185,7 +185,7 @@
                     />
                     <p v-if="errors.first_name" class="mt-1 text-sm text-red-600">{{ errors.first_name }}</p>
                   </div>
-                  
+
                   <div>
                     <label for="last_name" class="block text-sm font-semibold text-gray-900 mb-2">
                       Nom *
@@ -225,14 +225,22 @@
                   <label for="phone" class="block text-sm font-semibold text-gray-900 mb-2">
                     Numéro de téléphone *
                   </label>
-                  <input
-                    id="phone"
+                  <VueTelInput
                     v-model="form.phone"
-                    type="tel"
-                    placeholder="Ex: +241 01 23 45 67"
-                    required
-                    :class="'w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black' + (errors.phone ? ' border-red-300 bg-red-50' : '')"
-                    @input="validatePhoneInput"
+                    :default-country="selectedCountryCode"
+                    :preferred-countries="['GA', 'FR', 'CA']"
+                    :only-countries="['GA', 'FR', 'CA', 'CM', 'CI', 'SN', 'BF', 'ML', 'NE', 'TG', 'BJ', 'GN', 'GW', 'LR', 'SL', 'MR', 'TD', 'CF', 'CG', 'CD', 'AO', 'ST', 'GQ', 'DJ', 'ER', 'ET', 'KE', 'TZ', 'UG', 'RW', 'BI', 'SO', 'MG', 'MU', 'SC', 'KM', 'ZA', 'BW', 'LS', 'SZ', 'NA', 'ZW', 'ZM', 'MW', 'MZ']"
+                    :enable-search-country="true"
+                    :dropdown-options="{ disabled: false, showFlags: true, showDialCodeInSelection: true }"
+                    :input-options="{ 
+                      id: 'phone',
+                      placeholder: 'Ex: 01 23 45 67',
+                      required: true
+                    }"
+                    :class="['vue-tel-input-koumbaya', { 'has-error': errors.phone }]"
+                    @input="onPhoneInput"
+                    @validate="onPhoneValidate"
+                    @country-changed="onCountryChanged"
                   />
                   <p v-if="errors.phone" class="mt-1 text-sm text-red-600">{{ errors.phone }}</p>
                 </div>
@@ -252,9 +260,9 @@
                       :disabled="countriesLoading"
                     >
                       <option value="" disabled>Sélectionnez votre pays</option>
-                      <option 
-                        v-for="country in countries" 
-                        :key="country.id" 
+                      <option
+                        v-for="country in countries"
+                        :key="country.id"
                         :value="country.id"
                       >
                         {{ country.name }}
@@ -287,7 +295,7 @@
                     />
                     <p v-if="errors.city" class="mt-1 text-sm text-red-600">{{ errors.city }}</p>
                   </div>
-                  
+
                   <div>
                     <label for="address" class="block text-sm font-semibold text-gray-900 mb-2">
                       Adresse
@@ -331,7 +339,7 @@
                     </div>
                     <p v-if="errors.password" class="mt-1 text-sm text-red-600">{{ errors.password }}</p>
                   </div>
-                  
+
                   <div>
                     <label for="password_confirmation" class="block text-sm font-semibold text-gray-900 mb-2">
                       Confirmer *
@@ -371,9 +379,9 @@
                     />
                   </div>
                   <label for="terms" class="text-sm text-gray-600 leading-6">
-                    J'accepte les 
+                    J'accepte les
                     <a href="#" class="text-[#0099cc] hover:text-[#0088bb] font-semibold">conditions d'utilisation</a>
-                    et la 
+                    et la
                     <a href="#" class="text-[#0099cc] hover:text-[#0088bb] font-semibold">politique de confidentialité</a>
                   </label>
                 </div>
@@ -420,8 +428,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { EyeIcon, EyeSlashIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
+import VueTelInput from 'vue-tel-input'
+import 'vue-tel-input/vue-tel-input.css'
 import socialAuth from '@/services/socialAuth'
-import logoUrl from '@/assets/logo.png'
 const logoWhiteUrl = '/logo_white.png'
 import { useApi } from '@/composables/api'
 
@@ -434,6 +443,8 @@ const showPasswordConfirmation = ref(false)
 const countries = ref([])
 const countriesLoading = ref(false)
 const phoneValid = ref(false)
+const selectedCountryCode = ref('GA') // Gabon par défaut
+const phoneObject = ref(null)
 
 const form = reactive({
   account_type: 'personal',
@@ -469,24 +480,24 @@ const validateForm = () => {
   Object.keys(errors).forEach(key => {
     errors[key] = ''
   })
-  
+
   let isValid = true
-  
+
   if (form.account_type === 'business' && !form.business_name.trim()) {
     errors.business_name = 'Le nom de l\'entreprise est requis pour un compte business'
     isValid = false
   }
-  
+
   if (!form.first_name.trim()) {
     errors.first_name = 'Le prénom est requis'
     isValid = false
   }
-  
+
   if (!form.last_name.trim()) {
     errors.last_name = 'Le nom est requis'
     isValid = false
   }
-  
+
   if (!form.email) {
     errors.email = 'L\'email est requis'
     isValid = false
@@ -494,7 +505,7 @@ const validateForm = () => {
     errors.email = 'Format d\'email invalide'
     isValid = false
   }
-  
+
   if (!form.phone) {
     errors.phone = 'Le numéro de téléphone est requis'
     isValid = false
@@ -502,17 +513,17 @@ const validateForm = () => {
     errors.phone = 'Format de téléphone invalide'
     isValid = false
   }
-  
+
   if (!form.city.trim()) {
     errors.city = 'La ville est requise'
     isValid = false
   }
-  
+
   if (!form.country_id) {
     errors.country_id = 'Le pays est requis'
     isValid = false
   }
-  
+
   if (!form.password) {
     errors.password = 'Le mot de passe est requis'
     isValid = false
@@ -520,35 +531,47 @@ const validateForm = () => {
     errors.password = 'Le mot de passe doit contenir au moins 8 caractères'
     isValid = false
   }
-  
+
   if (form.password !== form.password_confirmation) {
     errors.password_confirmation = 'Les mots de passe ne correspondent pas'
     isValid = false
   }
-  
+
   if (!form.terms) {
     errors.terms = 'Vous devez accepter les conditions d\'utilisation'
     isValid = false
   }
-  
+
   return isValid
 }
 
-const validatePhoneInput = () => {
-  // Simple validation for phone input
-  if (form.phone && form.phone.length >= 8) {
-    phoneValid.value = true
+// Gestion des événements du composant VueTelInput
+const onPhoneInput = (phone, phoneObject) => {
+  form.phone = phone
+  onPhoneValidate(phoneObject)
+}
+
+const onPhoneValidate = (phoneObj) => {
+  phoneObject.value = phoneObj
+  phoneValid.value = phoneObj?.valid || false
+  
+  if (phoneValid.value) {
     errors.phone = ''
-  } else {
-    phoneValid.value = false
+  } else if (form.phone) {
+    errors.phone = 'Format de téléphone invalide'
   }
+}
+
+const onCountryChanged = (country) => {
+  selectedCountryCode.value = country.iso2
+  console.log('Pays sélectionné:', country)
 }
 
 const handleSubmit = async () => {
   if (!validateForm()) return
-  
+
   authStore.clearError()
-  
+
   const registrationData = {
     account_type: form.account_type,
     first_name: form.first_name.trim(),
@@ -564,22 +587,22 @@ const handleSubmit = async () => {
     can_sell: true,
     can_buy: true
   }
-  
+
   if (form.account_type === 'business' && form.business_name.trim()) {
     registrationData.business_name = form.business_name.trim()
   }
-  
+
   const result = await authStore.register(registrationData)
-  
+
   if (result.success) {
     console.log('Inscription réussie, données utilisateur:', authStore.user)
-    
+
     // Attendre un peu que les données utilisateur soient bien chargées
     await new Promise(resolve => setTimeout(resolve, 500))
-    
+
     // Use the centralized redirect logic
     const redirectTo = authStore.getDefaultRedirect()
-    
+
     console.log('Redirection après inscription:', {
       account_type: form.account_type,
       can_sell: registrationData.can_sell,
@@ -589,14 +612,14 @@ const handleSubmit = async () => {
       isMerchant: authStore.isMerchant,
       isCustomer: authStore.isCustomer
     })
-    
+
     // Vérifier si l'utilisateur a besoin de vérifier son compte
     if (authStore.user && !authStore.user.verified_at && result.requires_verification) {
       console.log('Utilisateur doit vérifier son compte par email')
       // Afficher un message à l'utilisateur
       alert('Inscription réussie ! Veuillez vérifier votre email pour activer votre compte.')
     }
-    
+
     router.push({ name: redirectTo })
   } else {
     console.error('Erreur lors de l\'inscription:', result)
@@ -637,7 +660,7 @@ const loadCountries = async () => {
     countriesLoading.value = true
     const response = await get('/countries')
     countries.value = response.countries || []
-    
+
     // Set Gabon as default country
     const gabon = countries.value.find(country => country.name === 'Gabon')
     if (gabon && !form.country_id) {
@@ -653,5 +676,102 @@ const loadCountries = async () => {
 onMounted(() => {
   loadCountries()
 })
-
 </script>
+
+<style>
+/* Styles personnalisés pour vue-tel-input avec le thème Koumbaya */
+.vue-tel-input-koumbaya {
+  border-radius: 0.75rem !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: none !important;
+}
+
+.vue-tel-input-koumbaya:focus-within {
+  border-color: #0099cc !important;
+  box-shadow: 0 0 0 2px rgba(0, 153, 204, 0.2) !important;
+}
+
+.vue-tel-input-koumbaya.has-error {
+  border-color: #fca5a5 !important;
+  background-color: #fef2f2 !important;
+}
+
+.vue-tel-input-koumbaya .vti__dropdown {
+  background-color: white !important;
+  border: none !important;
+  border-radius: 0.75rem 0 0 0.75rem !important;
+  padding: 0.75rem 0.5rem !important;
+}
+
+.vue-tel-input-koumbaya .vti__dropdown:hover {
+  background-color: #f9fafb !important;
+}
+
+.vue-tel-input-koumbaya .vti__dropdown-list {
+  border-radius: 0.5rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #e5e7eb !important;
+  max-height: 200px !important;
+  overflow-y: auto !important;
+}
+
+.vue-tel-input-koumbaya .vti__dropdown-item {
+  padding: 0.5rem 0.75rem !important;
+  transition: background-color 0.15s ease-in-out !important;
+}
+
+.vue-tel-input-koumbaya .vti__dropdown-item:hover,
+.vue-tel-input-koumbaya .vti__dropdown-item.highlighted {
+  background-color: #0099cc !important;
+  color: white !important;
+}
+
+.vue-tel-input-koumbaya .vti__input {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0.75rem 1rem !important;
+  font-size: 1rem !important;
+  color: #000000 !important;
+  border-radius: 0 0.75rem 0.75rem 0 !important;
+}
+
+.vue-tel-input-koumbaya .vti__input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.vue-tel-input-koumbaya .vti__input::placeholder {
+  color: #9ca3af !important;
+}
+
+.vue-tel-input-koumbaya .vti__flag {
+  margin-right: 0.5rem !important;
+}
+
+.vue-tel-input-koumbaya .vti__dropdown-arrow {
+  color: #6b7280 !important;
+  transform: scale(0.8) !important;
+}
+
+/* Style pour le mode erreur */
+.vue-tel-input-koumbaya.has-error .vti__input {
+  background-color: #fef2f2 !important;
+}
+
+.vue-tel-input-koumbaya.has-error .vti__dropdown {
+  background-color: #fef2f2 !important;
+  border-color: #fca5a5 !important;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .vue-tel-input-koumbaya .vti__dropdown-list {
+    max-height: 160px !important;
+  }
+  
+  .vue-tel-input-koumbaya .vti__dropdown-item {
+    padding: 0.375rem 0.5rem !important;
+    font-size: 0.875rem !important;
+  }
+}
+</style>
