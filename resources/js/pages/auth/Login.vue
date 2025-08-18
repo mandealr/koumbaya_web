@@ -21,6 +21,42 @@
     <div class="mt-12 sm:mx-auto sm:w-full sm:max-w-md">
       <div class="koumbaya-card bg-white/80 backdrop-blur-sm border-0 shadow-2xl">
         <div class="koumbaya-card-body p-8">
+          <!-- Message de succès d'inscription -->
+          <div v-if="registrationSuccess" class="mb-6 rounded-xl bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200 p-4 shadow-lg">
+            <div class="flex items-start">
+              <div class="flex-shrink-0">
+                <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3 flex-1">
+                <div class="text-sm font-semibold text-green-800 mb-2">
+                  🎉 Inscription réussie ! Bienvenue {{ registrationSuccess.first_name }}
+                </div>
+                <div class="text-sm text-green-700 leading-relaxed">
+                  {{ registrationSuccess.verification_message }}
+                </div>
+                <div v-if="registrationSuccess.email" class="mt-2 text-xs text-green-600 bg-green-100 rounded-lg p-2">
+                  <div class="font-medium mb-1">📧 Que faire maintenant :</div>
+                  <ul class="space-y-1 list-disc list-inside ml-2">
+                    <li>Consultez votre boîte email : <strong>{{ registrationSuccess.email }}</strong></li>
+                    <li>Cliquez sur le lien de vérification dans l'email</li>
+                    <li>Revenez ici pour vous connecter avec vos identifiants</li>
+                  </ul>
+                </div>
+              </div>
+              <button 
+                @click="clearRegistrationMessage" 
+                class="flex-shrink-0 ml-2 text-green-400 hover:text-green-600 transition-colors"
+                title="Fermer ce message"
+              >
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
           <form @submit.prevent="handleSubmit" class="space-y-6">
             <!-- Zone d'erreur améliorée -->
             <div v-if="errors.general" class="rounded-xl bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 p-4 shadow-lg">
@@ -218,7 +254,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import logoUrl from '@/assets/logo.png'
@@ -249,6 +285,7 @@ const errors = reactive({
 
 const loading = ref(false)
 const showPassword = ref(false)
+const registrationSuccess = ref(null)
 
 const validateForm = () => {
   let isValid = true
@@ -490,6 +527,41 @@ watch(() => form.password, (newPassword) => {
 watch([() => form.email, () => form.password], () => {
   if (errors.general) {
     errors.general = ''
+  }
+})
+
+// Fonction pour effacer le message d'inscription
+const clearRegistrationMessage = () => {
+  registrationSuccess.value = null
+  sessionStorage.removeItem('registration_success')
+}
+
+// Vérifier s'il y a des données d'inscription réussie
+onMounted(() => {
+  // Vérifier les paramètres de requête pour la redirection depuis l'inscription
+  if (route.query.registered === 'true') {
+    // Récupérer les données stockées dans sessionStorage
+    const storedData = sessionStorage.getItem('registration_success')
+    if (storedData) {
+      try {
+        registrationSuccess.value = JSON.parse(storedData)
+        // Pré-remplir l'email s'il est disponible
+        if (registrationSuccess.value.email) {
+          form.email = registrationSuccess.value.email
+        }
+      } catch (error) {
+        console.error('Erreur lors du parsing des données d\'inscription:', error)
+      }
+    } else if (route.query.email) {
+      // Fallback : utiliser l'email des paramètres de requête
+      form.email = route.query.email
+      registrationSuccess.value = {
+        email: route.query.email,
+        first_name: 'utilisateur',
+        verification_message: 'Un email de vérification a été envoyé à votre adresse. Veuillez consulter votre boîte email pour vérifier votre compte.',
+        requires_verification: true
+      }
+    }
   }
 })
 </script>

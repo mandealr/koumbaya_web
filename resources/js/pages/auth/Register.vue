@@ -312,8 +312,8 @@
                   <p v-if="countriesLoading" class="mt-1 text-sm text-gray-500">Chargement des pays...</p>
                 </div>
 
-                <!-- Location Fields -->
-                <div class="grid grid-cols-2 gap-4">
+                <!-- Location Fields - only for business accounts -->
+                <div v-if="form.account_type === 'business'" class="grid grid-cols-2 gap-4 transition-all duration-300">
                   <div>
                     <label for="city" class="block text-sm font-semibold text-gray-900 mb-2">
                       Ville *
@@ -322,7 +322,7 @@
                       id="city"
                       v-model="form.city"
                       type="text"
-                      required
+                      :required="form.account_type === 'business'"
                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
                       :class="{ 'border-red-300 bg-red-50': errors.city }"
                       placeholder="Libreville"
@@ -546,8 +546,8 @@ const validateForm = () => {
     isValid = false
   }
 
-  if (!form.city.trim()) {
-    errors.city = 'La ville est requise'
+  if (form.account_type === 'business' && !form.city.trim()) {
+    errors.city = 'La ville est requise pour un compte business'
     isValid = false
   }
 
@@ -653,14 +653,18 @@ const handleSubmit = async () => {
     last_name: form.last_name.trim(),
     email: form.email.trim(),
     phone: form.phone.trim(),
-    city: form.city.trim(),
-    address: form.address.trim() || null,
     country_id: parseInt(form.country_id),
     password: form.password,
     password_confirmation: form.password_confirmation,
     // Logique correcte selon le type de compte
     can_sell: form.account_type === 'business',
     can_buy: true // Tous les comptes peuvent acheter
+  }
+
+  // Ajouter ville et adresse uniquement pour les comptes business
+  if (form.account_type === 'business') {
+    registrationData.city = form.city.trim()
+    registrationData.address = form.address.trim() || null
   }
 
   if (form.account_type === 'business' && form.business_name.trim()) {
@@ -672,57 +676,34 @@ const handleSubmit = async () => {
   if (result.success) {
     console.log('Inscription réussie, données utilisateur:', authStore.user)
 
-    // Attendre un peu que les données utilisateur soient bien chargées
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // Déconnecter immédiatement l'utilisateur pour forcer la vérification
+    authStore.logout()
 
-    // Use the centralized redirect logic
-    const redirectTo = authStore.getDefaultRedirect()
+    // Préparer les données pour la page de connexion
+    const accountType = form.account_type === 'business' ? 'marchand' : 'client'
+    const verificationMessage = result.verification_type === 'email_link' 
+      ? `Un email de vérification a été envoyé à ${result.verification_sent_to}. Veuillez cliquer sur le lien dans votre email, puis vous connecter ci-dessous.`
+      : `Un code de vérification a été envoyé à ${result.verification_sent_to}. Veuillez vérifier votre compte, puis vous connecter ci-dessous.`
 
-    console.log('Redirection après inscription:', {
-      account_type: form.account_type,
-      can_sell: registrationData.can_sell,
-      user: authStore.user,
-      redirectTo,
-      isAdmin: authStore.isAdmin,
-      isMerchant: authStore.isMerchant,
-      isCustomer: authStore.isCustomer
+    // Sauvegarder les informations dans sessionStorage pour la page de login
+    sessionStorage.setItem('registration_success', JSON.stringify({
+      email: form.email.trim(),
+      first_name: result.user?.first_name || form.first_name,
+      account_type: accountType,
+      verification_message: verificationMessage,
+      requires_verification: result.requires_verification || false
+    }))
+
+    console.log('Redirection vers la page de connexion après inscription')
+
+    // Rediriger vers la page de connexion
+    router.push({ 
+      name: 'login',
+      query: { 
+        registered: 'true',
+        email: form.email.trim()
+      }
     })
-
-    // Naviguer vers le tableau de bord en premier
-    router.push({ name: redirectTo })
-
-    // Attendre que la navigation soit terminée puis afficher le message
-    await new Promise(resolve => setTimeout(resolve, 100))
-
-    // Vérifier si l'utilisateur a besoin de vérifier son compte
-    if (authStore.user && !authStore.user.verified_at && result.requires_verification) {
-      console.log('Utilisateur doit vérifier son compte par email')
-      
-      // Afficher un toast de bienvenue avec message de vérification
-      const accountType = form.account_type === 'business' ? 'marchand' : 'client'
-      const welcomeMessage = `Bienvenue ${authStore.user.first_name} ! Votre compte ${accountType} a été créé avec succès.`
-      const verificationMessage = result.verification_type === 'email_link' 
-        ? `Un email de vérification a été envoyé à ${result.verification_sent_to}. Veuillez cliquer sur le lien pour activer votre compte.`
-        : `Un code de vérification a été envoyé à ${result.verification_sent_to}. Veuillez vérifier votre compte.`
-
-      // Toast de succès pour l'inscription
-      if (window.$toast) {
-        window.$toast.success(welcomeMessage, 'Inscription réussie !')
-        
-        // Toast d'information pour la vérification
-        setTimeout(() => {
-          window.$toast.info(verificationMessage, 'Vérification requise', 8000)
-        }, 1500)
-      }
-    } else {
-      // Compte déjà vérifié ou pas besoin de vérification
-      const accountType = form.account_type === 'business' ? 'marchand' : 'client'
-      const welcomeMessage = `Bienvenue ${authStore.user?.first_name || 'sur Koumbaya'} ! Votre compte ${accountType} est maintenant actif.`
-      
-      if (window.$toast) {
-        window.$toast.success(welcomeMessage, 'Inscription réussie !')
-      }
-    }
   } else {
     console.error('Erreur lors de l\'inscription:', result)
     
