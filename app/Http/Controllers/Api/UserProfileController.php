@@ -138,7 +138,7 @@ class UserProfileController extends Controller
     /**
      * Send success response
      */
-    private function sendResponse($result, $message)
+    protected function sendResponse($result, $message)
     {
         $response = [
             'success' => true,
@@ -152,7 +152,7 @@ class UserProfileController extends Controller
     /**
      * Send error response
      */
-    private function sendError($error, $errorMessages = [], $code = 404)
+    protected function sendError($error, $errorMessages = [], $code = 404)
     {
         $response = [
             'success' => false,
