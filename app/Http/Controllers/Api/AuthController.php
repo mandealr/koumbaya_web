@@ -617,22 +617,37 @@ class AuthController extends Controller
      */
     private function assignUserRoles(User $user, Request $request): void
     {
-        // Système de rôles simplifié :
-        // - Particulier = client uniquement (achats, participation aux tombolas)
-        // - Business = marchand uniquement (vente, gestion des produits/tombolas)
+        // Système de rôles simplifié basé UNIQUEMENT sur account_type :
+        // - account_type = 'personal' → rôle 'Particulier' (achats, participation aux tombolas)
+        // - account_type = 'business' → rôle 'Business' (vente, gestion des produits/tombolas)
         
-        if ($request->account_type === 'business' || $request->can_sell) {
+        if ($request->account_type === 'business') {
             // Compte business = rôle Business uniquement
             $roleName = 'Business';
         } else {
-            // Compte particulier = rôle Particulier uniquement
+            // Compte particulier (par défaut) = rôle Particulier uniquement
             $roleName = 'Particulier';
         }
+
+        // Log pour debug
+        \Log::info('Attribution de rôle lors de l\'inscription', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'account_type' => $request->account_type,
+            'role_name' => $roleName,
+            'can_sell' => $request->can_sell,
+            'can_buy' => $request->can_buy
+        ]);
 
         // Assigner le rôle approprié
         $role = Role::where('name', $roleName)->first();
         if ($role && !$user->roles->contains($role->id)) {
             $user->roles()->attach($role->id);
+        } else if (!$role) {
+            \Log::error('Rôle non trouvé lors de l\'inscription', [
+                'role_name' => $roleName,
+                'user_id' => $user->id
+            ]);
         }
     }
 

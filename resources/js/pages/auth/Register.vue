@@ -658,9 +658,9 @@ const handleSubmit = async () => {
     country_id: parseInt(form.country_id),
     password: form.password,
     password_confirmation: form.password_confirmation,
-    // Le rôle sera déterminé côté serveur selon account_type
-    can_sell: true,
-    can_buy: true
+    // Logique correcte selon le type de compte
+    can_sell: form.account_type === 'business',
+    can_buy: true // Tous les comptes peuvent acheter
   }
 
   if (form.account_type === 'business' && form.business_name.trim()) {
@@ -688,16 +688,49 @@ const handleSubmit = async () => {
       isCustomer: authStore.isCustomer
     })
 
+    // Naviguer vers le tableau de bord en premier
+    router.push({ name: redirectTo })
+
+    // Attendre que la navigation soit terminée puis afficher le message
+    await new Promise(resolve => setTimeout(resolve, 100))
+
     // Vérifier si l'utilisateur a besoin de vérifier son compte
     if (authStore.user && !authStore.user.verified_at && result.requires_verification) {
       console.log('Utilisateur doit vérifier son compte par email')
-      // Afficher un message à l'utilisateur
-      alert('Inscription réussie ! Veuillez vérifier votre email pour activer votre compte.')
-    }
+      
+      // Afficher un toast de bienvenue avec message de vérification
+      const accountType = form.account_type === 'business' ? 'marchand' : 'client'
+      const welcomeMessage = `Bienvenue ${authStore.user.first_name} ! Votre compte ${accountType} a été créé avec succès.`
+      const verificationMessage = result.verification_type === 'email_link' 
+        ? `Un email de vérification a été envoyé à ${result.verification_sent_to}. Veuillez cliquer sur le lien pour activer votre compte.`
+        : `Un code de vérification a été envoyé à ${result.verification_sent_to}. Veuillez vérifier votre compte.`
 
-    router.push({ name: redirectTo })
+      // Toast de succès pour l'inscription
+      if (window.$toast) {
+        window.$toast.success(welcomeMessage, 'Inscription réussie !')
+        
+        // Toast d'information pour la vérification
+        setTimeout(() => {
+          window.$toast.info(verificationMessage, 'Vérification requise', 8000)
+        }, 1500)
+      }
+    } else {
+      // Compte déjà vérifié ou pas besoin de vérification
+      const accountType = form.account_type === 'business' ? 'marchand' : 'client'
+      const welcomeMessage = `Bienvenue ${authStore.user?.first_name || 'sur Koumbaya'} ! Votre compte ${accountType} est maintenant actif.`
+      
+      if (window.$toast) {
+        window.$toast.success(welcomeMessage, 'Inscription réussie !')
+      }
+    }
   } else {
     console.error('Erreur lors de l\'inscription:', result)
+    
+    // Afficher l'erreur dans un toast
+    if (window.$toast) {
+      const errorMessage = result.message || 'Une erreur est survenue lors de l\'inscription'
+      window.$toast.error(errorMessage, 'Erreur d\'inscription')
+    }
   }
 }
 
