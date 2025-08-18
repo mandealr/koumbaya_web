@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl w-full">
       <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
         <div class="grid grid-cols-1 lg:grid-cols-2">
@@ -225,23 +225,57 @@
                   <label for="phone" class="block text-sm font-semibold text-gray-900 mb-2">
                     Numéro de téléphone *
                   </label>
-                  <VueTelInput
-                    v-model="form.phone"
-                    :default-country="selectedCountryCode"
-                    :preferred-countries="['GA', 'FR', 'CA']"
-                    :only-countries="['GA', 'FR', 'CA', 'CM', 'CI', 'SN', 'BF', 'ML', 'NE', 'TG', 'BJ', 'GN', 'GW', 'LR', 'SL', 'MR', 'TD', 'CF', 'CG', 'CD', 'AO', 'ST', 'GQ', 'DJ', 'ER', 'ET', 'KE', 'TZ', 'UG', 'RW', 'BI', 'SO', 'MG', 'MU', 'SC', 'KM', 'ZA', 'BW', 'LS', 'SZ', 'NA', 'ZW', 'ZM', 'MW', 'MZ']"
-                    :enable-search-country="true"
-                    :dropdown-options="{ disabled: false, showFlags: true, showDialCodeInSelection: true }"
-                    :input-options="{ 
-                      id: 'phone',
-                      placeholder: 'Ex: 01 23 45 67',
-                      required: true
-                    }"
-                    :class="['vue-tel-input-koumbaya', { 'has-error': errors.phone }]"
-                    @input="onPhoneInput"
-                    @validate="onPhoneValidate"
-                    @country-changed="onCountryChanged"
-                  />
+                  <div class="phone-input-container" :class="{ 'has-error': errors.phone }">
+                    <div class="flex">
+                      <!-- Country Selector -->
+                      <div class="relative">
+                        <select
+                          v-model="selectedCountryCode"
+                          @change="onCountryChanged"
+                          class="appearance-none bg-white border border-gray-200 rounded-l-xl px-3 py-3 pr-8 focus:ring-2 focus:ring-[#0099cc] focus:border-transparent text-sm font-medium"
+                          :class="{ 'border-red-300 bg-red-50': errors.phone }"
+                        >
+                          <option value="GA">🇬🇦 +241</option>
+                          <option value="FR">🇫🇷 +33</option>
+                          <option value="CA">🇨🇦 +1</option>
+                          <option value="CM">🇨🇲 +237</option>
+                          <option value="CI">🇨🇮 +225</option>
+                          <option value="SN">🇸🇳 +221</option>
+                          <option value="BF">🇧🇫 +226</option>
+                          <option value="ML">🇲🇱 +223</option>
+                          <option value="NE">🇳🇪 +227</option>
+                          <option value="TG">🇹🇬 +228</option>
+                          <option value="BJ">🇧🇯 +229</option>
+                          <option value="GN">🇬🇳 +224</option>
+                          <option value="MR">🇲🇷 +222</option>
+                          <option value="TD">🇹🇩 +235</option>
+                          <option value="CF">🇨🇫 +236</option>
+                          <option value="CG">🇨🇬 +242</option>
+                          <option value="CD">🇨🇩 +243</option>
+                          <option value="AO">🇦🇴 +244</option>
+                          <option value="GQ">🇬🇶 +240</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                          <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+                      
+                      <!-- Phone Number Input -->
+                      <input
+                        id="phone"
+                        v-model="form.phone"
+                        type="tel"
+                        :placeholder="getPhonePlaceholder()"
+                        required
+                        class="flex-1 px-4 py-3 border-l-0 border border-gray-200 rounded-r-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
+                        :class="{ 'border-red-300 bg-red-50': errors.phone }"
+                        @input="onPhoneInput"
+                        @blur="validatePhoneNumber"
+                      />
+                    </div>
+                  </div>
                   <p v-if="errors.phone" class="mt-1 text-sm text-red-600">{{ errors.phone }}</p>
                 </div>
 
@@ -428,8 +462,6 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { EyeIcon, EyeSlashIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
-import VueTelInput from 'vue-tel-input'
-import 'vue-tel-input/vue-tel-input.css'
 import socialAuth from '@/services/socialAuth'
 const logoWhiteUrl = '/logo_white.png'
 import { useApi } from '@/composables/api'
@@ -438,13 +470,13 @@ const router = useRouter()
 const authStore = useAuthStore()
 const { get } = useApi()
 
+
 const showPassword = ref(false)
 const showPasswordConfirmation = ref(false)
 const countries = ref([])
 const countriesLoading = ref(false)
 const phoneValid = ref(false)
 const selectedCountryCode = ref('GA') // Gabon par défaut
-const phoneObject = ref(null)
 
 const form = reactive({
   account_type: 'personal',
@@ -545,26 +577,69 @@ const validateForm = () => {
   return isValid
 }
 
-// Gestion des événements du composant VueTelInput
-const onPhoneInput = (phone, phoneObject) => {
-  form.phone = phone
-  onPhoneValidate(phoneObject)
+// Mapping des codes pays vers leurs indicatifs
+const countryDialCodes = {
+  'GA': '+241', 'FR': '+33', 'CA': '+1', 'CM': '+237', 'CI': '+225',
+  'SN': '+221', 'BF': '+226', 'ML': '+223', 'NE': '+227', 'TG': '+228',
+  'BJ': '+229', 'GN': '+224', 'MR': '+222', 'TD': '+235', 'CF': '+236',
+  'CG': '+242', 'CD': '+243', 'AO': '+244', 'GQ': '+240'
 }
 
-const onPhoneValidate = (phoneObj) => {
-  phoneObject.value = phoneObj
-  phoneValid.value = phoneObj?.valid || false
+// Placeholders spécifiques par pays
+const getPhonePlaceholder = () => {
+  const placeholders = {
+    'GA': '01 23 45 67',
+    'FR': '01 23 45 67 89',
+    'CA': '(123) 456-7890',
+    'CM': '6 77 12 34 56',
+    'CI': '07 12 34 56 78',
+    'SN': '77 123 45 67'
+  }
+  return placeholders[selectedCountryCode.value] || '12 34 56 78'
+}
+
+// Gestion de la saisie téléphone
+const onPhoneInput = (event) => {
+  const value = event.target.value
+  form.phone = value
+  validatePhoneNumber()
+}
+
+// Validation du numéro de téléphone
+const validatePhoneNumber = () => {
+  const phone = form.phone.trim()
   
-  if (phoneValid.value) {
+  if (!phone) {
+    phoneValid.value = false
     errors.phone = ''
-  } else if (form.phone) {
-    errors.phone = 'Format de téléphone invalide'
+    return
+  }
+
+  // Validation basique selon le pays sélectionné
+  const dialCode = countryDialCodes[selectedCountryCode.value]
+  let isValid = false
+  
+  // Si le numéro commence par l'indicatif du pays
+  if (phone.startsWith(dialCode)) {
+    isValid = phone.length >= dialCode.length + 8 // Indicatif + au moins 8 chiffres
+  } else {
+    // Numéro local (sans indicatif)
+    isValid = phone.length >= 8 && phone.length <= 12
+  }
+  
+  phoneValid.value = isValid
+  
+  if (isValid) {
+    errors.phone = ''
+  } else if (phone.length > 0) {
+    errors.phone = `Format de téléphone invalide pour ${selectedCountryCode.value}`
   }
 }
 
-const onCountryChanged = (country) => {
-  selectedCountryCode.value = country.iso2
-  console.log('Pays sélectionné:', country)
+// Changement de pays
+const onCountryChanged = () => {
+  console.log('Pays sélectionné:', selectedCountryCode.value)
+  validatePhoneNumber() // Re-valider avec le nouveau pays
 }
 
 const handleSubmit = async () => {
@@ -679,7 +754,25 @@ onMounted(() => {
 </script>
 
 <style>
-/* Styles personnalisés pour vue-tel-input avec le thème Koumbaya */
+/* Styles personnalisés pour le composant téléphone Koumbaya */
+.phone-input-container {
+  width: 100%;
+}
+
+.phone-input-container.has-error select,
+.phone-input-container.has-error input {
+  border-color: #fca5a5 !important;
+  background-color: #fef2f2 !important;
+}
+
+.phone-input-container select:focus,
+.phone-input-container input:focus {
+  outline: none;
+  border-color: #0099cc;
+  box-shadow: 0 0 0 2px rgba(0, 153, 204, 0.2);
+}
+
+/* Styles personnalisés pour vue-tel-input avec le thème Koumbaya (si nécessaire plus tard) */
 .vue-tel-input-koumbaya {
   border-radius: 0.75rem !important;
   border: 1px solid #e5e7eb !important;
@@ -768,7 +861,7 @@ onMounted(() => {
   .vue-tel-input-koumbaya .vti__dropdown-list {
     max-height: 160px !important;
   }
-  
+
   .vue-tel-input-koumbaya .vti__dropdown-item {
     padding: 0.375rem 0.5rem !important;
     font-size: 0.875rem !important;
