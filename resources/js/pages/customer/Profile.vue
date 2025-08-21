@@ -575,16 +575,20 @@ const updatePersonalInfo = async () => {
 const updateAddress = async () => {
   updatingAddress.value = true
   try {
-    const response = await put('/user/profile', { address: addressForm })
+    console.log('Updating address with data:', addressForm)
+    const response = await put('/user/profile', addressForm)
+    console.log('Update address response:', response)
+    
     if (response && response.success) {
-      Object.assign(user.address, addressForm)
+      Object.assign(user, addressForm)
       alert('✅ Adresse mise à jour avec succès')
     } else {
       throw new Error(response?.message || 'Erreur lors de la mise à jour')
     }
   } catch (error) {
     console.error('Error updating address:', error)
-    alert('❌ Erreur lors de la mise à jour de l\'adresse')
+    console.error('Error details:', error.response?.data)
+    alert('❌ Erreur lors de la mise à jour: ' + (error.response?.data?.message || error.message))
   } finally {
     updatingAddress.value = false
   }
