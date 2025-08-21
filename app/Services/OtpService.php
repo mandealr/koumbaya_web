@@ -177,30 +177,44 @@ class OtpService
                 return true; // Simuler l'envoi réussi en développement
             }
 
-            // Utiliser le template approprié selon le purpose
-            if ($purpose === 'password_reset') {
-                // Créer un utilisateur fictif pour le template si pas d'utilisateur trouvé
-                $user = \App\Models\User::where('email', $email)->first();
-                if (!$user) {
-                    $user = (object) ['first_name' => 'Utilisateur', 'last_name' => ''];
+            // Essayer d'utiliser les templates, avec fallback en cas d'erreur
+            try {
+                if ($purpose === 'password_reset') {
+                    // Créer un utilisateur fictif pour le template si pas d'utilisateur trouvé
+                    $user = \App\Models\User::where('email', $email)->first();
+                    if (!$user) {
+                        $user = (object) ['first_name' => 'Utilisateur', 'last_name' => ''];
+                    }
+
+                    $resetUrl = config('app.frontend_url', 'https://koumbaya.com') . '/reset-password-verify?identifier=' . urlencode($email) . '&method=email';
+
+                    Mail::send('emails.password-reset', [
+                        'user' => $user,
+                        'otp' => $code,
+                        'resetUrl' => $resetUrl
+                    ], function($mail) use ($email, $subject) {
+                        $mail->to($email)->subject($subject);
+                    });
+                } else {
+                    // Pour les autres purposes, utiliser le template OTP
+                    Mail::send('emails.otp-verification', [
+                        'code' => $code,
+                        'purpose' => $purpose
+                    ], function($mail) use ($email, $subject) {
+                        $mail->to($email)->subject($subject);
+                    });
                 }
-
-                $resetUrl = config('app.frontend_url', 'https://koumbaya.com') . '/reset-password-verify?identifier=' . urlencode($email) . '&method=email';
-
-                Mail::send('emails.password-reset', [
-                    'user' => $user,
-                    'otp' => $code,
-                    'resetUrl' => $resetUrl
-                ], function($mail) use ($email, $subject) {
-                    $mail->to($email)->subject($subject);
-                });
-            } else {
-                // Pour les autres purposes, utiliser le template OTP
-                Mail::send('emails.otp-verification', [
-                    'code' => $code,
-                    'purpose' => $purpose
-                ], function($mail) use ($email, $subject) {
-                    $mail->to($email)->subject($subject);
+            } catch (\Exception $templateError) {
+                Log::warning('Erreur template email, utilisation du fallback', [
+                    'error' => $templateError->getMessage()
+                ]);
+                
+                // Fallback: utiliser un email simple mais bien formaté
+                $message = self::getFormattedEmailMessage($code, $purpose);
+                Mail::send([], [], function($mail) use ($email, $subject, $message) {
+                    $mail->to($email)
+                         ->subject($subject)
+                         ->html($message);
                 });
             }
 
@@ -346,6 +360,67 @@ class OtpService
         };
 
         return $baseMessage . "\n\n" . $code . "\n\nCe code expire dans 5 minutes.\n\nÉquipe Koumbaya";
+    }
+
+    /**
+     * Obtenir un message email formaté en HTML pour le fallback
+     */
+    private static function getFormattedEmailMessage($code, $purpose)
+    {
+        $title = match($purpose) {
+            Otp::PURPOSE_REGISTRATION => 'Bienvenue sur Koumbaya ! 🎉',
+            Otp::PURPOSE_PASSWORD_RESET => 'Réinitialisation de votre mot de passe 🔐',
+            Otp::PURPOSE_LOGIN => 'Connexion sécurisée 🔒',
+            Otp::PURPOSE_PAYMENT => 'Confirmation de paiement 💳',
+            default => 'Code de vérification Koumbaya'
+        };
+
+        $description = match($purpose) {
+            Otp::PURPOSE_REGISTRATION => 'Votre code de vérification d\'inscription est :',
+            Otp::PURPOSE_PASSWORD_RESET => 'Votre code de réinitialisation de mot de passe est :',
+            Otp::PURPOSE_LOGIN => 'Votre code de connexion sécurisée est :',
+            Otp::PURPOSE_PAYMENT => 'Votre code de confirmation de paiement est :',
+            default => 'Votre code de vérification est :'
+        };
+
+        return "
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: linear-gradient(135deg, #0099cc, #0088bb); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+                .code-box { background: #fff; border: 2px solid #0099cc; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
+                .code { font-size: 32px; font-weight: bold; color: #0099cc; letter-spacing: 4px; }
+                .warning { background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 15px; margin: 20px 0; }
+                .footer { text-align: center; color: #666; margin-top: 30px; }
+            </style>
+        </head>
+        <body>
+            <div class='header'>
+                <h1>{$title}</h1>
+            </div>
+            <div class='content'>
+                <p>Bonjour,</p>
+                <p>{$description}</p>
+                
+                <div class='code-box'>
+                    <div class='code'>{$code}</div>
+                    <p><strong>Ce code expire dans 5 minutes.</strong></p>
+                </div>
+                
+                <div class='warning'>
+                    🔒 <strong>Sécurité :</strong> Si vous n'avez pas demandé ce code, ignorez cet email. Votre compte reste sécurisé.
+                </div>
+                
+                <p><strong>Besoin d'aide ?</strong> Contactez-nous à support@koumbaya.com</p>
+                
+                <div class='footer'>
+                    <p>Cordialement,<br><strong>L'équipe Koumbaya</strong> 💙</p>
+                </div>
+            </div>
+        </body>
+        </html>";
     }
 
     /**
