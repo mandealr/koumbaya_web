@@ -65,7 +65,8 @@ export default {
         preferredCountries: this.preferredCountries,
         initialCountry: this.initialCountry,
         separateDialCode: true,
-        utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js',
+        // Désactiver utilsScript pour éviter les problèmes de chargement
+        // utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js',
         customPlaceholder: (selectedCountryPlaceholder, selectedCountryData) => {
           return selectedCountryPlaceholder;
         }
@@ -97,15 +98,37 @@ export default {
       if (this.iti && this.iti.getSelectedCountryData) {
         try {
           const countryData = this.iti.getSelectedCountryData();
-          const fullNumber = this.iti.getNumber();
-          const isValid = this.iti.isValidNumber();
+          const rawNumber = this.phoneNumber || '';
+          
+          // Construire manuellement le numéro complet
+          let fullNumber = '';
+          if (rawNumber.trim()) {
+            // Si le numéro ne commence pas par +, ajouter l'indicatif pays
+            if (rawNumber.startsWith('+')) {
+              fullNumber = rawNumber;
+            } else {
+              fullNumber = `+${countryData.dialCode}${rawNumber}`;
+            }
+          }
+          
+          // Validation manuelle basique
+          const isValid = this.validatePhoneNumber(rawNumber, countryData);
           
           // Émettre la valeur pour le v-model
           this.$emit('update:modelValue', fullNumber);
           
+          // Debug
+          console.log('PhoneInput emitting:', {
+            number: rawNumber,
+            fullNumber: fullNumber,
+            countryCode: countryData.dialCode,
+            countryIso2: countryData.iso2,
+            isValid: isValid
+          });
+
           // Émettre les données détaillées
           this.$emit('phone-change', {
-            number: this.phoneNumber,
+            number: rawNumber,
             fullNumber: fullNumber,
             countryCode: countryData.dialCode,
             countryIso2: countryData.iso2,
@@ -119,15 +142,53 @@ export default {
     emitPhoneData() {
       this.emitAllData();
     },
+    validatePhoneNumber(number, countryData) {
+      if (!number || !number.trim()) {
+        return false;
+      }
+      
+      // Règles de validation par pays (basiques)
+      const validationRules = {
+        'ga': { min: 7, max: 8 }, // Gabon (07, 06, 05, etc.)
+        'cm': { min: 8, max: 9 }, // Cameroun  
+        'ci': { min: 8, max: 10 }, // Côte d'Ivoire
+        'fr': { min: 9, max: 10 }, // France
+        'ca': { min: 10, max: 10 }, // Canada
+        'cg': { min: 8, max: 9 }, // Congo
+        'cf': { min: 8, max: 8 }, // République centrafricaine
+        'td': { min: 8, max: 8 }, // Tchad
+        'gq': { min: 9, max: 9 }, // Guinée équatoriale
+        'bf': { min: 8, max: 8 }, // Burkina Faso
+        'bj': { min: 8, max: 8 }, // Bénin
+        'tg': { min: 8, max: 8 }, // Togo
+      };
+      
+      const rule = validationRules[countryData.iso2] || { min: 7, max: 15 };
+      const cleanNumber = number.replace(/[^\d]/g, ''); // Enlever tout sauf les chiffres
+      
+      return cleanNumber.length >= rule.min && cleanNumber.length <= rule.max;
+    },
     getNumber() {
-      return this.iti ? this.iti.getNumber() : '';
+      if (this.iti && this.iti.getSelectedCountryData) {
+        const countryData = this.iti.getSelectedCountryData();
+        const rawNumber = this.phoneNumber || '';
+        if (rawNumber.trim()) {
+          return rawNumber.startsWith('+') ? rawNumber : `+${countryData.dialCode}${rawNumber}`;
+        }
+      }
+      return '';
     },
     isValidNumber() {
-      return this.iti ? this.iti.isValidNumber() : false;
+      if (this.iti && this.iti.getSelectedCountryData) {
+        const countryData = this.iti.getSelectedCountryData();
+        return this.validatePhoneNumber(this.phoneNumber, countryData);
+      }
+      return false;
     },
     setNumber(number) {
       if (this.iti) {
-        this.iti.setNumber(number);
+        this.phoneNumber = number;
+        this.emitAllData();
       }
     }
   }
