@@ -13,7 +13,7 @@
           <div class="text-center mb-6">
             <div class="relative inline-block">
               <img
-                :src="user.avatar_url ? `/storage/${user.avatar_url}` : (user.avatar || '/images/default-avatar.jpg')"
+                :src="user.avatar_url ? `/storage/${user.avatar_url}` : 'https://ui-avatars.com/api/?name=' + encodeURIComponent((user.first_name || '') + '+' + (user.last_name || '')) + '&background=3b82f6&color=ffffff&size=128'"
                 :alt="user.first_name + ' ' + user.last_name"
                 class="w-24 h-24 rounded-full object-cover"
               />
@@ -553,7 +553,10 @@ const notificationForm = reactive({
 const updatePersonalInfo = async () => {
   updatingPersonal.value = true
   try {
+    console.log('Updating personal info with data:', personalForm)
     const response = await put('/user/profile', personalForm)
+    console.log('Update personal info response:', response)
+    
     if (response && response.success) {
       Object.assign(user, personalForm)
       alert('✅ Informations personnelles mises à jour avec succès')
@@ -562,7 +565,8 @@ const updatePersonalInfo = async () => {
     }
   } catch (error) {
     console.error('Error updating personal info:', error)
-    alert('❌ Erreur lors de la mise à jour des informations personnelles')
+    console.error('Error details:', error.response?.data)
+    alert('❌ Erreur lors de la mise à jour: ' + (error.response?.data?.message || error.message))
   } finally {
     updatingPersonal.value = false
   }
