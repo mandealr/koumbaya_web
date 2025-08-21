@@ -43,7 +43,7 @@
                   <input 
                     v-model="accountForm.first_name"
                     type="text" 
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
                   >
                 </div>
                 
@@ -52,7 +52,7 @@
                   <input 
                     v-model="accountForm.last_name"
                     type="text" 
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
                   >
                 </div>
               </div>
@@ -62,7 +62,7 @@
                 <input 
                   v-model="accountForm.email"
                   type="email" 
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
                 >
               </div>
 
@@ -71,7 +71,7 @@
                 <input 
                   v-model="accountForm.phone"
                   type="tel" 
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
                 >
               </div>
 
@@ -101,7 +101,7 @@
                     <input 
                       v-model="passwordForm.current_password"
                       type="password" 
-                      class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
                     >
                   </div>
                   
@@ -110,7 +110,7 @@
                     <input 
                       v-model="passwordForm.new_password"
                       type="password" 
-                      class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
                     >
                   </div>
                   
@@ -119,7 +119,7 @@
                     <input 
                       v-model="passwordForm.confirm_password"
                       type="password" 
-                      class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
                     >
                   </div>
 

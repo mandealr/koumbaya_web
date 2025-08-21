@@ -99,7 +99,7 @@
                     v-model="form.name"
                     type="text"
                     required
-                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
                     placeholder="Votre nom"
                   />
                   <div v-if="errors.name" class="text-red-500 text-sm mt-1">{{ errors.name }}</div>
@@ -113,7 +113,7 @@
                     v-model="form.email"
                     type="email"
                     required
-                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
                     placeholder="votre@email.com"
                   />
                   <div v-if="errors.email" class="text-red-500 text-sm mt-1">{{ errors.email }}</div>
@@ -129,7 +129,7 @@
                   <input
                     v-model="form.phone"
                     type="tel"
-                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
                     placeholder="+241 XX XX XX XX"
                   />
                 </div>
@@ -141,7 +141,7 @@
                   <select
                     v-model="form.subject"
                     required
-                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
                   >
                     <option value="">Choisir un sujet</option>
                     <option value="support">Support technique</option>
@@ -165,7 +165,7 @@
                   v-model="form.message"
                   required
                   rows="6"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none text-gray-900"
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none" style="color: #5f5f5f"
                   placeholder="Décrivez votre demande en détail..."
                 ></textarea>
                 <div v-if="errors.message" class="text-red-500 text-sm mt-1">{{ errors.message }}</div>

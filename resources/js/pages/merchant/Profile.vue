@@ -80,7 +80,7 @@
                     v-model="profileForm.first_name"
                     type="text" 
                     required
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
                   >
                 </div>
                 
@@ -92,7 +92,7 @@
                     v-model="profileForm.last_name"
                     type="text" 
                     required
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
                   >
                 </div>
               </div>
@@ -106,7 +106,7 @@
                     v-model="profileForm.email"
                     type="email" 
                     required
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
                   >
                 </div>
                 
@@ -118,7 +118,7 @@
                     v-model="profileForm.phone"
                     type="tel" 
                     required
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
                   >
                 </div>
               </div>
@@ -128,7 +128,7 @@
                 <input 
                   v-model="profileForm.city"
                   type="text" 
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
                 >
               </div>
 
@@ -137,7 +137,7 @@
                 <textarea 
                   v-model="profileForm.address"
                   rows="3"
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
                   placeholder="Votre adresse complète..."
                 ></textarea>
               </div>
@@ -167,7 +167,7 @@
                   <textarea 
                     v-model="profileForm.bio"
                     rows="4"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
                     placeholder="Décrivez votre activité, vos produits, votre expertise..."
                   ></textarea>
                 </div>

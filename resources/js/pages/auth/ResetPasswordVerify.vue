@@ -28,7 +28,7 @@
                 v-model="form.otp"
                 required
                 maxlength="6"
-                class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 text-black text-center text-2xl letter-spacing-wide"
+                class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 text-center text-2xl letter-spacing-wide" style="color: #5f5f5f"
                 :class="{
                   'border-red-300 focus:border-red-500 focus:ring-red-500/10': errors.otp
                 }"
@@ -52,7 +52,7 @@
                   :type="showPassword ? 'text' : 'password'"
                   v-model="form.password"
                   required
-                  class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 pr-12 text-black"
+                  class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 pr-12" style="color: #5f5f5f"
                   :class="{
                     'border-red-300 focus:border-red-500 focus:ring-red-500/10': errors.password
                   }"
@@ -85,7 +85,7 @@
                   :type="showPasswordConfirmation ? 'text' : 'password'"
                   v-model="form.password_confirmation"
                   required
-                  class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 pr-12 text-black"
+                  class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 pr-12" style="color: #5f5f5f"
                   :class="{
                     'border-red-300 focus:border-red-500 focus:ring-red-500/10': errors.password_confirmation
                   }"
@@ -246,7 +246,7 @@ const handleSubmit = async () => {
     // D'abord vérifier le code OTP
     const otpResponse = await post('/otp/verify', {
       identifier: identifier.value,
-      otp: form.otp,
+      code: form.otp,
       purpose: 'password_reset'
     })
 
@@ -288,6 +288,7 @@ const resendCode = async () => {
   try {
     const response = await post('/otp/resend', {
       identifier: identifier.value,
+      type: method.value === 'email' ? 'email' : 'sms',
       purpose: 'password_reset'
     })
 

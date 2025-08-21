@@ -60,7 +60,7 @@
                 type="email"
                 v-model="form.email"
                 required
-                class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 text-black"
+                class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200" style="color: #5f5f5f"
                 :class="{
                   'border-red-300 focus:border-red-500 focus:ring-red-500/10': errors.email
                 }"
@@ -227,6 +227,7 @@ const handleSubmit = async () => {
 
     const response = await post('/otp/send', {
       identifier: identifier,
+      type: resetMethod.value === 'email' ? 'email' : 'sms',
       purpose: 'password_reset'
     })
 

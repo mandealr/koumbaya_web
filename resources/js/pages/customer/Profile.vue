@@ -63,7 +63,7 @@
                   v-model="personalForm.first_name"
                   type="text"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="color: #5f5f5f"
                 />
               </div>
               
@@ -73,7 +73,7 @@
                   v-model="personalForm.last_name"
                   type="text"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="color: #5f5f5f"
                 />
               </div>
               
@@ -83,7 +83,7 @@
                   v-model="personalForm.email"
                   type="email"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="color: #5f5f5f"
                 />
               </div>
               
@@ -103,7 +103,7 @@
                 <input
                   v-model="personalForm.birth_date"
                   type="date"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="color: #5f5f5f"
                 />
               </div>
               
@@ -111,7 +111,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Genre</label>
                 <select
                   v-model="personalForm.gender"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="color: #5f5f5f"
                 >
                   <option value="">Sélectionner...</option>
                   <option value="male">Homme</option>
@@ -145,7 +145,7 @@
                 <input
                   v-model="addressForm.address"
                   type="text"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="color: #5f5f5f"
                 />
               </div>
               
@@ -155,7 +155,7 @@
                   <input
                     v-model="addressForm.city"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="color: #5f5f5f"
                   />
                 </div>
                 
@@ -164,7 +164,7 @@
                   <input
                     v-model="addressForm.postal_code"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="color: #5f5f5f"
                   />
                 </div>
               </div>
@@ -207,7 +207,7 @@
                     v-model="passwordForm.current_password"
                     type="password"
                     required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="color: #5f5f5f"
                   />
                 </div>
                 
@@ -217,7 +217,7 @@
                     v-model="passwordForm.new_password"
                     type="password"
                     required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="color: #5f5f5f"
                   />
                 </div>
                 
@@ -227,7 +227,7 @@
                     v-model="passwordForm.confirm_password"
                     type="password"
                     required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="color: #5f5f5f"
                   />
                 </div>
                 

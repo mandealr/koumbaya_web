@@ -31,7 +31,7 @@
               </div>
               <div class="ml-3 flex-1">
                 <div class="text-sm font-semibold text-green-800 mb-2">
-                  🎉 Inscription réussie ! Bienvenue {{ registrationSuccess.first_name }}
+                    Inscription réussie ! Bienvenue {{ registrationSuccess.first_name }}
                 </div>
                 <div class="text-sm text-green-700 leading-relaxed">
                   {{ registrationSuccess.verification_message }}
@@ -45,8 +45,8 @@
                   </ul>
                 </div>
               </div>
-              <button 
-                @click="clearRegistrationMessage" 
+              <button
+                @click="clearRegistrationMessage"
                 class="flex-shrink-0 ml-2 text-green-400 hover:text-green-600 transition-colors"
                 title="Fermer ce message"
               >
@@ -123,8 +123,8 @@
                     </ul>
                   </div>
                 </div>
-                <button 
-                  @click="errors.general = ''" 
+                <button
+                  @click="errors.general = ''"
                   class="flex-shrink-0 ml-2 text-red-400 hover:text-red-600 transition-colors"
                   title="Fermer ce message"
                 >
@@ -149,8 +149,8 @@
                 type="email"
                 v-model="form.email"
                 required
-                class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 text-gray-900"
-                :class="{ 
+                class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200" style="color: #5f5f5f"
+                :class="{
                   'border-red-300 focus:border-red-500 focus:ring-red-500/10': errors.email,
                   'border-blue-300 focus:border-blue-500': !errors.email && form.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)
                 }"
@@ -209,8 +209,8 @@
                   :type="showPassword ? 'text' : 'password'"
                   v-model="form.password"
                   required
-                  class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 pr-12 text-gray-900"
-                  :class="{ 
+                  class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 pr-12" style="color: #5f5f5f"
+                  :class="{
                     'border-red-300 focus:border-red-500 focus:ring-red-500/10': errors.password,
                     'border-blue-300 focus:border-blue-500': !errors.password && form.password && form.password.length >= 6
                   }"
@@ -356,7 +356,7 @@ const onPhoneChange = (phoneData) => {
   console.log('Login phone change:', phoneData) // Debug
   phoneValid.value = phoneData.isValid
   form.phone = phoneData.fullNumber
-  
+
   // Clear error if phone is valid
   if (phoneData.isValid && phoneData.fullNumber) {
     errors.phone = ''
@@ -437,13 +437,13 @@ const handleSubmit = async (event) => {
     const credentials = {
       password: form.password
     }
-    
+
     if (loginMethod.value === 'email') {
       credentials.email = form.email
     } else {
       credentials.phone = form.phone
     }
-    
+
     const result = await authStore.login(credentials)
 
     if (result.success) {
@@ -459,7 +459,7 @@ const handleSubmit = async (event) => {
       // Gérer la redirection - priorité au paramètre redirect, sinon logique par défaut
       const redirectParam = route.query.redirect
       const action = route.query.action
-      
+
       setTimeout(() => {
         if (redirectParam && (action === 'participate' || action === 'wishlist')) {
           // L'utilisateur vient de la page publique d'un produit pour participer ou ajouter aux favoris
@@ -470,13 +470,13 @@ const handleSubmit = async (event) => {
             return
           }
         }
-        
+
         if (redirectParam) {
           // Redirection personnalisée
           router.push(redirectParam)
           return
         }
-        
+
         // Use the centralized redirect logic
         const redirectTo = authStore.getDefaultRedirect()
 
@@ -487,7 +487,7 @@ const handleSubmit = async (event) => {
           isMerchant: authStore.isMerchant,
           isCustomer: authStore.isCustomer
         })
-        
+
         router.push({ name: redirectTo }).catch(error => {
           console.error('Erreur de redirection vers', redirectTo, ':', error)
           // Fallback: try customer dashboard, then home
@@ -499,19 +499,19 @@ const handleSubmit = async (event) => {
     } else {
       // Gestion des erreurs de connexion avec messages spécifiques et clairs
       const errorMsg = result.error || 'Erreur de connexion inconnue'
-      
+
       // Messages d'erreur plus spécifiques et informatifs
-      if (errorMsg.toLowerCase().includes('identifiants incorrects') || 
+      if (errorMsg.toLowerCase().includes('identifiants incorrects') ||
           errorMsg.toLowerCase().includes('invalid credentials') ||
           errorMsg.includes('401')) {
         errors.general = '🚫 Identifiants incorrects. Vérifiez votre adresse email et votre mot de passe.'
         errors.email = 'Adresse email ou mot de passe incorrect'
         errors.password = 'Adresse email ou mot de passe incorrect'
-      } else if (errorMsg.toLowerCase().includes('trop de tentatives') || 
+      } else if (errorMsg.toLowerCase().includes('trop de tentatives') ||
                  errorMsg.toLowerCase().includes('too many') ||
                  errorMsg.includes('429')) {
         errors.general = '⏳ Trop de tentatives de connexion. Veuillez patienter 15 minutes avant de réessayer.'
-      } else if (errorMsg.toLowerCase().includes('network') || 
+      } else if (errorMsg.toLowerCase().includes('network') ||
                  errorMsg.toLowerCase().includes('réseau') ||
                  errorMsg.toLowerCase().includes('connexion')) {
         errors.general = '🌐 Problème de connexion internet. Vérifiez votre connexion et réessayez.'

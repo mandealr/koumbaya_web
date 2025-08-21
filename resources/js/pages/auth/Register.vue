@@ -161,7 +161,7 @@
                     v-model="form.business_name"
                     type="text"
                     required
-                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
                     :class="{ 'border-red-300 bg-red-50': errors.business_name }"
                     placeholder="Ma Super Entreprise"
                   />
@@ -179,7 +179,7 @@
                       v-model="form.first_name"
                       type="text"
                       required
-                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
+                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
                       :class="{ 'border-red-300 bg-red-50': errors.first_name }"
                       placeholder="Jean"
                     />
@@ -195,7 +195,7 @@
                       v-model="form.last_name"
                       type="text"
                       required
-                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
+                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
                       :class="{ 'border-red-300 bg-red-50': errors.last_name }"
                       placeholder="Dupont"
                     />
@@ -213,7 +213,7 @@
                     v-model="form.email"
                     type="email"
                     required
-                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
                     :class="{ 'border-red-300 bg-red-50': errors.email }"
                     placeholder="jean@exemple.com"
                   />
@@ -245,7 +245,7 @@
                       id="country"
                       v-model="form.country_id"
                       required
-                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all appearance-none bg-white text-gray-900"
+                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all appearance-none bg-white" style="color: #5f5f5f"
                       :class="{ 'border-red-300 bg-red-50': errors.country_id }"
                       :disabled="countriesLoading"
                     >
@@ -279,7 +279,7 @@
                       v-model="form.city"
                       type="text"
                       :required="form.account_type === 'business'"
-                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
+                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
                       :class="{ 'border-red-300 bg-red-50': errors.city }"
                       placeholder="Libreville"
                     />
@@ -294,7 +294,7 @@
                       id="address"
                       v-model="form.address"
                       type="text"
-                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
+                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
                       :class="{ 'border-red-300 bg-red-50': errors.address }"
                       placeholder="123 Rue Example"
                     />
@@ -314,7 +314,7 @@
                         v-model="form.password"
                         :type="showPassword ? 'text' : 'password'"
                         required
-                        class="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
+                        class="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
                         :class="{ 'border-red-300 bg-red-50': errors.password }"
                         placeholder="••••••••"
                       />
@@ -340,7 +340,7 @@
                         v-model="form.password_confirmation"
                         :type="showPasswordConfirmation ? 'text' : 'password'"
                         required
-                        class="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
+                        class="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
                         :class="{ 'border-red-300 bg-red-50': errors.password_confirmation }"
                         placeholder="••••••••"
                       />
