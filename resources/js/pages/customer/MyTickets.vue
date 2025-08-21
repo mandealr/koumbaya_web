@@ -341,7 +341,9 @@ const handleClaimPrize = async (ticketId) => {
   } catch (err) {
     // Show error message or notification here
     console.error('Erreur lors de la réclamation du prix:', err)
-    alert('Erreur lors de la réclamation du prix. Veuillez réessayer.')
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la réclamation du prix. Veuillez réessayer.', '❌ Erreur')
+    }
   }
 }
 
@@ -351,7 +353,9 @@ const handleDownloadTicket = async (ticketId) => {
   } catch (err) {
     // Show error message or notification here
     console.error('Erreur lors du téléchargement:', err)
-    alert('Erreur lors du téléchargement. Veuillez réessayer.')
+    if (window.$toast) {
+      window.$toast.error('Erreur lors du téléchargement. Veuillez réessayer.', '❌ Erreur')
+    }
   }
 }
 

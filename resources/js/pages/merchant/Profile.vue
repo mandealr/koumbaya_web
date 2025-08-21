@@ -272,10 +272,14 @@ const updateProfile = async () => {
     // Refresh user data in store
     await authStore.refreshUser()
     
-    alert('Profil mis à jour avec succès')
+    if (window.$toast) {
+      window.$toast.success('Profil mis à jour avec succès', '✅ Profil')
+    }
   } catch (error) {
     console.error('Erreur lors de la mise à jour du profil:', error)
-    alert('Erreur lors de la mise à jour du profil')
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la mise à jour du profil', '❌ Erreur')
+    }
   } finally {
     loading.value = false
   }

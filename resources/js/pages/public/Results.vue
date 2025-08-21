@@ -327,7 +327,9 @@ const copyVerificationCode = async (code) => {
   try {
     await navigator.clipboard.writeText(code)
     // Vous pourriez ajouter une notification toast ici
-    alert('Code copié dans le presse-papiers!')
+    if (window.$toast) {
+      window.$toast.success('Code copié dans le presse-papiers!', '✅ Copié')
+    }
   } catch (error) {
     console.error('Erreur lors de la copie:', error)
   }

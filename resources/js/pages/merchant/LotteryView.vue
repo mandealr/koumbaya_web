@@ -494,17 +494,23 @@ const formatDate = (dateString) => {
 const shareOrLottery = () => {
   const url = `${window.location.origin}/lottery/${lottery.value.id}`
   navigator.clipboard.writeText(url)
-  alert('Lien de partage copié dans le presse-papiers!')
+  if (window.$toast) {
+    window.$toast.success('Lien de partage copié dans le presse-papiers!', '✅ Partage')
+  }
 }
 
 const downloadReport = () => {
   // TODO: Implémenter le téléchargement de rapport
-  alert('Fonctionnalité de téléchargement en cours de développement')
+  if (window.$toast) {
+    window.$toast.info('Fonctionnalité de téléchargement en cours de développement', '🚀 En développement')
+  }
 }
 
 const pauseLottery = () => {
   // TODO: Implémenter la mise en pause
-  alert('Mise en pause de la tombola...')
+  if (window.$toast) {
+    window.$toast.info('Mise en pause de la tombola...', '⏸️ Pause')
+  }
 }
 
 const onLotteryDrawn = () => {

@@ -394,7 +394,9 @@ const viewLottery = (lottery) => {
 
 const drawLottery = (lottery) => {
   if (lottery.completion_rate < 80) {
-    alert('La tombola doit être à au moins 80% avant de pouvoir effectuer le tirage.')
+    if (window.$toast) {
+      window.$toast.warning('La tombola doit être à au moins 80% avant de pouvoir effectuer le tirage.', '⚠️ Tirage impossible')
+    }
     return
   }
   selectedLottery.value = lottery

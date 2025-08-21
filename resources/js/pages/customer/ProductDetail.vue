@@ -21,9 +21,10 @@
       <div>
         <div class="relative">
           <img
-            :src="product.image_url || product.main_image || '/images/products/placeholder.jpg'"
+            :src="getProductImageUrl(product)"
             :alt="product.title || product.name"
             class="w-full h-96 object-cover rounded-xl"
+            @error="handleImageError"
           />
           <div class="absolute top-4 left-4">
             <span :class="[
@@ -371,6 +372,30 @@ const getRemainingTime = (dateString) => {
   }
 }
 
+const getProductImageUrl = (product) => {
+  if (!product) return 'https://via.placeholder.com/400x300/e2e8f0/64748b?text=Produit'
+  
+  // Essayer différentes sources d'image
+  const imageUrl = product.image_url || product.main_image || (product.images && product.images[0])
+  
+  if (imageUrl) {
+    // Si l'URL commence par http, l'utiliser directement
+    if (imageUrl.startsWith('http')) {
+      return imageUrl
+    }
+    // Sinon ajouter le préfixe du domaine
+    return imageUrl.startsWith('/') ? imageUrl : `/storage/${imageUrl}`
+  }
+  
+  // Image placeholder si aucune image disponible
+  return 'https://via.placeholder.com/400x300/e2e8f0/64748b?text=Produit'
+}
+
+const handleImageError = (event) => {
+  console.log('Image loading error, using placeholder')
+  event.target.src = 'https://via.placeholder.com/400x300/e2e8f0/64748b?text=Produit'
+}
+
 const getStatusLabel = (status) => {
   const labels = {
     'active': 'Actif',
@@ -384,14 +409,25 @@ const purchaseTickets = async () => {
   purchasing.value = true
 
   try {
+    const lottery = product.value.lottery || product.value.active_lottery
+    const ticketPrice = lottery?.ticket_price || product.value.ticket_price || 0
+    const totalAmount = ticketPrice * ticketQuantity.value
+
+    // TODO: Récupérer le numéro de téléphone de l'utilisateur depuis son profil
+    // Pour l'instant on utilise un numéro par défaut, à adapter selon vos besoins
+    const phoneNumber = '074000000' // À remplacer par le vrai numéro de l'utilisateur
+
     const response = await post('/tickets/purchase', {
-      product_id: product.value.id,
-      lottery_id: product.value.lottery?.id || product.value.active_lottery?.id,
-      quantity: ticketQuantity.value
+      lottery_id: lottery?.id,
+      quantity: ticketQuantity.value,
+      phone_number: phoneNumber,
+      total_amount: totalAmount
     })
 
     if (response && response.success) {
-      alert('🎉 Tickets achetés avec succès ! Bonne chance pour le tirage !')
+      if (window.$toast) {
+        window.$toast.success('🎉 Tickets achetés avec succès ! Confirmez le paiement sur votre téléphone.', '✅ Achat initié')
+      }
 
       // Refresh product data
       await loadProduct()
@@ -404,7 +440,11 @@ const purchaseTickets = async () => {
 
   } catch (error) {
     console.error('Error purchasing tickets:', error)
-    alert('❌ Erreur lors de l\'achat des tickets. Veuillez réessayer.')
+    const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de l\'achat des tickets'
+    
+    if (window.$toast) {
+      window.$toast.error('❌ ' + errorMessage, '❌ Erreur d\'achat')
+    }
   } finally {
     purchasing.value = false
   }
@@ -421,7 +461,9 @@ const purchaseDirectly = async () => {
     })
 
     if (response && response.success) {
-      alert('🎉 Produit acheté avec succès ! Vous recevrez une confirmation par SMS.')
+      if (window.$toast) {
+        window.$toast.success('🎉 Produit acheté avec succès ! Vous recevrez une confirmation par SMS.', '✅ Achat confirmé')
+      }
 
       // Refresh product data
       await loadProduct()
@@ -431,7 +473,11 @@ const purchaseDirectly = async () => {
 
   } catch (error) {
     console.error('Error purchasing product directly:', error)
-    alert('❌ Erreur lors de l\'achat. Veuillez réessayer.')
+    const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de l\'achat'
+    
+    if (window.$toast) {
+      window.$toast.error('❌ ' + errorMessage, '❌ Erreur d\'achat')
+    }
   } finally {
     purchasing.value = false
   }
@@ -470,10 +516,10 @@ const loadParticipants = async () => {
   try {
     const lottery = product.value.lottery || product.value.active_lottery
     if (lottery) {
-      const response = await get(`/lotteries/${lottery.id}/participants`)
-      if (response && response.data) {
-        participants.value = response.data
-      }
+      // TODO: Endpoint /lotteries/{id}/participants n'existe pas encore
+      // Utiliser /tickets/my-tickets en attendant ou créer l'endpoint manquant
+      console.log('Participants endpoint not available yet for lottery:', lottery.id)
+      participants.value = []
     }
   } catch (error) {
     console.error('Error loading participants:', error)

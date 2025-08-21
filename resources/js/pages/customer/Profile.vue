@@ -90,9 +90,11 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
                 <PhoneInput
+                  ref="phoneInputRef"
                   v-model="personalForm.phone"
                   class="w-full"
-                  :default-country="'ga'"
+                  :initial-country="'ga'"
+                  :preferred-countries="['ga', 'cm', 'ci', 'cg', 'cf', 'td', 'gq', 'bf', 'bj', 'tg', 'fr', 'ca']"
                 />
               </div>
               
@@ -429,6 +431,7 @@ const updatingPassword = ref(false)
 const updatingNotifications = ref(false)
 const showAvatarUpload = ref(false)
 const selectedAvatar = ref(null)
+const phoneInputRef = ref(null)
 
 const tabs = [
   { key: 'personal', label: 'Informations personnelles', icon: UserIcon },
@@ -772,6 +775,13 @@ const loadUserProfile = async () => {
       console.log('User data loaded:', userData)
       console.log('Personal form:', personalForm)
       console.log('Address form:', addressForm)
+      
+      // Forcer la mise à jour du PhoneInput avec le numéro chargé
+      setTimeout(() => {
+        if (phoneInputRef.value && personalForm.phone) {
+          phoneInputRef.value.setNumber(personalForm.phone)
+        }
+      }, 100)
     } else if (response && response.data) {
       const userData = response.data
       Object.assign(user, userData)
@@ -791,6 +801,13 @@ const loadUserProfile = async () => {
         postal_code: userData.postal_code || '',
         country_id: userData.country_id || null
       })
+      
+      // Forcer la mise à jour du PhoneInput avec le numéro chargé
+      setTimeout(() => {
+        if (phoneInputRef.value && personalForm.phone) {
+          phoneInputRef.value.setNumber(personalForm.phone)
+        }
+      }, 100)
     }
   } catch (error) {
     console.error('Error loading user profile:', error)

@@ -244,16 +244,22 @@ const updateAccountInfo = async () => {
     await put('/user/profile', accountForm)
     // Update auth store
     await authStore.refreshUser()
-    alert('Informations mises à jour avec succès')
+    if (window.$toast) {
+      window.$toast.success('Informations mises à jour avec succès', '✅ Mise à jour')
+    }
   } catch (error) {
     console.error('Erreur lors de la mise à jour:', error)
-    alert('Erreur lors de la mise à jour')
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la mise à jour', '❌ Erreur')
+    }
   }
 }
 
 const updatePassword = async () => {
   if (passwordForm.new_password !== passwordForm.confirm_password) {
-    alert('Les mots de passe ne correspondent pas')
+    if (window.$toast) {
+      window.$toast.error('Les mots de passe ne correspondent pas', '❌ Validation')
+    }
     return
   }
   
@@ -268,20 +274,28 @@ const updatePassword = async () => {
     passwordForm.new_password = ''
     passwordForm.confirm_password = ''
     
-    alert('Mot de passe mis à jour avec succès')
+    if (window.$toast) {
+      window.$toast.success('Mot de passe mis à jour avec succès', '✅ Sécurité')
+    }
   } catch (error) {
     console.error('Erreur lors du changement de mot de passe:', error)
-    alert('Erreur lors du changement de mot de passe')
+    if (window.$toast) {
+      window.$toast.error('Erreur lors du changement de mot de passe', '❌ Erreur')
+    }
   }
 }
 
 const updatePreferences = async () => {
   try {
     await put('/user/preferences', preferences)
-    alert('Préférences sauvegardées avec succès')
+    if (window.$toast) {
+      window.$toast.success('Préférences sauvegardées avec succès', '✅ Préférences')
+    }
   } catch (error) {
     console.error('Erreur lors de la sauvegarde:', error)
-    alert('Erreur lors de la sauvegarde des préférences')
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la sauvegarde des préférences', '❌ Erreur')
+    }
   }
 }
 

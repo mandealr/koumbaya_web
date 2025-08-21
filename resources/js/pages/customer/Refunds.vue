@@ -447,11 +447,15 @@ const createRefund = async () => {
     showCreateRefund.value = false
     
     // Show success message
-    alert('Demande de remboursement créée avec succès!')
+    if (window.$toast) {
+      window.$toast.success('Demande de remboursement créée avec succès!', '✅ Demande créée')
+    }
     
   } catch (error) {
     console.error('Error creating refund:', error)
-    alert('Erreur lors de la création de la demande')
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la création de la demande', '❌ Erreur')
+    }
   } finally {
     creating.value = false
   }
@@ -470,11 +474,15 @@ const cancelRefund = async (refund) => {
       refunds.value[index].rejection_reason = 'Annulé par l\'utilisateur'
     }
     
-    alert('Demande annulée avec succès')
+    if (window.$toast) {
+      window.$toast.success('Demande annulée avec succès', '✅ Annulation')
+    }
     
   } catch (error) {
     console.error('Error cancelling refund:', error)
-    alert('Erreur lors de l\'annulation')
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de l\'annulation', '❌ Erreur')
+    }
   }
 }
 

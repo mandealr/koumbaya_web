@@ -788,18 +788,21 @@ const calculateDurationDays = () => {
 }
 
 const showSuccessToast = (message) => {
-  // TODO: Implement toast notification
-  alert(message)
+  if (window.$toast) {
+    window.$toast.success(message, '✅ Succès')
+  }
 }
 
 const showErrorToast = (message) => {
-  // TODO: Implement toast notification
-  alert('Erreur: ' + message)
+  if (window.$toast) {
+    window.$toast.error(message, '❌ Erreur')
+  }
 }
 
 const showWarningToast = (message) => {
-  // TODO: Implement toast notification
-  alert('Attention: ' + message)
+  if (window.$toast) {
+    window.$toast.warning(message, '⚠️ Attention')
+  }
 }
 
 // Validation helper

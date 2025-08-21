@@ -545,7 +545,9 @@ const processAutomatic = async () => {
       dry_run: processOptions.value.dryRun
     })
     
-    alert('Traitement automatique terminé : ' + response.data.message)
+    if (window.$toast) {
+      window.$toast.success('Traitement automatique terminé : ' + response.data.message, '✅ Traitement')
+    }
     
     // Reload data
     await Promise.all([
@@ -558,7 +560,9 @@ const processAutomatic = async () => {
   } catch (error) {
     console.error('Error processing automatic refunds:', error)
     // Show success message even if API fails (for demo purposes)
-    alert('Traitement automatique simulé : ' + (processOptions.value.dryRun ? 'Mode test activé' : '3 remboursements traités'))
+    if (window.$toast) {
+      window.$toast.success('Traitement automatique simulé : ' + (processOptions.value.dryRun ? 'Mode test activé' : '3 remboursements traités'), '✅ Simulation')
+    }
     
     // Reload data with fallback
     await Promise.all([
@@ -583,7 +587,9 @@ const processLottery = async (lotteryId, dryRun = false) => {
       dry_run: dryRun
     })
     
-    alert('Traitement terminé : ' + response.data.message)
+    if (window.$toast) {
+      window.$toast.success('Traitement terminé : ' + response.data.message, '✅ Traitement')
+    }
     
     await Promise.all([
       loadRefunds(),
@@ -592,7 +598,9 @@ const processLottery = async (lotteryId, dryRun = false) => {
     ])
   } catch (error) {
     console.error('Error processing lottery refunds:', error)
-    alert('Erreur lors du traitement')
+    if (window.$toast) {
+      window.$toast.error('Erreur lors du traitement', '❌ Erreur')
+    }
   } finally {
     processing.value = false
   }
@@ -605,7 +613,9 @@ const approveRefund = async (refund) => {
   try {
     const response = await post(`/admin/refunds/${refund.id}/approve`)
     
-    alert('Remboursement approuvé et traité')
+    if (window.$toast) {
+      window.$toast.success('Remboursement approuvé et traité', '✅ Approbation')
+    }
     
     // Update refund in list
     const index = refunds.value.findIndex(r => r.id === refund.id)
@@ -618,7 +628,9 @@ const approveRefund = async (refund) => {
   } catch (error) {
     console.error('Error approving refund:', error)
     // Simulate successful approval
-    alert('Remboursement simulé : approuvé et traité')
+    if (window.$toast) {
+      window.$toast.success('Remboursement simulé : approuvé et traité', '✅ Simulation')
+    }
     
     // Update refund status in list
     const index = refunds.value.findIndex(r => r.id === refund.id)
@@ -647,7 +659,9 @@ const rejectRefund = async () => {
       reason: rejectReason.value
     })
     
-    alert('Remboursement rejeté')
+    if (window.$toast) {
+      window.$toast.warning('Remboursement rejeté', '⚠️ Rejet')
+    }
     
     // Update refund in list
     const index = refunds.value.findIndex(r => r.id === refundToReject.value.id)
@@ -663,7 +677,9 @@ const rejectRefund = async () => {
   } catch (error) {
     console.error('Error rejecting refund:', error)
     // Simulate successful rejection
-    alert('Remboursement simulé : rejeté avec motif')
+    if (window.$toast) {
+      window.$toast.warning('Remboursement simulé : rejeté avec motif', '⚠️ Simulation')
+    }
     
     // Update refund status in list
     const index = refunds.value.findIndex(r => r.id === refundToReject.value.id)
@@ -684,7 +700,9 @@ const rejectRefund = async () => {
 
 const viewRefundDetails = (refund) => {
   // Open details modal or navigate to details page
-  alert('Détails du remboursement : ' + refund.refund_number)
+  if (window.$toast) {
+    window.$toast.info('Détails du remboursement : ' + refund.refund_number, '📝 Détails')
+  }
 }
 
 const resetFilters = () => {

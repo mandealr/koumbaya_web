@@ -589,13 +589,17 @@ const publishProduct = async (product) => {
       
       if (response && response.success) {
         await loadProducts() // Refresh products
-        alert('✅ Tombola publiée avec succès !')
+        if (window.$toast) {
+          window.$toast.success('Tombola publiée avec succès !', '✅ Publication')
+        }
       } else {
         throw new Error(response?.message || 'Erreur lors de la publication')
       }
     } catch (error) {
       console.error('Error publishing product:', error)
-      alert('❌ Erreur lors de la publication')
+      if (window.$toast) {
+        window.$toast.error('Erreur lors de la publication', '❌ Erreur')
+      }
     }
   }
 }
@@ -612,13 +616,17 @@ const duplicateProduct = async (product) => {
     
     if (response && response.success) {
       await loadProducts() // Refresh products
-      alert('✅ Produit dupliqué avec succès !')
+      if (window.$toast) {
+        window.$toast.success('Produit dupliqué avec succès !', '✅ Duplication')
+      }
     } else {
       throw new Error(response?.message || 'Erreur lors de la duplication')
     }
   } catch (error) {
     console.error('Error duplicating product:', error)
-    alert('❌ Erreur lors de la duplication')
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la duplication', '❌ Erreur')
+    }
   }
   showProductMenu.value = null
 }
@@ -634,13 +642,17 @@ const deleteProduct = async (product) => {
       const response = await del(`/products/${product.id}`)
       if (response && response.success) {
         await loadProducts() // Refresh products
-        alert('✅ Produit supprimé')
+        if (window.$toast) {
+          window.$toast.success('Produit supprimé', '✅ Suppression')
+        }
       } else {
         throw new Error(response?.message || 'Erreur lors de la suppression')
       }
     } catch (error) {
       console.error('Error deleting product:', error)
-      alert('❌ Erreur lors de la suppression')
+      if (window.$toast) {
+        window.$toast.error('Erreur lors de la suppression', '❌ Erreur')
+      }
     }
     showProductMenu.value = null
   }

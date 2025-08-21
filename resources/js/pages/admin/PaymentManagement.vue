@@ -474,11 +474,15 @@ const initiateRefund = async (payment) => {
       // TODO: Implement refund API call
       console.log('Initiating refund for:', payment.transaction_id)
       // await post(`/admin/payments/${payment.id}/refund`)
-      alert('Remboursement initié avec succès')
+      if (window.$toast) {
+        window.$toast.success('Remboursement initié avec succès', '✅ Remboursement')
+      }
       loadPayments()
     } catch (error) {
       console.error('Error initiating refund:', error)
-      alert('Erreur lors de l\'initiation du remboursement')
+      if (window.$toast) {
+        window.$toast.error('Erreur lors de l\'initiation du remboursement', '❌ Erreur')
+      }
     }
   }
 }
@@ -486,7 +490,9 @@ const initiateRefund = async (payment) => {
 const exportPayments = () => {
   // TODO: Implement export functionality
   console.log('Exporting payments...')
-  alert('Fonctionnalité d\'export en cours de développement')
+  if (window.$toast) {
+    window.$toast.info('Fonctionnalité d\'export en cours de développement', '🚀 En développement')
+  }
 }
 
 const refreshData = () => {

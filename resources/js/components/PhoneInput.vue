@@ -46,6 +46,10 @@ export default {
     modelValue(newVal) {
       if (newVal !== this.phoneNumber) {
         this.phoneNumber = newVal;
+        // Mettre à jour l'input directement
+        if (this.iti && this.$refs.phoneInput && newVal) {
+          this.iti.setNumber(newVal);
+        }
       }
     }
   },
@@ -187,6 +191,7 @@ export default {
     },
     setNumber(number) {
       if (this.iti) {
+        this.iti.setNumber(number);
         this.phoneNumber = number;
         this.emitAllData();
       }
