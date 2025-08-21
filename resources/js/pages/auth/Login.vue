@@ -58,6 +58,35 @@
           </div>
 
           <form @submit.prevent="handleSubmit" class="space-y-6">
+            <!-- Toggle entre email et téléphone -->
+            <div class="flex justify-center space-x-2 p-1 bg-gray-100 rounded-lg mb-6">
+              <button
+                type="button"
+                @click="loginMethod = 'email'"
+                :class="[
+                  'flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200',
+                  loginMethod === 'email'
+                    ? 'bg-white text-koumbaya-primary shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                ]"
+              >
+                <EnvelopeIcon class="w-4 h-4 inline-block mr-2" />
+                Email
+              </button>
+              <button
+                type="button"
+                @click="loginMethod = 'phone'"
+                :class="[
+                  'flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200',
+                  loginMethod === 'phone'
+                    ? 'bg-white text-koumbaya-primary shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                ]"
+              >
+                <PhoneIcon class="w-4 h-4 inline-block mr-2" />
+                Téléphone
+              </button>
+            </div>
             <!-- Zone d'erreur améliorée -->
             <div v-if="errors.general" class="rounded-xl bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 p-4 shadow-lg">
               <div class="flex items-start">
@@ -106,7 +135,8 @@
               </div>
             </div>
 
-            <div class="koumbaya-form-group">
+            <!-- Email input -->
+            <div v-if="loginMethod === 'email'" class="koumbaya-form-group">
               <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                 <div class="flex items-center">
                   <EnvelopeIcon class="w-4 h-4 mr-2 text-gray-500 flex-shrink-0" />
@@ -135,6 +165,33 @@
                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                 </svg>
                 ✓ Adresse email valide
+              </p>
+            </div>
+
+            <!-- Phone input -->
+            <div v-if="loginMethod === 'phone'" class="koumbaya-form-group">
+              <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                <div class="flex items-center">
+                  <PhoneIcon class="w-4 h-4 mr-2 text-gray-500 flex-shrink-0" />
+                  <span>Numéro de téléphone</span>
+                </div>
+              </label>
+              <PhoneInput
+                ref="phoneInputRef"
+                v-model="form.phone"
+                :preferred-countries="['ga', 'cm', 'ci', 'cg', 'cf', 'td', 'gq', 'bf', 'bj', 'tg', 'fr', 'ca']"
+                initial-country="ga"
+                @phone-change="onPhoneChange"
+              />
+              <p v-if="errors.phone" class="mt-2 text-sm text-red-600 flex items-center">
+                <ExclamationCircleIcon class="w-4 h-4 mr-1" />
+                {{ errors.phone }}
+              </p>
+              <p v-else-if="phoneValid" class="mt-2 text-sm text-blue-600 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                ✓ Numéro de téléphone valide
               </p>
             </div>
 
@@ -264,8 +321,10 @@ import {
   EnvelopeIcon,
   LockClosedIcon,
   ArrowRightOnRectangleIcon,
-  ExclamationCircleIcon
+  ExclamationCircleIcon,
+  PhoneIcon
 } from '@heroicons/vue/24/outline'
+import PhoneInput from '@/components/PhoneInput.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -273,15 +332,32 @@ const authStore = useAuthStore()
 
 const form = reactive({
   email: '',
+  phone: '',
   password: '',
   rememberMe: false
 })
 
+const loginMethod = ref('email') // 'email' or 'phone'
+const phoneInputRef = ref(null)
+const phoneValid = ref(false)
+
 const errors = reactive({
   email: '',
+  phone: '',
   password: '',
   general: ''
 })
+
+// Gestion du changement de téléphone
+const onPhoneChange = (phoneData) => {
+  phoneValid.value = phoneData.isValid
+  form.phone = phoneData.fullNumber
+  
+  // Clear error if phone is valid
+  if (phoneData.isValid) {
+    errors.phone = ''
+  }
+}
 
 const loading = ref(false)
 const showPassword = ref(false)
@@ -295,19 +371,30 @@ const validateForm = () => {
     errors[key] = ''
   })
 
-  // Email validation avec messages détaillés
-  if (!form.email) {
-    errors.email = '📧 L\'adresse email est obligatoire'
-    isValid = false
-  } else if (!form.email.includes('@')) {
-    errors.email = '⚠️ L\'adresse email doit contenir le symbole @'
-    isValid = false
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = '❌ Format d\'email invalide (exemple: nom@domaine.com)'
-    isValid = false
-  } else if (form.email.length > 100) {
-    errors.email = '📏 L\'adresse email est trop longue (max 100 caractères)'
-    isValid = false
+  if (loginMethod.value === 'email') {
+    // Email validation avec messages détaillés
+    if (!form.email) {
+      errors.email = '📧 L\'adresse email est obligatoire'
+      isValid = false
+    } else if (!form.email.includes('@')) {
+      errors.email = '⚠️ L\'adresse email doit contenir le symbole @'
+      isValid = false
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      errors.email = '❌ Format d\'email invalide (exemple: nom@domaine.com)'
+      isValid = false
+    } else if (form.email.length > 100) {
+      errors.email = '📏 L\'adresse email est trop longue (max 100 caractères)'
+      isValid = false
+    }
+  } else {
+    // Phone validation
+    if (!form.phone) {
+      errors.phone = '📱 Le numéro de téléphone est obligatoire'
+      isValid = false
+    } else if (!phoneValid.value) {
+      errors.phone = '❌ Format de téléphone invalide'
+      isValid = false
+    }
   }
 
   // Password validation avec messages détaillés
@@ -343,10 +430,17 @@ const handleSubmit = async (event) => {
   errors.general = ''
 
   try {
-    const result = await authStore.login({
-      email: form.email,
+    const credentials = {
       password: form.password
-    })
+    }
+    
+    if (loginMethod.value === 'email') {
+      credentials.email = form.email
+    } else {
+      credentials.phone = form.phone
+    }
+    
+    const result = await authStore.login(credentials)
 
     if (result.success) {
       // Success toast avec informations personnalisées

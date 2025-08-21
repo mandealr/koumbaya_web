@@ -225,57 +225,13 @@
                   <label for="phone" class="block text-sm font-semibold text-gray-900 mb-2">
                     Numéro de téléphone *
                   </label>
-                  <div class="phone-input-container" :class="{ 'has-error': errors.phone }">
-                    <div class="flex">
-                      <!-- Country Selector -->
-                      <div class="relative">
-                        <select
-                          v-model="selectedCountryCode"
-                          @change="onCountryChanged"
-                          class="appearance-none bg-white border border-gray-200 rounded-l-xl px-3 py-3 pr-8 focus:ring-2 focus:ring-[#0099cc] focus:border-transparent text-sm font-medium"
-                          :class="{ 'border-red-300 bg-red-50': errors.phone }"
-                        >
-                          <option value="GA">🇬🇦 +241</option>
-                          <option value="FR">🇫🇷 +33</option>
-                          <option value="CA">🇨🇦 +1</option>
-                          <option value="CM">🇨🇲 +237</option>
-                          <option value="CI">🇨🇮 +225</option>
-                          <option value="SN">🇸🇳 +221</option>
-                          <option value="BF">🇧🇫 +226</option>
-                          <option value="ML">🇲🇱 +223</option>
-                          <option value="NE">🇳🇪 +227</option>
-                          <option value="TG">🇹🇬 +228</option>
-                          <option value="BJ">🇧🇯 +229</option>
-                          <option value="GN">🇬🇳 +224</option>
-                          <option value="MR">🇲🇷 +222</option>
-                          <option value="TD">🇹🇩 +235</option>
-                          <option value="CF">🇨🇫 +236</option>
-                          <option value="CG">🇨🇬 +242</option>
-                          <option value="CD">🇨🇩 +243</option>
-                          <option value="AO">🇦🇴 +244</option>
-                          <option value="GQ">🇬🇶 +240</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                          <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
-                      </div>
-
-                      <!-- Phone Number Input -->
-                      <input
-                        id="phone"
-                        v-model="form.phone"
-                        type="tel"
-                        :placeholder="getPhonePlaceholder()"
-                        required
-                        class="flex-1 px-4 py-3 border-l-0 border border-gray-200 rounded-r-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
-                        :class="{ 'border-red-300 bg-red-50': errors.phone }"
-                        @input="onPhoneInput"
-                        @blur="validatePhoneNumber"
-                      />
-                    </div>
-                  </div>
+                  <PhoneInput
+                    ref="phoneInputRef"
+                    v-model="form.phone"
+                    :preferred-countries="['ga', 'cm', 'ci', 'cg', 'cf', 'td', 'gq', 'bf', 'bj', 'tg', 'fr', 'ca']"
+                    initial-country="ga"
+                    @phone-change="onPhoneChange"
+                  />
                   <p v-if="errors.phone" class="mt-1 text-sm text-red-600">{{ errors.phone }}</p>
                 </div>
 
@@ -465,6 +421,7 @@ import { EyeIcon, EyeSlashIcon, ExclamationTriangleIcon } from '@heroicons/vue/2
 import socialAuth from '@/services/socialAuth'
 const logoWhiteUrl = '/logo_white.png'
 import { useApi } from '@/composables/api'
+import PhoneInput from '@/components/PhoneInput.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -598,48 +555,15 @@ const getPhonePlaceholder = () => {
   return placeholders[selectedCountryCode.value] || '12 34 56 78'
 }
 
-// Gestion de la saisie téléphone
-const onPhoneInput = (event) => {
-  const value = event.target.value
-  form.phone = value
-  validatePhoneNumber()
-}
-
-// Validation du numéro de téléphone
-const validatePhoneNumber = () => {
-  const phone = form.phone.trim()
-
-  if (!phone) {
-    phoneValid.value = false
+// Gestion du changement de téléphone avec le nouveau composant
+const onPhoneChange = (phoneData) => {
+  phoneValid.value = phoneData.isValid
+  form.phone = phoneData.fullNumber
+  
+  // Clear error if phone is valid
+  if (phoneData.isValid) {
     errors.phone = ''
-    return
   }
-
-  // Validation basique selon le pays sélectionné
-  const dialCode = countryDialCodes[selectedCountryCode.value]
-  let isValid = false
-
-  // Si le numéro commence par l'indicatif du pays
-  if (phone.startsWith(dialCode)) {
-    isValid = phone.length >= dialCode.length + 8 // Indicatif + au moins 8 chiffres
-  } else {
-    // Numéro local (sans indicatif)
-    isValid = phone.length >= 8 && phone.length <= 12
-  }
-
-  phoneValid.value = isValid
-
-  if (isValid) {
-    errors.phone = ''
-  } else if (phone.length > 0) {
-    errors.phone = `Format de téléphone invalide pour ${selectedCountryCode.value}`
-  }
-}
-
-// Changement de pays
-const onCountryChanged = () => {
-  console.log('Pays sélectionné:', selectedCountryCode.value)
-  validatePhoneNumber() // Re-valider avec le nouveau pays
 }
 
 const handleSubmit = async () => {
