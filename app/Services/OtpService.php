@@ -26,7 +26,10 @@ class OtpService
                 Log::info('OTP Email envoyé avec succès', [
                     'email' => $email,
                     'purpose' => $purpose,
-                    'code' => $otp->code // À retirer en production
+                    'code' => $otp->code, // À retirer en production
+                    'identifier_stored' => $otp->identifier,
+                    'expires_at' => $otp->expires_at,
+                    'otp_id' => $otp->id
                 ]);
 
                 return [
@@ -116,10 +119,36 @@ class OtpService
     public static function verifyOtp($identifier, $code, $purpose)
     {
         try {
+            $originalIdentifier = $identifier;
+            
             // Nettoyer l'identifiant si c'est un téléphone
             if (self::isPhoneNumber($identifier)) {
                 $identifier = self::cleanPhoneNumber($identifier);
             }
+
+            // Debug: vérifier les codes existants pour cet identifiant
+            $existingOtps = Otp::where('identifier', $identifier)
+                              ->where('purpose', $purpose)
+                              ->orderBy('created_at', 'desc')
+                              ->get();
+
+            Log::info('Tentative de vérification OTP', [
+                'original_identifier' => $originalIdentifier,
+                'cleaned_identifier' => $identifier,
+                'code' => $code,
+                'purpose' => $purpose,
+                'existing_otps_count' => $existingOtps->count(),
+                'existing_otps' => $existingOtps->map(function($otp) {
+                    return [
+                        'id' => $otp->id,
+                        'code' => $otp->code,
+                        'is_used' => $otp->is_used,
+                        'expires_at' => $otp->expires_at,
+                        'is_expired' => $otp->isExpired(),
+                        'created_at' => $otp->created_at
+                    ];
+                })
+            ]);
 
             $isValid = Otp::verify($identifier, $code, $purpose);
 
@@ -138,7 +167,8 @@ class OtpService
             Log::warning('OTP invalide', [
                 'identifier' => $identifier,
                 'code' => $code,
-                'purpose' => $purpose
+                'purpose' => $purpose,
+                'debug_info' => 'Code non trouvé ou conditions non remplies'
             ]);
 
             return [
@@ -149,7 +179,8 @@ class OtpService
         } catch (\Exception $e) {
             Log::error('Erreur validation OTP', [
                 'identifier' => $identifier,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return [

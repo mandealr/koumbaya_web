@@ -243,20 +243,7 @@ const handleSubmit = async () => {
   success.value = false
 
   try {
-    // D'abord vérifier le code OTP
-    const otpResponse = await post('/otp/verify', {
-      identifier: identifier.value,
-      code: form.otp,
-      purpose: 'password_reset'
-    })
-
-    if (!otpResponse.success) {
-      errors.general = otpResponse.message || 'Code invalide'
-      loading.value = false
-      return
-    }
-
-    // Ensuite réinitialiser le mot de passe
+    // Réinitialiser le mot de passe directement (qui inclut la vérification OTP)
     const resetResponse = await post('/auth/reset-password', {
       identifier: identifier.value,
       otp: form.otp,
@@ -276,7 +263,11 @@ const handleSubmit = async () => {
     }
   } catch (error) {
     console.error('Erreur lors de la réinitialisation:', error)
-    errors.general = 'Une erreur est survenue lors de la réinitialisation'
+    if (error.response?.data?.message) {
+      errors.general = error.response.data.message
+    } else {
+      errors.general = 'Une erreur est survenue lors de la réinitialisation'
+    }
   } finally {
     loading.value = false
   }
