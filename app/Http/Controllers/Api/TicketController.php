@@ -93,8 +93,10 @@ class TicketController extends Controller
         DB::beginTransaction();
         try {
             // Créer la transaction
+            $transactionId = 'TXN-' . time() . '-' . Str::random(6);
             $transaction = Transaction::create([
-                'transaction_id' => 'TXN-' . time() . '-' . Str::random(6),
+                'transaction_id' => $transactionId,
+                'reference' => $transactionId, // Utiliser transaction_id comme référence
                 'user_id' => $user->id,
                 'lottery_id' => $lottery->id,
                 'amount' => $request->total_amount,

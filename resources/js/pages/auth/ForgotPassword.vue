@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-koumbaya-primary/5 via-white to-koumbaya-primary/10 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-white flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <div class="flex justify-center mb-8">
         <img class="h-20 w-auto" :src="logoUrl" alt="Koumbaya" />
@@ -181,7 +181,7 @@ const errors = reactive({
 const onPhoneChange = (phoneData) => {
   phoneValid.value = phoneData.isValid
   form.phone = phoneData.fullNumber
-  
+
   if (phoneData.isValid) {
     errors.phone = ''
   }
@@ -224,7 +224,7 @@ const handleSubmit = async () => {
 
   try {
     const identifier = resetMethod.value === 'email' ? form.email : form.phone
-    
+
     const response = await post('/otp/send', {
       identifier: identifier,
       purpose: 'password_reset'
@@ -232,7 +232,7 @@ const handleSubmit = async () => {
 
     if (response.success) {
       success.value = true
-      
+
       // Redirection vers la page de vérification OTP après 2 secondes
       setTimeout(() => {
         router.push({

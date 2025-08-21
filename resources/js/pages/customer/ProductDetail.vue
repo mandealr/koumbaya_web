@@ -272,6 +272,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApi } from '@/composables/api'
+import { useAuthStore } from '@/stores/auth'
+import { getImageUrl, handleImageError as handleImgError } from '@/utils/imageUtils'
 import {
   ArrowLeftIcon,
   StarIcon,
@@ -287,6 +289,7 @@ import {
 const route = useRoute()
 const router = useRouter()
 const { get, post, loading, error } = useApi()
+const authStore = useAuthStore()
 
 const purchasing = ref(false)
 const product = ref(null)
@@ -373,27 +376,11 @@ const getRemainingTime = (dateString) => {
 }
 
 const getProductImageUrl = (product) => {
-  if (!product) return 'https://via.placeholder.com/400x300/e2e8f0/64748b?text=Produit'
-  
-  // Essayer différentes sources d'image
-  const imageUrl = product.image_url || product.main_image || (product.images && product.images[0])
-  
-  if (imageUrl) {
-    // Si l'URL commence par http, l'utiliser directement
-    if (imageUrl.startsWith('http')) {
-      return imageUrl
-    }
-    // Sinon ajouter le préfixe du domaine
-    return imageUrl.startsWith('/') ? imageUrl : `/storage/${imageUrl}`
-  }
-  
-  // Image placeholder si aucune image disponible
-  return 'https://via.placeholder.com/400x300/e2e8f0/64748b?text=Produit'
+  return getImageUrl(product, 'Produit', 400, 300)
 }
 
 const handleImageError = (event) => {
-  console.log('Image loading error, using placeholder')
-  event.target.src = 'https://via.placeholder.com/400x300/e2e8f0/64748b?text=Produit'
+  handleImgError(event, 'Image non disponible')
 }
 
 const getStatusLabel = (status) => {
@@ -413,9 +400,16 @@ const purchaseTickets = async () => {
     const ticketPrice = lottery?.ticket_price || product.value.ticket_price || 0
     const totalAmount = ticketPrice * ticketQuantity.value
 
-    // TODO: Récupérer le numéro de téléphone de l'utilisateur depuis son profil
-    // Pour l'instant on utilise un numéro par défaut, à adapter selon vos besoins
-    const phoneNumber = '074000000' // À remplacer par le vrai numéro de l'utilisateur
+    // Récupérer le numéro de téléphone de l'utilisateur connecté
+    const phoneNumber = authStore.user?.phone
+
+    // Vérifier que l'utilisateur a un numéro de téléphone
+    if (!phoneNumber) {
+      if (window.$toast) {
+        window.$toast.error('Veuillez ajouter un numéro de téléphone à votre profil avant d\'effectuer un achat.', '📱 Téléphone requis')
+      }
+      return
+    }
 
     const response = await post('/tickets/purchase', {
       lottery_id: lottery?.id,

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-koumbaya-primary/5 via-white to-koumbaya-primary/10 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-white flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <div class="flex justify-center mb-8">
         <img class="h-20 w-auto" :src="logoUrl" alt="Koumbaya" />
@@ -266,7 +266,7 @@ const handleSubmit = async () => {
 
     if (resetResponse.success) {
       success.value = true
-      
+
       // Redirection vers la page de connexion après 2 secondes
       setTimeout(() => {
         router.push({ name: 'login' })
@@ -284,7 +284,7 @@ const handleSubmit = async () => {
 
 const resendCode = async () => {
   resendLoading.value = true
-  
+
   try {
     const response = await post('/otp/resend', {
       identifier: identifier.value,
