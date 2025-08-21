@@ -149,7 +149,7 @@
                 type="email"
                 v-model="form.email"
                 required
-                class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 text-black"
+                class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 text-gray-900"
                 :class="{ 
                   'border-red-300 focus:border-red-500 focus:ring-red-500/10': errors.email,
                   'border-blue-300 focus:border-blue-500': !errors.email && form.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)
@@ -209,7 +209,7 @@
                   :type="showPassword ? 'text' : 'password'"
                   v-model="form.password"
                   required
-                  class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 pr-12 text-black"
+                  class="koumbaya-input bg-white/50 border-gray-200 focus:border-koumbaya-primary focus:ring-4 focus:ring-koumbaya-primary/10 rounded-xl transition-all duration-200 pr-12 text-gray-900"
                   :class="{ 
                     'border-red-300 focus:border-red-500 focus:ring-red-500/10': errors.password,
                     'border-blue-300 focus:border-blue-500': !errors.password && form.password && form.password.length >= 6

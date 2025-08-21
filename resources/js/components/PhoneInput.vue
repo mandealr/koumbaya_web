@@ -221,7 +221,7 @@ export default {
   border-radius: 8px;
   font-size: 14px;
   background-color: #fff;
-  color: #000;
+  color: #111827;
 }
 
 .phone-input-wrapper :deep(.iti__selected-dial-code) {

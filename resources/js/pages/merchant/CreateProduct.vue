@@ -69,7 +69,7 @@
               v-model="form.name"
               type="text"
               required
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
               placeholder="Ex: iPhone 15 Pro Max 256GB"
             />
             <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
@@ -84,7 +84,7 @@
               v-model="form.description"
               rows="4"
               required
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
               placeholder="Décrivez votre produit en détail..."
             ></textarea>
             <p v-if="errors.description" class="mt-1 text-sm text-red-600">{{ errors.description }}</p>
@@ -99,7 +99,7 @@
               v-model="form.category_id"
               required
               :disabled="apiLoading"
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black disabled:opacity-50"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900 disabled:opacity-50"
             >
               <option value="">Sélectionner une catégorie</option>
               <option v-if="apiLoading" disabled>Chargement des catégories...</option>
@@ -117,7 +117,7 @@
             <select
               v-model="form.condition"
               required
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
             >
               <option value="">État du produit</option>
               <option value="new">Neuf</option>
@@ -135,7 +135,7 @@
               type="number"
               required
               min="0"
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
               placeholder="Ex: 800000"
             />
             <p v-if="errors.price" class="mt-1 text-sm text-red-600">{{ errors.price }}</p>
@@ -150,7 +150,7 @@
               v-model="form.location"
               type="text"
               required
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
               placeholder="Ex: Libreville, Gabon"
             />
           </div>
@@ -246,7 +246,7 @@
               type="number"
               required
               min="100"
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
               placeholder="Ex: 2500"
               @input="calculateLotteryMetrics"
               @blur="validateTicketPrice"
@@ -266,7 +266,7 @@
               required
               min="10"
               max="10000"
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
               placeholder="Ex: 400"
               @input="calculateLotteryMetrics"
               @blur="validateTotalTickets"
@@ -286,7 +286,7 @@
               required
               :min="minDate"
               @change="validateEndDate"
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
             />
             <p v-if="errors.end_date" class="mt-1 text-sm text-red-600">{{ errors.end_date }}</p>
             <p v-else-if="form.end_date && new Date(form.end_date) <= new Date()" class="mt-1 text-sm text-orange-600">La date de fin doit être dans le futur</p>
@@ -301,7 +301,7 @@
               type="number"
               required
               :max="form.total_tickets"
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-black"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900"
               placeholder="Ex: 200"
             />
             <p v-if="errors.min_tickets" class="mt-1 text-sm text-red-600">{{ errors.min_tickets }}</p>
