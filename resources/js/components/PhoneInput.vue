@@ -2,7 +2,6 @@
   <div class="phone-input-wrapper">
     <input
       ref="phoneInput"
-      v-model="phoneNumber"
       type="tel"
       class="form-control"
       :placeholder="placeholder"
@@ -60,7 +59,9 @@ export default {
   },
   methods: {
     initializeIntlTelInput() {
-      this.iti = intlTelInput(this.$refs.phoneInput, {
+      const input = this.$refs.phoneInput;
+      
+      this.iti = intlTelInput(input, {
         preferredCountries: this.preferredCountries,
         initialCountry: this.initialCountry,
         separateDialCode: true,
@@ -70,13 +71,20 @@ export default {
         }
       });
 
-      this.$refs.phoneInput.addEventListener('countrychange', () => {
+      // Gérer l'événement input manuellement pour éviter les conflits avec v-model
+      input.addEventListener('input', (e) => {
+        this.phoneNumber = e.target.value;
         this.emitPhoneData();
       });
 
-      this.$refs.phoneInput.addEventListener('input', () => {
+      input.addEventListener('countrychange', () => {
         this.emitPhoneData();
       });
+      
+      // Définir la valeur initiale si elle existe
+      if (this.modelValue) {
+        this.iti.setNumber(this.modelValue);
+      }
     },
     emitPhoneData() {
       if (this.iti) {
@@ -124,17 +132,26 @@ export default {
   padding: 0 10px;
 }
 
-.phone-input-wrapper :deep(.form-control) {
-  padding-left: 80px;
+.phone-input-wrapper :deep(.form-control),
+.phone-input-wrapper input {
+  padding-left: 80px !important;
   width: 100%;
   height: 45px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   font-size: 14px;
+  background-color: #fff;
+  color: #000;
 }
 
-.phone-input-wrapper :deep(.form-control:focus) {
-  border-color: #4CAF50;
-  box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+.phone-input-wrapper :deep(.form-control:focus),
+.phone-input-wrapper input:focus {
+  border-color: #0099cc;
+  box-shadow: 0 0 0 0.2rem rgba(0, 153, 204, 0.25);
+  outline: none;
+}
+
+.phone-input-wrapper :deep(.iti__country-list) {
+  z-index: 9999;
 }
 </style>
