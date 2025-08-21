@@ -10,6 +10,8 @@ import AdminLayout from '@/components/common/AdminLayout.vue'
 import Login from '@/pages/auth/Login.vue'
 import Register from '@/pages/auth/Register.vue'
 import VerifyEmail from '@/pages/auth/VerifyEmail.vue'
+import ForgotPassword from '@/pages/auth/ForgotPassword.vue'
+import ResetPasswordVerify from '@/pages/auth/ResetPasswordVerify.vue'
 import Home from '@/pages/guest/Home.vue'
 import Results from '@/pages/public/Results.vue'
 import VerifyWinner from '@/pages/public/VerifyWinner.vue'
@@ -52,6 +54,20 @@ const routes = [
     path: '/verify-email',
     name: 'verify-email',
     component: VerifyEmail
+  },
+
+  // Password Reset Routes (no layout)
+  {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: ForgotPassword,
+    meta: { requiresGuest: true }
+  },
+  {
+    path: '/reset-password-verify',
+    name: 'reset-password-verify',
+    component: ResetPasswordVerify,
+    meta: { requiresGuest: true }
   },
 
   // Guest Routes

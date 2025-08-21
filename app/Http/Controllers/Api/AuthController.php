@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\OtpController;
 use App\Models\User;
 use App\Models\UserWallet;
 use App\Models\UserLoginHistory;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Str;
 
@@ -207,20 +209,35 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        // Déterminer si on utilise email ou téléphone
+        $loginField = $request->has('email') ? 'email' : 'phone';
+        $identifier = $request->input($loginField);
 
-        $validator = Validator::make($credentials, [
-            'email' => 'required|email',
+        $rules = [
             'password' => 'required|string|min:6',
-        ]);
+        ];
+
+        if ($loginField === 'email') {
+            $rules['email'] = 'required|email';
+        } else {
+            $rules['phone'] = 'required|string';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
+        // Préparer les credentials pour l'authentification
+        $credentials = [
+            $loginField => $identifier,
+            'password' => $request->password
+        ];
+
         // Tentative d'authentification avec le guard web
         if (!Auth::guard('web')->attempt($credentials)) {
-            $this->logFailedLogin($request->email, $request->ip());
+            $this->logFailedLogin($identifier, $request->ip());
             return response()->json(['error' => 'Identifiants invalides'], 401);
         }
 
@@ -727,5 +744,110 @@ class AuthController extends Controller
             'first_name' => $firstName ?: 'User',
             'last_name' => $lastName ?: 'Account'
         ];
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/reset-password",
+     *     summary="Réinitialiser le mot de passe",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"identifier", "otp", "password", "password_confirmation"},
+     *             @OA\Property(property="identifier", type="string", example="user@example.com"),
+     *             @OA\Property(property="otp", type="string", example="123456"),
+     *             @OA\Property(property="password", type="string", example="newpassword123"),
+     *             @OA\Property(property="password_confirmation", type="string", example="newpassword123")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Mot de passe réinitialisé avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Mot de passe réinitialisé avec succès")
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Erreur de validation ou code OTP invalide"),
+     *     @OA\Response(response=404, description="Utilisateur non trouvé")
+     * )
+     */
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'identifier' => 'required|string',
+            'otp' => 'required|string|size:6',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Vérifier le code OTP
+            $otpController = new OtpController();
+            $otpRequest = new Request([
+                'identifier' => $request->identifier,
+                'otp' => $request->otp,
+                'purpose' => 'password_reset'
+            ]);
+
+            $otpResponse = $otpController->verify($otpRequest);
+            $otpData = $otpResponse->getData(true);
+
+            if (!$otpData['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $otpData['message'] ?? 'Code OTP invalide'
+                ], 400);
+            }
+
+            // Trouver l'utilisateur par email ou téléphone
+            $user = User::where('email', $request->identifier)
+                       ->orWhere('phone', $request->identifier)
+                       ->first();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Utilisateur non trouvé'
+                ], 404);
+            }
+
+            // Réinitialiser le mot de passe
+            $user->password = Hash::make($request->password);
+            $user->save();
+
+            // Log de l'activité
+            Log::info('Password reset successful', [
+                'user_id' => $user->id,
+                'identifier' => $request->identifier,
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Mot de passe réinitialisé avec succès'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Password reset error', [
+                'error' => $e->getMessage(),
+                'identifier' => $request->identifier,
+                'ip' => $request->ip()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue lors de la réinitialisation'
+            ], 500);
+        }
     }
 }

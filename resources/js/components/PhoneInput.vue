@@ -74,10 +74,14 @@ export default {
       // Gérer l'événement input manuellement pour éviter les conflits avec v-model
       input.addEventListener('input', (e) => {
         this.phoneNumber = e.target.value;
+        // Émettre la valeur mise à jour via v-model
+        this.$emit('update:modelValue', this.iti.getNumber());
         this.emitPhoneData();
       });
 
       input.addEventListener('countrychange', () => {
+        // Émettre la valeur mise à jour lors du changement de pays
+        this.$emit('update:modelValue', this.iti.getNumber());
         this.emitPhoneData();
       });
       
@@ -134,7 +138,7 @@ export default {
 
 .phone-input-wrapper :deep(.form-control),
 .phone-input-wrapper input {
-  padding-left: 80px !important;
+  padding-left: 95px !important;
   width: 100%;
   height: 45px;
   border: 1px solid #e0e0e0;
@@ -142,6 +146,10 @@ export default {
   font-size: 14px;
   background-color: #fff;
   color: #000;
+}
+
+.phone-input-wrapper :deep(.iti__selected-dial-code) {
+  margin-right: 10px;
 }
 
 .phone-input-wrapper :deep(.form-control:focus),

@@ -251,9 +251,12 @@
                 </span>
               </label>
 
-              <a href="#" class="text-sm font-semibold text-koumbaya-primary hover:text-koumbaya-primary-dark transition-colors">
+              <router-link
+                to="/forgot-password"
+                class="text-sm font-semibold text-koumbaya-primary hover:text-koumbaya-primary-dark transition-colors"
+              >
                 Mot de passe oublié ?
-              </a>
+              </router-link>
             </div>
 
             <div class="pt-2">
