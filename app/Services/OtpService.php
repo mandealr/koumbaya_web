@@ -165,7 +165,6 @@ class OtpService
     private static function sendEmailCode($email, $code, $purpose)
     {
         $subject = self::getEmailSubject($purpose);
-        $message = self::getEmailMessage($code, $purpose);
 
         try {
             // En mode développement, on peut utiliser log
@@ -178,11 +177,32 @@ class OtpService
                 return true; // Simuler l'envoi réussi en développement
             }
 
-            // En production, utiliser le service d'email configuré
-            Mail::raw($message, function($mail) use ($email, $subject) {
-                $mail->to($email)
-                     ->subject($subject);
-            });
+            // Utiliser le template approprié selon le purpose
+            if ($purpose === 'password_reset') {
+                // Créer un utilisateur fictif pour le template si pas d'utilisateur trouvé
+                $user = \App\Models\User::where('email', $email)->first();
+                if (!$user) {
+                    $user = (object) ['first_name' => 'Utilisateur', 'last_name' => ''];
+                }
+
+                $resetUrl = config('app.frontend_url', 'https://koumbaya.com') . '/reset-password-verify?identifier=' . urlencode($email) . '&method=email';
+
+                Mail::send('emails.password-reset', [
+                    'user' => $user,
+                    'otp' => $code,
+                    'resetUrl' => $resetUrl
+                ], function($mail) use ($email, $subject) {
+                    $mail->to($email)->subject($subject);
+                });
+            } else {
+                // Pour les autres purposes, utiliser le template OTP
+                Mail::send('emails.otp-verification', [
+                    'code' => $code,
+                    'purpose' => $purpose
+                ], function($mail) use ($email, $subject) {
+                    $mail->to($email)->subject($subject);
+                });
+            }
 
             return true;
 

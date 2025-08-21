@@ -785,7 +785,7 @@ class AuthController extends Controller
             $otpController = new OtpController();
             $otpRequest = new Request([
                 'identifier' => $request->identifier,
-                'otp' => $request->otp,
+                'code' => $request->otp,
                 'purpose' => 'password_reset'
             ]);
 
