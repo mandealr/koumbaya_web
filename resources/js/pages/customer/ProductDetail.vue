@@ -21,8 +21,8 @@
       <div>
         <div class="relative">
           <img
-            :src="product.image"
-            :alt="product.title"
+            :src="product.image_url || product.main_image || '/images/products/placeholder.jpg'"
+            :alt="product.title || product.name"
             class="w-full h-96 object-cover rounded-xl"
           />
           <div class="absolute top-4 left-4">
@@ -56,7 +56,7 @@
       <!-- Product Info -->
       <div>
         <div class="mb-6">
-          <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ product.title }}</h1>
+          <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ product.title || product.name }}</h1>
           <p class="text-lg text-gray-600 mb-4">{{ product.description }}</p>
           
           <div class="flex items-center space-x-4 mb-6">
@@ -65,7 +65,7 @@
               <div class="text-sm text-gray-500">{{ hasActiveLottery ? 'Valeur du produit' : 'Prix' }}</div>
             </div>
             <div v-if="hasActiveLottery" class="text-center">
-              <div class="text-xl font-semibold text-gray-900">{{ formatPrice(product.lottery?.ticket_price || 0) }} FCFA</div>
+              <div class="text-xl font-semibold text-gray-900">{{ formatPrice((product.lottery?.ticket_price || product.active_lottery?.ticket_price || product.ticket_price || 0)) }} FCFA</div>
               <div class="text-sm text-gray-500">Prix par ticket</div>
             </div>
           </div>
@@ -74,7 +74,7 @@
           <div v-if="hasActiveLottery" class="mb-6">
             <div class="flex justify-between text-sm text-gray-600 mb-2">
               <span>Progression de la tombola</span>
-              <span>{{ calculateProgress() }}% ({{ product.lottery?.sold_tickets || 0 }}/{{ product.lottery?.total_tickets || 0 }})</span>
+              <span>{{ calculateProgress() }}% ({{ (product.lottery?.sold_tickets || product.active_lottery?.sold_tickets || 0) }}/{{ (product.lottery?.total_tickets || product.active_lottery?.total_tickets || 0) }})</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-3">
               <div 
@@ -84,7 +84,7 @@
             </div>
             <div class="flex justify-between text-xs text-gray-500 mt-1">
               <span>0 tickets</span>
-              <span>{{ product.lottery?.total_tickets || 0 }} tickets</span>
+              <span>{{ (product.lottery?.total_tickets || product.active_lottery?.total_tickets || 0) }} tickets</span>
             </div>
           </div>
 
@@ -92,11 +92,11 @@
           <div v-if="hasActiveLottery" class="mb-6 p-4 bg-gray-50 rounded-lg">
             <div class="flex items-center mb-2">
               <CalendarIcon class="w-5 h-5 text-gray-600 mr-2" />
-              <span class="font-medium text-gray-900">Date de tirage: {{ formatDate(product.lottery?.draw_date) }}</span>
+              <span class="font-medium text-gray-900">Date de tirage: {{ formatDate(product.lottery?.draw_date || product.active_lottery?.draw_date) }}</span>
             </div>
             <div class="flex items-center">
               <ClockIcon class="w-5 h-5 text-gray-600 mr-2" />
-              <span class="text-gray-600">{{ getRemainingTime(product.lottery?.draw_date) }}</span>
+              <span class="text-gray-600">{{ getRemainingTime(product.lottery?.draw_date || product.active_lottery?.draw_date) }}</span>
             </div>
           </div>
         </div>
@@ -121,7 +121,7 @@
                   v-model="ticketQuantity"
                   type="number"
                   min="1"
-                  :max="(product.lottery?.total_tickets || 0) - (product.lottery?.sold_tickets || 0)"
+                  :max="((product.lottery?.total_tickets || product.active_lottery?.total_tickets || 0) - (product.lottery?.sold_tickets || product.active_lottery?.sold_tickets || 0))"
                   class="w-20 text-center border border-gray-300 rounded-md py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
@@ -301,18 +301,23 @@ const tabs = [
 ]
 
 const hasActiveLottery = computed(() => {
-  return product.value && product.value.lottery && product.value.lottery.total_tickets > 0
+  return product.value && (product.value.lottery || product.value.active_lottery) && 
+         (product.value.lottery?.total_tickets > 0 || product.value.active_lottery?.total_tickets > 0)
 })
 
 const totalPrice = computed(() => {
-  if (!product.value || !product.value.lottery) return 0
-  return (product.value.lottery.ticket_price || 0) * ticketQuantity.value
+  if (!product.value) return 0
+  const lottery = product.value.lottery || product.value.active_lottery
+  if (!lottery) return 0
+  return (lottery.ticket_price || product.value.ticket_price || 0) * ticketQuantity.value
 })
 
 const calculateProgress = () => {
-  if (!product.value || !product.value.lottery) return 0
-  const sold = product.value.lottery.sold_tickets || 0
-  const total = product.value.lottery.total_tickets || 1
+  if (!product.value) return 0
+  const lottery = product.value.lottery || product.value.active_lottery
+  if (!lottery) return 0
+  const sold = lottery.sold_tickets || 0
+  const total = lottery.total_tickets || 1
   return Math.round((sold / total) * 100)
 }
 
@@ -324,7 +329,8 @@ const formatPrice = (price) => {
 }
 
 const increaseTickets = () => {
-  const maxTickets = (product.value.lottery?.total_tickets || 0) - (product.value.lottery?.sold_tickets || 0)
+  const lottery = product.value.lottery || product.value.active_lottery
+  const maxTickets = (lottery?.total_tickets || 0) - (lottery?.sold_tickets || 0)
   if (ticketQuantity.value < maxTickets) {
     ticketQuantity.value++
   }
@@ -380,7 +386,7 @@ const purchaseTickets = async () => {
   try {
     const response = await post('/tickets/purchase', {
       product_id: product.value.id,
-      lottery_id: product.value.lottery.id,
+      lottery_id: product.value.lottery?.id || product.value.active_lottery?.id,
       quantity: ticketQuantity.value
     })
     
@@ -443,7 +449,7 @@ const loadProduct = async () => {
       currentImage.value = product.value.image || '/images/products/placeholder.jpg'
       
       // Load participants if it's a lottery product
-      if (product.value.lottery) {
+      if (product.value.lottery || product.value.active_lottery) {
         await loadParticipants()
       }
     } else if (response && response.data) {
@@ -462,8 +468,9 @@ const loadProduct = async () => {
 
 const loadParticipants = async () => {
   try {
-    if (product.value.lottery) {
-      const response = await get(`/lotteries/${product.value.lottery.id}/participants`)
+    const lottery = product.value.lottery || product.value.active_lottery
+    if (lottery) {
+      const response = await get(`/lotteries/${lottery.id}/participants`)
       if (response && response.data) {
         participants.value = response.data
       }

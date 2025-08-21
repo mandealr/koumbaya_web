@@ -397,9 +397,10 @@ class ProductController extends Controller
             }
         ])->findOrFail($id);
 
-        return $this->sendResponse([
-            'product' => new ProductResource($product)
-        ]);
+        return $this->sendResponse(
+            new ProductResource($product),
+            'Product retrieved successfully'
+        );
     }
 
     /**
