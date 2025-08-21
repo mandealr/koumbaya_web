@@ -188,16 +188,6 @@ class User extends Authenticatable
         return $this->canPurchase();
     }
 
-    public function country()
-    {
-        return $this->belongsTo(Country::class, 'country_id');
-    }
-
-    public function language()
-    {
-        return $this->belongsTo(Language::class, 'language_id');
-    }
-
     public function refunds()
     {
         return $this->hasMany(Refund::class, 'user_id');

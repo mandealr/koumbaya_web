@@ -170,20 +170,10 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Pays</label>
-                  <select
-                    v-model="addressForm.country_id"
-                    @change="loadStates"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Sélectionner un pays...</option>
-                    <option
-                      v-for="country in countries"
-                      :key="country.id"
-                      :value="country.id"
-                    >
-                      {{ country.name }}
-                    </option>
-                  </select>
+                  <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600">
+                    {{ user.country?.name || 'Non spécifié' }}
+                    <div class="text-xs text-gray-500 mt-1">Le pays n'est pas modifiable après l'inscription</div>
+                  </div>
                 </div>
                 
                 <div>

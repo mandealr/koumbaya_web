@@ -44,7 +44,6 @@ class UserProfileController extends Controller
             'gender' => 'nullable|in:male,female,other',
             'city' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:500',
-            'country_id' => 'nullable|exists:countries,id',
             'bio' => 'nullable|string|max:1000',
         ]);
 
@@ -57,7 +56,6 @@ class UserProfileController extends Controller
             'gender',
             'city',
             'address',
-            'country_id',
             'bio'
         ]));
 
