@@ -353,11 +353,12 @@ const errors = reactive({
 
 // Gestion du changement de téléphone
 const onPhoneChange = (phoneData) => {
+  console.log('Login phone change:', phoneData) // Debug
   phoneValid.value = phoneData.isValid
   form.phone = phoneData.fullNumber
   
   // Clear error if phone is valid
-  if (phoneData.isValid) {
+  if (phoneData.isValid && phoneData.fullNumber) {
     errors.phone = ''
   }
 }
@@ -391,10 +392,10 @@ const validateForm = () => {
     }
   } else {
     // Phone validation
-    if (!form.phone) {
+    if (!form.phone || form.phone.trim() === '') {
       errors.phone = '📱 Le numéro de téléphone est obligatoire'
       isValid = false
-    } else if (!phoneValid.value) {
+    } else if (!phoneValid.value && form.phone.length > 3) {
       errors.phone = '❌ Format de téléphone invalide'
       isValid = false
     }

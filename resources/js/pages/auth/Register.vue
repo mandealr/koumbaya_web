@@ -495,10 +495,11 @@ const validateForm = () => {
     isValid = false
   }
 
-  if (!form.phone) {
+  if (!form.phone || form.phone.trim() === '') {
     errors.phone = 'Le numéro de téléphone est requis'
     isValid = false
-  } else if (!phoneValid.value) {
+  } else if (!phoneValid.value && form.phone.length > 3) {
+    // Ne valider le format que si il y a plus de 3 caractères saisis
     errors.phone = 'Format de téléphone invalide'
     isValid = false
   }
@@ -557,11 +558,12 @@ const getPhonePlaceholder = () => {
 
 // Gestion du changement de téléphone avec le nouveau composant
 const onPhoneChange = (phoneData) => {
+  console.log('Phone change:', phoneData) // Debug
   phoneValid.value = phoneData.isValid
   form.phone = phoneData.fullNumber
   
   // Clear error if phone is valid
-  if (phoneData.isValid) {
+  if (phoneData.isValid && phoneData.fullNumber) {
     errors.phone = ''
   }
 }

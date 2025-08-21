@@ -74,35 +74,50 @@ export default {
       // Gérer l'événement input manuellement pour éviter les conflits avec v-model
       input.addEventListener('input', (e) => {
         this.phoneNumber = e.target.value;
-        // Émettre la valeur mise à jour via v-model
-        this.$emit('update:modelValue', this.iti.getNumber());
-        this.emitPhoneData();
+        this.emitAllData();
       });
 
       input.addEventListener('countrychange', () => {
-        // Émettre la valeur mise à jour lors du changement de pays
-        this.$emit('update:modelValue', this.iti.getNumber());
-        this.emitPhoneData();
+        this.emitAllData();
       });
       
-      // Définir la valeur initiale si elle existe
-      if (this.modelValue) {
-        this.iti.setNumber(this.modelValue);
+      // Attendre que intl-tel-input soit complètement initialisé
+      setTimeout(() => {
+        // Définir la valeur initiale si elle existe
+        if (this.modelValue) {
+          this.iti.setNumber(this.modelValue);
+        }
+        
+        // Émettre l'état initial même si le champ est vide
+        // pour initialiser phoneValid dans le formulaire parent
+        this.emitAllData();
+      }, 100);
+    },
+    emitAllData() {
+      if (this.iti && this.iti.getSelectedCountryData) {
+        try {
+          const countryData = this.iti.getSelectedCountryData();
+          const fullNumber = this.iti.getNumber();
+          const isValid = this.iti.isValidNumber();
+          
+          // Émettre la valeur pour le v-model
+          this.$emit('update:modelValue', fullNumber);
+          
+          // Émettre les données détaillées
+          this.$emit('phone-change', {
+            number: this.phoneNumber,
+            fullNumber: fullNumber,
+            countryCode: countryData.dialCode,
+            countryIso2: countryData.iso2,
+            isValid: isValid
+          });
+        } catch (error) {
+          console.warn('PhoneInput: Error emitting data', error);
+        }
       }
     },
     emitPhoneData() {
-      if (this.iti) {
-        const countryData = this.iti.getSelectedCountryData();
-        const fullNumber = this.iti.getNumber();
-        
-        this.$emit('phone-change', {
-          number: this.phoneNumber,
-          fullNumber: fullNumber,
-          countryCode: countryData.dialCode,
-          countryIso2: countryData.iso2,
-          isValid: this.iti.isValidNumber()
-        });
-      }
+      this.emitAllData();
     },
     getNumber() {
       return this.iti ? this.iti.getNumber() : '';
