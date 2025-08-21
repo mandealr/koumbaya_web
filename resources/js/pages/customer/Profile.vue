@@ -89,10 +89,10 @@
               
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
-                <input
+                <PhoneInput
                   v-model="personalForm.phone"
-                  type="tel"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  class="w-full"
+                  :default-country="'ga'"
                 />
               </div>
               
@@ -167,30 +167,11 @@
                 </div>
               </div>
               
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Pays</label>
-                  <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600">
-                    {{ user.country?.name || 'Non spécifié' }}
-                    <div class="text-xs text-gray-500 mt-1">Le pays n'est pas modifiable après l'inscription</div>
-                  </div>
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">État/Province</label>
-                  <select
-                    v-model="addressForm.state"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                  >
-                    <option value="">Sélectionner un état...</option>
-                    <option
-                      v-for="state in states"
-                      :key="state"
-                      :value="state"
-                    >
-                      {{ state }}
-                    </option>
-                  </select>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Pays</label>
+                <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600">
+                  {{ user.country?.name || 'Non spécifié' }}
+                  <div class="text-xs text-gray-500 mt-1">Le pays n'est pas modifiable après l'inscription</div>
                 </div>
               </div>
             </div>
@@ -436,6 +417,7 @@ import {
   ComputerDesktopIcon
 } from '@heroicons/vue/24/outline'
 import { useApi } from '@/composables/api'
+import PhoneInput from '@/components/PhoneInput.vue'
 
 const authStore = useAuthStore()
 const { get, put, post, loading, error } = useApi()
@@ -487,8 +469,7 @@ const addressForm = reactive({
   address: user.address.address,
   city: user.address.city,
   postal_code: user.address.postal_code,
-  country_id: user.address.country_id,
-  state: user.address.state
+  country_id: user.address.country_id
 })
 
 const passwordForm = reactive({
@@ -498,8 +479,6 @@ const passwordForm = reactive({
 })
 
 const countries = ref([])
-const states = ref([])
-
 const loginSessions = ref([])
 
 const notificationCategories = [
@@ -787,8 +766,7 @@ const loadUserProfile = async () => {
         address: userData.address || '',
         city: userData.city || '',
         postal_code: userData.postal_code || '',
-        country_id: userData.country_id || null,
-        state: userData.state || ''
+        country_id: userData.country_id || null
       })
       
       console.log('User data loaded:', userData)
@@ -811,8 +789,7 @@ const loadUserProfile = async () => {
         address: userData.address || '',
         city: userData.city || '',
         postal_code: userData.postal_code || '',
-        country_id: userData.country_id || null,
-        state: userData.state || ''
+        country_id: userData.country_id || null
       })
     }
   } catch (error) {
@@ -858,14 +835,6 @@ const loadUserPreferences = async () => {
   }
 }
 
-const loadStates = () => {
-  // This could be enhanced to load states from API based on country
-  if (addressForm.country_id === 1) {
-    states.value = ['Île-de-France', 'Provence-Alpes-Côte d\'Azur', 'Nouvelle-Aquitaine', 'Occitanie']
-  } else {
-    states.value = []
-  }
-}
 
 const formatDate = (date) => {
   return new Intl.DateTimeFormat('fr-FR', {

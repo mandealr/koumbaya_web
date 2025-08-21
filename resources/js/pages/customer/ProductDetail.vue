@@ -58,7 +58,7 @@
         <div class="mb-6">
           <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ product.title || product.name }}</h1>
           <p class="text-lg text-gray-600 mb-4">{{ product.description }}</p>
-          
+
           <div class="flex items-center space-x-4 mb-6">
             <div class="text-center">
               <div class="text-3xl font-bold text-blue-600">{{ formatPrice(product.price) }} FCFA</div>
@@ -77,8 +77,8 @@
               <span>{{ calculateProgress() }}% ({{ (product.lottery?.sold_tickets || product.active_lottery?.sold_tickets || 0) }}/{{ (product.lottery?.total_tickets || product.active_lottery?.total_tickets || 0) }})</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-3">
-              <div 
-                class="bg-blue-600 h-3 rounded-full transition-all duration-300" 
+              <div
+                class="bg-blue-600 h-3 rounded-full transition-all duration-300"
                 :style="{ width: calculateProgress() + '%' }"
               ></div>
             </div>
@@ -106,7 +106,7 @@
           <!-- Lottery Purchase -->
           <div v-if="hasActiveLottery">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Acheter des tickets</h3>
-            
+
             <div class="flex items-center space-x-4 mb-4">
               <label class="block text-sm font-medium text-gray-700">Nombre de tickets:</label>
               <div class="flex items-center space-x-2">
@@ -146,14 +146,14 @@
             >
               <span v-if="purchasing">Achat en cours...</span>
               <span v-else-if="product.status !== 'active'">Tombola terminée</span>
-              <span v-else>🍀 Acheter {{ ticketQuantity }} ticket{{ ticketQuantity > 1 ? 's' : '' }}</span>
+              <span v-else>Acheter {{ ticketQuantity }} ticket{{ ticketQuantity > 1 ? 's' : '' }}</span>
             </button>
           </div>
 
           <!-- Direct Purchase -->
           <div v-else>
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Acheter ce produit</h3>
-            
+
             <div class="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
               <div class="flex items-center mb-2">
                 <CheckCircleIcon class="w-5 h-5 text-green-600 mr-2" />
@@ -208,7 +208,7 @@
       <div v-if="activeTab === 'description'" class="prose max-w-none">
         <h3 class="text-lg font-semibold mb-3">Description détaillée</h3>
         <p class="text-gray-600 leading-relaxed">{{ product.detailed_description || product.description }}</p>
-        
+
         <h4 class="text-md font-semibold mt-6 mb-3">Caractéristiques</h4>
         <ul v-if="product.features" class="space-y-2">
           <li v-for="feature in product.features" :key="feature" class="flex items-center">
@@ -301,7 +301,7 @@ const tabs = [
 ]
 
 const hasActiveLottery = computed(() => {
-  return product.value && (product.value.lottery || product.value.active_lottery) && 
+  return product.value && (product.value.lottery || product.value.active_lottery) &&
          (product.value.lottery?.total_tickets > 0 || product.value.active_lottery?.total_tickets > 0)
 })
 
@@ -360,7 +360,7 @@ const getRemainingTime = (dateString) => {
   const drawDate = new Date(dateString)
   const diff = drawDate - now
   const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  
+
   if (days > 7) {
     return `Plus de ${days} jours restants`
   } else if (days > 0) {
@@ -382,26 +382,26 @@ const getStatusLabel = (status) => {
 
 const purchaseTickets = async () => {
   purchasing.value = true
-  
+
   try {
     const response = await post('/tickets/purchase', {
       product_id: product.value.id,
       lottery_id: product.value.lottery?.id || product.value.active_lottery?.id,
       quantity: ticketQuantity.value
     })
-    
+
     if (response && response.success) {
       alert('🎉 Tickets achetés avec succès ! Bonne chance pour le tirage !')
-      
+
       // Refresh product data
       await loadProduct()
-      
+
       // Reset quantity
       ticketQuantity.value = 1
     } else {
       throw new Error(response?.message || 'Erreur lors de l\'achat des tickets')
     }
-    
+
   } catch (error) {
     console.error('Error purchasing tickets:', error)
     alert('❌ Erreur lors de l\'achat des tickets. Veuillez réessayer.')
@@ -412,23 +412,23 @@ const purchaseTickets = async () => {
 
 const purchaseDirectly = async () => {
   purchasing.value = true
-  
+
   try {
     const response = await post('/payments/initiate', {
       product_id: product.value.id,
       type: 'product_purchase',
       amount: product.value.price
     })
-    
+
     if (response && response.success) {
       alert('🎉 Produit acheté avec succès ! Vous recevrez une confirmation par SMS.')
-      
+
       // Refresh product data
       await loadProduct()
     } else {
       throw new Error(response?.message || 'Erreur lors de l\'achat')
     }
-    
+
   } catch (error) {
     console.error('Error purchasing product directly:', error)
     alert('❌ Erreur lors de l\'achat. Veuillez réessayer.')
@@ -443,11 +443,11 @@ const loadProduct = async () => {
     console.log('Loading product ID:', productId)
     const response = await get(`/products/${productId}`)
     console.log('Product API response:', response)
-    
+
     if (response && response.success && response.data) {
       product.value = response.data
       currentImage.value = product.value.image || '/images/products/placeholder.jpg'
-      
+
       // Load participants if it's a lottery product
       if (product.value.lottery || product.value.active_lottery) {
         await loadParticipants()
@@ -459,7 +459,7 @@ const loadProduct = async () => {
       console.error('Product not found in response:', response)
       product.value = null
     }
-    
+
   } catch (error) {
     console.error('Error loading product:', error)
     product.value = null
