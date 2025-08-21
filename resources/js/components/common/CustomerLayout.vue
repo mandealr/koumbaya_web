@@ -132,6 +132,9 @@
       </div>
     </header>
 
+    <!-- Bannière de vérification email -->
+    <VerificationBanner v-if="shouldShowVerificationBanner" />
+
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
       <router-view />
@@ -147,6 +150,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import KoumbayaFooter from './KoumbayaFooter.vue'
+import VerificationBanner from './VerificationBanner.vue'
 import {
   BellIcon,
   UserIcon,
@@ -173,6 +177,13 @@ const userInitials = computed(() => {
   const user = authStore.user
   if (!user) return 'U'
   return (user.first_name?.[0] || '') + (user.last_name?.[0] || '')
+})
+
+// Logique pour la bannière de vérification
+const shouldShowVerificationBanner = computed(() => {
+  return authStore.isAuthenticated && 
+         authStore.user && 
+         !authStore.user.verified_at
 })
 
 const handleLogout = async () => {

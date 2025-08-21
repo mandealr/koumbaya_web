@@ -49,7 +49,7 @@ export function useCustomerDashboard() {
       const response = await get('/tickets/my-tickets')
       
       if (response && response.success) {
-        const tickets = response.data || []
+        const tickets = Array.isArray(response.data) ? response.data : []
         
         // Calculate stats from tickets
         const uniqueLotteries = new Set()
@@ -75,11 +75,11 @@ export function useCustomerDashboard() {
       }
     } catch (err) {
       console.error('Erreur lors du chargement des statistiques:', err)
-      // Fallback with dummy data for development
+      // Fallback with empty data for new users
       rawStats.value = {
-        ticketsBought: 12,
-        lotteriesParticipated: 5,
-        totalSpent: 15000,
+        ticketsBought: 0,
+        lotteriesParticipated: 0,
+        totalSpent: 0,
         prizesWon: 0
       }
     }
@@ -89,7 +89,7 @@ export function useCustomerDashboard() {
     try {
       const response = await get('/tickets/my-tickets?limit=5&order=desc')
       
-      if (response && response.success) {
+      if (response && response.success && Array.isArray(response.data)) {
         recentTickets.value = response.data.map(ticket => ({
           id: ticket.id,
           product: {
@@ -102,6 +102,9 @@ export function useCustomerDashboard() {
           status: ticket.status || 'active',
           purchased_at: new Date(ticket.created_at)
         }))
+      } else {
+        // Si pas de données valides, initialiser avec un tableau vide
+        recentTickets.value = []
       }
     } catch (err) {
       console.error('Erreur lors du chargement des tickets récents:', err)
@@ -114,7 +117,7 @@ export function useCustomerDashboard() {
     try {
       const response = await get('/lotteries/active?limit=6')
       
-      if (response && response.success) {
+      if (response && response.success && Array.isArray(response.data)) {
         activeLotteries.value = response.data.map(lottery => ({
           id: lottery.id,
           product: {
@@ -126,6 +129,9 @@ export function useCustomerDashboard() {
           progress: Math.round((lottery.sold_tickets / lottery.total_tickets) * 100) || 0,
           draw_date: new Date(lottery.end_date)
         }))
+      } else {
+        // Si pas de données valides, initialiser avec un tableau vide
+        activeLotteries.value = []
       }
     } catch (err) {
       console.error('Erreur lors du chargement des tombolas actives:', err)

@@ -1,7 +1,5 @@
 <template>
   <div id="app">
-    <!-- Bannière de vérification email globale -->
-    <VerificationBanner v-if="shouldShowVerificationBanner" />
     <router-view />
     <!-- Composant Toast global -->
     <Toast ref="toastRef" />
@@ -9,28 +7,11 @@
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useRoute } from 'vue-router'
 import Toast from '@/components/common/Toast.vue'
-import VerificationBanner from '@/components/common/VerificationBanner.vue'
 
 const authStore = useAuthStore()
-const route = useRoute()
-
-// N'afficher la bannière que si :
-// - L'utilisateur est connecté
-// - L'utilisateur n'est pas vérifié  
-// - On n'est pas sur les pages d'auth (login, register, verify-email)
-const shouldShowVerificationBanner = computed(() => {
-  const authPages = ['login', 'register', 'verify-email']
-  const isAuthPage = authPages.includes(route.name)
-  
-  return authStore.isAuthenticated && 
-         authStore.user && 
-         !authStore.user.verified_at && 
-         !isAuthPage
-})
 
 onMounted(() => {
   // Vérifier si l'utilisateur est connecté au démarrage
