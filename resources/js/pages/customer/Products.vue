@@ -209,9 +209,15 @@ const filteredProducts = computed(() => {
 const loadProducts = async () => {
   try {
     const response = await get('/products')
-    products.value = response.data || []
+    console.log('Products API response:', response)
+    if (response && response.success && response.data && response.data.products) {
+      products.value = response.data.products || []
+    } else {
+      products.value = response.data || []
+    }
   } catch (err) {
     console.error('Erreur lors du chargement des produits:', err)
+    products.value = []
   }
 }
 
@@ -260,7 +266,10 @@ const getRemainingTime = (dateString) => {
 }
 
 const formatPrice = (price) => {
-  return new Intl.NumberFormat('fr-FR').format(price)
+  if (price === null || price === undefined || isNaN(price)) {
+    return '0'
+  }
+  return new Intl.NumberFormat('fr-FR').format(Number(price))
 }
 
 const calculateProgress = (product) => {

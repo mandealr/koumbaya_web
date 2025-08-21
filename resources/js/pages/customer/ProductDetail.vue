@@ -317,7 +317,10 @@ const calculateProgress = () => {
 }
 
 const formatPrice = (price) => {
-  return new Intl.NumberFormat('fr-FR').format(price)
+  if (price === null || price === undefined || isNaN(price)) {
+    return '0'
+  }
+  return new Intl.NumberFormat('fr-FR').format(Number(price))
 }
 
 const increaseTickets = () => {
@@ -431,9 +434,11 @@ const purchaseDirectly = async () => {
 const loadProduct = async () => {
   try {
     const productId = route.params.id
+    console.log('Loading product ID:', productId)
     const response = await get(`/products/${productId}`)
+    console.log('Product API response:', response)
     
-    if (response && response.data) {
+    if (response && response.success && response.data) {
       product.value = response.data
       currentImage.value = product.value.image || '/images/products/placeholder.jpg'
       
@@ -441,7 +446,11 @@ const loadProduct = async () => {
       if (product.value.lottery) {
         await loadParticipants()
       }
+    } else if (response && response.data) {
+      product.value = response.data
+      currentImage.value = product.value.image || '/images/products/placeholder.jpg'
     } else {
+      console.error('Product not found in response:', response)
       product.value = null
     }
     

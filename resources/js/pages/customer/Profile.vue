@@ -13,7 +13,7 @@
           <div class="text-center mb-6">
             <div class="relative inline-block">
               <img
-                :src="user.avatar || '/images/default-avatar.jpg'"
+                :src="user.avatar_url ? `/storage/${user.avatar_url}` : (user.avatar || '/images/default-avatar.jpg')"
                 :alt="user.first_name + ' ' + user.last_name"
                 class="w-24 h-24 rounded-full object-cover"
               />
@@ -700,13 +700,21 @@ const uploadAvatar = async () => {
     const formData = new FormData()
     formData.append('avatar', selectedAvatar.value)
     
+    console.log('Uploading avatar:', selectedAvatar.value)
+    
     const response = await post('/user/avatar', formData)
     
-    if (response && response.success) {
+    console.log('Avatar upload response:', response)
+    
+    if (response && response.success && response.data) {
       user.avatar = response.data.avatar_url
+      user.avatar_url = response.data.avatar_url
       showAvatarUpload.value = false
       selectedAvatar.value = null
       alert('✅ Photo de profil mise à jour avec succès')
+      
+      // Refresh user data
+      await loadUserProfile()
     } else {
       throw new Error(response?.message || 'Erreur lors du téléchargement')
     }
@@ -720,20 +728,54 @@ const uploadAvatar = async () => {
 const loadUserProfile = async () => {
   try {
     const response = await get('/user/profile')
-    if (response && response.data) {
-      Object.assign(user, response.data)
+    console.log('Profile API response:', response)
+    
+    if (response && response.success && response.data && response.data.user) {
+      const userData = response.data.user
+      Object.assign(user, userData)
+      
       // Sync forms with loaded data
       Object.assign(personalForm, {
-        first_name: user.first_name,
-        last_name: user.last_name,
-        email: user.email,
-        phone: user.phone,
-        birth_date: user.birth_date,
-        gender: user.gender
+        first_name: userData.first_name || '',
+        last_name: userData.last_name || '',
+        email: userData.email || '',
+        phone: userData.phone || '',
+        birth_date: userData.birth_date || '',
+        gender: userData.gender || ''
       })
-      if (user.address) {
-        Object.assign(addressForm, user.address)
-      }
+      
+      // Sync address form
+      Object.assign(addressForm, {
+        address: userData.address || '',
+        city: userData.city || '',
+        postal_code: userData.postal_code || '',
+        country_id: userData.country_id || null,
+        state: userData.state || ''
+      })
+      
+      console.log('User data loaded:', userData)
+      console.log('Personal form:', personalForm)
+      console.log('Address form:', addressForm)
+    } else if (response && response.data) {
+      const userData = response.data
+      Object.assign(user, userData)
+      
+      Object.assign(personalForm, {
+        first_name: userData.first_name || '',
+        last_name: userData.last_name || '',
+        email: userData.email || '',
+        phone: userData.phone || '',
+        birth_date: userData.birth_date || '',
+        gender: userData.gender || ''
+      })
+      
+      Object.assign(addressForm, {
+        address: userData.address || '',
+        city: userData.city || '',
+        postal_code: userData.postal_code || '',
+        country_id: userData.country_id || null,
+        state: userData.state || ''
+      })
     }
   } catch (error) {
     console.error('Error loading user profile:', error)

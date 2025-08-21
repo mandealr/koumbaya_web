@@ -69,7 +69,15 @@ export function useApi() {
   }
 
   const get = (url, config = {}) => makeRequest(() => api.get(url, config))
-  const post = (url, data = {}, config = {}) => makeRequest(() => api.post(url, data, config))
+  const post = (url, data = {}, config = {}) => {
+    // Handle FormData without overriding Content-Type
+    if (data instanceof FormData) {
+      const formConfig = { ...config }
+      delete formConfig.headers?.['Content-Type']
+      return makeRequest(() => api.post(url, data, formConfig))
+    }
+    return makeRequest(() => api.post(url, data, config))
+  }
   const put = (url, data = {}, config = {}) => makeRequest(() => api.put(url, data, config))
   const del = (url, config = {}) => makeRequest(() => api.delete(url, config))
 
