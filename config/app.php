@@ -52,20 +52,20 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'koumbaya.com'),
 
     /*
     |--------------------------------------------------------------------------
     | Frontend Application URL
     |--------------------------------------------------------------------------
     |
-    | This URL is used to generate links in emails and notifications that 
+    | This URL is used to generate links in emails and notifications that
     | point to the frontend application (Vue.js). This should be set to the
     | URL where your frontend application is running.
     |
     */
 
-    'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
+    'frontend_url' => env('FRONTEND_URL', 'https://koumbaya.com'),
 
     /*
     |--------------------------------------------------------------------------

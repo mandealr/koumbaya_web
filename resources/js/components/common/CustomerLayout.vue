@@ -7,14 +7,14 @@
           <!-- Logo -->
           <div class="flex items-center min-w-0 flex-shrink-0">
             <router-link to="/customer" class="flex items-center">
-              <img 
+              <img
                 v-if="!logoError"
-                class="h-8 sm:h-10 w-auto object-contain max-w-none" 
-                src="/logo.png" 
+                class="h-8 sm:h-10 w-auto object-contain max-w-none"
+                src="/logo.png"
                 alt="Koumbaya Marketplace"
                 @error="handleImageError"
               />
-              <div 
+              <div
                 v-else
                 class="flex items-center space-x-1 sm:space-x-2"
               >
@@ -132,12 +132,15 @@
       </div>
     </header>
 
-    <!-- Bannière de vérification email -->
-    <VerificationBanner v-if="shouldShowVerificationBanner" />
+
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      <router-view />
+
+        <!-- Bannière de vérification email -->
+        <VerificationBanner v-if="shouldShowVerificationBanner" />
+
+        <router-view />
     </main>
 
     <!-- Footer -->
@@ -181,8 +184,8 @@ const userInitials = computed(() => {
 
 // Logique pour la bannière de vérification
 const shouldShowVerificationBanner = computed(() => {
-  return authStore.isAuthenticated && 
-         authStore.user && 
+  return authStore.isAuthenticated &&
+         authStore.user &&
          !authStore.user.verified_at
 })
 

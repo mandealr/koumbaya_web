@@ -47,6 +47,11 @@ class User extends Authenticatable
         'last_otp_request',
         'country_id',
         'language_id',
+        'avatar_url',
+        'birth_date',
+        'gender',
+        'bio',
+        'preferences',
     ];
 
     /**
@@ -142,6 +147,21 @@ class User extends Authenticatable
     public function loginHistories()
     {
         return $this->hasMany(UserLoginHistory::class, 'user_id');
+    }
+
+    public function loginHistory()
+    {
+        return $this->hasMany(UserLoginHistory::class, 'user_id');
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class, 'country_id');
+    }
+
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'language_id');
     }
 
     /**

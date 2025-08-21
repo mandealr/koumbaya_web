@@ -1,11 +1,11 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-[#0099cc]/5 via-white to-[#0099cc]/10 flex items-center justify-center py-12 px-4">
+  <div class="min-h-screen bg-white flex items-center justify-center py-12 px-4">
     <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl border border-gray-100 p-8">
       <!-- Logo -->
       <div class="text-center mb-8">
-        <img 
-          :src="logoUrl" 
-          alt="Logo Koumbaya" 
+        <img
+          :src="logoUrl"
+          alt="Logo Koumbaya"
           class="h-16 w-auto mx-auto mb-4"
         />
       </div>
@@ -28,7 +28,7 @@
           {{ verificationResult.already_verified ? 'Déjà vérifié !' : 'Compte vérifié !' }}
         </h2>
         <p class="text-gray-600 mb-6">{{ verificationResult.message }}</p>
-        
+
         <div class="space-y-3">
           <button
             @click="redirectToDashboard"
@@ -54,7 +54,7 @@
         </div>
         <h2 class="text-2xl font-bold text-red-600 mb-2">Vérification échouée</h2>
         <p class="text-gray-600 mb-6">{{ errorMessage }}</p>
-        
+
         <div class="space-y-3">
           <button
             @click="$router.push('/register')"
@@ -113,10 +113,10 @@ const verifyEmail = async () => {
     }
 
     const response = await get(`/auth/verify-email/${encodeURIComponent(token)}`)
-    
+
     if (response.success) {
       verificationResult.value = response
-      
+
       // Si l'utilisateur est connecté, actualiser ses informations
       if (authStore.isAuthenticated) {
         await authStore.refreshUser()

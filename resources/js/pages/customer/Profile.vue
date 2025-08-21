@@ -631,7 +631,24 @@ const updatePassword = async () => {
 const updateNotifications = async () => {
   updatingNotifications.value = true
   try {
-    const response = await put('/user/preferences', { notifications: notificationForm })
+    const response = await put('/user/preferences/detailed', {
+      email_notifications: {
+        lottery_results: notificationForm.draw_results.email,
+        new_lotteries: notificationForm.new_lottery.email,
+        ending_soon: notificationForm.ending_soon.email,
+        account_updates: notificationForm.profile_update.email,
+        login_alerts: notificationForm.login.email
+      },
+      sms_notifications: {
+        lottery_results: notificationForm.draw_results.sms,
+        new_lotteries: notificationForm.new_lottery.sms,
+        ending_soon: notificationForm.ending_soon.sms,
+        account_updates: notificationForm.profile_update.sms,
+        login_alerts: notificationForm.login.sms
+      },
+      push_notifications: true,
+      marketing_emails: true
+    })
     if (response && response.success) {
       alert('✅ Préférences de notifications mises à jour')
     } else {
@@ -647,19 +664,35 @@ const updateNotifications = async () => {
 
 const toggleTwoFactor = async () => {
   try {
-    user.two_factor_enabled = !user.two_factor_enabled
-    console.log('Two-factor authentication toggled:', user.two_factor_enabled)
+    const response = await post('/user/2fa/toggle', {
+      enabled: !user.two_factor_enabled
+    })
+    
+    if (response && response.success) {
+      user.two_factor_enabled = !user.two_factor_enabled
+      alert(`✅ Authentification à deux facteurs ${user.two_factor_enabled ? 'activée' : 'désactivée'}`)
+    } else {
+      throw new Error(response?.message || 'Erreur lors de la modification')
+    }
   } catch (error) {
     console.error('Error toggling two-factor authentication:', error)
+    alert('❌ Erreur lors de la modification de l\'authentification à deux facteurs')
   }
 }
 
 const revokeSession = async (sessionId) => {
   try {
-    loginSessions.value = loginSessions.value.filter(session => session.id !== sessionId)
-    console.log('Session revoked:', sessionId)
+    const response = await post(`/user/sessions/${sessionId}/revoke`)
+    
+    if (response && response.success) {
+      loginSessions.value = loginSessions.value.filter(session => session.id !== sessionId)
+      alert('✅ Session révoquée avec succès')
+    } else {
+      throw new Error(response?.message || 'Erreur lors de la révocation')
+    }
   } catch (error) {
     console.error('Error revoking session:', error)
+    alert('❌ Erreur lors de la révocation de la session')
   }
 }
 
@@ -677,15 +710,19 @@ const uploadAvatar = async () => {
     const formData = new FormData()
     formData.append('avatar', selectedAvatar.value)
     
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    const response = await post('/user/avatar', formData)
     
-    user.avatar = URL.createObjectURL(selectedAvatar.value)
-    showAvatarUpload.value = false
-    selectedAvatar.value = null
-    
-    console.log('Avatar uploaded')
+    if (response && response.success) {
+      user.avatar = response.data.avatar_url
+      showAvatarUpload.value = false
+      selectedAvatar.value = null
+      alert('✅ Photo de profil mise à jour avec succès')
+    } else {
+      throw new Error(response?.message || 'Erreur lors du téléchargement')
+    }
   } catch (error) {
     console.error('Error uploading avatar:', error)
+    alert('❌ Erreur lors du téléchargement de la photo')
   }
 }
 
@@ -727,8 +764,24 @@ const loadCountries = async () => {
 const loadUserPreferences = async () => {
   try {
     const response = await get('/user/preferences')
-    if (response && response.data) {
-      Object.assign(notificationForm, response.data.notifications || {})
+    if (response && response.data && response.data.preferences) {
+      const prefs = response.data.preferences
+      
+      if (prefs.email_notifications) {
+        notificationForm.draw_results.email = prefs.email_notifications.lottery_results || true
+        notificationForm.new_lottery.email = prefs.email_notifications.new_lotteries || true
+        notificationForm.ending_soon.email = prefs.email_notifications.ending_soon || true
+        notificationForm.profile_update.email = prefs.email_notifications.account_updates || true
+        notificationForm.login.email = prefs.email_notifications.login_alerts || true
+      }
+      
+      if (prefs.sms_notifications) {
+        notificationForm.draw_results.sms = prefs.sms_notifications.lottery_results || false
+        notificationForm.new_lottery.sms = prefs.sms_notifications.new_lotteries || false
+        notificationForm.ending_soon.sms = prefs.sms_notifications.ending_soon || false
+        notificationForm.profile_update.sms = prefs.sms_notifications.account_updates || false
+        notificationForm.login.sms = prefs.sms_notifications.login_alerts || false
+      }
     }
   } catch (error) {
     console.error('Error loading user preferences:', error)
@@ -754,11 +807,30 @@ const formatDate = (date) => {
   }).format(new Date(date))
 }
 
+const loadSessions = async () => {
+  try {
+    const response = await get('/user/sessions')
+    if (response && response.data && response.data.sessions) {
+      loginSessions.value = response.data.sessions.map(session => ({
+        id: session.id,
+        device_name: session.user_agent?.includes('Mobile') ? 'Mobile' : 'Desktop',
+        device_type: session.user_agent?.includes('Mobile') ? 'mobile' : 'desktop',
+        location: `${session.city || 'Inconnue'}, ${session.country || 'Inconnue'}`,
+        last_active: session.last_activity,
+        is_current: session.is_current
+      }))
+    }
+  } catch (error) {
+    console.error('Error loading sessions:', error)
+  }
+}
+
 onMounted(async () => {
   await Promise.all([
     loadUserProfile(),
     loadCountries(),
-    loadUserPreferences()
+    loadUserPreferences(),
+    loadSessions()
   ])
 })
 </script>

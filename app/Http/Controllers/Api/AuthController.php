@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Api\OtpController;
+use App\Mail\VerificationEmail;
 use App\Models\User;
 use App\Models\UserWallet;
 use App\Models\UserLoginHistory;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Str;
 
@@ -596,20 +598,9 @@ class AuthController extends Controller
         ]);
         
         try {
-            // Envoyer l'email avec Mail::raw pour une implémentation simple
-            \Mail::raw(
-                "Bonjour {$user->first_name} {$user->last_name},\n\n" .
-                "Merci de vous être inscrit sur Koumbaya MarketPlace.\n\n" .
-                "Veuillez cliquer sur le lien suivant pour vérifier votre compte :\n" .
-                $verificationUrl . "\n\n" .
-                "Ce lien expire dans 24 heures.\n\n" .
-                "Cordialement,\n" .
-                "L'équipe Koumbaya",
-                function ($message) use ($user) {
-                    $message->to($user->email, $user->first_name . ' ' . $user->last_name)
-                           ->subject('Vérification de votre compte Koumbaya MarketPlace');
-                }
-            );
+            // Envoyer l'email avec le nouveau template Mailable
+            Mail::to($user->email, $user->first_name . ' ' . $user->last_name)
+                ->send(new VerificationEmail($user, $verificationUrl));
             
             \Log::info('Email de vérification envoyé avec succès', [
                 'user_id' => $user->id,

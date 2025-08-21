@@ -220,7 +220,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/profile', [UserProfileController::class, 'show']);
     Route::put('/user/profile', [UserProfileController::class, 'update']);
     Route::put('/user/password', [UserProfileController::class, 'updatePassword']);
+    Route::post('/user/avatar', [UserProfileController::class, 'uploadAvatar']);
     Route::get('/user/preferences', [UserProfileController::class, 'getPreferences']);
     Route::put('/user/preferences', [UserProfileController::class, 'updatePreferences']);
+    Route::put('/user/preferences/detailed', [UserProfileController::class, 'updateDetailedPreferences']);
+    Route::get('/user/sessions', [UserProfileController::class, 'getSessions']);
+    Route::post('/user/2fa/toggle', [UserProfileController::class, 'toggleTwoFactor']);
+    Route::post('/user/sessions/{id}/revoke', [UserProfileController::class, 'revokeSession']);
 });
 
