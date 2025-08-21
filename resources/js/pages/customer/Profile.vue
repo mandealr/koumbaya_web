@@ -559,14 +559,18 @@ const updatePersonalInfo = async () => {
     
     if (response && response.success) {
       Object.assign(user, personalForm)
-      alert('✅ Informations personnelles mises à jour avec succès')
+      if (window.$toast) {
+        window.$toast.success('Informations personnelles mises à jour avec succès', '✅ Profil mis à jour')
+      }
     } else {
       throw new Error(response?.message || 'Erreur lors de la mise à jour')
     }
   } catch (error) {
     console.error('Error updating personal info:', error)
     console.error('Error details:', error.response?.data)
-    alert('❌ Erreur lors de la mise à jour: ' + (error.response?.data?.message || error.message))
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la mise à jour: ' + (error.response?.data?.message || error.message), '❌ Erreur')
+    }
   } finally {
     updatingPersonal.value = false
   }
@@ -581,14 +585,18 @@ const updateAddress = async () => {
     
     if (response && response.success) {
       Object.assign(user, addressForm)
-      alert('✅ Adresse mise à jour avec succès')
+      if (window.$toast) {
+        window.$toast.success('Adresse mise à jour avec succès', '✅ Adresse')
+      }
     } else {
       throw new Error(response?.message || 'Erreur lors de la mise à jour')
     }
   } catch (error) {
     console.error('Error updating address:', error)
     console.error('Error details:', error.response?.data)
-    alert('❌ Erreur lors de la mise à jour: ' + (error.response?.data?.message || error.message))
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la mise à jour: ' + (error.response?.data?.message || error.message), '❌ Erreur')
+    }
   } finally {
     updatingAddress.value = false
   }
@@ -596,7 +604,9 @@ const updateAddress = async () => {
 
 const updatePassword = async () => {
   if (passwordForm.new_password !== passwordForm.confirm_password) {
-    alert('❌ Les mots de passe ne correspondent pas')
+    if (window.$toast) {
+      window.$toast.error('Les mots de passe ne correspondent pas', '❌ Erreur de validation')
+    }
     return
   }
 
@@ -614,13 +624,17 @@ const updatePassword = async () => {
         new_password: '',
         confirm_password: ''
       })
-      alert('✅ Mot de passe mis à jour avec succès')
+      if (window.$toast) {
+        window.$toast.success('Mot de passe mis à jour avec succès', '✅ Sécurité')
+      }
     } else {
       throw new Error(response?.message || 'Erreur lors de la mise à jour')
     }
   } catch (error) {
     console.error('Error updating password:', error)
-    alert('❌ Erreur lors de la mise à jour du mot de passe')
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la mise à jour du mot de passe', '❌ Erreur')
+    }
   } finally {
     updatingPassword.value = false
   }
@@ -648,13 +662,17 @@ const updateNotifications = async () => {
       marketing_emails: true
     })
     if (response && response.success) {
-      alert('✅ Préférences de notifications mises à jour')
+      if (window.$toast) {
+        window.$toast.success('Préférences de notifications mises à jour', '✅ Notifications')
+      }
     } else {
       throw new Error(response?.message || 'Erreur lors de la mise à jour')
     }
   } catch (error) {
     console.error('Error updating notifications:', error)
-    alert('❌ Erreur lors de la mise à jour des notifications')
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la mise à jour des notifications', '❌ Erreur')
+    }
   } finally {
     updatingNotifications.value = false
   }
@@ -668,13 +686,17 @@ const toggleTwoFactor = async () => {
     
     if (response && response.success) {
       user.two_factor_enabled = !user.two_factor_enabled
-      alert(`✅ Authentification à deux facteurs ${user.two_factor_enabled ? 'activée' : 'désactivée'}`)
+      if (window.$toast) {
+        window.$toast.success(`Authentification à deux facteurs ${user.two_factor_enabled ? 'activée' : 'désactivée'}`, '✅ Sécurité mise à jour')
+      }
     } else {
       throw new Error(response?.message || 'Erreur lors de la modification')
     }
   } catch (error) {
     console.error('Error toggling two-factor authentication:', error)
-    alert('❌ Erreur lors de la modification de l\'authentification à deux facteurs')
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la modification de l\'authentification à deux facteurs', '❌ Erreur')
+    }
   }
 }
 
@@ -684,13 +706,17 @@ const revokeSession = async (sessionId) => {
     
     if (response && response.success) {
       loginSessions.value = loginSessions.value.filter(session => session.id !== sessionId)
-      alert('✅ Session révoquée avec succès')
+      if (window.$toast) {
+        window.$toast.success('Session révoquée avec succès', '✅ Sécurité')
+      }
     } else {
       throw new Error(response?.message || 'Erreur lors de la révocation')
     }
   } catch (error) {
     console.error('Error revoking session:', error)
-    alert('❌ Erreur lors de la révocation de la session')
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la révocation de la session', '❌ Erreur')
+    }
   }
 }
 
@@ -719,7 +745,9 @@ const uploadAvatar = async () => {
       user.avatar_url = response.data.avatar_url
       showAvatarUpload.value = false
       selectedAvatar.value = null
-      alert('✅ Photo de profil mise à jour avec succès')
+      if (window.$toast) {
+        window.$toast.success('Photo de profil mise à jour avec succès', '✅ Avatar')
+      }
       
       // Refresh user data
       await loadUserProfile()
@@ -728,7 +756,9 @@ const uploadAvatar = async () => {
     }
   } catch (error) {
     console.error('Error uploading avatar:', error)
-    alert('❌ Erreur lors du téléchargement de la photo')
+    if (window.$toast) {
+      window.$toast.error('Erreur lors du téléchargement de la photo', '❌ Erreur')
+    }
   }
 }
 
