@@ -257,7 +257,7 @@ const handleSubmit = async () => {
     }
 
     // Ensuite réinitialiser le mot de passe
-    const resetResponse = await post('/reset-password', {
+    const resetResponse = await post('/auth/reset-password', {
       identifier: identifier.value,
       otp: form.otp,
       password: form.password,
