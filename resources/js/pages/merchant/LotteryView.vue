@@ -4,8 +4,8 @@
     <div class="flex justify-between items-start">
       <div>
         <div class="flex items-center space-x-3 mb-2">
-          <router-link 
-            to="/merchant/lotteries" 
+          <router-link
+            to="/merchant/lotteries"
             class="text-gray-500 hover:text-gray-700"
           >
             <ArrowLeftIcon class="w-5 h-5" />
@@ -25,7 +25,7 @@
       </div>
 
       <div class="flex space-x-3">
-        <button 
+        <button
           v-if="lottery.status === 'active'"
           @click="showExtendModal = true"
           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
@@ -33,7 +33,7 @@
           <ClockIcon class="w-4 h-4 mr-2" />
           Prolonger
         </button>
-        <button 
+        <button
           v-if="lottery.status === 'active' && canDraw"
           @click="showDrawModal = true"
           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
@@ -41,7 +41,7 @@
           <GiftIcon class="w-4 h-4 mr-2" />
           Effectuer le tirage
         </button>
-        <button 
+        <button
           @click="showEditModal = true"
           class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center"
         >
@@ -110,12 +110,12 @@
           <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900">Informations du produit</h3>
           </div>
-          
+
           <div class="p-6">
             <div class="flex space-x-6">
               <div class="flex-shrink-0">
-                <img 
-                  :src="lottery.product_image || '/images/products/placeholder.jpg'" 
+                <img
+                  :src="lottery.product_image || '/images/products/placeholder.jpg'"
                   :alt="lottery.title"
                   class="w-32 h-32 object-cover rounded-lg"
                 />
@@ -123,7 +123,7 @@
               <div class="flex-1">
                 <h4 class="text-xl font-semibold text-gray-900 mb-2">{{ lottery.title }}</h4>
                 <p class="text-gray-600 mb-4">{{ lottery.description }}</p>
-                
+
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <p class="text-sm font-medium text-gray-500">Valeur du produit</p>
@@ -152,7 +152,7 @@
           <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900">Progression</h3>
           </div>
-          
+
           <div class="p-6">
             <div class="space-y-4">
               <div>
@@ -161,7 +161,7 @@
                   <span class="text-sm text-gray-500">{{ lottery.participants_count }} / {{ lottery.max_participants || '∞' }}</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2">
-                  <div 
+                  <div
                     class="bg-blue-600 h-2 rounded-full transition-all duration-300"
                     :style="{ width: participationProgress + '%' }"
                   ></div>
@@ -174,7 +174,7 @@
                   <span class="text-sm text-gray-500">{{ formatCurrency(lottery.total_revenue) }} / {{ formatCurrency(lottery.revenue_target) }}</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2">
-                  <div 
+                  <div
                     class="bg-blue-600 h-2 rounded-full transition-all duration-300"
                     :style="{ width: revenueProgress + '%' }"
                   ></div>
@@ -207,7 +207,7 @@
               Gagnant
             </h3>
           </div>
-          
+
           <div class="p-6">
             <div class="flex items-center space-x-4">
               <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -218,10 +218,10 @@
                 <p class="text-sm text-gray-600">Tirage effectué le {{ formatDate(lottery.draw_date) }}</p>
               </div>
             </div>
-            
+
             <div class="mt-4 p-4 bg-yellow-50 rounded-lg">
               <p class="text-sm text-yellow-800">
-                🎉 Félicitations ! Le gagnant a été contacté automatiquement par email.
+                Félicitations ! Le gagnant a été contacté automatiquement par email.
               </p>
             </div>
           </div>
@@ -235,25 +235,25 @@
           <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900">Actions rapides</h3>
           </div>
-          
+
           <div class="p-6 space-y-3">
-            <button 
+            <button
               @click="shareLottery"
               class="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               <ShareIcon class="w-4 h-4 mr-2" />
               Partager la tombola
             </button>
-            
-            <button 
+
+            <button
               @click="downloadReport"
               class="w-full flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
             >
               <DocumentArrowDownIcon class="w-4 h-4 mr-2" />
               Télécharger le rapport
             </button>
-            
-            <button 
+
+            <button
               v-if="lottery.status === 'active'"
               @click="pauseLottery"
               class="w-full flex items-center justify-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
@@ -269,7 +269,7 @@
           <div class="px-6 py-4 border-b border-gray-200">
             <div class="flex justify-between items-center">
               <h3 class="text-lg font-semibold text-gray-900">Participants récents</h3>
-              <router-link 
+              <router-link
                 :to="`/merchant/lotteries/${lottery.id}/participants`"
                 class="text-sm text-blue-600 hover:text-blue-700"
               >
@@ -277,11 +277,11 @@
               </router-link>
             </div>
           </div>
-          
+
           <div class="p-6">
             <div class="space-y-3">
-              <div 
-                v-for="participant in recentParticipants" 
+              <div
+                v-for="participant in recentParticipants"
                 :key="participant.id"
                 class="flex items-center space-x-3"
               >
@@ -307,7 +307,7 @@
           <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900">Statistiques</h3>
           </div>
-          
+
           <div class="p-6">
             <div class="space-y-4">
               <div class="flex justify-between">
@@ -439,12 +439,12 @@ const timeRemaining = computed(() => {
   const now = new Date()
   const endDate = new Date(lottery.value.end_date)
   const diffMs = endDate - now
-  
+
   if (diffMs <= 0) return 'Terminée'
-  
+
   const days = Math.floor(diffMs / (1000 * 60 * 60 * 24))
   const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-  
+
   if (days > 0) return `${days}j ${hours}h`
   return `${hours}h`
 })
@@ -453,7 +453,7 @@ const daysRemaining = computed(() => {
   const now = new Date()
   const endDate = new Date(lottery.value.end_date)
   const diffMs = endDate - now
-  
+
   if (diffMs <= 0) return 0
   return Math.ceil(diffMs / (1000 * 60 * 60 * 24))
 })

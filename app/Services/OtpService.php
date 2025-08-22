@@ -44,7 +44,6 @@ class OtpService
                 'success' => false,
                 'message' => 'Erreur lors de l\'envoi de l\'email'
             ];
-
         } catch (\Exception $e) {
             Log::error('Erreur envoi OTP email', [
                 'email' => $email,
@@ -66,7 +65,7 @@ class OtpService
         try {
             // Nettoyer et valider le numéro de téléphone
             $cleanPhone = self::cleanPhoneNumber($phone);
-            
+
             if (!$cleanPhone) {
                 return [
                     'success' => false,
@@ -99,7 +98,6 @@ class OtpService
                 'success' => false,
                 'message' => 'Erreur lors de l\'envoi du SMS'
             ];
-
         } catch (\Exception $e) {
             Log::error('Erreur envoi OTP SMS', [
                 'phone' => $phone,
@@ -120,7 +118,7 @@ class OtpService
     {
         try {
             $originalIdentifier = $identifier;
-            
+
             // Nettoyer l'identifiant si c'est un téléphone
             if (self::isPhoneNumber($identifier)) {
                 $identifier = self::cleanPhoneNumber($identifier);
@@ -128,9 +126,9 @@ class OtpService
 
             // Debug: vérifier les codes existants pour cet identifiant
             $existingOtps = Otp::where('identifier', $identifier)
-                              ->where('purpose', $purpose)
-                              ->orderBy('created_at', 'desc')
-                              ->get();
+                ->where('purpose', $purpose)
+                ->orderBy('created_at', 'desc')
+                ->get();
 
             Log::info('Tentative de vérification OTP', [
                 'original_identifier' => $originalIdentifier,
@@ -138,7 +136,7 @@ class OtpService
                 'code' => $code,
                 'purpose' => $purpose,
                 'existing_otps_count' => $existingOtps->count(),
-                'existing_otps' => $existingOtps->map(function($otp) {
+                'existing_otps' => $existingOtps->map(function ($otp) {
                     return [
                         'id' => $otp->id,
                         'code' => $otp->code,
@@ -175,7 +173,6 @@ class OtpService
                 'success' => false,
                 'message' => 'Code de vérification invalide ou expiré'
             ];
-
         } catch (\Exception $e) {
             Log::error('Erreur validation OTP', [
                 'identifier' => $identifier,
@@ -223,7 +220,7 @@ class OtpService
                         'user' => $user,
                         'otp' => $code,
                         'resetUrl' => $resetUrl
-                    ], function($mail) use ($email, $subject) {
+                    ], function ($mail) use ($email, $subject) {
                         $mail->to($email)->subject($subject);
                     });
                 } else {
@@ -231,7 +228,7 @@ class OtpService
                     Mail::send('emails.otp-verification', [
                         'code' => $code,
                         'purpose' => $purpose
-                    ], function($mail) use ($email, $subject) {
+                    ], function ($mail) use ($email, $subject) {
                         $mail->to($email)->subject($subject);
                     });
                 }
@@ -239,18 +236,17 @@ class OtpService
                 Log::warning('Erreur template email, utilisation du fallback', [
                     'error' => $templateError->getMessage()
                 ]);
-                
+
                 // Fallback: utiliser un email simple mais bien formaté
                 $message = self::getFormattedEmailMessage($code, $purpose);
-                Mail::send([], [], function($mail) use ($email, $subject, $message) {
+                Mail::send([], [], function ($mail) use ($email, $subject, $message) {
                     $mail->to($email)
-                         ->subject($subject)
-                         ->html($message);
+                        ->subject($subject)
+                        ->html($message);
                 });
             }
 
             return true;
-
         } catch (\Exception $e) {
             Log::error('Erreur envoi email OTP', [
                 'email' => $email,
@@ -280,7 +276,6 @@ class OtpService
 
             // En production, utiliser l'API SMS (à adapter selon le fournisseur)
             return self::sendSmsViaApi($phone, $message);
-
         } catch (\Exception $e) {
             Log::error('Erreur envoi SMS OTP', [
                 'phone' => $phone,
@@ -315,7 +310,6 @@ class OtpService
             ]);
 
             return $response->successful();
-
         } catch (\Exception $e) {
             Log::error('Erreur API SMS', [
                 'error' => $e->getMessage()
@@ -368,7 +362,7 @@ class OtpService
      */
     private static function getEmailSubject($purpose)
     {
-        return match($purpose) {
+        return match ($purpose) {
             Otp::PURPOSE_REGISTRATION => 'Koumbaya - Code de vérification d\'inscription',
             Otp::PURPOSE_PASSWORD_RESET => 'Koumbaya - Code de réinitialisation',
             Otp::PURPOSE_LOGIN => 'Koumbaya - Code de connexion',
@@ -382,7 +376,7 @@ class OtpService
      */
     private static function getEmailMessage($code, $purpose)
     {
-        $baseMessage = match($purpose) {
+        $baseMessage = match ($purpose) {
             Otp::PURPOSE_REGISTRATION => 'Bienvenue sur Koumbaya ! Votre code de vérification d\'inscription est :',
             Otp::PURPOSE_PASSWORD_RESET => 'Vous avez demandé une réinitialisation de mot de passe. Votre code de vérification est :',
             Otp::PURPOSE_LOGIN => 'Code de sécurité pour votre connexion Koumbaya :',
@@ -398,15 +392,15 @@ class OtpService
      */
     private static function getFormattedEmailMessage($code, $purpose)
     {
-        $title = match($purpose) {
-            Otp::PURPOSE_REGISTRATION => 'Bienvenue sur Koumbaya ! 🎉',
-            Otp::PURPOSE_PASSWORD_RESET => 'Réinitialisation de votre mot de passe 🔐',
-            Otp::PURPOSE_LOGIN => 'Connexion sécurisée 🔒',
-            Otp::PURPOSE_PAYMENT => 'Confirmation de paiement 💳',
+        $title = match ($purpose) {
+            Otp::PURPOSE_REGISTRATION => 'Bienvenue sur Koumbaya !',
+            Otp::PURPOSE_PASSWORD_RESET => 'Réinitialisation de votre mot de passe',
+            Otp::PURPOSE_LOGIN => 'Connexion sécurisée',
+            Otp::PURPOSE_PAYMENT => 'Confirmation de paiement',
             default => 'Code de vérification Koumbaya'
         };
 
-        $description = match($purpose) {
+        $description = match ($purpose) {
             Otp::PURPOSE_REGISTRATION => 'Votre code de vérification d\'inscription est :',
             Otp::PURPOSE_PASSWORD_RESET => 'Votre code de réinitialisation de mot de passe est :',
             Otp::PURPOSE_LOGIN => 'Votre code de connexion sécurisée est :',
@@ -434,18 +428,18 @@ class OtpService
             <div class='content'>
                 <p>Bonjour,</p>
                 <p>{$description}</p>
-                
+
                 <div class='code-box'>
                     <div class='code'>{$code}</div>
                     <p><strong>Ce code expire dans 5 minutes.</strong></p>
                 </div>
-                
+
                 <div class='warning'>
                     🔒 <strong>Sécurité :</strong> Si vous n'avez pas demandé ce code, ignorez cet email. Votre compte reste sécurisé.
                 </div>
-                
+
                 <p><strong>Besoin d'aide ?</strong> Contactez-nous à support@koumbaya.com</p>
-                
+
                 <div class='footer'>
                     <p>Cordialement,<br><strong>L'équipe Koumbaya</strong> 💙</p>
                 </div>
@@ -459,7 +453,7 @@ class OtpService
      */
     private static function getSmsMessage($code, $purpose)
     {
-        return match($purpose) {
+        return match ($purpose) {
             Otp::PURPOSE_REGISTRATION => "Koumbaya: Votre code d'inscription est {$code}. Valide 5 min.",
             Otp::PURPOSE_PASSWORD_RESET => "Koumbaya: Code de réinitialisation {$code}. Valide 5 min.",
             Otp::PURPOSE_LOGIN => "Koumbaya: Code de connexion {$code}. Valide 5 min.",

@@ -104,6 +104,7 @@ class TicketController extends Controller
                 'quantity' => $request->quantity,
                 'status' => 'pending',
                 'type' => 'ticket_purchase',
+                'description' => "Achat de {$request->quantity} ticket(s) pour la tombola {$lottery->title}",
             ]);
 
             // Créer les tickets en attente

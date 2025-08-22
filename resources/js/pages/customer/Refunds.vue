@@ -58,7 +58,7 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="flex items-center">
             <div class="p-3 rounded-full bg-red-100 text-red-600 mr-4">
-              ❌
+              X
             </div>
             <div>
               <div class="text-2xl font-bold text-gray-900">{{ stats.rejected_refunds || 0 }}</div>
@@ -84,7 +84,7 @@
               <option value="completed">Terminé</option>
               <option value="rejected">Rejeté</option>
             </select>
-            
+
             <button
               @click="resetFilters"
               class="px-3 py-2 text-gray-600 hover:text-gray-800 text-sm"
@@ -92,7 +92,7 @@
               Réinitialiser
             </button>
           </div>
-          
+
           <div class="text-sm text-gray-500">
             {{ refunds.length }} remboursement(s)
           </div>
@@ -127,7 +127,7 @@
             <div class="flex-1">
               <div class="flex items-center space-x-3 mb-2">
                 <span class="font-mono text-sm text-gray-600">{{ refund.refund_number }}</span>
-                <span 
+                <span
                   class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                   :class="getStatusClass(refund.status)"
                 >
@@ -137,40 +137,40 @@
                   🤖 Automatique
                 </span>
               </div>
-              
+
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
                   <div class="text-sm text-gray-600">Montant</div>
                   <div class="text-lg font-semibold text-gray-900">{{ formatCurrency(refund.amount) }}</div>
                 </div>
-                
+
                 <div>
                   <div class="text-sm text-gray-600">Raison</div>
                   <div class="text-sm font-medium">{{ getReasonText(refund.reason) }}</div>
                 </div>
-                
+
                 <div>
                   <div class="text-sm text-gray-600">Date de demande</div>
                   <div class="text-sm">{{ formatDate(refund.created_at) }}</div>
                 </div>
               </div>
-              
+
               <div v-if="refund.lottery" class="bg-gray-50 rounded-lg p-3 mb-4">
                 <div class="text-sm text-gray-600">Tombola concernée</div>
                 <div class="font-medium">{{ refund.lottery.lottery_number }} - {{ refund.lottery.product_title }}</div>
               </div>
-              
+
               <div v-if="refund.rejection_reason" class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
                 <div class="text-sm font-medium text-red-800">Raison du rejet</div>
                 <div class="text-sm text-red-700 mt-1">{{ refund.rejection_reason }}</div>
               </div>
-              
+
               <div v-if="refund.notes" class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
                 <div class="text-sm font-medium text-blue-800">Notes</div>
                 <div class="text-sm text-blue-700 mt-1">{{ refund.notes }}</div>
               </div>
             </div>
-            
+
             <div class="flex space-x-2 ml-4">
               <button
                 @click="viewDetails(refund)"
@@ -178,7 +178,7 @@
               >
                 Détails
               </button>
-              
+
               <button
                 v-if="refund.status === 'pending'"
                 @click="cancelRefund(refund)"
@@ -204,7 +204,7 @@
                 <XMarkIcon class="w-6 h-6" />
               </button>
             </div>
-            
+
             <form @submit.prevent="createRefund">
               <div class="space-y-4">
                 <div>
@@ -221,7 +221,7 @@
                     </option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Raison du remboursement</label>
                   <select
@@ -237,7 +237,7 @@
                     <option value="other">Autre</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Explication (optionnel)</label>
                   <textarea
@@ -248,7 +248,7 @@
                   ></textarea>
                 </div>
               </div>
-              
+
               <div class="flex justify-end space-x-3 mt-6">
                 <button
                   type="button"
@@ -283,7 +283,7 @@
                 <XMarkIcon class="w-6 h-6" />
               </button>
             </div>
-            
+
             <div class="space-y-6">
               <!-- Status and Basic Info -->
               <div class="grid grid-cols-2 gap-4">
@@ -293,7 +293,7 @@
                 </div>
                 <div>
                   <div class="text-sm text-gray-600">Statut</div>
-                  <span 
+                  <span
                     class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                     :class="getStatusClass(selectedRefund.status)"
                   >
@@ -301,7 +301,7 @@
                   </span>
                 </div>
               </div>
-              
+
               <!-- Amount and dates -->
               <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -313,7 +313,7 @@
                   <div>{{ getRefundMethodText(selectedRefund.refund_method) }}</div>
                 </div>
               </div>
-              
+
               <!-- Transaction Info -->
               <div class="bg-gray-50 rounded-lg p-4">
                 <h4 class="font-medium text-gray-900 mb-3">Transaction originale</h4>
@@ -328,7 +328,7 @@
                   </div>
                 </div>
               </div>
-              
+
               <!-- Lottery Info if available -->
               <div v-if="selectedRefund.lottery" class="bg-blue-50 rounded-lg p-4">
                 <h4 class="font-medium text-gray-900 mb-3">Tombola concernée</h4>
@@ -341,7 +341,7 @@
                   <div>{{ selectedRefund.lottery.product_title }}</div>
                 </div>
               </div>
-              
+
               <!-- Timeline -->
               <div>
                 <h4 class="font-medium text-gray-900 mb-3">Chronologie</h4>
@@ -407,7 +407,7 @@ const loadRefunds = async () => {
     if (selectedStatus.value) {
       params.append('status', selectedStatus.value)
     }
-    
+
     const response = await get(`/refunds?${params}`)
     refunds.value = response.data.refunds || []
     stats.value = response.data.stats || {}
@@ -434,23 +434,23 @@ const createRefund = async () => {
   creating.value = true
   try {
     const response = await post('/refunds', newRefund.value)
-    
+
     // Add new refund to list
     refunds.value.unshift(response.data.refund)
-    
+
     // Update stats
     stats.value.total_refunds = (stats.value.total_refunds || 0) + 1
     stats.value.pending_refunds = (stats.value.pending_refunds || 0) + 1
-    
+
     // Reset form and close modal
     newRefund.value = { transaction_id: '', reason: '', notes: '' }
     showCreateRefund.value = false
-    
+
     // Show success message
     if (window.$toast) {
       window.$toast.success('Demande de remboursement créée avec succès!', '✅ Demande créée')
     }
-    
+
   } catch (error) {
     console.error('Error creating refund:', error)
     if (window.$toast) {
@@ -463,21 +463,21 @@ const createRefund = async () => {
 
 const cancelRefund = async (refund) => {
   if (!confirm('Êtes-vous sûr de vouloir annuler cette demande ?')) return
-  
+
   try {
     await post(`/refunds/${refund.id}/cancel`)
-    
+
     // Update refund in list
     const index = refunds.value.findIndex(r => r.id === refund.id)
     if (index !== -1) {
       refunds.value[index].status = 'rejected'
       refunds.value[index].rejection_reason = 'Annulé par l\'utilisateur'
     }
-    
+
     if (window.$toast) {
       window.$toast.success('Demande annulée avec succès', '✅ Annulation')
     }
-    
+
   } catch (error) {
     console.error('Error cancelling refund:', error)
     if (window.$toast) {
@@ -510,7 +510,7 @@ const formatCurrency = (amount) => {
 
 const formatCurrencyShort = (amount) => {
   if (!amount) return '0'
-  
+
   if (amount >= 1000000) {
     return (amount / 1000000).toFixed(1) + 'M'
   } else if (amount >= 1000) {

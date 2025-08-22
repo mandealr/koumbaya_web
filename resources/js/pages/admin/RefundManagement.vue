@@ -154,7 +154,7 @@
               <option value="completed">Terminé</option>
               <option value="rejected">Rejeté</option>
             </select>
-            
+
             <select
               v-model="filters.type"
               @change="loadRefunds"
@@ -165,7 +165,7 @@
               <option value="manual">Manuel</option>
               <option value="admin">Admin</option>
             </select>
-            
+
             <select
               v-model="filters.reason"
               @change="loadRefunds"
@@ -177,7 +177,7 @@
               <option value="accidental_purchase">Achat accidentel</option>
               <option value="technical_issue">Problème technique</option>
             </select>
-            
+
             <button
               @click="resetFilters"
               class="px-3 py-2 text-gray-600 hover:text-gray-800 text-sm"
@@ -185,7 +185,7 @@
               Réinitialiser
             </button>
           </div>
-          
+
           <div class="text-sm text-gray-500">
             {{ refunds.length }} remboursement(s)
           </div>
@@ -229,39 +229,39 @@
                     </div>
                   </div>
                 </td>
-                
+
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div>
                     <div class="text-sm font-medium text-gray-900">{{ refund.user.full_name }}</div>
                     <div class="text-sm text-gray-500">{{ refund.user.email }}</div>
                   </div>
                 </td>
-                
+
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-semibold text-gray-900">{{ formatCurrency(refund.amount) }}</div>
                   <div class="text-xs text-gray-500">{{ refund.currency }}</div>
                 </td>
-                
+
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">{{ getReasonText(refund.reason) }}</div>
                   <div v-if="refund.lottery" class="text-xs text-gray-500">
                     {{ refund.lottery.lottery_number }}
                   </div>
                 </td>
-                
+
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span 
+                  <span
                     class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
                     :class="getStatusClass(refund.status)"
                   >
                     {{ getStatusText(refund.status) }}
                   </span>
                 </td>
-                
+
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {{ formatDate(refund.created_at) }}
                 </td>
-                
+
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex space-x-2">
                     <button
@@ -269,17 +269,17 @@
                       @click="approveRefund(refund)"
                       class="text-blue-600 hover:text-blue-900"
                     >
-                      ✅ Approuver
+                      Approuver
                     </button>
-                    
+
                     <button
                       v-if="refund.status === 'pending'"
                       @click="showRejectModal(refund)"
                       class="text-red-600 hover:text-red-900"
                     >
-                      ❌ Rejeter
+                      Rejeter
                     </button>
-                    
+
                     <button
                       @click="viewRefundDetails(refund)"
                       class="text-blue-600 hover:text-blue-900"
@@ -307,7 +307,7 @@
                 <XMarkIcon class="w-6 h-6" />
               </button>
             </div>
-            
+
             <div class="space-y-4">
               <div>
                 <label class="flex items-center">
@@ -319,7 +319,7 @@
                   <span class="ml-2 text-sm text-gray-700">Mode test (pas de changements)</span>
                 </label>
               </div>
-              
+
               <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                 <div class="text-sm text-yellow-800">
                   <p class="font-medium mb-1">⚠️ Attention</p>
@@ -327,7 +327,7 @@
                 </div>
               </div>
             </div>
-            
+
             <div class="flex justify-end space-x-3 mt-6">
               <button
                 @click="showProcessAutomatic = false"
@@ -360,7 +360,7 @@
                 <XMarkIcon class="w-6 h-6" />
               </button>
             </div>
-            
+
             <div class="space-y-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Raison du rejet *</label>
@@ -373,7 +373,7 @@
                 ></textarea>
               </div>
             </div>
-            
+
             <div class="flex justify-end space-x-3 mt-6">
               <button
                 @click="refundToReject = null; rejectReason = ''"
@@ -434,13 +434,13 @@ const loadRefunds = async () => {
   loading.value = true
   try {
     const params = new URLSearchParams({ limit: 100 })
-    
+
     Object.keys(filters.value).forEach(key => {
       if (filters.value[key]) {
         params.append(key, filters.value[key])
       }
     })
-    
+
     const response = await get(`/admin/refunds?${params}`)
     refunds.value = response.data.refunds || []
   } catch (error) {
@@ -544,18 +544,18 @@ const processAutomatic = async () => {
     const response = await post('/admin/refunds/process-automatic', {
       dry_run: processOptions.value.dryRun
     })
-    
+
     if (window.$toast) {
       window.$toast.success('Traitement automatique terminé : ' + response.data.message, '✅ Traitement')
     }
-    
+
     // Reload data
     await Promise.all([
       loadRefunds(),
       loadStats(),
       checkEligibleLotteries()
     ])
-    
+
     showProcessAutomatic.value = false
   } catch (error) {
     console.error('Error processing automatic refunds:', error)
@@ -563,14 +563,14 @@ const processAutomatic = async () => {
     if (window.$toast) {
       window.$toast.success('Traitement automatique simulé : ' + (processOptions.value.dryRun ? 'Mode test activé' : '3 remboursements traités'), '✅ Simulation')
     }
-    
+
     // Reload data with fallback
     await Promise.all([
       loadRefunds(),
-      loadStats(), 
+      loadStats(),
       checkEligibleLotteries()
     ])
-    
+
     showProcessAutomatic.value = false
   } finally {
     processing.value = false
@@ -579,18 +579,18 @@ const processAutomatic = async () => {
 
 const processLottery = async (lotteryId, dryRun = false) => {
   if (!confirm('Traiter les remboursements pour cette tombola ?')) return
-  
+
   processing.value = true
   try {
     const response = await post('/admin/refunds/process-automatic', {
       lottery_id: lotteryId,
       dry_run: dryRun
     })
-    
+
     if (window.$toast) {
       window.$toast.success('Traitement terminé : ' + response.data.message, '✅ Traitement')
     }
-    
+
     await Promise.all([
       loadRefunds(),
       loadStats(),
@@ -608,21 +608,21 @@ const processLottery = async (lotteryId, dryRun = false) => {
 
 const approveRefund = async (refund) => {
   if (!confirm('Approuver ce remboursement ?')) return
-  
+
   processing.value = true
   try {
     const response = await post(`/admin/refunds/${refund.id}/approve`)
-    
+
     if (window.$toast) {
       window.$toast.success('Remboursement approuvé et traité', '✅ Approbation')
     }
-    
+
     // Update refund in list
     const index = refunds.value.findIndex(r => r.id === refund.id)
     if (index !== -1) {
       refunds.value[index] = response.data.refund
     }
-    
+
     // Reload stats
     await loadStats()
   } catch (error) {
@@ -631,13 +631,13 @@ const approveRefund = async (refund) => {
     if (window.$toast) {
       window.$toast.success('Remboursement simulé : approuvé et traité', '✅ Simulation')
     }
-    
+
     // Update refund status in list
     const index = refunds.value.findIndex(r => r.id === refund.id)
     if (index !== -1) {
       refunds.value[index].status = 'approved'
     }
-    
+
     // Reload stats with fallback
     await loadStats()
   } finally {
@@ -652,26 +652,26 @@ const showRejectModal = (refund) => {
 
 const rejectRefund = async () => {
   if (!rejectReason.value.trim()) return
-  
+
   processing.value = true
   try {
     const response = await post(`/admin/refunds/${refundToReject.value.id}/reject`, {
       reason: rejectReason.value
     })
-    
+
     if (window.$toast) {
       window.$toast.warning('Remboursement rejeté', '⚠️ Rejet')
     }
-    
+
     // Update refund in list
     const index = refunds.value.findIndex(r => r.id === refundToReject.value.id)
     if (index !== -1) {
       refunds.value[index] = response.data.refund
     }
-    
+
     refundToReject.value = null
     rejectReason.value = ''
-    
+
     // Reload stats
     await loadStats()
   } catch (error) {
@@ -680,17 +680,17 @@ const rejectRefund = async () => {
     if (window.$toast) {
       window.$toast.warning('Remboursement simulé : rejeté avec motif', '⚠️ Simulation')
     }
-    
+
     // Update refund status in list
     const index = refunds.value.findIndex(r => r.id === refundToReject.value.id)
     if (index !== -1) {
       refunds.value[index].status = 'rejected'
       refunds.value[index].reason = rejectReason.value
     }
-    
+
     refundToReject.value = null
     rejectReason.value = ''
-    
+
     // Reload stats with fallback
     await loadStats()
   } finally {
@@ -720,7 +720,7 @@ const formatCurrency = (amount) => {
 
 const formatCurrencyShort = (amount) => {
   if (!amount) return '0'
-  
+
   if (amount >= 1000000) {
     return (amount / 1000000).toFixed(1) + 'M'
   } else if (amount >= 1000) {

@@ -8,7 +8,7 @@
           <p class="text-xl opacity-90 mb-8">
             Explorez l'historique complet de toutes nos tombolas terminées
           </p>
-          
+
           <!-- Quick Stats -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
             <div class="bg-white bg-opacity-20 rounded-lg p-4">
@@ -51,7 +51,7 @@
                 <option value="year">Cette année</option>
               </select>
             </div>
-            
+
             <!-- Category Filter -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
@@ -66,7 +66,7 @@
                 </option>
               </select>
             </div>
-            
+
             <!-- Sort Filter -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Trier par</label>
@@ -83,7 +83,7 @@
               </select>
             </div>
           </div>
-          
+
           <div class="flex items-center space-x-4">
             <button
               @click="resetFilters"
@@ -128,7 +128,7 @@
               />
               <div class="absolute top-3 right-3">
                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  ✅ Terminé
+                  Terminé
                 </span>
               </div>
               <div class="absolute bottom-3 left-3">
@@ -249,7 +249,7 @@
                 <XMarkIcon class="w-6 h-6" />
               </button>
             </div>
-            
+
             <div class="space-y-6">
               <!-- Product Info -->
               <div class="flex items-start space-x-4">
@@ -265,7 +265,7 @@
                   <p class="text-sm text-gray-600">{{ selectedLottery.product.category }}</p>
                 </div>
               </div>
-              
+
               <!-- Winner -->
               <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h5 class="font-medium text-blue-900 mb-2">🏆 Gagnant officiel</h5>
@@ -280,7 +280,7 @@
                   </div>
                 </div>
               </div>
-              
+
               <!-- Statistics -->
               <div class="grid grid-cols-2 gap-4">
                 <div class="bg-gray-50 p-4 rounded-lg">
@@ -301,7 +301,7 @@
                   <div class="text-sm text-gray-600">Code vérif.</div>
                 </div>
               </div>
-              
+
               <!-- Timeline -->
               <div>
                 <h5 class="font-medium text-gray-900 mb-3">📅 Chronologie</h5>
@@ -349,7 +349,7 @@ const itemsPerPage = 12
 // Computed
 const filteredHistory = computed(() => {
   let filtered = [...history.value]
-  
+
   // Apply sorting
   switch (filters.value.sort) {
     case 'date_asc':
@@ -368,7 +368,7 @@ const filteredHistory = computed(() => {
       filtered.sort((a, b) => b.participation_rate - a.participation_rate)
       break
   }
-  
+
   return filtered
 })
 
@@ -384,7 +384,7 @@ const visiblePages = computed(() => {
   const pages = []
   const current = currentPage.value
   const total = totalPages.value
-  
+
   if (total <= 7) {
     for (let i = 1; i <= total; i++) {
       pages.push(i)
@@ -406,7 +406,7 @@ const visiblePages = computed(() => {
       pages.push(total)
     }
   }
-  
+
   return pages
 })
 
@@ -418,17 +418,17 @@ const loadHistory = async () => {
       period: filters.value.period,
       limit: 500 // Load more for client-side filtering
     })
-    
+
     if (filters.value.category) {
       params.append('category', filters.value.category)
     }
-    
+
     const [historyResponse, statsResponse, categoriesResponse] = await Promise.all([
       get(`/public/results?${params}`),
       get('/public/results/stats'),
       get('/categories')
     ])
-    
+
     history.value = historyResponse.data.results || []
     stats.value = historyResponse.data.stats || {}
     categories.value = categoriesResponse.data || []
@@ -462,7 +462,7 @@ const formatCurrency = (amount) => {
 
 const formatCurrencyShort = (amount) => {
   if (!amount) return '0'
-  
+
   if (amount >= 1000000) {
     return (amount / 1000000).toFixed(1) + 'M'
   } else if (amount >= 1000) {
