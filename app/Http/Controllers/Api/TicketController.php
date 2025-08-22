@@ -128,7 +128,9 @@ class TicketController extends Controller
             // Initier le paiement Mobile Money
             $paymentData = (object) [
                 'amount' => $request->total_amount,
-                'phone' => $request->phone_number,
+                'quantity' => $request->quantity,
+                'lottery_id' => $lottery->id,
+                'user' => $user,
                 'reference' => $transaction->transaction_id,
                 'description' => "Achat de {$request->quantity} ticket(s) - Tombola {$lottery->lottery_number}",
                 'callback_url' => url('/api/payment/callback'),

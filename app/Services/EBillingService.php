@@ -96,7 +96,7 @@ class EBillingService
                     'amount' => $data->amount + $fees,
                     'short_description' => "Achat de {$data->quantity} ticket(s) pour la tombola #{$data->lottery_id}",
                     'external_reference' => $reference,
-                    'payer_name' => $data->user->name,
+                    'payer_name' => trim(($data->user->first_name ?? '') . ' ' . ($data->user->last_name ?? '')) ?: 'Client Koumbaya',
                     'expiry_period' => $expiry_period,
                     'callback_url' => url('/api/payments/callback/lottery_ticket/' . $data->lottery_id)
                 ];
@@ -108,7 +108,7 @@ class EBillingService
                     'amount' => $data->product->price + $fees,
                     'short_description' => "Achat direct - {$data->product->title}",
                     'external_reference' => $reference,
-                    'payer_name' => $data->user->name,
+                    'payer_name' => trim(($data->user->first_name ?? '') . ' ' . ($data->user->last_name ?? '')) ?: 'Client Koumbaya',
                     'expiry_period' => $expiry_period,
                     'callback_url' => url('/api/payments/callback/product_purchase/' . $data->product->id)
                 ];
@@ -131,6 +131,7 @@ class EBillingService
             Log::error('E-BILLING :: Missing configuration');
             return false;
         }
+
 
         $globalArray = [
             'payer_email' => $paymentData['payer_email'],
