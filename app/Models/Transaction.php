@@ -187,6 +187,6 @@ class Transaction extends Model
             'callback_data' => $callbackData,
         ]);
 
-        $this->tickets()->update(['status' => 'cancelled']);
+        $this->tickets()->update(['status' => 'refunded']);
     }
 }

@@ -117,7 +117,7 @@ class TicketController extends Controller
                     'user_id' => $user->id,
                     'transaction_id' => $transaction->id,
                     'ticket_number' => $ticketNumber,
-                    'status' => 'reserved', // En attente de paiement
+                    'status' => 'pending', // En attente de paiement
                     'price_paid' => $lottery->ticket_price,
                     'purchased_at' => now(),
                 ]);
@@ -267,7 +267,7 @@ class TicketController extends Controller
         $ticket = LotteryTicket::where('user_id', auth()->id())
             ->findOrFail($id);
 
-        if ($ticket->status !== 'reserved') {
+        if ($ticket->status !== 'pending') {
             return $this->sendError('Ce ticket ne peut pas être annulé.');
         }
 
