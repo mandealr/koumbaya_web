@@ -49,7 +49,7 @@ class RefundService
 
                 // Créer le remboursement automatique
                 $refund = Refund::createAutomaticRefund($transaction, $reason);
-                
+
                 // Traiter immédiatement le remboursement
                 $this->processRefund($refund);
 
@@ -83,10 +83,9 @@ class RefundService
                 'total_refunded' => $totalRefunded,
                 'participant_count' => $participantCount
             ];
-
         } catch (\Exception $e) {
             DB::rollback();
-            
+
             Log::error('Failed to process automatic refunds', [
                 'lottery_id' => $lottery->id,
                 'reason' => $reason,
@@ -119,7 +118,7 @@ class RefundService
 
         foreach ($expiredLotteries as $lottery) {
             $minParticipants = $lottery->product->min_participants ?? 10;
-            
+
             if ($lottery->sold_tickets < $minParticipants) {
                 $result = $this->processAutomaticRefunds($lottery, 'insufficient_participants');
                 $results['insufficient_participants'][] = [
@@ -154,7 +153,7 @@ class RefundService
         try {
             // Pour l'instant, on simule le traitement du remboursement
             // Dans un environnement réel, ici on appellerait l'API de Mobile Money
-            
+
             if ($refund->refund_method === 'mobile_money') {
                 return $this->processMobileMoneyRefund($refund);
             } elseif ($refund->refund_method === 'wallet_credit') {
@@ -182,7 +181,7 @@ class RefundService
 
             // Simuler l'envoi du remboursement via Mobile Money
             // En production, intégrer avec l'API du fournisseur Mobile Money
-            
+
             $refundData = [
                 'amount' => $refund->amount,
                 'phone' => $user->phone,
@@ -210,7 +209,6 @@ class RefundService
             ]);
 
             return true;
-
         } catch (\Exception $e) {
             Log::error('Mobile Money refund failed', [
                 'refund_id' => $refund->id,
@@ -227,7 +225,7 @@ class RefundService
     {
         try {
             $user = $refund->user;
-            
+
             // Créditer le portefeuille de l'utilisateur
             $wallet = $user->wallet()->firstOrCreate([
                 'user_id' => $user->id
@@ -255,7 +253,6 @@ class RefundService
             ]);
 
             return true;
-
         } catch (\Exception $e) {
             Log::error('Wallet credit refund failed', [
                 'refund_id' => $refund->id,
@@ -271,7 +268,7 @@ class RefundService
     public function createManualRefund(Transaction $transaction, string $reason, User $requestedBy = null): Refund
     {
         $refund = Refund::createManualRefund($transaction, $reason, $requestedBy);
-        
+
         Log::info('Manual refund created', [
             'refund_id' => $refund->id,
             'transaction_id' => $transaction->id,
@@ -289,10 +286,10 @@ class RefundService
     {
         try {
             $refund->approve($approver, $notes);
-            
+
             // Traiter le remboursement approuvé
             $processed = $this->processRefund($refund);
-            
+
             if ($processed) {
                 $this->notifyRefund($refund);
             }
@@ -304,7 +301,6 @@ class RefundService
             ]);
 
             return $processed;
-
         } catch (\Exception $e) {
             Log::error('Failed to approve refund', [
                 'refund_id' => $refund->id,
@@ -321,7 +317,7 @@ class RefundService
     {
         try {
             $refund->reject($rejector, $reason);
-            
+
             // Notifier l'utilisateur du rejet
             $this->notifyRefundRejection($refund);
 
@@ -332,7 +328,6 @@ class RefundService
             ]);
 
             return true;
-
         } catch (\Exception $e) {
             Log::error('Failed to reject refund', [
                 'refund_id' => $refund->id,
@@ -350,7 +345,7 @@ class RefundService
         try {
             $user = $refund->user;
             $lottery = $refund->lottery;
-            
+
             // Créer une notification en base
             $notification = Notification::create([
                 'user_id' => $user->id,
@@ -378,7 +373,6 @@ class RefundService
                 $message = "✅ Remboursement traité: {$refund->amount} FCFA pour la tombola {$lottery?->lottery_number}. Référence: {$refund->refund_number}";
                 $this->otpService->sendSMS($user->phone, $message);
             }
-
         } catch (\Exception $e) {
             Log::error('Failed to notify refund', [
                 'refund_id' => $refund->id,
@@ -394,7 +388,7 @@ class RefundService
     {
         try {
             $user = $refund->user;
-            
+
             // Créer une notification en base
             $notification = Notification::create([
                 'user_id' => $user->id,
@@ -415,7 +409,6 @@ class RefundService
 
             // Envoyer email de rejet
             $this->sendRefundRejectionEmail($refund);
-
         } catch (\Exception $e) {
             Log::error('Failed to notify refund rejection', [
                 'refund_id' => $refund->id,
@@ -455,20 +448,19 @@ class RefundService
     {
         try {
             $user = $refund->user;
-            
+
             Mail::send('emails.refund-processed', [
                 'refund' => $refund,
                 'user' => $user
             ], function ($message) use ($user, $refund) {
                 $message->to($user->email, $user->full_name)
-                        ->subject('💸 Remboursement traité - ' . $refund->refund_number);
+                    ->subject('💸 Remboursement traité - ' . $refund->refund_number);
             });
-            
+
             Log::info('Refund processed email sent', [
                 'refund_id' => $refund->id,
                 'user_email' => $user->email
             ]);
-            
         } catch (\Exception $e) {
             Log::error('Failed to send refund processed email', [
                 'refund_id' => $refund->id,
@@ -484,20 +476,19 @@ class RefundService
     {
         try {
             $user = $refund->user;
-            
+
             Mail::send('emails.refund-rejected', [
                 'refund' => $refund,
                 'user' => $user
             ], function ($message) use ($user, $refund) {
                 $message->to($user->email, $user->full_name)
-                        ->subject('❌ Demande de remboursement rejetée - ' . $refund->refund_number);
+                    ->subject('Demande de remboursement rejetée - ' . $refund->refund_number);
             });
-            
+
             Log::info('Refund rejection email sent', [
                 'refund_id' => $refund->id,
                 'user_email' => $user->email
             ]);
-            
         } catch (\Exception $e) {
             Log::error('Failed to send refund rejection email', [
                 'refund_id' => $refund->id,

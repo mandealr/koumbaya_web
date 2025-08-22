@@ -131,7 +131,7 @@
             <div class="flex items-center justify-center">
               <XCircleIcon class="w-12 h-12 mr-4" />
               <div>
-                <h3 class="text-2xl font-bold">❌ CODE INVALIDE</h3>
+                <h3 class="text-2xl font-bold">CODE INVALIDE</h3>
                 <p class="text-red-100">Ce code de vérification n'existe pas</p>
               </div>
             </div>
@@ -217,7 +217,7 @@
               <span class="font-mono text-sm text-gray-600">{{ verification.code }}</span>
               <span class="mx-2">→</span>
               <span class="text-sm" :class="verification.valid ? 'text-blue-600' : 'text-red-600'">
-                {{ verification.valid ? '✅ Valide' : '❌ Invalide' }}
+                {{ verification.valid ? '✅ Valide' : 'Invalide' }}
               </span>
             </div>
             <span class="text-xs text-gray-500">

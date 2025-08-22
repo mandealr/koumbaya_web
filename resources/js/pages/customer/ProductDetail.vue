@@ -437,7 +437,7 @@ const purchaseTickets = async () => {
     const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de l\'achat des tickets'
     
     if (window.$toast) {
-      window.$toast.error('❌ ' + errorMessage, '❌ Erreur d\'achat')
+      window.$toast.error('' + errorMessage, ' Erreur d\'achat')
     }
   } finally {
     purchasing.value = false
@@ -470,7 +470,7 @@ const purchaseDirectly = async () => {
     const errorMessage = error.response?.data?.message || error.message || 'Erreur lors de l\'achat'
     
     if (window.$toast) {
-      window.$toast.error('❌ ' + errorMessage, '❌ Erreur d\'achat')
+      window.$toast.error(' ' + errorMessage, ' Erreur d\'achat')
     }
   } finally {
     purchasing.value = false

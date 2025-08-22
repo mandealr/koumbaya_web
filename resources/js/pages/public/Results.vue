@@ -94,7 +94,7 @@
           </div>
           <div v-else class="flex items-center text-red-800">
             <XCircleIcon class="w-5 h-5 mr-2" />
-            <div class="font-medium">❌ Code invalide</div>
+            <div class="font-medium">Code invalide</div>
           </div>
         </div>
       </div>

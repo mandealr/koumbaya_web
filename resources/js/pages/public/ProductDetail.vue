@@ -597,8 +597,8 @@ const loadProduct = async () => {
     console.log('📦 Product data:', productData)
     
     if (!productData) {
-      console.error('❌ Product data is null/undefined')
-      console.error('📋 Full response:', JSON.stringify(response, null, 2))
+      console.error('Product data is null/undefined')
+      console.error('Full response:', JSON.stringify(response, null, 2))
       throw new Error('Produit non trouvé dans la réponse API')
     }
     

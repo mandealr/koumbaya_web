@@ -551,7 +551,7 @@ const updatePersonalInfo = async () => {
     console.error('Error updating personal info:', error)
     console.error('Error details:', error.response?.data)
     if (window.$toast) {
-      window.$toast.error('Erreur lors de la mise à jour: ' + (error.response?.data?.message || error.message), '❌ Erreur')
+      window.$toast.error('Erreur lors de la mise à jour: ' + (error.response?.data?.message || error.message), ' Erreur')
     }
   } finally {
     updatingPersonal.value = false
@@ -577,7 +577,7 @@ const updateAddress = async () => {
     console.error('Error updating address:', error)
     console.error('Error details:', error.response?.data)
     if (window.$toast) {
-      window.$toast.error('Erreur lors de la mise à jour: ' + (error.response?.data?.message || error.message), '❌ Erreur')
+      window.$toast.error('Erreur lors de la mise à jour: ' + (error.response?.data?.message || error.message), ' Erreur')
     }
   } finally {
     updatingAddress.value = false

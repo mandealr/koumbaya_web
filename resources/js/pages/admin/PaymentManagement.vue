@@ -481,7 +481,7 @@ const initiateRefund = async (payment) => {
     } catch (error) {
       console.error('Error initiating refund:', error)
       if (window.$toast) {
-        window.$toast.error('Erreur lors de l\'initiation du remboursement', '❌ Erreur')
+        window.$toast.error('Erreur lors de l\'initiation du remboursement', 'Erreur')
       }
     }
   }

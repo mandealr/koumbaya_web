@@ -137,11 +137,11 @@ class TicketController extends Controller
             
             $paymentResult = $this->eBillingService->initiate('lottery_ticket', $paymentData);
 
-            if ($paymentResult['success']) {
+            if ($paymentResult !== false) {
                 // Mettre à jour la transaction avec les détails du paiement
                 $transaction->update([
-                    'payment_provider_id' => $paymentResult['data']['payment_id'] ?? null,
-                    'payment_provider' => $paymentResult['data']['provider'] ?? 'mobile_money',
+                    'payment_provider_id' => $paymentResult,
+                    'payment_provider' => 'ebilling',
                     'status' => 'payment_initiated',
                 ]);
 
@@ -149,7 +149,7 @@ class TicketController extends Controller
 
                 return $this->sendResponse([
                     'transaction_id' => $transaction->transaction_id,
-                    'payment_id' => $paymentResult['data']['payment_id'] ?? null,
+                    'payment_id' => $paymentResult,
                     'tickets' => $tickets->map(function ($ticket) {
                         return [
                             'id' => $ticket->id,
@@ -157,12 +157,12 @@ class TicketController extends Controller
                             'status' => $ticket->status,
                         ];
                     }),
-                    'instructions' => $paymentResult['data']['instructions'] ?? 'Suivez les instructions sur votre téléphone pour confirmer le paiement.',
+                    'instructions' => 'Suivez les instructions sur votre téléphone pour confirmer le paiement.',
                 ], 'Achat initié avec succès. Confirmez le paiement sur votre téléphone.');
 
             } else {
                 DB::rollback();
-                return $this->sendError($paymentResult['message'] ?? 'Erreur lors de l\'initiation du paiement.');
+                return $this->sendError('Erreur lors de l\'initiation du paiement.');
             }
 
         } catch (\Exception $e) {

@@ -378,16 +378,16 @@ const validateForm = () => {
   if (loginMethod.value === 'email') {
     // Email validation avec messages détaillés
     if (!form.email) {
-      errors.email = '📧 L\'adresse email est obligatoire'
+      errors.email = 'L\'adresse email est obligatoire'
       isValid = false
     } else if (!form.email.includes('@')) {
-      errors.email = '⚠️ L\'adresse email doit contenir le symbole @'
+      errors.email = 'L\'adresse email doit contenir le symbole @'
       isValid = false
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      errors.email = '❌ Format d\'email invalide (exemple: nom@domaine.com)'
+      errors.email = 'Format d\'email invalide (exemple: nom@domaine.com)'
       isValid = false
     } else if (form.email.length > 100) {
-      errors.email = '📏 L\'adresse email est trop longue (max 100 caractères)'
+      errors.email = 'L\'adresse email est trop longue (max 100 caractères)'
       isValid = false
     }
   } else {
@@ -396,23 +396,23 @@ const validateForm = () => {
       errors.phone = '📱 Le numéro de téléphone est obligatoire'
       isValid = false
     } else if (!phoneValid.value && form.phone.length > 3) {
-      errors.phone = '❌ Format de téléphone invalide'
+      errors.phone = 'Format de téléphone invalide'
       isValid = false
     }
   }
 
   // Password validation avec messages détaillés
   if (!form.password) {
-    errors.password = '🔒 Le mot de passe est obligatoire'
+    errors.password = 'Le mot de passe est obligatoire'
     isValid = false
   } else if (form.password.length < 6) {
-    errors.password = '📏 Le mot de passe doit contenir au moins 6 caractères'
+    errors.password = 'Le mot de passe doit contenir au moins 6 caractères'
     isValid = false
   } else if (form.password.length > 50) {
-    errors.password = '📏 Le mot de passe est trop long (max 50 caractères)'
+    errors.password = 'Le mot de passe est trop long (max 50 caractères)'
     isValid = false
   } else if (form.password.includes(' ')) {
-    errors.password = '⚠️ Le mot de passe ne doit pas contenir d\'espaces'
+    errors.password = 'Le mot de passe ne doit pas contenir d\'espaces'
     isValid = false
   }
 
@@ -520,7 +520,7 @@ const handleSubmit = async (event) => {
       } else if (errorMsg.toLowerCase().includes('blocked') || errorMsg.toLowerCase().includes('suspendu')) {
         errors.general = '🔒 Votre compte est temporairement suspendu. Contactez le support client.'
       } else {
-        errors.general = `❌ ${errorMsg}`
+        errors.general = `${errorMsg}`
       }
 
       if (window.$toast) {
@@ -540,7 +540,7 @@ const handleSubmit = async (event) => {
     console.error('Erreur lors de la connexion:', error)
 
     // Gestion d'erreurs système avec messages clairs
-    let errorMessage = '❌ Une erreur technique est survenue. Veuillez réessayer.'
+    let errorMessage = 'Une erreur technique est survenue. Veuillez réessayer.'
 
     if (error.response?.status === 401) {
       errorMessage = '🚫 Identifiants incorrects. Vérifiez votre adresse email et votre mot de passe.'
@@ -569,9 +569,9 @@ const handleSubmit = async (event) => {
     } else if (error.code === 'NETWORK_ERROR' || !error.response) {
       errorMessage = '🌐 Impossible de joindre le serveur. Vérifiez votre connexion internet.'
     } else if (error.response?.data?.message) {
-      errorMessage = `❌ ${error.response.data.message}`
+      errorMessage = `${error.response.data.message}`
     } else if (error.message) {
-      errorMessage = `❌ ${error.message}`
+      errorMessage = `${error.message}`
     }
 
     errors.general = errorMessage

@@ -111,7 +111,7 @@
 
           <!-- Cancelled Lotteries -->
           <div v-if="eligibleLotteries.cancelled?.length">
-            <h4 class="text-md font-medium text-red-700 mb-3">❌ Tombolas annulées</h4>
+            <h4 class="text-md font-medium text-red-700 mb-3">Tombolas annulées</h4>
             <div class="space-y-3">
               <div
                 v-for="lottery in eligibleLotteries.cancelled"
@@ -355,7 +355,7 @@
         <div class="relative bg-white rounded-lg max-w-md w-full">
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold">❌ Rejeter le remboursement</h3>
+              <h3 class="text-lg font-semibold">Rejeter le remboursement</h3>
               <button @click="refundToReject = null" class="text-gray-400 hover:text-gray-600">
                 <XMarkIcon class="w-6 h-6" />
               </button>
@@ -599,7 +599,7 @@ const processLottery = async (lotteryId, dryRun = false) => {
   } catch (error) {
     console.error('Error processing lottery refunds:', error)
     if (window.$toast) {
-      window.$toast.error('Erreur lors du traitement', '❌ Erreur')
+      window.$toast.error('Erreur lors du traitement', 'Erreur')
     }
   } finally {
     processing.value = false

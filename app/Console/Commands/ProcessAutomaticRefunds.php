@@ -38,7 +38,7 @@ class ProcessAutomaticRefunds extends Command
     public function handle()
     {
         $this->info('🔄 Starting automatic refunds processing...');
-        
+
         $dryRun = $this->option('dry-run');
         $lotteryId = $this->option('lottery-id');
         $force = $this->option('force');
@@ -55,12 +55,11 @@ class ProcessAutomaticRefunds extends Command
             }
 
             $this->info('✅ Automatic refunds processing completed successfully');
-            
+
             // Afficher les statistiques
             $this->displayRefundStats();
-
         } catch (\Exception $e) {
-            $this->error('❌ Error processing automatic refunds: ' . $e->getMessage());
+            $this->error('Error processing automatic refunds: ' . $e->getMessage());
             Log::error('ProcessAutomaticRefunds command failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -77,9 +76,9 @@ class ProcessAutomaticRefunds extends Command
     protected function processSingleLottery(int $lotteryId, bool $dryRun, bool $force)
     {
         $lottery = \App\Models\Lottery::with('product')->find($lotteryId);
-        
+
         if (!$lottery) {
-            $this->error("❌ Lottery with ID {$lotteryId} not found");
+            $this->error("Lottery with ID {$lotteryId} not found");
             return;
         }
 
@@ -114,18 +113,18 @@ class ProcessAutomaticRefunds extends Command
         }
 
         $reason = $isCancelled ? 'lottery_cancelled' : 'insufficient_participants';
-        
+
         if ($dryRun) {
             $this->info("🔍 [DRY RUN] Would process refunds for reason: {$reason}");
             return;
         }
 
         $result = $this->refundService->processAutomaticRefunds($lottery, $reason);
-        
+
         if ($result['success']) {
             $this->info("✅ Processed {$result['participant_count']} refunds totaling {$result['total_refunded']} FCFA");
         } else {
-            $this->error("❌ Failed to process refunds: " . $result['error']);
+            $this->error("Failed to process refunds: " . $result['error']);
         }
     }
 
@@ -135,14 +134,14 @@ class ProcessAutomaticRefunds extends Command
     protected function processAllEligibleLotteries(bool $dryRun)
     {
         $this->info('🔍 Checking for lotteries requiring automatic refunds...');
-        
+
         if ($dryRun) {
             $this->checkEligibleLotteries();
             return;
         }
 
         $results = $this->refundService->checkAndProcessRefunds();
-        
+
         $totalProcessed = 0;
         $totalRefunded = 0;
 
@@ -150,13 +149,13 @@ class ProcessAutomaticRefunds extends Command
         foreach ($results['insufficient_participants'] as $lotteryResult) {
             $lottery = $lotteryResult['lottery'];
             $result = $lotteryResult['result'];
-            
+
             if ($result['success']) {
                 $this->info("✅ {$lottery->lottery_number}: {$result['participant_count']} refunds, {$result['total_refunded']} FCFA");
                 $totalProcessed += $result['participant_count'];
                 $totalRefunded += $result['total_refunded'];
             } else {
-                $this->error("❌ {$lottery->lottery_number}: " . $result['error']);
+                $this->error("{$lottery->lottery_number}: " . $result['error']);
             }
         }
 
@@ -164,13 +163,13 @@ class ProcessAutomaticRefunds extends Command
         foreach ($results['cancelled_lotteries'] as $lotteryResult) {
             $lottery = $lotteryResult['lottery'];
             $result = $lotteryResult['result'];
-            
+
             if ($result['success']) {
                 $this->info("✅ {$lottery->lottery_number} (cancelled): {$result['participant_count']} refunds, {$result['total_refunded']} FCFA");
                 $totalProcessed += $result['participant_count'];
                 $totalRefunded += $result['total_refunded'];
             } else {
-                $this->error("❌ {$lottery->lottery_number} (cancelled): " . $result['error']);
+                $this->error("{$lottery->lottery_number} (cancelled): " . $result['error']);
             }
         }
 
@@ -193,7 +192,7 @@ class ProcessAutomaticRefunds extends Command
         foreach ($expiredLotteries as $lottery) {
             $minParticipants = $lottery->product->min_participants ?? 10;
             $hasInsufficientParticipants = $lottery->sold_tickets < $minParticipants;
-            
+
             if ($hasInsufficientParticipants) {
                 $this->line("   🎯 {$lottery->lottery_number}: {$lottery->sold_tickets}/{$minParticipants} participants - WOULD REFUND");
             } else {
@@ -215,7 +214,7 @@ class ProcessAutomaticRefunds extends Command
     protected function displayRefundStats()
     {
         $stats = $this->refundService->getRefundStats();
-        
+
         $this->line('');
         $this->info('📈 Refund Statistics:');
         $this->line("   💰 Total refunds: {$stats['total_refunds']}");
@@ -223,7 +222,7 @@ class ProcessAutomaticRefunds extends Command
         $this->line("   ⏳ Pending: {$stats['pending_refunds']} ({$stats['pending_amount']} FCFA)");
         $this->line("   🤖 Auto-processed: {$stats['auto_processed']}");
         $this->line("   👤 Manual: {$stats['manual_processed']}");
-        
+
         if (!empty($stats['by_reason'])) {
             $this->line('');
             $this->info('📊 By Reason:');
