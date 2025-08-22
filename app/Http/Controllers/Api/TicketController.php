@@ -126,14 +126,16 @@ class TicketController extends Controller
             }
 
             // Initier le paiement Mobile Money
-            $paymentResult = $this->eBillingService->initiate([
+            $paymentData = (object) [
                 'amount' => $request->total_amount,
                 'phone' => $request->phone_number,
                 'reference' => $transaction->transaction_id,
                 'description' => "Achat de {$request->quantity} ticket(s) - Tombola {$lottery->lottery_number}",
                 'callback_url' => url('/api/payment/callback'),
                 'return_url' => url('/api/payment/return'),
-            ]);
+            ];
+            
+            $paymentResult = $this->eBillingService->initiate('lottery_ticket', $paymentData);
 
             if ($paymentResult['success']) {
                 // Mettre à jour la transaction avec les détails du paiement
