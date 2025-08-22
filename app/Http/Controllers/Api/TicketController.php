@@ -119,6 +119,7 @@ class TicketController extends Controller
                     'ticket_number' => $ticketNumber,
                     'status' => 'reserved', // En attente de paiement
                     'price_paid' => $lottery->ticket_price,
+                    'purchased_at' => now(),
                 ]);
 
                 $tickets[] = $ticket;
