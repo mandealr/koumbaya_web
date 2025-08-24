@@ -45,8 +45,8 @@ export function useMerchantLotteries() {
         queryParams.search = filters.value.search
       }
 
-      // Utiliser la route dans le dashboard merchant qui fonctionne
-      const response = await get('/merchant/dashboard/lotteries', { params: queryParams })
+      // Utiliser la route lottery-performance qui existe et fonctionne déjà (avec pagination elle retourne la liste)
+      const response = await get('/merchant/dashboard/lottery-performance', { params: queryParams })
       
       if (response.success) {
         lotteries.value = response.data.data || response.data
