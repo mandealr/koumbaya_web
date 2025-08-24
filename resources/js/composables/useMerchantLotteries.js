@@ -45,8 +45,8 @@ export function useMerchantLotteries() {
         queryParams.search = filters.value.search
       }
 
-      // Utiliser la route my-lotteries qui existe dans la section publique mais avec middleware merchant
-      const response = await get('/lotteries/my-lotteries', { params: queryParams })
+      // Utiliser la route merchant-lotteries dans la section protégée
+      const response = await get('/merchant-lotteries', { params: queryParams })
       
       if (response.success) {
         lotteries.value = response.data.data || response.data
