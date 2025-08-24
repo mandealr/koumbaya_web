@@ -156,38 +156,42 @@ export function useMerchantOrders() {
     )
     
     // Calcul des changements par rapport à la semaine précédente
-    const calculateChange = () => {
-      // Pour simplifier, on génère des valeurs aléatoires réalistes
-      // Dans une vraie app, on comparerait avec les données de la semaine précédente
-      return Math.random() * 20 - 5 // Entre -5% et +15%
+    const calculateChange = (currentValue) => {
+      // Si pas de données actuelles, retourner 0
+      if (!currentValue || currentValue === 0) {
+        return 0
+      }
+      // TODO: Implémenter une vraie comparaison avec les données de la semaine précédente
+      // Pour l'instant, retourner 0 au lieu de valeurs aléatoires
+      return 0
     }
     
     return [
       {
         label: 'Total commandes',
         value: (stats.value.total_orders || 0).toString(),
-        change: calculateChange(),
+        change: calculateChange(stats.value.total_orders),
         icon: 'ShoppingBagIcon',
         color: 'bg-[#0099cc]'
       },
       {
         label: 'Revenus',
         value: Math.floor(stats.value.revenue || 0).toLocaleString(),
-        change: calculateChange(),
+        change: calculateChange(stats.value.revenue),
         icon: 'CurrencyDollarIcon',
         color: 'bg-blue-500'
       },
       {
         label: 'En attente',
         value: (stats.value.pending || 0).toString(),
-        change: calculateChange(),
+        change: calculateChange(stats.value.pending),
         icon: 'ClockIcon',
         color: 'bg-yellow-500'
       },
       {
         label: 'Taux conversion',
         value: `${stats.value.conversion_rate || 0}%`,
-        change: calculateChange(),
+        change: calculateChange(stats.value.conversion_rate),
         icon: 'CheckIcon',
         color: 'bg-purple-500'
       }

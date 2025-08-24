@@ -174,6 +174,7 @@ Route::group([
     Route::post('products/{id}/create-lottery', [ProductController::class, 'createLottery']);
     
     // Lotteries (Marchands seulement)
+    Route::get('merchant/lotteries', [LotteryController::class, 'myLotteries']);
     Route::post('lotteries/{id}/draw', [LotteryController::class, 'drawLottery']);
     Route::get('lotteries/{id}/verify-draw', [LotteryController::class, 'verifyDraw']);
     Route::get('lotteries/{id}/draw-history', [LotteryController::class, 'drawHistory']);

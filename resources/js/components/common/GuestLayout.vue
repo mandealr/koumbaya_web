@@ -253,7 +253,7 @@ const userDashboardPath = computed(() => {
   // Convertir les noms de route en chemins
   const routePaths = {
     'admin.dashboard': '/admin',
-    'merchant.dashboard': '/merchant',
+    'merchant.dashboard': '/merchant/dashboard',
     'customer.dashboard': '/customer'
   }
 
