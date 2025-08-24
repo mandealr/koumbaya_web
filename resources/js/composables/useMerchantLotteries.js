@@ -46,7 +46,18 @@ export function useMerchantLotteries() {
       }
 
       // Utiliser la route spécialisée pour les merchants
-      const response = await get('/merchant/lotteries', { params: queryParams })
+      // Essayer d'abord la route principale, puis la route alternative si erreur 404
+      let response;
+      try {
+        response = await get('/merchant/lotteries', { params: queryParams })
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
+          // Essayer la route alternative dans le dashboard
+          response = await get('/merchant/dashboard/lotteries', { params: queryParams })
+        } else {
+          throw error
+        }
+      }
       
       if (response.success) {
         lotteries.value = response.data.data || response.data
