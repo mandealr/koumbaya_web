@@ -178,21 +178,14 @@ Route::group([
     Route::get('lotteries/{id}/verify-draw', [LotteryController::class, 'verifyDraw']);
     Route::get('lotteries/{id}/draw-history', [LotteryController::class, 'drawHistory']);
     
-    // Merchant routes with prefix
-    Route::prefix('merchant')->group(function () {
-        // Merchant lotteries
-        Route::get('lotteries', [LotteryController::class, 'myLotteries']);
-        
-        // Merchant Dashboard
-        Route::prefix('dashboard')->group(function () {
-            Route::get('stats', [MerchantDashboardController::class, 'getStats']);
-            Route::get('sales-chart', [MerchantDashboardController::class, 'getSalesChart']);
-            Route::get('top-products', [MerchantDashboardController::class, 'getTopProducts']);
-            Route::get('recent-transactions', [MerchantDashboardController::class, 'getRecentTransactions']);
-            Route::get('lottery-performance', [MerchantDashboardController::class, 'getLotteryPerformance']);
-            Route::get('export-orders', [MerchantDashboardController::class, 'exportOrders']);
-            Route::get('lotteries', [LotteryController::class, 'myLotteries']); // Alternative route
-        });
+    // Merchant Dashboard
+    Route::prefix('merchant/dashboard')->group(function () {
+        Route::get('stats', [MerchantDashboardController::class, 'getStats']);
+        Route::get('sales-chart', [MerchantDashboardController::class, 'getSalesChart']);
+        Route::get('top-products', [MerchantDashboardController::class, 'getTopProducts']);
+        Route::get('recent-transactions', [MerchantDashboardController::class, 'getRecentTransactions']);
+        Route::get('lottery-performance', [MerchantDashboardController::class, 'getLotteryPerformance']);
+        Route::get('export-orders', [MerchantDashboardController::class, 'exportOrders']);
     });
     
     // Transaction management
