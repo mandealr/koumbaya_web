@@ -525,4 +525,82 @@ class MerchantDashboardController extends Controller
             'status' => 'processing'
         ]);
     }
+
+    /**
+     * Get merchant lotteries
+     */
+    public function getLotteries(Request $request)
+    {
+        $user = auth('sanctum')->user();
+        
+        $query = Lottery::with(['product.category', 'tickets'])
+            ->whereHas('product', function ($productQuery) use ($user) {
+                $productQuery->where('merchant_id', $user->id);
+            });
+
+        // Filtres de base
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        // Recherche par nom ou description du produit
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('product', function ($productQuery) use ($search) {
+                $productQuery->where('name', 'LIKE', "%{$search}%")
+                            ->orWhere('description', 'LIKE', "%{$search}%");
+            })->orWhere('lottery_number', 'LIKE', "%{$search}%");
+        }
+
+        // Tri des résultats
+        $sortBy = $request->get('sort_by', 'end_date_asc');
+        switch ($sortBy) {
+            case 'end_date_asc':
+                $query->orderBy('end_date', 'asc');
+                break;
+            case 'end_date_desc':
+                $query->orderBy('end_date', 'desc');
+                break;
+            case 'ticket_price_asc':
+                $query->orderBy('ticket_price', 'asc');
+                break;
+            case 'ticket_price_desc':
+                $query->orderBy('ticket_price', 'desc');
+                break;
+            case 'popularity':
+                $query->withCount('tickets')
+                      ->orderBy('tickets_count', 'desc');
+                break;
+            default:
+                $query->orderBy('end_date', 'asc');
+        }
+
+        $perPage = min($request->get('per_page', 15), 50);
+        $lotteries = $query->paginate($perPage);
+
+        // Ajouter des informations utiles
+        $lotteries->getCollection()->transform(function ($lottery) {
+            $lottery->append(['time_remaining', 'participation_rate', 'is_ending_soon', 'can_draw']);
+            return $lottery;
+        });
+
+        // Calculer les statistiques
+        $baseStatsQuery = Lottery::whereHas('product', function ($productQuery) use ($user) {
+            $productQuery->where('merchant_id', $user->id);
+        });
+
+        $stats = [
+            'total' => (clone $baseStatsQuery)->count(),
+            'active' => (clone $baseStatsQuery)->where('status', 'active')->count(),
+            'pending' => (clone $baseStatsQuery)->where('status', 'pending')->count(),
+            'completed' => (clone $baseStatsQuery)->where('status', 'completed')->count(),
+            'cancelled' => (clone $baseStatsQuery)->where('status', 'cancelled')->count(),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $lotteries,
+            'stats' => $stats
+        ]);
+    }
 }

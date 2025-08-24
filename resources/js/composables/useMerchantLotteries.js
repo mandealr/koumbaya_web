@@ -45,8 +45,8 @@ export function useMerchantLotteries() {
         queryParams.search = filters.value.search
       }
 
-      // Utiliser la route merchant-lotteries dans la section protégée
-      const response = await get('/merchant-lotteries', { params: queryParams })
+      // Utiliser la route dans le dashboard merchant qui fonctionne
+      const response = await get('/merchant/dashboard/lotteries', { params: queryParams })
       
       if (response.success) {
         lotteries.value = response.data.data || response.data

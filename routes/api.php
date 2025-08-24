@@ -172,8 +172,7 @@ Route::group([
     Route::put('products/{id}', [ProductController::class, 'update']);
     Route::post('products/{id}/create-lottery', [ProductController::class, 'createLottery']);
     
-    // Merchant Lotteries (Marchands seulement)
-    Route::get('merchant-lotteries', [LotteryController::class, 'myLotteries']);
+    // Lotteries (Marchands seulement)
     Route::post('lotteries/{id}/draw', [LotteryController::class, 'drawLottery']);
     Route::get('lotteries/{id}/verify-draw', [LotteryController::class, 'verifyDraw']);
     Route::get('lotteries/{id}/draw-history', [LotteryController::class, 'drawHistory']);
@@ -186,6 +185,7 @@ Route::group([
         Route::get('recent-transactions', [MerchantDashboardController::class, 'getRecentTransactions']);
         Route::get('lottery-performance', [MerchantDashboardController::class, 'getLotteryPerformance']);
         Route::get('export-orders', [MerchantDashboardController::class, 'exportOrders']);
+        Route::get('lotteries', [MerchantDashboardController::class, 'getLotteries']);
     });
     
     // Transaction management
