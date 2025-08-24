@@ -175,10 +175,7 @@ class LotteryController extends Controller
     {
         $user = auth('sanctum')->user();
         
-        // Vérifier que l'utilisateur est un merchant
-        if ($user->role !== 'MERCHANT') {
-            return response()->json(['error' => 'Accès réservé aux merchants'], 403);
-        }
+        // Le middleware 'merchant' s'assure déjà que l'utilisateur est authentifié et marchand
 
         $query = Lottery::with(['product.category', 'tickets'])
             ->whereHas('product', function ($productQuery) use ($user) {
@@ -212,16 +209,16 @@ class LotteryController extends Controller
         });
 
         // Calculer les statistiques
-        $totalQuery = Lottery::whereHas('product', function ($productQuery) use ($user) {
+        $baseStatsQuery = Lottery::whereHas('product', function ($productQuery) use ($user) {
             $productQuery->where('merchant_id', $user->id);
         });
 
         $stats = [
-            'total' => $totalQuery->count(),
-            'active' => $totalQuery->where('status', 'active')->count(),
-            'pending' => $totalQuery->where('status', 'pending')->count(),
-            'completed' => $totalQuery->where('status', 'completed')->count(),
-            'cancelled' => $totalQuery->where('status', 'cancelled')->count(),
+            'total' => (clone $baseStatsQuery)->count(),
+            'active' => (clone $baseStatsQuery)->where('status', 'active')->count(),
+            'pending' => (clone $baseStatsQuery)->where('status', 'pending')->count(),
+            'completed' => (clone $baseStatsQuery)->where('status', 'completed')->count(),
+            'cancelled' => (clone $baseStatsQuery)->where('status', 'cancelled')->count(),
         ];
 
         return response()->json([

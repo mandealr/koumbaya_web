@@ -23,7 +23,7 @@ class MerchantMiddleware
         }
 
         // Vérifier que l'utilisateur est un marchand
-        if (!$user->is_merchant) {
+        if (!$user->isMerchant()) {
             return response()->json([
                 'error' => 'Accès refusé. Seuls les marchands peuvent accéder à cette ressource.',
                 'required_role' => 'MERCHANT',

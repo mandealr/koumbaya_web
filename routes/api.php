@@ -77,9 +77,11 @@ Route::group([
     Route::get('products/featured', [ProductController::class, 'featured']);
     Route::get('products/{id}', [ProductController::class, 'show']);
     
-    // Lotteries
+    // Lotteries (routes spécifiques avant les routes avec paramètres)
     Route::get('lotteries', [LotteryController::class, 'index']);
     Route::get('lotteries/active', [LotteryController::class, 'active']);
+    Route::get('lotteries/my-lotteries', [LotteryController::class, 'myLotteries'])->middleware(['auth:sanctum', 'merchant']);
+    // Route avec paramètre {id} doit être après les routes spécifiques
     Route::get('lotteries/{id}', [LotteryController::class, 'show']);
     
     // Payment callbacks (public)
@@ -172,7 +174,6 @@ Route::group([
     Route::post('products/{id}/create-lottery', [ProductController::class, 'createLottery']);
     
     // Lotteries (Marchands seulement)
-    Route::get('lotteries/my-lotteries', [LotteryController::class, 'myLotteries']);
     Route::post('lotteries/{id}/draw', [LotteryController::class, 'drawLottery']);
     Route::get('lotteries/{id}/verify-draw', [LotteryController::class, 'verifyDraw']);
     Route::get('lotteries/{id}/draw-history', [LotteryController::class, 'drawHistory']);
