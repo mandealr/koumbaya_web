@@ -9,6 +9,8 @@ use App\Models\Transaction;
 use App\Models\Product;
 use App\Services\EBillingService;
 use App\Services\NotificationService;
+use App\Services\LotteryDrawService;
+use App\Models\DrawHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -23,11 +25,13 @@ use Illuminate\Support\Str;
 class LotteryController extends Controller
 {
     protected $notificationService;
+    protected $drawService;
 
-    public function __construct(NotificationService $notificationService)
+    public function __construct(NotificationService $notificationService, LotteryDrawService $drawService)
     {
         $this->middleware('auth:sanctum', ['except' => ['index', 'show', 'active']]);
         $this->notificationService = $notificationService;
+        $this->drawService = $drawService;
     }
 
     /**
@@ -475,74 +479,55 @@ class LotteryController extends Controller
             return response()->json(['error' => 'Non autorisé'], 403);
         }
 
-        if (!$lottery->can_draw) {
-            return response()->json(['error' => 'Conditions de tirage non remplies'], 422);
-        }
+        // Utiliser le nouveau service de tirage
+        $result = $this->drawService->performDraw($lottery, [
+            'method' => 'manual',
+            'initiated_by' => 'user_' . $user->id
+        ]);
 
-        DB::beginTransaction();
-        try {
-            // Récupérer tous les tickets payés
-            $paidTickets = $lottery->paidTickets()->get();
-            
-            if ($paidTickets->count() < $lottery->product->min_participants) {
-                DB::rollback();
-                return response()->json(['error' => 'Pas assez de participants'], 422);
-            }
-
-            // Sélectionner un ticket gagnant aléatoirement
-            $winningTicket = $paidTickets->random();
-
-            // Marquer le ticket comme gagnant
-            $winningTicket->update(['is_winner' => true]);
-
-            // Mettre à jour la tombola
-            $lottery->update([
-                'winner_user_id' => $winningTicket->user_id,
-                'winner_ticket_number' => $winningTicket->ticket_number,
-                'draw_date' => now(),
-                'is_drawn' => true,
-                'status' => 'completed',
-                'draw_proof' => json_encode([
-                    'total_participants' => $paidTickets->count(),
-                    'draw_method' => 'random_selection',
-                    'timestamp' => now()->toISOString(),
-                    'drawn_by' => $user->id,
-                ])
-            ]);
-
-            // Mettre à jour le statut du produit
-            $lottery->product->update(['status' => 'sold']);
-
-            DB::commit();
-
-            // Envoyer les notifications après le commit réussi
-            try {
-                // Notification du gagnant
-                $this->notificationService->notifyLotteryWinner(
-                    $lottery->fresh(['product', 'winner']), 
-                    $winningTicket->user, 
-                    $winningTicket
-                );
-
-                // Notifications des résultats pour tous les participants
-                $this->notificationService->notifyLotteryResult(
-                    $lottery->fresh(['product', 'winner']), 
-                    $winningTicket->user
-                );
-            } catch (\Exception $e) {
-                // Log l'erreur mais ne pas faire échouer le tirage
-                \Log::error('Failed to send draw notifications: ' . $e->getMessage());
-            }
-
+        if ($result['success']) {
             return response()->json([
-                'message' => 'Tirage effectué avec succès',
-                'lottery' => $lottery->load(['winner', 'product']),
-                'winning_ticket' => $winningTicket->load('user')
+                'message' => $result['message'],
+                'lottery' => $result['data']['lottery'],
+                'winning_ticket' => $result['data']['winning_ticket'],
+                'verification_hash' => $result['data']['verification_hash']
             ]);
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json(['error' => 'Erreur lors du tirage'], 500);
+        } else {
+            return response()->json([
+                'error' => $result['message'],
+                'details' => $result['data'] ?? null
+            ], 422);
         }
+    }
+
+    /**
+     * Verify draw integrity
+     */
+    public function verifyDraw($id)
+    {
+        $lottery = Lottery::findOrFail($id);
+        
+        $verification = $this->drawService->verifyDraw($lottery);
+        
+        return response()->json($verification);
+    }
+
+    /**
+     * Get draw history
+     */
+    public function drawHistory($id)
+    {
+        $lottery = Lottery::findOrFail($id);
+        
+        $history = DrawHistory::where('lottery_id', $lottery->id)
+            ->with(['winner', 'winningTicket'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        return response()->json([
+            'lottery' => $lottery->only(['id', 'lottery_number', 'draw_date']),
+            'history' => $history,
+            'total_draws' => $history->count()
+        ]);
     }
 }

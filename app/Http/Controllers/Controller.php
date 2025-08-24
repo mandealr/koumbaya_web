@@ -34,6 +34,14 @@ use Illuminate\Routing\Controller as BaseController;
  *     description="Authentification via token Bearer JWT"
  * )
  *
+ * @OA\SecurityScheme(
+ *     securityScheme="sanctum",
+ *     type="apiKey",
+ *     in="header",
+ *     name="Authorization",
+ *     description="Laravel Sanctum authentication token (Bearer token)"
+ * )
+ *
  * @OA\Tag(
  *     name="Authentication",
  *     description="Endpoints d'authentification et gestion utilisateurs"

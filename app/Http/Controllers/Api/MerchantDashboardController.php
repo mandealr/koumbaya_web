@@ -74,16 +74,16 @@ class MerchantDashboardController extends Controller
         })->where('status', 'pending')->count();
 
         return $this->sendResponse([
-            'total_products' => $totalProducts,
-            'active_lotteries' => $activeLotteries,
-            'total_sales' => $totalSales,
-            'tickets_sold' => $ticketsSold,
-            'revenue_this_month' => $revenueThisMonth,
-            'revenue_last_month' => $revenueLastMonth,
-            'growth_rate' => round($growthRate, 2),
-            'conversion_rate' => $this->getConversionRate($merchantId),
-            'avg_ticket_price' => $this->getAverageTicketPrice($merchantId),
-            'pending_orders' => $pendingOrders,
+            'total_products' => intval($totalProducts ?? 0),
+            'active_lotteries' => intval($activeLotteries ?? 0),
+            'total_sales' => floatval($totalSales ?? 0),
+            'tickets_sold' => intval($ticketsSold ?? 0),
+            'revenue_this_month' => floatval($revenueThisMonth ?? 0),
+            'revenue_last_month' => floatval($revenueLastMonth ?? 0),
+            'growth_rate' => floatval(round($growthRate, 2)),
+            'conversion_rate' => floatval($this->getConversionRate($merchantId)),
+            'avg_ticket_price' => floatval($this->getAverageTicketPrice($merchantId)),
+            'pending_orders' => intval($pendingOrders ?? 0),
         ]);
     }
 
@@ -165,45 +165,64 @@ class MerchantDashboardController extends Controller
      */
     public function getTopProducts(Request $request)
     {
-        $merchantId = auth()->id();
-        $limit = $request->get('limit', 10);
+        try {
+            $merchantId = auth()->id();
+            $limit = $request->get('limit', 10);
 
-        $topProducts = Product::select([
-            'products.*',
-            DB::raw('COALESCE(SUM(transactions.amount), 0) as total_revenue'),
-            DB::raw('COALESCE(SUM(transactions.quantity), 0) as tickets_sold'),
-            DB::raw('COUNT(DISTINCT transactions.id) as total_transactions')
-        ])
-        ->leftJoin('lotteries', 'products.id', '=', 'lotteries.product_id')
-        ->leftJoin('transactions', function ($join) {
-            $join->on('lotteries.id', '=', 'transactions.lottery_id')
-                 ->where('transactions.status', '=', 'completed');
-        })
-        ->where('products.merchant_id', $merchantId)
-        ->with(['category', 'activeLottery'])
-        ->groupBy('products.id')
-        ->orderBy('total_revenue', 'desc')
-        ->limit($limit)
-        ->get();
+            $topProducts = Product::select([
+                'products.*',
+                DB::raw('COALESCE(SUM(transactions.amount), 0) as total_revenue'),
+                DB::raw('COALESCE(SUM(transactions.quantity), 0) as tickets_sold'),
+                DB::raw('COUNT(DISTINCT transactions.id) as total_transactions')
+            ])
+            ->leftJoin('lotteries', 'products.id', '=', 'lotteries.product_id')
+            ->leftJoin('transactions', function ($join) {
+                $join->on('lotteries.id', '=', 'transactions.lottery_id')
+                     ->where('transactions.status', '=', 'completed');
+            })
+            ->where('products.merchant_id', $merchantId)
+            ->groupBy('products.id', 'products.title', 'products.price', 'products.ticket_price', 
+                     'products.image_url', 'products.created_at', 'products.updated_at', 
+                     'products.merchant_id', 'products.category_id', 'products.description',
+                     'products.images', 'products.is_active', 'products.min_participants',
+                     'products.max_participants', 'products.views_count')
+            ->orderBy('total_revenue', 'desc')
+            ->limit($limit)
+            ->get();
 
-        return $this->sendResponse([
-            'products' => $topProducts->map(function ($product) {
+            // Charger les relations après la requête pour éviter les conflits avec GROUP BY
+            $topProducts->load(['category']);
+
+            $productsData = $topProducts->map(function ($product) {
+                // Vérifier s'il y a une tombola active pour ce produit
+                $activeLottery = Lottery::where('product_id', $product->id)
+                    ->where('status', 'active')
+                    ->first();
+
                 return [
                     'id' => $product->id,
-                    'title' => $product->title,
-                    'price' => $product->price,
-                    'ticket_price' => $product->ticket_price,
-                    'image_url' => $product->image_url,
+                    'title' => $product->title ?? 'Produit sans titre',
+                    'price' => floatval($product->price ?? 0),
+                    'ticket_price' => floatval($product->ticket_price ?? 0),
+                    'image_url' => $product->image_url ?? $product->images,
                     'category' => $product->category->name ?? 'Non classé',
-                    'total_revenue' => floatval($product->total_revenue),
-                    'tickets_sold' => intval($product->tickets_sold),
-                    'total_transactions' => intval($product->total_transactions),
-                    'has_active_lottery' => $product->activeLottery !== null,
-                    'lottery_status' => $product->activeLottery->status ?? null,
+                    'total_revenue' => floatval($product->total_revenue ?? 0),
+                    'tickets_sold' => intval($product->tickets_sold ?? 0),
+                    'total_transactions' => intval($product->total_transactions ?? 0),
+                    'has_active_lottery' => $activeLottery !== null,
+                    'lottery_status' => $activeLottery->status ?? null,
                     'conversion_rate' => $this->getProductConversionRate($product->id),
                 ];
-            })
-        ]);
+            });
+
+            return $this->sendResponse($productsData->toArray());
+
+        } catch (\Exception $e) {
+            \Log::error('Erreur dans getTopProducts: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            return $this->sendResponse([]);
+        }
     }
 
     /**
@@ -223,13 +242,14 @@ class MerchantDashboardController extends Controller
      */
     public function getRecentTransactions(Request $request)
     {
-        $merchantId = auth()->id();
-        $limit = $request->get('limit', 20);
-        
-        $query = Transaction::with(['user', 'lottery.product', 'lottery_tickets'])
-            ->whereHas('lottery.product', function ($query) use ($merchantId) {
-                $query->where('merchant_id', $merchantId);
-            });
+        try {
+            $merchantId = auth()->id();
+            $limit = $request->get('limit', 20);
+            
+            $query = Transaction::with(['user', 'lottery.product', 'lottery_tickets'])
+                ->whereHas('lottery.product', function ($query) use ($merchantId) {
+                    $query->where('merchant_id', $merchantId);
+                });
         
         // Filtres
         if ($request->has('search') && $request->search) {
@@ -272,32 +292,42 @@ class MerchantDashboardController extends Controller
                              ->limit($limit)
                              ->get();
 
-        return $this->sendResponse([
-            'transactions' => $transactions->map(function ($transaction) {
-                // Récupérer les numéros de tickets
-                $ticketNumbers = $transaction->lottery_tickets->pluck('ticket_number')->toArray();
+            $transactionsData = $transactions->map(function ($transaction) {
+                // Récupérer les numéros de tickets de manière sécurisée
+                $ticketNumbers = [];
+                if ($transaction->lottery_tickets && $transaction->lottery_tickets->count() > 0) {
+                    $ticketNumbers = $transaction->lottery_tickets->pluck('ticket_number')->toArray();
+                }
                 
                 return [
                     'id' => $transaction->id,
-                    'transaction_id' => $transaction->transaction_id,
-                    'amount' => $transaction->amount,
-                    'quantity' => $transaction->quantity,
+                    'transaction_id' => $transaction->transaction_id ?? '',
+                    'amount' => floatval($transaction->amount ?? 0),
+                    'quantity' => intval($transaction->quantity ?? 0),
                     'ticket_numbers' => $ticketNumbers,
-                    'status' => $transaction->status,
+                    'status' => $transaction->status ?? 'unknown',
                     'completed_at' => $transaction->completed_at ?? $transaction->created_at,
                     'user' => [
-                        'name' => $transaction->user->first_name . ' ' . $transaction->user->last_name,
-                        'email' => $transaction->user->email,
+                        'name' => ($transaction->user ? 
+                            ($transaction->user->first_name . ' ' . $transaction->user->last_name) : 
+                            'Utilisateur inconnu'),
+                        'email' => $transaction->user->email ?? '',
                     ],
                     'product' => [
-                        'title' => $transaction->lottery->product->title,
+                        'title' => $transaction->lottery->product->title ?? 'Produit non trouvé',
                         'image_url' => $transaction->lottery->product->images ?? null,
-                        'lottery_number' => $transaction->lottery->lottery_number,
+                        'lottery_number' => $transaction->lottery->lottery_number ?? '',
                     ],
                     'payment_method' => $transaction->payment_provider ?? 'Mobile Money',
                 ];
-            })
-        ]);
+            });
+
+            return $this->sendResponse($transactionsData->toArray());
+
+        } catch (\Exception $e) {
+            \Log::error('Erreur dans getRecentTransactions: ' . $e->getMessage());
+            return $this->sendResponse([]);
+        }
     }
 
     /**
@@ -362,7 +392,7 @@ class MerchantDashboardController extends Controller
             $query->where('merchant_id', $merchantId);
         })
         ->where('status', 'completed')
-        ->sum('amount');
+        ->sum('amount') ?: 0;
     }
 
     private function getTicketsSold($merchantId)
@@ -371,7 +401,7 @@ class MerchantDashboardController extends Controller
             $query->where('merchant_id', $merchantId);
         })
         ->where('status', 'completed')
-        ->sum('quantity');
+        ->sum('quantity') ?: 0;
     }
 
     private function getRevenueThisMonth($merchantId)
@@ -384,7 +414,7 @@ class MerchantDashboardController extends Controller
             Carbon::now()->startOfMonth(),
             Carbon::now()->endOfMonth()
         ])
-        ->sum('amount');
+        ->sum('amount') ?: 0;
     }
 
     private function getRevenueLastMonth($merchantId)
@@ -397,7 +427,7 @@ class MerchantDashboardController extends Controller
             Carbon::now()->subMonth()->startOfMonth(),
             Carbon::now()->subMonth()->endOfMonth()
         ])
-        ->sum('amount');
+        ->sum('amount') ?: 0;
     }
 
     private function getConversionRate($merchantId)
@@ -410,8 +440,8 @@ class MerchantDashboardController extends Controller
 
     private function getAverageTicketPrice($merchantId)
     {
-        return Product::where('merchant_id', $merchantId)
-            ->avg('ticket_price') ?: 0;
+        return floatval(Product::where('merchant_id', $merchantId)
+            ->avg('ticket_price')) ?: 0;
     }
 
     private function getProductConversionRate($productId)

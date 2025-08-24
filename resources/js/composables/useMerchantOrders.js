@@ -17,18 +17,25 @@ export function useMerchantOrders() {
   const loadStats = async () => {
     try {
       const response = await get('/merchant/dashboard/stats')
-      if (response.success) {
+      if (response && response.data) {
         // Adapter les stats aux besoins de la page Orders
         stats.value = {
-          total_orders: response.data.tickets_sold,
-          revenue: response.data.total_sales,
-          pending: response.data.pending_orders || 0,
-          conversion_rate: response.data.conversion_rate || 0
+          total_orders: parseInt(response.data.tickets_sold || 0),
+          revenue: parseFloat(response.data.total_sales || 0),
+          pending: parseInt(response.data.pending_orders || 0),
+          conversion_rate: parseFloat(response.data.conversion_rate || 0)
         }
       }
       return response
     } catch (err) {
       console.error('Erreur lors du chargement des stats:', err)
+      // Valeurs par défaut en cas d'erreur
+      stats.value = {
+        total_orders: 0,
+        revenue: 0,
+        pending: 0,
+        conversion_rate: 0
+      }
       throw err
     }
   }
@@ -50,28 +57,31 @@ export function useMerchantOrders() {
       const url = `/merchant/dashboard/recent-transactions${queryString ? '?' + queryString : ''}`
       
       const response = await get(url)
-      if (response.success && response.data.transactions) {
+      if (response && response.data && Array.isArray(response.data)) {
         // Transformer les transactions en format commandes
-        orders.value = response.data.transactions.map(transaction => ({
-          id: transaction.id,
-          order_number: transaction.transaction_id,
-          customer_name: transaction.user.name,
-          customer_email: transaction.user.email,
-          product_name: transaction.product.title,
-          product_image: transaction.product.image_url || '/images/products/placeholder.jpg',
-          tickets_count: transaction.quantity,
+        orders.value = response.data.map(transaction => ({
+          id: transaction.id || Math.random(),
+          order_number: transaction.transaction_id || `ORD-${transaction.id}`,
+          customer_name: transaction.user?.name || 'Client inconnu',
+          customer_email: transaction.user?.email || '',
+          product_name: transaction.product?.title || 'Produit inconnu',
+          product_image: transaction.product?.image_url || '/images/products/placeholder.jpg',
+          tickets_count: parseInt(transaction.quantity || 0),
           ticket_numbers: transaction.ticket_numbers || [],
-          ticket_price: transaction.amount / transaction.quantity,
-          total_amount: transaction.amount,
+          ticket_price: parseFloat(transaction.amount || 0) / Math.max(parseInt(transaction.quantity || 1), 1),
+          total_amount: parseFloat(transaction.amount || 0),
           currency: 'FCFA',
-          payment_method: transaction.payment_method,
+          payment_method: transaction.payment_method || 'Mobile Money',
           status: transaction.status || 'completed',
-          created_at: transaction.completed_at
+          created_at: transaction.completed_at || transaction.created_at
         }))
+      } else {
+        orders.value = []
       }
       return response
     } catch (err) {
       console.error('Erreur lors du chargement des commandes:', err)
+      orders.value = []
       throw err
     }
   }
@@ -80,15 +90,18 @@ export function useMerchantOrders() {
   const loadProducts = async () => {
     try {
       const response = await get('/merchant/dashboard/top-products?limit=100')
-      if (response.success && response.data.products) {
-        products.value = response.data.products.map(product => ({
+      if (response && response.data && Array.isArray(response.data)) {
+        products.value = response.data.map(product => ({
           id: product.id,
-          name: product.title
+          name: product.title || product.name || 'Produit sans nom'
         }))
+      } else {
+        products.value = []
       }
       return response
     } catch (err) {
       console.error('Erreur lors du chargement des produits:', err)
+      products.value = []
       throw err
     }
   }
@@ -152,28 +165,28 @@ export function useMerchantOrders() {
     return [
       {
         label: 'Total commandes',
-        value: stats.value.total_orders.toString(),
+        value: (stats.value.total_orders || 0).toString(),
         change: calculateChange(),
         icon: 'ShoppingBagIcon',
         color: 'bg-[#0099cc]'
       },
       {
         label: 'Revenus',
-        value: Math.floor(stats.value.revenue).toLocaleString(),
+        value: Math.floor(stats.value.revenue || 0).toLocaleString(),
         change: calculateChange(),
         icon: 'CurrencyDollarIcon',
         color: 'bg-blue-500'
       },
       {
         label: 'En attente',
-        value: stats.value.pending.toString(),
+        value: (stats.value.pending || 0).toString(),
         change: calculateChange(),
         icon: 'ClockIcon',
         color: 'bg-yellow-500'
       },
       {
         label: 'Taux conversion',
-        value: `${stats.value.conversion_rate}%`,
+        value: `${stats.value.conversion_rate || 0}%`,
         change: calculateChange(),
         icon: 'CheckIcon',
         color: 'bg-purple-500'

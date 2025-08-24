@@ -174,6 +174,8 @@ Route::group([
     // Lotteries (Marchands seulement)
     Route::get('lotteries/my-lotteries', [LotteryController::class, 'myLotteries']);
     Route::post('lotteries/{id}/draw', [LotteryController::class, 'drawLottery']);
+    Route::get('lotteries/{id}/verify-draw', [LotteryController::class, 'verifyDraw']);
+    Route::get('lotteries/{id}/draw-history', [LotteryController::class, 'drawHistory']);
     
     // Merchant Dashboard
     Route::prefix('merchant/dashboard')->group(function () {
@@ -212,6 +214,19 @@ Route::group([
         Route::post('/process-automatic', [AdminRefundController::class, 'processAutomatic']);
         Route::post('/{id}/approve', [AdminRefundController::class, 'approve']);
         Route::post('/{id}/reject', [AdminRefundController::class, 'reject']);
+    });
+    
+    // Admin Lotteries Management
+    Route::prefix('lotteries')->controller(App\Http\Controllers\Api\AdminLotteryController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::get('/statistics', 'statistics');
+        Route::get('/eligible-for-draw', 'eligibleForDraw');
+        Route::get('/{id}', 'show');
+        Route::post('/{id}/draw', 'draw');
+        Route::post('/batch-draw', 'batchDraw');
+        Route::post('/{id}/cancel', 'cancel');
+        Route::put('/{id}', 'update');
+        Route::get('/{id}/export', 'export');
     });
 });
 

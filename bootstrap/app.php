@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'auth.sanctum' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'merchant' => \App\Http\Middleware\MerchantMiddleware::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'throttle.api' => \App\Http\Middleware\RateLimitMiddleware::class,
             'security' => \App\Http\Middleware\SecurityHeadersMiddleware::class,
             'validate.json' => \App\Http\Middleware\ValidateJsonMiddleware::class,

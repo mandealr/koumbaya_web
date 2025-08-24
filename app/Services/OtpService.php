@@ -286,6 +286,32 @@ class OtpService
     }
 
     /**
+     * Envoyer un SMS simple (non-OTP)
+     */
+    public function sendSMS($phone, $message)
+    {
+        try {
+            // En mode développement
+            if (config('app.env') === 'local') {
+                Log::info('SMS Notification (DEV MODE)', [
+                    'to' => $phone,
+                    'message' => $message
+                ]);
+                return true; // Simuler l'envoi réussi en développement
+            }
+
+            // En production, utiliser l'API SMS
+            return self::sendSmsViaApi($phone, $message);
+        } catch (\Exception $e) {
+            Log::error('Erreur envoi SMS notification', [
+                'phone' => $phone,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
+    /**
      * Envoyer SMS via API (exemple avec un fournisseur générique)
      */
     private static function sendSmsViaApi($phone, $message)

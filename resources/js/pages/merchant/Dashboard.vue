@@ -120,15 +120,15 @@
         <!-- Sales Summary -->
         <div class="mt-6 grid grid-cols-3 gap-4">
           <div class="text-center">
-            <p class="text-2xl font-bold text-[#0099cc]">{{ salesSummary.totalSales.toLocaleString() }}</p>
+            <p class="text-2xl font-bold text-[#0099cc]">{{ formatPrice(salesSummary.totalSales || 0) }}</p>
             <p class="text-sm text-gray-600">Ventes totales (FCFA)</p>
           </div>
           <div class="text-center">
-            <p class="text-2xl font-bold text-blue-600">{{ salesSummary.totalOrders }}</p>
+            <p class="text-2xl font-bold text-blue-600">{{ salesSummary.totalOrders || 0 }}</p>
             <p class="text-sm text-gray-600">Commandes</p>
           </div>
           <div class="text-center">
-            <p class="text-2xl font-bold text-purple-600">{{ salesSummary.avgOrder.toLocaleString() }}</p>
+            <p class="text-2xl font-bold text-purple-600">{{ formatPrice(salesSummary.avgOrder || 0) }}</p>
             <p class="text-sm text-gray-600">Panier moyen (FCFA)</p>
           </div>
         </div>
@@ -161,7 +161,7 @@
                 </div>
               </div>
               <div class="text-right">
-                <p class="font-semibold text-gray-900">{{ order.amount.toLocaleString() }} FCFA</p>
+                <p class="font-semibold text-gray-900">{{ formatPrice(order.amount || 0) }} FCFA</p>
                 <span :class="[
                   'inline-block px-2 py-1 text-xs font-medium rounded-full',
                   order.status === 'completed' ? 'bg-blue-100 text-blue-800' :
@@ -291,35 +291,43 @@ const loadDashboardStats = async () => {
 const loadRecentOrders = async () => {
   try {
     const response = await get('/merchant/dashboard/recent-transactions')
-    if (response && response.data) {
+    if (response && response.data && Array.isArray(response.data)) {
       recentOrders.value = response.data.map(order => ({
         id: order.id,
-        product_name: order.product?.name || 'Produit inconnu',
-        customer_name: order.user?.first_name + ' ' + order.user?.last_name || 'Client inconnu',
-        amount: order.amount || 0,
+        product_name: order.product?.title || order.product?.name || 'Produit inconnu',
+        customer_name: (order.user?.name || 
+                       (order.user?.first_name + ' ' + order.user?.last_name) || 
+                       'Client inconnu').trim(),
+        amount: parseFloat(order.amount || 0),
         status: order.status || 'pending',
-        created_at: new Date(order.created_at)
+        created_at: order.created_at ? new Date(order.created_at) : new Date()
       }))
+    } else {
+      recentOrders.value = []
     }
   } catch (err) {
     console.error('Erreur lors du chargement des commandes récentes:', err)
+    recentOrders.value = []
   }
 }
 
 const loadTopProducts = async () => {
   try {
     const response = await get('/merchant/dashboard/top-products')
-    if (response && response.data) {
+    if (response && response.data && Array.isArray(response.data)) {
       topProducts.value = response.data.map(product => ({
         id: product.id,
-        name: product.name,
-        sales: product.sales_count || 0,
+        name: product.title || product.name || 'Produit sans nom',
+        sales: product.tickets_sold || product.sales_count || 0,
         growth: product.growth_percentage || 0,
-        image: product.image || '/images/products/placeholder.jpg'
+        image: product.image_url || product.image || '/images/products/placeholder.jpg'
       }))
+    } else {
+      topProducts.value = []
     }
   } catch (err) {
     console.error('Erreur lors du chargement des produits populaires:', err)
+    topProducts.value = []
   }
 }
 

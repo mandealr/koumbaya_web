@@ -198,7 +198,7 @@
               <p class="text-blue-600 text-xs">Revenus</p>
             </div>
             <div class="bg-blue-50 p-3 rounded-lg">
-              <p class="text-blue-700 font-semibold text-lg">{{ product.ticket_price.toLocaleString() }}</p>
+              <p class="text-blue-700 font-semibold text-lg">{{ formatCurrency(product.ticket_price || 0) }}</p>
               <p class="text-blue-600 text-xs">Prix/ticket</p>
             </div>
           </div>
@@ -514,13 +514,17 @@ const loadProducts = async () => {
     if (filters.sortBy) params.append('sort_by', filters.sortBy)
     
     const response = await get(`/products?${params.toString()}`)
-    if (response && response.data) {
+    if (response && response.data && Array.isArray(response.data)) {
       products.value = response.data.map(product => ({
         ...product,
         lottery: product.lottery || null,
+        ticket_price: parseFloat(product.ticket_price || 0),
+        price: parseFloat(product.price || 0),
         progress: product.lottery ? 
-          Math.round((product.lottery.sold_tickets / product.lottery.total_tickets) * 100) : 0
+          Math.round(((product.lottery.sold_tickets || 0) / (product.lottery.total_tickets || 1)) * 100) : 0
       }))
+    } else {
+      products.value = []
     }
   } catch (error) {
     console.error('Error loading products:', error)
