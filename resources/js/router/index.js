@@ -236,6 +236,12 @@ const routes = [
         component: () => import('@/pages/merchant/CreateProduct.vue')
       },
       {
+        path: 'products/:id/edit',
+        name: 'merchant.products.edit',
+        component: () => import('@/pages/merchant/EditProduct.vue'),
+        props: true
+      },
+      {
         path: 'orders',
         name: 'merchant.orders',
         component: () => import('@/pages/merchant/Orders.vue')
