@@ -121,6 +121,222 @@
             </form>
           </div>
 
+          <!-- Gestion des pays -->
+          <div v-if="activeSection === 'countries'" class="p-6">
+            <div class="admin-card-header mb-6">
+              <div class="flex justify-between items-center">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900">Gestion des pays</h3>
+                  <p class="text-sm text-gray-600">Configurez les pays disponibles sur la plateforme</p>
+                </div>
+                <button
+                  @click="showCountryModal = true"
+                  class="admin-btn-primary flex items-center"
+                >
+                  <PlusIcon class="w-4 h-4 mr-2" />
+                  Ajouter un pays
+                </button>
+              </div>
+            </div>
+            
+            <!-- Search -->
+            <div class="mb-6">
+              <input
+                v-model="countryFilters.search"
+                type="text"
+                placeholder="Rechercher un pays..."
+                class="admin-input w-full md:w-1/3"
+              />
+            </div>
+
+            <!-- Countries Table -->
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Pays
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Code
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Devise
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Statut
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr
+                    v-for="country in filteredCountries"
+                    :key="country.id"
+                    class="hover:bg-gray-50"
+                  >
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center">
+                        <img
+                          v-if="country.flag"
+                          :src="country.flag"
+                          :alt="country.name"
+                          class="w-6 h-4 rounded object-cover mr-3"
+                        />
+                        <div class="text-sm font-medium text-gray-900">{{ country.name }}</div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ country.code }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ country.currency }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span :class="[
+                        'px-2 py-1 text-xs font-medium rounded-full',
+                        country.is_active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
+                      ]">
+                        {{ country.is_active ? 'Actif' : 'Inactif' }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div class="flex space-x-2">
+                        <button
+                          @click="editCountry(country)"
+                          class="text-blue-600 hover:text-blue-900"
+                        >
+                          <PencilIcon class="w-4 h-4" />
+                        </button>
+                        <button
+                          @click="toggleCountryStatus(country)"
+                          class="text-blue-600 hover:text-blue-900 text-xs"
+                        >
+                          {{ country.is_active ? 'Désactiver' : 'Activer' }}
+                        </button>
+                        <button
+                          @click="deleteCountry(country.id)"
+                          class="text-red-600 hover:text-red-900"
+                        >
+                          <TrashIcon class="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Gestion des langues -->
+          <div v-if="activeSection === 'languages'" class="p-6">
+            <div class="admin-card-header mb-6">
+              <div class="flex justify-between items-center">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900">Gestion des langues</h3>
+                  <p class="text-sm text-gray-600">Configurez les langues disponibles sur la plateforme</p>
+                </div>
+                <button
+                  @click="showLanguageModal = true"
+                  class="admin-btn-primary flex items-center"
+                >
+                  <PlusIcon class="w-4 h-4 mr-2" />
+                  Ajouter une langue
+                </button>
+              </div>
+            </div>
+            
+            <!-- Search -->
+            <div class="mb-6">
+              <input
+                v-model="languageFilters.search"
+                type="text"
+                placeholder="Rechercher une langue..."
+                class="admin-input w-full md:w-1/3"
+              />
+            </div>
+
+            <!-- Languages Table -->
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Langue
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Code
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Direction
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Statut
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr
+                    v-for="language in filteredLanguages"
+                    :key="language.id"
+                    class="hover:bg-gray-50"
+                  >
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center">
+                        <span class="text-2xl mr-3">{{ language.flag }}</span>
+                        <div>
+                          <div class="text-sm font-medium text-gray-900">{{ language.name }}</div>
+                          <div class="text-sm text-gray-500">{{ language.native_name }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ language.code }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ language.direction === 'rtl' ? 'Droite à gauche' : 'Gauche à droite' }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span :class="[
+                        'px-2 py-1 text-xs font-medium rounded-full',
+                        language.is_active ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
+                      ]">
+                        {{ language.is_active ? 'Actif' : 'Inactif' }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div class="flex space-x-2">
+                        <button
+                          @click="editLanguage(language)"
+                          class="text-blue-600 hover:text-blue-900"
+                        >
+                          <PencilIcon class="w-4 h-4" />
+                        </button>
+                        <button
+                          @click="toggleLanguageStatus(language)"
+                          class="text-blue-600 hover:text-blue-900 text-xs"
+                        >
+                          {{ language.is_active ? 'Désactiver' : 'Activer' }}
+                        </button>
+                        <button
+                          @click="deleteLanguage(language.id)"
+                          class="text-red-600 hover:text-red-900"
+                        >
+                          <TrashIcon class="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <!-- Paramètres de paiement -->
           <div v-if="activeSection === 'payment'" class="p-6">
             <div class="admin-card-header mb-6">
@@ -453,11 +669,178 @@
         </div>
       </div>
     </div>
+
+    <!-- Modales pour les pays et langues -->
+    
+    <!-- Country Modal -->
+    <div v-if="showCountryModal || showEditCountryModal" class="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg max-w-md w-full mx-4">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900">
+            {{ showCountryModal ? 'Ajouter un pays' : 'Modifier le pays' }}
+          </h3>
+        </div>
+
+        <form @submit.prevent="showCountryModal ? createCountry() : updateCountry()">
+          <div class="px-6 py-4 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
+              <input
+                v-model="countryForm.name"
+                type="text"
+                required
+                class="admin-input"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Code *</label>
+              <input
+                v-model="countryForm.code"
+                type="text"
+                required
+                maxlength="2"
+                class="admin-input"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Devise</label>
+              <input
+                v-model="countryForm.currency"
+                type="text"
+                class="admin-input"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">URL du drapeau</label>
+              <input
+                v-model="countryForm.flag"
+                type="url"
+                class="admin-input"
+              />
+            </div>
+            <div class="flex items-center">
+              <input
+                v-model="countryForm.is_active"
+                type="checkbox"
+                class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label class="ml-2 text-sm text-gray-700">Actif</label>
+            </div>
+          </div>
+
+          <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+            <button
+              type="button"
+              @click="closeCountryModal"
+              class="admin-btn-secondary"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              :disabled="loading"
+              class="admin-btn-primary disabled:opacity-50"
+            >
+              <span v-if="loading">Enregistrement...</span>
+              <span v-else>{{ showCountryModal ? 'Créer' : 'Modifier' }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Language Modal -->
+    <div v-if="showLanguageModal || showEditLanguageModal" class="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg max-w-md w-full mx-4">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900">
+            {{ showLanguageModal ? 'Ajouter une langue' : 'Modifier la langue' }}
+          </h3>
+        </div>
+
+        <form @submit.prevent="showLanguageModal ? createLanguage() : updateLanguage()">
+          <div class="px-6 py-4 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
+              <input
+                v-model="languageForm.name"
+                type="text"
+                required
+                class="admin-input"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nom natif</label>
+              <input
+                v-model="languageForm.native_name"
+                type="text"
+                class="admin-input"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Code *</label>
+              <input
+                v-model="languageForm.code"
+                type="text"
+                required
+                maxlength="2"
+                class="admin-input"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Drapeau (emoji)</label>
+              <input
+                v-model="languageForm.flag"
+                type="text"
+                maxlength="2"
+                class="admin-input"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Direction</label>
+              <select
+                v-model="languageForm.direction"
+                class="admin-input"
+              >
+                <option value="ltr">Gauche à droite</option>
+                <option value="rtl">Droite à gauche</option>
+              </select>
+            </div>
+            <div class="flex items-center">
+              <input
+                v-model="languageForm.is_active"
+                type="checkbox"
+                class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label class="ml-2 text-sm text-gray-700">Actif</label>
+            </div>
+          </div>
+
+          <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+            <button
+              type="button"
+              @click="closeLanguageModal"
+              class="admin-btn-secondary"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              :disabled="loading"
+              class="admin-btn-primary disabled:opacity-50"
+            >
+              <span v-if="loading">Enregistrement...</span>
+              <span v-else>{{ showLanguageModal ? 'Créer' : 'Modifier' }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useApi } from '@/composables/api'
 import {
   CogIcon,
@@ -472,7 +855,11 @@ import {
   DevicePhoneMobileIcon,
   TrashIcon,
   DocumentIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
+  GlobeAltIcon,
+  LanguageIcon,
+  PlusIcon,
+  PencilIcon
 } from '@heroicons/vue/24/outline'
 
 const { get, post, put } = useApi()
@@ -483,6 +870,8 @@ const activeSection = ref('general')
 
 const settingSections = [
   { id: 'general', name: 'Général', icon: CogIcon },
+  { id: 'countries', name: 'Pays', icon: GlobeAltIcon },
+  { id: 'languages', name: 'Langues', icon: LanguageIcon },
   { id: 'payment', name: 'Paiements', icon: CurrencyDollarIcon },
   { id: 'lottery', name: 'Tombolas', icon: GiftIcon },
   { id: 'notifications', name: 'Notifications', icon: BellIcon },
@@ -580,6 +969,116 @@ const maintenanceSettings = reactive({
   maintenance_message: 'La plateforme est temporairement en maintenance. Nous reviendrons bientôt !'
 })
 
+// Countries and Languages data
+const countries = ref([
+  {
+    id: 1,
+    name: 'France',
+    code: 'FR',
+    currency: 'EUR',
+    flag: 'https://flagcdn.com/w40/fr.png',
+    is_active: true
+  },
+  {
+    id: 2,
+    name: 'Sénégal',
+    code: 'SN',
+    currency: 'XOF',
+    flag: 'https://flagcdn.com/w40/sn.png',
+    is_active: true
+  },
+  {
+    id: 3,
+    name: 'Côte d\'Ivoire',
+    code: 'CI',
+    currency: 'XOF',
+    flag: 'https://flagcdn.com/w40/ci.png',
+    is_active: true
+  },
+  {
+    id: 4,
+    name: 'Mali',
+    code: 'ML',
+    currency: 'XOF',
+    flag: 'https://flagcdn.com/w40/ml.png',
+    is_active: false
+  }
+])
+
+const languages = ref([
+  {
+    id: 1,
+    name: 'Français',
+    native_name: 'Français',
+    code: 'fr',
+    flag: '🇫🇷',
+    direction: 'ltr',
+    is_active: true
+  },
+  {
+    id: 2,
+    name: 'English',
+    native_name: 'English',
+    code: 'en',
+    flag: '🇺🇸',
+    direction: 'ltr',
+    is_active: true
+  },
+  {
+    id: 3,
+    name: 'العربية',
+    native_name: 'العربية',
+    code: 'ar',
+    flag: '🇸🇦',
+    direction: 'rtl',
+    is_active: false
+  },
+  {
+    id: 4,
+    name: 'Español',
+    native_name: 'Español',
+    code: 'es',
+    flag: '🇪🇸',
+    direction: 'ltr',
+    is_active: false
+  }
+])
+
+// Modal states
+const showCountryModal = ref(false)
+const showEditCountryModal = ref(false)
+const showLanguageModal = ref(false)
+const showEditLanguageModal = ref(false)
+const editingCountry = ref(null)
+const editingLanguage = ref(null)
+
+// Forms
+const countryForm = reactive({
+  name: '',
+  code: '',
+  currency: '',
+  flag: '',
+  is_active: true
+})
+
+const languageForm = reactive({
+  name: '',
+  native_name: '',
+  code: '',
+  flag: '',
+  direction: 'ltr',
+  is_active: true
+})
+
+// Filters
+const countryFilters = reactive({
+  search: ''
+})
+
+const languageFilters = reactive({
+  search: ''
+})
+
 // Methods
 const loadSettings = async () => {
   loading.value = true
@@ -600,6 +1099,15 @@ const loadSettings = async () => {
             method.active = savedMethod.active
           }
         })
+      }
+      
+      // Load countries and languages
+      if (response.data.countries) {
+        countries.value = response.data.countries
+      }
+      
+      if (response.data.languages) {
+        languages.value = response.data.languages
       }
     }
   } catch (error) {
@@ -825,6 +1333,268 @@ const testEmailConfig = async () => {
   } finally {
     loading.value = false
   }
+}
+
+// Countries and Languages methods
+
+// Computed properties for filters
+const filteredCountries = computed(() => {
+  let filtered = countries.value
+
+  if (countryFilters.search) {
+    const search = countryFilters.search.toLowerCase()
+    filtered = filtered.filter(country => 
+      country.name.toLowerCase().includes(search) ||
+      country.code.toLowerCase().includes(search)
+    )
+  }
+
+  return filtered
+})
+
+const filteredLanguages = computed(() => {
+  let filtered = languages.value
+
+  if (languageFilters.search) {
+    const search = languageFilters.search.toLowerCase()
+    filtered = filtered.filter(language => 
+      language.name.toLowerCase().includes(search) ||
+      language.native_name.toLowerCase().includes(search) ||
+      language.code.toLowerCase().includes(search)
+    )
+  }
+
+  return filtered
+})
+
+// Country methods
+const editCountry = (country) => {
+  editingCountry.value = country
+  Object.assign(countryForm, {
+    name: country.name,
+    code: country.code,
+    currency: country.currency,
+    flag: country.flag,
+    is_active: country.is_active
+  })
+  showEditCountryModal.value = true
+}
+
+const createCountry = async () => {
+  loading.value = true
+  try {
+    const response = await post('/admin/countries', countryForm)
+    if (response && response.success) {
+      const newCountry = {
+        id: Date.now(),
+        ...countryForm
+      }
+      countries.value.unshift(newCountry)
+      closeCountryModal()
+      if (window.$toast) {
+        window.$toast.success('Pays créé avec succès', '✅ Création')
+      }
+    }
+  } catch (error) {
+    console.error('Error creating country:', error)
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la création du pays', '✗ Erreur')
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+const updateCountry = async () => {
+  loading.value = true
+  try {
+    const response = await put(`/admin/countries/${editingCountry.value.id}`, countryForm)
+    if (response && response.success) {
+      const index = countries.value.findIndex(c => c.id === editingCountry.value.id)
+      if (index !== -1) {
+        countries.value[index] = {
+          ...countries.value[index],
+          ...countryForm
+        }
+      }
+      closeCountryModal()
+      if (window.$toast) {
+        window.$toast.success('Pays modifié avec succès', '✅ Modification')
+      }
+    }
+  } catch (error) {
+    console.error('Error updating country:', error)
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la modification du pays', '✗ Erreur')
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+const toggleCountryStatus = async (country) => {
+  try {
+    const response = await put(`/admin/countries/${country.id}/toggle-status`)
+    if (response && response.success) {
+      country.is_active = !country.is_active
+      if (window.$toast) {
+        window.$toast.success(`Pays ${country.is_active ? 'activé' : 'désactivé'}`, '✅ Statut')
+      }
+    }
+  } catch (error) {
+    console.error('Error toggling country status:', error)
+    if (window.$toast) {
+      window.$toast.error('Erreur lors du changement de statut', '✗ Erreur')
+    }
+  }
+}
+
+const deleteCountry = async (countryId) => {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer ce pays ?')) return
+  
+  try {
+    const response = await post(`/admin/countries/${countryId}/delete`)
+    if (response && response.success) {
+      countries.value = countries.value.filter(c => c.id !== countryId)
+      if (window.$toast) {
+        window.$toast.success('Pays supprimé avec succès', '✅ Suppression')
+      }
+    }
+  } catch (error) {
+    console.error('Error deleting country:', error)
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la suppression du pays', '✗ Erreur')
+    }
+  }
+}
+
+const closeCountryModal = () => {
+  showCountryModal.value = false
+  showEditCountryModal.value = false
+  editingCountry.value = null
+  Object.assign(countryForm, {
+    name: '',
+    code: '',
+    currency: '',
+    flag: '',
+    is_active: true
+  })
+}
+
+// Language methods
+const editLanguage = (language) => {
+  editingLanguage.value = language
+  Object.assign(languageForm, {
+    name: language.name,
+    native_name: language.native_name,
+    code: language.code,
+    flag: language.flag,
+    direction: language.direction,
+    is_active: language.is_active
+  })
+  showEditLanguageModal.value = true
+}
+
+const createLanguage = async () => {
+  loading.value = true
+  try {
+    const response = await post('/admin/languages', languageForm)
+    if (response && response.success) {
+      const newLanguage = {
+        id: Date.now(),
+        ...languageForm
+      }
+      languages.value.unshift(newLanguage)
+      closeLanguageModal()
+      if (window.$toast) {
+        window.$toast.success('Langue créée avec succès', '✅ Création')
+      }
+    }
+  } catch (error) {
+    console.error('Error creating language:', error)
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la création de la langue', '✗ Erreur')
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+const updateLanguage = async () => {
+  loading.value = true
+  try {
+    const response = await put(`/admin/languages/${editingLanguage.value.id}`, languageForm)
+    if (response && response.success) {
+      const index = languages.value.findIndex(l => l.id === editingLanguage.value.id)
+      if (index !== -1) {
+        languages.value[index] = {
+          ...languages.value[index],
+          ...languageForm
+        }
+      }
+      closeLanguageModal()
+      if (window.$toast) {
+        window.$toast.success('Langue modifiée avec succès', '✅ Modification')
+      }
+    }
+  } catch (error) {
+    console.error('Error updating language:', error)
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la modification de la langue', '✗ Erreur')
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+const toggleLanguageStatus = async (language) => {
+  try {
+    const response = await put(`/admin/languages/${language.id}/toggle-status`)
+    if (response && response.success) {
+      language.is_active = !language.is_active
+      if (window.$toast) {
+        window.$toast.success(`Langue ${language.is_active ? 'activée' : 'désactivée'}`, '✅ Statut')
+      }
+    }
+  } catch (error) {
+    console.error('Error toggling language status:', error)
+    if (window.$toast) {
+      window.$toast.error('Erreur lors du changement de statut', '✗ Erreur')
+    }
+  }
+}
+
+const deleteLanguage = async (languageId) => {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer cette langue ?')) return
+  
+  try {
+    const response = await post(`/admin/languages/${languageId}/delete`)
+    if (response && response.success) {
+      languages.value = languages.value.filter(l => l.id !== languageId)
+      if (window.$toast) {
+        window.$toast.success('Langue supprimée avec succès', '✅ Suppression')
+      }
+    }
+  } catch (error) {
+    console.error('Error deleting language:', error)
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la suppression de la langue', '✗ Erreur')
+    }
+  }
+}
+
+const closeLanguageModal = () => {
+  showLanguageModal.value = false
+  showEditLanguageModal.value = false
+  editingLanguage.value = null
+  Object.assign(languageForm, {
+    name: '',
+    native_name: '',
+    code: '',
+    flag: '',
+    direction: 'ltr',
+    is_active: true
+  })
 }
 
 // Lifecycle

@@ -455,9 +455,9 @@ const selectedImage = ref(null)
 
 // Profile data
 const profileData = reactive({
-  first_name: '',
-  last_name: '',
-  email: '',
+  first_name: authStore.user?.first_name || '',
+  last_name: authStore.user?.last_name || '',
+  email: authStore.user?.email || '',
   phone: '',
   position: '',
   bio: '',
