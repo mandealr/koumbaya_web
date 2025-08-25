@@ -64,7 +64,7 @@
     <!-- Mobile sidebar overlay -->
     <div 
       v-if="sidebarOpen"
-      class="fixed inset-0 z-40 bg-black bg-opacity-20 lg:hidden"
+      class="fixed inset-0 z-40 bg-black/20 lg:hidden"
       @click="sidebarOpen = false"
     ></div>
 

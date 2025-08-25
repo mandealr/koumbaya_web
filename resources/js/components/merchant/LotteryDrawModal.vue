@@ -2,7 +2,7 @@
   <div v-if="show" class="fixed inset-0 z-50 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen px-4 text-center sm:block sm:p-0">
       <!-- Backdrop -->
-      <div class="fixed inset-0 bg-black bg-opacity-20 transition-opacity" @click="close"></div>
+      <div class="fixed inset-0 bg-black/20 transition-opacity" @click="close"></div>
 
       <!-- Modal -->
       <div class="koumbaya-card inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle bg-white shadow-xl transform transition-all">

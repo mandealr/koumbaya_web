@@ -11,19 +11,19 @@
           
           <!-- Quick Stats -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+            <div class="bg-white/20 rounded-lg p-4">
               <div class="text-2xl font-bold">{{ stats.total_lotteries || 0 }}</div>
               <div class="text-sm opacity-90">Tombolas terminées</div>
             </div>
-            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+            <div class="bg-white/20 rounded-lg p-4">
               <div class="text-2xl font-bold">{{ stats.total_winners || 0 }}</div>
               <div class="text-sm opacity-90">Gagnants heureux</div>
             </div>
-            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+            <div class="bg-white/20 rounded-lg p-4">
               <div class="text-2xl font-bold">{{ formatCurrencyShort(stats.total_prizes_value) }}</div>
               <div class="text-sm opacity-90">Valeur des prix</div>
             </div>
-            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+            <div class="bg-white/20 rounded-lg p-4">
               <div class="text-2xl font-bold">{{ stats.total_tickets_sold || 0 }}</div>
               <div class="text-sm opacity-90">Tickets vendus</div>
             </div>

@@ -11,19 +11,19 @@
 
           <!-- Quick Stats -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+            <div class="bg-white/20 rounded-lg p-4">
               <div class="text-2xl font-bold">{{ stats.total_lotteries || 0 }}</div>
               <div class="text-sm opacity-90">Tombolas terminées</div>
             </div>
-            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+            <div class="bg-white/20 rounded-lg p-4">
               <div class="text-2xl font-bold">{{ stats.total_winners || 0 }}</div>
               <div class="text-sm opacity-90">Gagnants heureux</div>
             </div>
-            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+            <div class="bg-white/20 rounded-lg p-4">
               <div class="text-2xl font-bold">{{ formatCurrencyShort(stats.total_prizes_value) }}</div>
               <div class="text-sm opacity-90">Valeur totale</div>
             </div>
-            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+            <div class="bg-white/20 rounded-lg p-4">
               <div class="text-2xl font-bold">{{ Math.round(stats.average_participation_rate || 0) }}%</div>
               <div class="text-sm opacity-90">Participation moy.</div>
             </div>
@@ -237,7 +237,7 @@
     <!-- Detail Modal -->
     <div v-if="selectedLottery" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-black bg-opacity-20" @click="selectedLottery = null"></div>
+        <div class="fixed inset-0 bg-black/20" @click="selectedLottery = null"></div>
         <div class="relative bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">

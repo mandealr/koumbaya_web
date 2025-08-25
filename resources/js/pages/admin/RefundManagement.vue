@@ -298,7 +298,7 @@
     <!-- Process Automatic Modal -->
     <div v-if="showProcessAutomatic" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-black bg-opacity-20" @click="showProcessAutomatic = false"></div>
+        <div class="fixed inset-0 bg-black/20" @click="showProcessAutomatic = false"></div>
         <div class="relative bg-white rounded-lg max-w-md w-full">
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
@@ -351,7 +351,7 @@
     <!-- Reject Modal -->
     <div v-if="refundToReject" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-black bg-opacity-20" @click="refundToReject = null"></div>
+        <div class="fixed inset-0 bg-black/20" @click="refundToReject = null"></div>
         <div class="relative bg-white rounded-lg max-w-md w-full">
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">

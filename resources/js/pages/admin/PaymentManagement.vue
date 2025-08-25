@@ -222,7 +222,7 @@
     </div>
 
     <!-- Payment Details Modal -->
-    <div v-if="showPaymentModal" class="fixed inset-0 bg-black bg-opacity-20 overflow-y-auto h-full w-full z-50">
+    <div v-if="showPaymentModal" class="fixed inset-0 bg-black/20 overflow-y-auto h-full w-full z-50">
       <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 shadow-lg rounded-md bg-white">
         <div class="mt-3">
           <div class="flex justify-between items-center mb-4">
