@@ -419,7 +419,7 @@ class ProductController extends Controller
      *             @OA\Property(property="ticket_price", type="number", format="float", example=2500),
      *             @OA\Property(property="category_id", type="integer", example=1),
      *             @OA\Property(property="images", type="array", @OA\Items(type="string")),
-     *             @OA\Property(property="min_participants", type="integer", example=300)
+     *             @OA\Property(property="min_participants", type="integer", example=150)
      *         )
      *     ),
      *     @OA\Response(
@@ -448,8 +448,8 @@ class ProductController extends Controller
             'ticket_price' => 'required|numeric|min:100',
             'category_id' => 'required|exists:categories,id',
             'images' => 'nullable|array',
-            'images.*' => 'string|url',
-            'min_participants' => 'nullable|integer|min:300|max:10000',
+            'images.*' => 'string',
+            'min_participants' => 'nullable|integer|min:10|max:10000',
         ]);
 
         if ($validator->fails()) {
@@ -463,7 +463,7 @@ class ProductController extends Controller
             'images' => $request->images,
             'price' => $request->price,
             'ticket_price' => $request->ticket_price,
-            'min_participants' => $request->min_participants ?? 300,
+            'min_participants' => $request->min_participants ?? 50,
             'category_id' => $request->category_id,
             'merchant_id' => $user->id,
             'status' => 'draft',
