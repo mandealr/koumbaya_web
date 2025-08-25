@@ -5,7 +5,7 @@
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900">🏦 Gestion des Remboursements</h1>
+            <h1 class="text-2xl font-bold text-gray-900">Gestion des Remboursements</h1>
             <p class="text-gray-600 mt-1">Administration des remboursements automatiques et manuels</p>
           </div>
           <div class="flex space-x-3">
@@ -13,7 +13,8 @@
               @click="checkEligibleLotteries"
               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              🔍 Vérifier les tombolas
+              <MagnifyingGlassIcon class="w-4 h-4 mr-2" />
+              Vérifier les tombolas
             </button>
             <button
               @click="showProcessAutomatic = true"
@@ -408,8 +409,12 @@ import {
   BanknotesIcon,
   XMarkIcon,
   ClockIcon,
-  CheckIcon,
-  CurrencyDollarIcon
+  CheckCircleIcon,
+  CogIcon,
+  MagnifyingGlassIcon,
+  EyeIcon,
+  XCircleIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
 
 const { get, post } = useApi()

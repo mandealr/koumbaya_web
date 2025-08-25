@@ -4,12 +4,18 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\RateLimiter;
+use App\Services\SafeRateLimiter;
 use Symfony\Component\HttpFoundation\Response;
 
 class RateLimitMiddleware
 {
+    protected $rateLimiter;
+
+    public function __construct()
+    {
+        $this->rateLimiter = new SafeRateLimiter();
+    }
+
     /**
      * Handle an incoming request.
      *
@@ -19,8 +25,8 @@ class RateLimitMiddleware
     {
         $key = $this->resolveRequestSignature($request);
         
-        if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
-            $retryAfter = RateLimiter::availableIn($key);
+        if ($this->rateLimiter->tooManyAttempts($key, $maxAttempts)) {
+            $retryAfter = $this->rateLimiter->availableIn($key);
             
             return response()->json([
                 'error' => 'Trop de requêtes. Réessayez dans ' . $retryAfter . ' secondes.',
@@ -28,13 +34,13 @@ class RateLimitMiddleware
             ], 429);
         }
 
-        RateLimiter::hit($key, $decayMinutes * 60);
+        $this->rateLimiter->hit($key, $decayMinutes * 60);
 
         $response = $next($request);
 
         // Ajouter des headers de rate limiting
         $response->headers->set('X-RateLimit-Limit', $maxAttempts);
-        $response->headers->set('X-RateLimit-Remaining', max(0, $maxAttempts - RateLimiter::attempts($key)));
+        $response->headers->set('X-RateLimit-Remaining', max(0, $maxAttempts - $this->rateLimiter->attempts($key)));
         
         return $response;
     }
