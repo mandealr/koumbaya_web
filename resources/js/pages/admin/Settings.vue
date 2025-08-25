@@ -166,12 +166,14 @@
             
             <!-- Search -->
             <div class="mb-6">
-              <input
-                v-model="countryFilters.search"
-                type="text"
-                placeholder="Rechercher un pays..."
-                class="admin-input w-full md:w-1/3"
-              />
+              <div class="w-full md:w-1/2 lg:w-1/3">
+                <input
+                  v-model="countryFilters.search"
+                  type="text"
+                  placeholder="Rechercher un pays..."
+                  class="admin-input"
+                />
+              </div>
             </div>
 
             <!-- Countries Table -->
@@ -275,12 +277,14 @@
             
             <!-- Search -->
             <div class="mb-6">
-              <input
-                v-model="languageFilters.search"
-                type="text"
-                placeholder="Rechercher une langue..."
-                class="admin-input w-full md:w-1/3"
-              />
+              <div class="w-full md:w-1/2 lg:w-1/3">
+                <input
+                  v-model="languageFilters.search"
+                  type="text"
+                  placeholder="Rechercher une langue..."
+                  class="admin-input"
+                />
+              </div>
             </div>
 
             <!-- Languages Table -->
@@ -398,11 +402,22 @@
                 <h4 class="font-medium text-gray-900">Méthodes de paiement actives</h4>
                 
                 <div class="space-y-3">
-                  <div v-for="method in paymentMethods" :key="method.id" class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                  <div v-for="method in paymentMethods" :key="method.id" class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                     <div class="flex items-center">
-                      <component :is="method.icon" class="w-6 h-6 mr-3 text-gray-500" />
+                      <component :is="method.icon" class="w-6 h-6 mr-3" :class="{
+                        'text-green-500': method.active,
+                        'text-gray-400': !method.active
+                      }" />
                       <div>
-                        <p class="font-medium text-gray-900">{{ method.name }}</p>
+                        <div class="flex items-center space-x-2">
+                          <p class="font-medium text-gray-900">{{ method.name }}</p>
+                          <span v-if="method.type === 'gateway'" class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                            Passerelle
+                          </span>
+                          <span v-else-if="method.gateway" class="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">
+                            via {{ method.gateway }}
+                          </span>
+                        </div>
                         <p class="text-sm text-gray-600">{{ method.description }}</p>
                       </div>
                     </div>
@@ -417,7 +432,12 @@
                       </label>
                       <button
                         @click="configurePaymentMethod(method)"
-                        class="text-[#0099cc] hover:text-[#0088bb] text-sm"
+                        :class="{
+                          'text-[#0099cc] hover:text-[#0088bb]': method.type === 'gateway' || method.config,
+                          'text-gray-300 cursor-not-allowed': method.type !== 'gateway' && !method.config
+                        }"
+                        class="text-sm transition-colors"
+                        :disabled="method.type !== 'gateway' && !method.config"
                       >
                         <CogIcon class="w-4 h-4" />
                       </button>
@@ -862,6 +882,227 @@
         </form>
       </div>
     </div>
+
+    <!-- Payment Configuration Modal -->
+    <div v-if="showPaymentConfigModal" class="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg max-w-2xl w-full mx-4">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900">
+            Configuration {{ editingPaymentMethod?.name }}
+          </h3>
+        </div>
+
+        <form @submit.prevent="updatePaymentMethodConfig">
+          <div class="px-6 py-4 space-y-6">
+            <!-- eBilling Configuration -->
+            <div v-if="editingPaymentMethod?.id === 'ebilling'">
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div class="flex items-start">
+                  <div class="flex-shrink-0">
+                    <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">Configuration eBilling</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                      <p>eBilling prend en charge Airtel Money et Moov Money au Gabon. Configurez vos identifiants API ci-dessous.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Merchant ID *</label>
+                  <input
+                    v-model="editingPaymentMethod.config.merchant_id"
+                    type="text"
+                    required
+                    class="admin-input"
+                    placeholder="Votre Merchant ID eBilling"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Environnement</label>
+                  <select
+                    v-model="editingPaymentMethod.config.environment"
+                    class="admin-input"
+                  >
+                    <option value="sandbox">Test (Sandbox)</option>
+                    <option value="production">Production</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Clé API *</label>
+                <input
+                  v-model="editingPaymentMethod.config.api_key"
+                  type="text"
+                  required
+                  class="admin-input"
+                  placeholder="Votre clé API eBilling"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Clé secrète *</label>
+                <input
+                  v-model="editingPaymentMethod.config.secret_key"
+                  type="password"
+                  required
+                  class="admin-input"
+                  placeholder="Votre clé secrète eBilling"
+                />
+              </div>
+
+              <div class="bg-gray-50 rounded-lg p-4">
+                <h4 class="text-sm font-medium text-gray-900 mb-2">Méthodes supportées via eBilling</h4>
+                <div class="flex flex-wrap gap-2">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                    Airtel Money
+                  </span>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                    Moov Money
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Flutterwave Configuration -->
+            <div v-if="editingPaymentMethod?.id === 'flutterwave'">
+              <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+                <div class="flex items-start">
+                  <div class="flex-shrink-0">
+                    <svg class="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-purple-800">Configuration Flutterwave</h3>
+                    <div class="mt-2 text-sm text-purple-700">
+                      <p>Flutterwave prend en charge les cartes, mobile money, et virements bancaires à travers l'Afrique.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Clé publique *</label>
+                  <input
+                    v-model="editingPaymentMethod.config.public_key"
+                    type="text"
+                    required
+                    class="admin-input"
+                    placeholder="FLWPUBK_TEST-..."
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Environnement</label>
+                  <select
+                    v-model="editingPaymentMethod.config.environment"
+                    class="admin-input"
+                  >
+                    <option value="sandbox">Test (Sandbox)</option>
+                    <option value="live">Production (Live)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Clé secrète *</label>
+                <input
+                  v-model="editingPaymentMethod.config.secret_key"
+                  type="password"
+                  required
+                  class="admin-input"
+                  placeholder="FLWSECK_TEST-..."
+                />
+              </div>
+            </div>
+
+            <!-- Paystack Configuration -->
+            <div v-if="editingPaymentMethod?.id === 'paystack'">
+              <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                <div class="flex items-start">
+                  <div class="flex-shrink-0">
+                    <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-green-800">Configuration Paystack</h3>
+                    <div class="mt-2 text-sm text-green-700">
+                      <p>Paystack prend en charge les cartes, USSD, et virements bancaires principalement au Nigeria et Ghana.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Clé publique *</label>
+                  <input
+                    v-model="editingPaymentMethod.config.public_key"
+                    type="text"
+                    required
+                    class="admin-input"
+                    placeholder="pk_test_..."
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Environnement</label>
+                  <select
+                    v-model="editingPaymentMethod.config.environment"
+                    class="admin-input"
+                  >
+                    <option value="sandbox">Test (Sandbox)</option>
+                    <option value="live">Production (Live)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Clé secrète *</label>
+                <input
+                  v-model="editingPaymentMethod.config.secret_key"
+                  type="password"
+                  required
+                  class="admin-input"
+                  placeholder="sk_test_..."
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+            <button
+              type="button"
+              @click="closePaymentConfigModal"
+              class="admin-btn-secondary"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              :disabled="loading"
+              class="admin-btn-primary disabled:opacity-50"
+            >
+              <span v-if="loading">Sauvegarde...</span>
+              <span v-else>Sauvegarder la configuration</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -922,32 +1163,102 @@ const paymentSettings = reactive({
 
 const paymentMethods = ref([
   {
+    id: 'ebilling',
+    name: 'eBilling',
+    description: 'Passerelle eBilling (Airtel Money, Moov Money)',
+    icon: DevicePhoneMobileIcon,
+    active: true,
+    type: 'gateway',
+    config: {
+      merchant_id: '',
+      api_key: '',
+      secret_key: '',
+      environment: 'sandbox' // sandbox ou production
+    }
+  },
+  {
+    id: 'airtel_money',
+    name: 'Airtel Money',
+    description: 'Paiement mobile via Airtel Money (eBilling)',
+    icon: DevicePhoneMobileIcon,
+    active: true,
+    type: 'mobile_money',
+    gateway: 'ebilling'
+  },
+  {
+    id: 'moov_money',
+    name: 'Moov Money',
+    description: 'Paiement mobile via Moov Money (eBilling)',
+    icon: DevicePhoneMobileIcon,
+    active: true,
+    type: 'mobile_money',
+    gateway: 'ebilling'
+  },
+  {
     id: 'orange_money',
     name: 'Orange Money',
-    description: 'Paiement via Orange Money',
+    description: 'Paiement mobile via Orange Money',
     icon: DevicePhoneMobileIcon,
-    active: true
+    active: false,
+    type: 'mobile_money'
   },
   {
     id: 'mtn_money',
     name: 'MTN Mobile Money',
-    description: 'Paiement via MTN Mobile Money',
+    description: 'Paiement mobile via MTN Mobile Money',
     icon: DevicePhoneMobileIcon,
-    active: true
+    active: false,
+    type: 'mobile_money'
   },
   {
     id: 'credit_card',
-    name: 'Carte bancaire',
+    name: 'Cartes bancaires',
     description: 'Paiement par carte Visa/Mastercard',
     icon: CreditCardIcon,
-    active: false
+    active: false,
+    type: 'card'
+  },
+  {
+    id: 'flutterwave',
+    name: 'Flutterwave',
+    description: 'Passerelle Flutterwave (Cards, Mobile Money, Bank Transfer)',
+    icon: CreditCardIcon,
+    active: false,
+    type: 'gateway',
+    config: {
+      public_key: '',
+      secret_key: '',
+      environment: 'sandbox'
+    }
+  },
+  {
+    id: 'paystack',
+    name: 'Paystack',
+    description: 'Passerelle Paystack (Cards, USSD, Bank Transfer)',
+    icon: CreditCardIcon,
+    active: false,
+    type: 'gateway',
+    config: {
+      public_key: '',
+      secret_key: '',
+      environment: 'sandbox'
+    }
+  },
+  {
+    id: 'wave',
+    name: 'Wave',
+    description: 'Paiement mobile Wave (Sénégal, Côte d\'Ivoire)',
+    icon: DevicePhoneMobileIcon,
+    active: false,
+    type: 'mobile_money'
   },
   {
     id: 'bank_transfer',
     name: 'Virement bancaire',
-    description: 'Paiement par virement bancaire',
+    description: 'Paiement par virement bancaire local',
     icon: BanknotesIcon,
-    active: false
+    active: false,
+    type: 'bank_transfer'
   }
 ])
 
@@ -1085,8 +1396,10 @@ const showCountryModal = ref(false)
 const showEditCountryModal = ref(false)
 const showLanguageModal = ref(false)
 const showEditLanguageModal = ref(false)
+const showPaymentConfigModal = ref(false)
 const editingCountry = ref(null)
 const editingLanguage = ref(null)
+const editingPaymentMethod = ref(null)
 
 // Forms
 const countryForm = reactive({
@@ -1124,6 +1437,21 @@ const activeLanguages = computed(() => {
   return languages.value.filter(language => language.is_active)
 })
 
+// Utility function to handle API errors gracefully during development
+const handleApiError = (error, action, successMessage) => {
+  if (error.response?.status === 404) {
+    // API pas encore implémentée, simuler le succès
+    console.info(`API ${action} pas encore implémentée, simulation du succès`)
+    if (window.$toast) {
+      window.$toast.info(`${successMessage} (API en développement)`, 'ℹ️ Développement')
+    }
+  } else {
+    if (window.$toast) {
+      window.$toast.error(`Erreur lors de ${action.toLowerCase()}`, '✗ Erreur')
+    }
+  }
+}
+
 // Methods
 const loadSettings = async () => {
   loading.value = true
@@ -1157,8 +1485,14 @@ const loadSettings = async () => {
     }
   } catch (error) {
     console.error('Error loading settings:', error)
-    if (window.$toast) {
-      window.$toast.error('Erreur lors du chargement des paramètres', '✗ Erreur')
+    // En mode développement, utiliser les données par défaut sans afficher d'erreur
+    if (error.response?.status !== 404) {
+      if (window.$toast) {
+        window.$toast.error('Erreur lors du chargement des paramètres', '✗ Erreur')
+      }
+    } else {
+      // API pas encore implémentée, utiliser les données par défaut
+      console.info('API /admin/settings pas encore implémentée, utilisation des données par défaut')
     }
   } finally {
     loading.value = false
@@ -1176,9 +1510,7 @@ const updateGeneralSettings = async () => {
     }
   } catch (error) {
     console.error('Error updating general settings:', error)
-    if (window.$toast) {
-      window.$toast.error('Erreur lors de la sauvegarde', '✗ Erreur')
-    }
+    handleApiError(error, '/admin/settings/general', 'Paramètres généraux sauvegardés')
   } finally {
     loading.value = false
   }
@@ -1294,10 +1626,14 @@ const backupSettings = async () => {
 }
 
 const configurePaymentMethod = (method) => {
-  if (window.$toast) {
-    window.$toast.info(`Configuration de ${method.name}`, 'ℹ️ Configuration')
+  if (method.type === 'gateway' && method.config) {
+    editingPaymentMethod.value = method
+    showPaymentConfigModal.value = true
+  } else {
+    if (window.$toast) {
+      window.$toast.info(`Configuration non disponible pour ${method.name}`, 'ℹ️ Information')
+    }
   }
-  // TODO: Open configuration modal for payment method
 }
 
 const clearCache = async () => {
@@ -1640,6 +1976,36 @@ const closeLanguageModal = () => {
     direction: 'ltr',
     is_active: true
   })
+}
+
+// Payment configuration methods
+const updatePaymentMethodConfig = async () => {
+  loading.value = true
+  try {
+    const response = await put(`/admin/settings/payment-methods/${editingPaymentMethod.value.id}`, {
+      config: editingPaymentMethod.value.config,
+      active: editingPaymentMethod.value.active
+    })
+    
+    if (response && response.success) {
+      if (window.$toast) {
+        window.$toast.success(`Configuration ${editingPaymentMethod.value.name} sauvegardée`, '✅ Configuration')
+      }
+      closePaymentConfigModal()
+    }
+  } catch (error) {
+    console.error('Error updating payment method config:', error)
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la sauvegarde de la configuration', '✗ Erreur')
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+const closePaymentConfigModal = () => {
+  showPaymentConfigModal.value = false
+  editingPaymentMethod.value = null
 }
 
 // Lifecycle

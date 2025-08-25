@@ -141,11 +141,15 @@
 }
 
 .admin-input {
+  width: 100%;
+  min-width: 200px;
   border: 1px solid var(--admin-border-medium);
   background-color: var(--admin-card-bg);
   color: var(--admin-text-primary);
-  padding: 0.75rem;
-  border-radius: 6px;
+  padding: 0.875rem 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.5;
   transition: all 0.2s ease;
 }
 
@@ -153,6 +157,11 @@
   border-color: var(--admin-primary);
   box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
   outline: none;
+}
+
+.admin-input::placeholder {
+  color: var(--admin-text-secondary);
+  opacity: 0.7;
 }
 
 .admin-badge-success {
