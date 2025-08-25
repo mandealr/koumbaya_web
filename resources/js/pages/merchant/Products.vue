@@ -512,12 +512,13 @@ const editProduct = (product) => {
 const loadProducts = async () => {
   try {
     const params = new URLSearchParams()
+    params.append('my_products', '1') // Filter for current merchant's products
     if (filters.search) params.append('search', filters.search)
     if (filters.category) params.append('category_id', filters.category)
     if (filters.status) params.append('status', filters.status)
     if (filters.sortBy) params.append('sort_by', filters.sortBy)
     
-    const response = await get(`/merchant/products?${params.toString()}`)
+    const response = await get(`/products?${params.toString()}`)
     if (response && response.data && Array.isArray(response.data)) {
       products.value = response.data.map(product => ({
         ...product,

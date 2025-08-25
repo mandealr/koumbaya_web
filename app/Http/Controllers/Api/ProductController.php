@@ -100,6 +100,14 @@ class ProductController extends Controller
     {
         $query = Product::with(['category', 'merchant', 'activeLottery']);
 
+        // Filtrer par marchand si paramètre "my_products" est présent et user authentifié
+        if ($request->boolean('my_products')) {
+            $user = auth('sanctum')->user();
+            if ($user) {
+                $query->where('merchant_id', $user->id);
+            }
+        }
+
         // Filtres de base
         if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id);
