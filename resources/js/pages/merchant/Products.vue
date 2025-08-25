@@ -150,7 +150,7 @@
       </router-link>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative">
       <div
         v-for="product in filteredProducts"
         :key="product.id"
@@ -269,6 +269,7 @@
             <div class="relative">
               <button
                 @click="toggleProductMenu(product.id)"
+                :data-product-id="product.id"
                 class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
               >
                 <EllipsisVerticalIcon class="w-4 h-4" />
@@ -276,7 +277,8 @@
 
               <div
                 v-if="showProductMenu === product.id"
-                class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                class="fixed mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-[9999]"
+                :style="getMenuPosition(product.id)"
               >
                 <button
                   @click="duplicateProduct(product)"
@@ -749,6 +751,19 @@ const formatCurrency = (amount) => {
 
 const toggleProductMenu = (productId) => {
   showProductMenu.value = showProductMenu.value === productId ? null : productId
+}
+
+const getMenuPosition = (productId) => {
+  // Obtenir la position du bouton relatif à la fenêtre
+  const button = document.querySelector(`[data-product-id="${productId}"]`)
+  if (button) {
+    const rect = button.getBoundingClientRect()
+    return {
+      top: `${rect.bottom + 8}px`,
+      left: `${rect.right - 192}px` // 192px = w-48
+    }
+  }
+  return { top: '0px', left: '0px' }
 }
 
 // Close menu when clicking outside
