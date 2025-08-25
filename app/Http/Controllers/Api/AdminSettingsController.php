@@ -56,23 +56,23 @@ class AdminSettingsController extends Controller
     {
         try {
             $request->validate([
-                'app_name' => 'required|string|max:255',
-                'app_url' => 'required|url|max:255',
-                'app_description' => 'required|string|max:1000',
-                'contact_email' => 'required|email|max:255',
-                'contact_phone' => 'required|string|max:20',
-                'default_language' => 'required|string|max:5',
-                'default_country' => 'required|string|max:2'
+                'app_name' => 'nullable|string|max:255',
+                'app_url' => 'nullable|string|max:255',
+                'app_description' => 'nullable|string|max:1000',
+                'contact_email' => 'nullable|email|max:255',
+                'contact_phone' => 'nullable|string|max:20',
+                'default_language' => 'nullable|string|max:5',
+                'default_country' => 'nullable|string|max:2'
             ]);
 
             $settings = [
-                'app_name' => ['value' => $request->app_name, 'type' => 'string'],
-                'app_url' => ['value' => $request->app_url, 'type' => 'string'],
-                'app_description' => ['value' => $request->app_description, 'type' => 'string'],
-                'contact_email' => ['value' => $request->contact_email, 'type' => 'string'],
-                'contact_phone' => ['value' => $request->contact_phone, 'type' => 'string'],
-                'default_language' => ['value' => $request->default_language, 'type' => 'string'],
-                'default_country' => ['value' => $request->default_country, 'type' => 'string']
+                'app_name' => ['value' => $request->app_name ?? '', 'type' => 'string'],
+                'app_url' => ['value' => $request->app_url ?? '', 'type' => 'string'],
+                'app_description' => ['value' => $request->app_description ?? '', 'type' => 'string'],
+                'contact_email' => ['value' => $request->contact_email ?? '', 'type' => 'string'],
+                'contact_phone' => ['value' => $request->contact_phone ?? '', 'type' => 'string'],
+                'default_language' => ['value' => $request->default_language ?? 'fr', 'type' => 'string'],
+                'default_country' => ['value' => $request->default_country ?? 'GA', 'type' => 'string']
             ];
 
             foreach ($settings as $key => $config) {
@@ -83,6 +83,12 @@ class AdminSettingsController extends Controller
                 'success' => true,
                 'message' => 'Paramètres généraux mis à jour avec succès'
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $e->validator->errors()
+            ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
