@@ -56,7 +56,7 @@
 
     <!-- Filters and Search -->
     <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Rechercher</label>
           <div class="relative">
@@ -97,6 +97,19 @@
             <option value="active">Actif</option>
             <option value="completed">Terminé</option>
             <option value="cancelled">Annulé</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Mode de vente</label>
+          <select
+            v-model="filters.saleMode"
+            @change="applyFilters"
+            class="w-full py-2 px-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0099cc] focus:border-transparent text-black"
+          >
+            <option value="">Tous les modes</option>
+            <option value="direct">Vente directe</option>
+            <option value="lottery">Tombola</option>
           </select>
         </div>
 
@@ -143,7 +156,7 @@
         <!-- Product Image -->
         <div class="relative h-48 bg-gray-200">
           <ProductImage
-            :src="product.image"
+            :src="product.main_image || product.image_url || (product.images && product.images[0]) || null"
             :alt="product.name"
             container-class="w-full h-full"
             image-class="w-full h-full object-cover"
@@ -155,7 +168,7 @@
           </div>
           <div class="absolute top-3 right-3">
             <div class="bg-black/50 text-white px-2 py-1 rounded-lg text-xs font-medium">
-              {{ product.category }}
+              {{ product.category?.name || 'Sans catégorie' }}
             </div>
           </div>
         </div>
@@ -165,42 +178,57 @@
           <div class="flex items-start justify-between mb-3">
             <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ product.name }}</h3>
             <div class="text-right ml-2">
-              <p class="text-lg font-bold text-[#0099cc]">{{ formatAmount(product.value) }} FCFA</p>
+              <p class="text-lg font-bold text-[#0099cc]">{{ formatAmount(product.price) }} FCFA</p>
               <p class="text-xs text-gray-500">Valeur</p>
             </div>
           </div>
 
           <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ product.description }}</p>
 
-          <!-- Lottery Progress -->
+          <!-- Product Info -->
           <div class="space-y-3 mb-4">
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-600">Progression</span>
-              <span class="font-medium">{{ product.sold_tickets }}/{{ product.total_tickets }}</span>
+            <!-- Direct Sale Mode -->
+            <div v-if="product.sale_mode === 'direct'" class="text-center py-2">
+              <div class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                Vente directe
+              </div>
             </div>
 
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div
-                class="bg-gradient-to-r from-[#0099cc] to-cyan-500 h-2 rounded-full transition-all duration-500"
-                :style="{ width: product.progress + '%' }"
-              ></div>
-            </div>
+            <!-- Lottery Mode -->
+            <div v-else-if="product.sale_mode === 'lottery'">
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Progression</span>
+                <span class="font-medium">{{ product.sold_tickets || 0 }}/{{ product.total_tickets || 0 }}</span>
+              </div>
 
-            <div class="flex justify-between text-xs text-gray-500">
-              <span>{{ product.progress }}% vendu</span>
-              <span v-if="product.end_date">Fin: {{ formatDate(product.end_date) }}</span>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  class="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-500"
+                  :style="{ width: product.progress + '%' }"
+                ></div>
+              </div>
+
+              <div class="flex justify-between text-xs text-gray-500">
+                <span>{{ product.progress }}% vendu</span>
+                <span v-if="product.end_date">Fin: {{ formatDate(product.end_date) }}</span>
+              </div>
             </div>
           </div>
 
           <!-- Revenue Info -->
           <div class="grid grid-cols-2 gap-4 mb-4 text-center">
-            <div class="bg-blue-50 p-3 rounded-lg">
-              <p class="text-blue-700 font-semibold text-lg">{{ formatAmount(product.revenue) }}</p>
-              <p class="text-blue-600 text-xs">Revenus</p>
+            <div class="bg-green-50 p-3 rounded-lg">
+              <p class="text-green-700 font-semibold text-lg">{{ formatAmount(product.revenue || 0) }}</p>
+              <p class="text-green-600 text-xs">Revenus</p>
             </div>
             <div class="bg-blue-50 p-3 rounded-lg">
-              <p class="text-blue-700 font-semibold text-lg">{{ formatCurrency(product.ticket_price || 0) }}</p>
-              <p class="text-blue-600 text-xs">Prix/ticket</p>
+              <p v-if="product.sale_mode === 'lottery'" class="text-blue-700 font-semibold text-lg">{{ formatAmount(product.ticket_price || 0) }}</p>
+              <p v-else class="text-blue-700 font-semibold text-lg">{{ product.stock_quantity || 0 }}</p>
+              <p v-if="product.sale_mode === 'lottery'" class="text-blue-600 text-xs">Prix/ticket</p>
+              <p v-else class="text-blue-600 text-xs">Stock</p>
             </div>
           </div>
 
@@ -400,6 +428,7 @@ const filters = reactive({
   search: '',
   category: '',
   status: '',
+  saleMode: '',
   sortBy: 'created_at'
 })
 
@@ -409,39 +438,8 @@ const products = ref([])
 
 // Computed
 const filteredProducts = computed(() => {
-  let filtered = products.value
-
-  if (filters.search) {
-    const search = filters.search.toLowerCase()
-    filtered = filtered.filter(product =>
-      product.name.toLowerCase().includes(search) ||
-      product.description.toLowerCase().includes(search)
-    )
-  }
-
-  if (filters.category) {
-    filtered = filtered.filter(product => product.category === categories.value.find(c => c.id == filters.category)?.name)
-  }
-
-  if (filters.status) {
-    filtered = filtered.filter(product => product.status === filters.status)
-  }
-
-  // Sort
-  filtered.sort((a, b) => {
-    switch (filters.sortBy) {
-      case 'sales':
-        return b.sold_tickets - a.sold_tickets
-      case 'end_date':
-        return new Date(b.end_date || 0) - new Date(a.end_date || 0)
-      case 'value':
-        return b.value - a.value
-      default:
-        return new Date(b.created_at) - new Date(a.created_at)
-    }
-  })
-
-  return filtered
+  // Les filtres et tri sont gérés côté backend
+  return products.value
 })
 
 // Methods
@@ -516,6 +514,7 @@ const loadProducts = async () => {
     if (filters.search) params.append('search', filters.search)
     if (filters.category) params.append('category_id', filters.category)
     if (filters.status) params.append('status', filters.status)
+    if (filters.saleMode) params.append('sale_mode', filters.saleMode)
     if (filters.sortBy) params.append('sort_by', filters.sortBy)
     
     const response = await get(`/products?${params.toString()}`)
