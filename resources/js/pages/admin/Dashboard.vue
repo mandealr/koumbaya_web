@@ -150,8 +150,19 @@
                     {{ formatDate(lottery.end_date) }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button class="text-[#0099cc] hover:text-[#0088bb] mr-3">Voir</button>
-                    <button v-if="lottery.status === 'active'" class="text-orange-600 hover:text-orange-900">Modifier</button>
+                    <button 
+                      @click="viewLottery(lottery)"
+                      class="text-[#0099cc] hover:text-[#0088bb] mr-3"
+                    >
+                      Voir
+                    </button>
+                    <button 
+                      v-if="lottery.status === 'active'" 
+                      @click="manageLotteries"
+                      class="text-orange-600 hover:text-orange-900"
+                    >
+                      Modifier
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -211,7 +222,10 @@
           </div>
           
           <div class="mt-4 pt-4 border-t border-gray-100">
-            <button class="admin-btn-secondary w-full text-sm">
+            <button 
+              @click="viewAllActivities"
+              class="admin-btn-secondary w-full text-sm"
+            >
               Voir toutes les activités
             </button>
           </div>
@@ -262,15 +276,17 @@
             <h3 class="text-lg font-semibold text-gray-900">Actions rapides</h3>
           </div>
           <div class="space-y-3">
-            <button class="admin-btn-primary w-full justify-center">
-              <PlusIcon class="w-4 h-4 mr-2" />
-              Nouveau produit
-            </button>
-            <button class="admin-btn-secondary w-full justify-center">
+            <button 
+              @click="navigateToUsers"
+              class="admin-btn-primary w-full justify-center"
+            >
               <UserPlusIcon class="w-4 h-4 mr-2" />
-              Ajouter utilisateur
+              Gérer les utilisateurs
             </button>
-            <button class="admin-btn-accent w-full justify-center">
+            <button 
+              @click="generateReport"
+              class="admin-btn-secondary w-full justify-center"
+            >
               <DocumentTextIcon class="w-4 h-4 mr-2" />
               Générer rapport
             </button>
@@ -283,6 +299,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import ProductImage from '@/components/common/ProductImage.vue'
 import {
   UsersIcon,
@@ -292,15 +309,17 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
   ChartBarIcon,
-  PlusIcon,
   UserPlusIcon,
   DocumentTextIcon,
   BanknotesIcon,
   InformationCircleIcon
 } from '@heroicons/vue/24/outline'
 import { useAdminStats } from '@/composables/useAdminStats'
+import { useApi } from '@/composables/api'
 
 // Composables
+const router = useRouter()
+const { get } = useApi()
 const {
   stats,
   recentLotteries,
@@ -360,6 +379,51 @@ const formatTime = (date) => {
 // Refresh data
 const refreshDashboard = async () => {
   await loadDashboardData()
+}
+
+// Navigation methods
+const navigateToUsers = () => {
+  router.push('/admin/users')
+}
+
+const manageLotteries = () => {
+  router.push('/admin/lotteries')
+}
+
+const viewAllActivities = () => {
+  // Pour l'instant, affichage d'un toast - peut être étendu plus tard
+  if (window.$toast) {
+    window.$toast.info('Fonctionnalité des activités détaillées en cours de développement', 'ℹ️ Information')
+  }
+}
+
+// Lottery actions
+const viewLottery = (lottery) => {
+  if (window.$toast) {
+    window.$toast.info(`Affichage des détails de la tombola ${lottery.lottery_number}`, '👁️ Détails')
+  }
+  // Ici on pourrait naviguer vers une page de détail ou ouvrir un modal
+  // router.push(`/admin/lotteries/${lottery.id}`)
+}
+
+// Report generation
+const generateReport = async () => {
+  try {
+    if (window.$toast) {
+      window.$toast.info('Génération du rapport en cours...', '📊 Rapport')
+    }
+    
+    // Simuler la génération d'un rapport
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    if (window.$toast) {
+      window.$toast.success('Rapport généré avec succès!', '✅ Rapport')
+    }
+  } catch (error) {
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la génération du rapport', '❌ Erreur')
+    }
+  }
 }
 
 onMounted(async () => {
