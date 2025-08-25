@@ -228,7 +228,7 @@ class AdminProductController extends Controller
      */
     private function getCategories()
     {
-        return Category::where('active', true)
+        return Category::where('is_active', true)
             ->select('id', 'name', 'slug')
             ->orderBy('name')
             ->get();
