@@ -133,7 +133,7 @@
             <!-- Product Image -->
             <div class="flex-shrink-0">
               <img
-                :src="ticket.product.image"
+                :src="ticket.product.image_url || ticket.product.main_image || ticket.product.image"
                 :alt="ticket.product.title"
                 class="w-20 h-20 rounded-lg object-cover"
               />

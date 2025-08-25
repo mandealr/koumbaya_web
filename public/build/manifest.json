@@ -35,7 +35,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-B6xONF2U.js",
+    "file": "assets/app-BMePXE-1.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -47,6 +47,7 @@
       "resources/js/pages/merchant/Dashboard.vue",
       "resources/js/pages/merchant/Products.vue",
       "resources/js/pages/merchant/CreateProduct.vue",
+      "resources/js/pages/merchant/EditProduct.vue",
       "resources/js/pages/merchant/Orders.vue",
       "resources/js/pages/merchant/LotteriesSimple.vue",
       "resources/js/pages/merchant/LotteryView.vue",
@@ -55,7 +56,7 @@
       "resources/js/pages/merchant/Profile.vue"
     ],
     "css": [
-      "assets/app-u44WzFFR.css"
+      "assets/app-DSbG9CAz.css"
     ],
     "assets": [
       "assets/logo-ZbB75Npb.png",
@@ -79,7 +80,7 @@
     "src": "resources/js/assets/avatar-placeholder.jpg"
   },
   "resources/js/components/common/MerchantLayout.vue": {
-    "file": "assets/MerchantLayout-C-zAD9ZV.js",
+    "file": "assets/MerchantLayout-DdKEVpmd.js",
     "name": "MerchantLayout",
     "src": "resources/js/components/common/MerchantLayout.vue",
     "isDynamicEntry": true,
@@ -89,7 +90,7 @@
     ]
   },
   "resources/js/pages/merchant/Analytics.vue": {
-    "file": "assets/Analytics-CM2lm0cp.js",
+    "file": "assets/Analytics-XtDKUaLQ.js",
     "name": "Analytics",
     "src": "resources/js/pages/merchant/Analytics.vue",
     "isDynamicEntry": true,
@@ -99,7 +100,7 @@
     ]
   },
   "resources/js/pages/merchant/CreateProduct.vue": {
-    "file": "assets/CreateProduct-B2pMzLSN.js",
+    "file": "assets/CreateProduct-BD1j0lhH.js",
     "name": "CreateProduct",
     "src": "resources/js/pages/merchant/CreateProduct.vue",
     "isDynamicEntry": true,
@@ -110,7 +111,7 @@
     ]
   },
   "resources/js/pages/merchant/Dashboard.vue": {
-    "file": "assets/Dashboard-D-ZSMnrP.js",
+    "file": "assets/Dashboard-By4yYF_j.js",
     "name": "Dashboard",
     "src": "resources/js/pages/merchant/Dashboard.vue",
     "isDynamicEntry": true,
@@ -119,8 +120,18 @@
       "_vendor-CTxEzfV9.js"
     ]
   },
+  "resources/js/pages/merchant/EditProduct.vue": {
+    "file": "assets/EditProduct-DstJxNgW.js",
+    "name": "EditProduct",
+    "src": "resources/js/pages/merchant/EditProduct.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-CTxEzfV9.js",
+      "resources/js/app.js"
+    ]
+  },
   "resources/js/pages/merchant/LotteriesSimple.vue": {
-    "file": "assets/LotteriesSimple-CQIG23_t.js",
+    "file": "assets/LotteriesSimple-DTy0-xrZ.js",
     "name": "LotteriesSimple",
     "src": "resources/js/pages/merchant/LotteriesSimple.vue",
     "isDynamicEntry": true,
@@ -130,7 +141,7 @@
     ]
   },
   "resources/js/pages/merchant/LotteryView.vue": {
-    "file": "assets/LotteryView-BmIk5nld.js",
+    "file": "assets/LotteryView-NW_WaSce.js",
     "name": "LotteryView",
     "src": "resources/js/pages/merchant/LotteryView.vue",
     "isDynamicEntry": true,
@@ -140,7 +151,7 @@
     ]
   },
   "resources/js/pages/merchant/Orders.vue": {
-    "file": "assets/Orders-BlxBX4cI.js",
+    "file": "assets/Orders-B8a26v09.js",
     "name": "Orders",
     "src": "resources/js/pages/merchant/Orders.vue",
     "isDynamicEntry": true,
@@ -150,7 +161,7 @@
     ]
   },
   "resources/js/pages/merchant/Products.vue": {
-    "file": "assets/Products-BXW_nkyz.js",
+    "file": "assets/Products-CDuyEnO5.js",
     "name": "Products",
     "src": "resources/js/pages/merchant/Products.vue",
     "isDynamicEntry": true,
@@ -161,7 +172,7 @@
     ]
   },
   "resources/js/pages/merchant/Profile.vue": {
-    "file": "assets/Profile-BB5cktsw.js",
+    "file": "assets/Profile-KrjfIuvE.js",
     "name": "Profile",
     "src": "resources/js/pages/merchant/Profile.vue",
     "isDynamicEntry": true,
@@ -171,7 +182,7 @@
     ]
   },
   "resources/js/pages/merchant/Settings.vue": {
-    "file": "assets/Settings-t3JGxHvj.js",
+    "file": "assets/Settings-Bdw8JD6h.js",
     "name": "Settings",
     "src": "resources/js/pages/merchant/Settings.vue",
     "isDynamicEntry": true,

@@ -102,7 +102,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-4">
                 <img
-                  :src="lottery.product.image"
+                  :src="lottery.product.image_url || lottery.product.main_image || lottery.product.image"
                   :alt="lottery.product.title"
                   class="w-16 h-16 rounded-lg object-cover"
                 />
@@ -200,7 +200,7 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <img
-                      :src="lottery.product.image"
+                      :src="lottery.product.image_url || lottery.product.main_image || lottery.product.image"
                       :alt="lottery.product.title"
                       class="w-12 h-12 rounded-lg object-cover"
                     />
@@ -287,7 +287,7 @@
             <div class="flex items-start justify-between">
               <div class="flex items-start space-x-4">
                 <img
-                  :src="lottery.product.image"
+                  :src="lottery.product.image_url || lottery.product.main_image || lottery.product.image"
                   :alt="lottery.product.title"
                   class="w-16 h-16 rounded-lg object-cover"
                 />

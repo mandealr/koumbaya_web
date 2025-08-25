@@ -121,7 +121,7 @@
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <ProductImage 
-                        :src="lottery.product.image" 
+                        :src="lottery.product.image_url || lottery.product.main_image || lottery.product.image" 
                         :alt="lottery.product.name"
                         container-class="h-10 w-10 rounded-lg"
                         image-class="h-full w-full object-cover rounded-lg"
@@ -234,7 +234,7 @@
                 </span>
               </div>
               <ProductImage 
-                :src="product.image" 
+                :src="product.image_url || product.main_image || product.image" 
                 :alt="product.title"
                 container-class="w-10 h-10 rounded-lg flex-shrink-0"
                 image-class="w-full h-full object-cover rounded-lg"

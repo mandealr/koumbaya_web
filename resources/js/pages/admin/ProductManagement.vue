@@ -155,7 +155,7 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <ProductImage
-                      :src="product.image"
+                      :src="product.image_url || product.main_image || product.image"
                       :alt="product.title"
                       container-class="w-12 h-12 rounded-lg"
                       image-class="w-full h-full object-cover rounded-lg"
@@ -233,7 +233,7 @@
             >
               <div class="relative">
                 <ProductImage
-                  :src="product.image"
+                  :src="product.image_url || product.main_image || product.image"
                   :alt="product.title"
                   container-class="w-full h-48"
                   image-class="w-full h-full object-cover"

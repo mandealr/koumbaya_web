@@ -72,7 +72,7 @@
       >
         <div class="relative">
           <img
-            :src="product.image || '/images/products/placeholder.jpg'"
+            :src="product.image_url || product.main_image || product.image || '/images/products/placeholder.jpg'"
             :alt="product.title"
             class="w-full h-48 object-cover"
           />

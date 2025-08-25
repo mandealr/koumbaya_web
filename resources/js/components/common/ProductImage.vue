@@ -70,8 +70,13 @@ const loading = ref(false)
 const imageUrl = computed(() => {
   if (!props.src) return ''
   
-  // Si c'est déjà une URL complète, la retourner telle quelle
+  // Si c'est déjà une URL complète (http/https), la retourner telle quelle
   if (props.src.startsWith('http')) {
+    return props.src
+  }
+  
+  // Si c'est du base64, l'utiliser directement
+  if (props.src.startsWith('data:image/')) {
     return props.src
   }
   

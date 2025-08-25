@@ -36,7 +36,7 @@
           <div class="space-y-4">
             <div class="relative overflow-hidden rounded-2xl bg-gray-100">
               <ProductImage
-                :src="product.image"
+                :src="product.image_url || product.main_image || product.image"
                 :alt="product.name"
                 container-class="w-full h-96 lg:h-[500px]"
                 image-class="w-full h-full object-cover"
@@ -62,7 +62,7 @@
             <div class="grid grid-cols-4 gap-4">
               <div v-for="n in 4" :key="n" class="relative overflow-hidden rounded-xl bg-gray-100 cursor-pointer hover:ring-2 hover:ring-[#0099cc] transition-all">
                 <ProductImage
-                  :src="product.image"
+                  :src="product.image_url || product.main_image || product.image"
                   :alt="`${product.name} - Vue ${n}`"
                   container-class="w-full h-20"
                   image-class="w-full h-full object-cover"

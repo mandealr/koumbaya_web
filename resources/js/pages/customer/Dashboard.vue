@@ -129,7 +129,7 @@
             class="flex items-center space-x-4 p-3 border border-gray-200 rounded-lg"
           >
             <img
-              :src="ticket.product.image"
+              :src="ticket.product.image_url || ticket.product.main_image || ticket.product.image"
               :alt="ticket.product.title"
               class="w-12 h-12 rounded-lg object-cover"
             />
@@ -173,7 +173,7 @@
           >
             <div class="flex items-start space-x-4">
               <img
-                :src="lottery.product.image"
+                :src="lottery.product.image_url || lottery.product.main_image || lottery.product.image"
                 :alt="lottery.product.title"
                 class="w-16 h-16 rounded-lg object-cover"
               />

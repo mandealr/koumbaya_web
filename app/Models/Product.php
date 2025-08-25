@@ -132,7 +132,24 @@ class Product extends Model
      */
     public function getImageUrlAttribute()
     {
-        return $this->main_image;
+        $mainImage = $this->main_image;
+        
+        if (!$mainImage) {
+            return null;
+        }
+        
+        // Si c'est déjà du base64 ou une URL complète, retourner tel quel
+        if (str_starts_with($mainImage, 'data:image/') || str_starts_with($mainImage, 'http')) {
+            return $mainImage;
+        }
+        
+        // Si c'est un chemin qui commence par /, l'utiliser tel quel  
+        if (str_starts_with($mainImage, '/')) {
+            return $mainImage;
+        }
+        
+        // Sinon, construire l'URL avec le préfixe storage
+        return "/storage/products/{$mainImage}";
     }
 
     /**

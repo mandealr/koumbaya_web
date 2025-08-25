@@ -194,7 +194,7 @@
                 {{ index + 1 }}
               </div>
               <ProductImage 
-                :src="product.image" 
+                :src="product.image_url || product.main_image || product.image" 
                 :alt="product.name"
                 container-class="w-12 h-12 rounded-lg"
                 image-class="w-12 h-12 rounded-lg object-cover"

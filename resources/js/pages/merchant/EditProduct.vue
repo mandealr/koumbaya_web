@@ -368,7 +368,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useApi } from '../../composables/api'
+import { useApi } from '@/composables/api'
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -505,7 +505,7 @@ const loadCategories = async () => {
     }
   } catch (error) {
     console.error('Error loading categories:', error)
-    showErrorToast('Erreur lors du chargement des catégories')
+    console.error('Erreur lors du chargement des catégories')
   }
 }
 
@@ -527,13 +527,13 @@ const handleFiles = (files) => {
   const validFiles = files.filter(file => {
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      showErrorToast(`Le fichier ${file.name} n'est pas une image valide`)
+      console.error(`Le fichier ${file.name} n'est pas une image valide`)
       return false
     }
     
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      showErrorToast(`Le fichier ${file.name} est trop volumineux (max 5MB)`)
+      console.error(`Le fichier ${file.name} est trop volumineux (max 5MB)`)
       return false
     }
     
@@ -542,7 +542,7 @@ const handleFiles = (files) => {
 
   const totalImages = existingImages.value.length + form.images.length + validFiles.length
   if (totalImages > 10) {
-    showErrorToast('Maximum 10 images autorisées')
+    console.error('Maximum 10 images autorisées')
     return
   }
 
@@ -558,7 +558,7 @@ const handleFiles = (files) => {
       })
     }
     reader.onerror = () => {
-      showErrorToast(`Erreur lors de la lecture du fichier ${file.name}`)
+      console.error(`Erreur lors de la lecture du fichier ${file.name}`)
     }
     reader.readAsDataURL(file)
   })

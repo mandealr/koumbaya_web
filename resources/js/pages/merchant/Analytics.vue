@@ -201,7 +201,7 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="flex-shrink-0 h-10 w-10">
-                      <img :src="product.image || '/images/products/placeholder.jpg'" 
+                      <img :src="product.image_url || product.main_image || product.image || '/images/products/placeholder.jpg'" 
                            :alt="product.name" 
                            class="h-10 w-10 rounded-lg object-cover bg-gray-100">
                     </div>

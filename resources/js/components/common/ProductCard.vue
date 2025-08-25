@@ -4,7 +4,7 @@
     <div class="relative overflow-hidden">
       <div class="aspect-w-16 aspect-h-10 bg-gradient-to-br from-koumbaya-primary/5 to-koumbaya-primary/20">
         <ProductImage 
-          :src="product.image" 
+          :src="product.image_url || product.main_image || product.image" 
           :alt="product.name"
           container-class="w-full h-48"
           image-class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"

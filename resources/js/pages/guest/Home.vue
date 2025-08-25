@@ -248,7 +248,7 @@
           >
             <div class="relative mb-6">
               <img
-                :src="product.image || '/images/products/placeholder.jpg'"
+                :src="product.image_url || product.main_image || product.image || '/images/products/placeholder.jpg'"
                 :alt="product.name"
                 class="w-full h-48 object-cover rounded-2xl bg-gray-100 group-hover:scale-105 transition-transform duration-300"
               />
