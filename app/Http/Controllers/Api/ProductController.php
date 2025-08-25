@@ -466,7 +466,8 @@ class ProductController extends Controller
             'min_participants' => $request->min_participants ?? 50,
             'category_id' => $request->category_id,
             'merchant_id' => $user->id,
-            'status' => 'draft',
+            'stock_quantity' => 1,
+            'status' => 'active',
         ]);
 
         $product->load(['category', 'merchant']);

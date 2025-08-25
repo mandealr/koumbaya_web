@@ -126,6 +126,43 @@
             </select>
           </div>
 
+          <div class="lg:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Mode de vente *
+            </label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label class="flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors"
+                     :class="{ 'border-[#0099cc] bg-blue-50': form.sale_mode === 'direct' }">
+                <input type="radio" v-model="form.sale_mode" value="direct" class="sr-only">
+                <div class="flex items-center space-x-3">
+                  <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                       :class="form.sale_mode === 'direct' ? 'border-[#0099cc]' : 'border-gray-300'">
+                    <div v-if="form.sale_mode === 'direct'" class="w-2.5 h-2.5 bg-[#0099cc] rounded-full"></div>
+                  </div>
+                  <div>
+                    <p class="font-medium text-gray-900">Vente directe</p>
+                    <p class="text-sm text-gray-500">Les clients achètent directement</p>
+                  </div>
+                </div>
+              </label>
+              
+              <label class="flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors"
+                     :class="{ 'border-purple-500 bg-purple-50': form.sale_mode === 'lottery' }">
+                <input type="radio" v-model="form.sale_mode" value="lottery" class="sr-only">
+                <div class="flex items-center space-x-3">
+                  <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                       :class="form.sale_mode === 'lottery' ? 'border-purple-500' : 'border-gray-300'">
+                    <div v-if="form.sale_mode === 'lottery'" class="w-2.5 h-2.5 bg-purple-500 rounded-full"></div>
+                  </div>
+                  <div>
+                    <p class="font-medium text-gray-900">Tombola</p>
+                    <p class="text-sm text-gray-500">Les clients achètent des tickets</p>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Valeur du produit (FCFA) *
@@ -232,8 +269,44 @@
         </div>
       </div>
 
-      <!-- Step 3: Lottery Settings -->
+      <!-- Step 3: Sale Configuration -->
       <div v-if="currentStep === 3" class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+        <!-- Direct Sale Mode -->
+        <div v-if="form.sale_mode === 'direct'">
+          <h2 class="text-xl font-semibold text-gray-900 mb-6">Configuration de vente directe</h2>
+          
+          <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center">
+            <div class="flex items-center justify-center space-x-3 mb-4">
+              <div class="w-12 h-12 bg-[#0099cc] rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Vente directe configurée</h3>
+                <p class="text-gray-600">Votre produit sera disponible à l'achat immédiat</p>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div class="bg-white rounded-lg p-3">
+                <p class="text-gray-600">Prix de vente</p>
+                <p class="font-semibold text-[#0099cc]">{{ formatAmount(form.price) }} FCFA</p>
+              </div>
+              <div class="bg-white rounded-lg p-3">
+                <p class="text-gray-600">Commission plateforme</p>
+                <p class="font-semibold text-gray-800">{{ formatAmount(form.price * 0.05) }} FCFA (5%)</p>
+              </div>
+            </div>
+            
+            <p class="text-sm text-gray-500 mt-4">
+              Les clients pourront acheter votre produit directement au prix affiché.
+            </p>
+          </div>
+        </div>
+
+        <!-- Lottery Mode -->
+        <div v-else-if="form.sale_mode === 'lottery'">
         <h2 class="text-xl font-semibold text-gray-900 mb-6">Configuration de la tombola</h2>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -330,6 +403,7 @@
             </div>
           </div>
         </div>
+        </div>
       </div>
 
       <!-- Step 4: Review -->
@@ -364,10 +438,38 @@
             </div>
           </div>
 
-          <!-- Lottery Summary -->
+          <!-- Sale Configuration Summary -->
           <div>
-            <h3 class="font-semibold text-gray-900 mb-4">Configuration tombola</h3>
-            <div class="space-y-3">
+            <h3 class="font-semibold text-gray-900 mb-4">
+              {{ form.sale_mode === 'lottery' ? 'Configuration tombola' : 'Configuration vente' }}
+            </h3>
+            
+            <!-- Direct Sale Summary -->
+            <div v-if="form.sale_mode === 'direct'" class="space-y-3">
+              <div class="flex justify-between">
+                <span class="text-gray-600">Mode de vente :</span>
+                <span class="font-medium text-[#0099cc]">Vente directe</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Prix de vente :</span>
+                <span class="font-medium">{{ formatAmount(form.price) }} FCFA</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Commission (5%) :</span>
+                <span class="font-medium">{{ formatAmount(form.price * 0.05) }} FCFA</span>
+              </div>
+              <div class="flex justify-between border-t pt-3">
+                <span class="text-gray-600">Vous recevrez :</span>
+                <span class="font-bold text-[#0099cc]">{{ formatAmount(form.price * 0.95) }} FCFA</span>
+              </div>
+            </div>
+            
+            <!-- Lottery Summary -->
+            <div v-else-if="form.sale_mode === 'lottery'" class="space-y-3">
+              <div class="flex justify-between">
+                <span class="text-gray-600">Mode de vente :</span>
+                <span class="font-medium text-purple-600">Tombola</span>
+              </div>
               <div class="flex justify-between">
                 <span class="text-gray-600">Prix/ticket :</span>
                 <span class="font-medium">{{ formatAmount(form.ticket_price) }} FCFA</span>
@@ -404,7 +506,7 @@
             <span class="text-sm text-gray-700">
               J'accepte les <a href="#" class="text-[#0099cc] hover:underline">conditions de vente</a>
               et confirme que toutes les informations sont exactes. Je comprends que Koumbaya prélèvera
-              des frais de 5% sur les revenus de la tombola.
+              des frais de 5% sur les revenus {{ form.sale_mode === 'lottery' ? 'de la tombola' : 'de la vente' }}.
             </span>
           </label>
         </div>
@@ -494,6 +596,7 @@ const form = reactive({
   description: '',
   category_id: '',
   condition: '',
+  sale_mode: 'direct', // 'direct' or 'lottery'
   price: '', // Changed from 'value' to 'price' to match API
   location: '',
   images: [],
@@ -561,6 +664,7 @@ const validateStep1 = () => {
                   form.description && 
                   form.category_id && 
                   form.condition && 
+                  form.sale_mode &&
                   form.price && 
                   form.location &&
                   parseFloat(form.price) >= 1000 // Minimum price according to API
@@ -579,25 +683,35 @@ const validateStep1 = () => {
 }
 
 const validateStep3 = () => {
-  const isValid = form.ticket_price && 
-                  form.total_tickets && 
-                  form.min_tickets && 
-                  form.end_date &&
-                  parseFloat(form.ticket_price) >= 100 && // Minimum ticket price
-                  parseInt(form.total_tickets) >= 10 && // Minimum tickets
-                  parseInt(form.min_tickets) >= 10 &&
-                  parseInt(form.min_tickets) <= parseInt(form.total_tickets) &&
-                  new Date(form.end_date) > new Date() // End date in future
-  
-  // Clear step 3 errors if valid
-  if (isValid) {
-    errors.ticket_price = ''
-    errors.total_tickets = ''
-    errors.min_tickets = ''
-    errors.end_date = ''
+  // Direct sale mode - always valid (no extra fields required)
+  if (form.sale_mode === 'direct') {
+    return true
   }
   
-  return isValid
+  // Lottery mode - validate lottery fields
+  if (form.sale_mode === 'lottery') {
+    const isValid = form.ticket_price && 
+                    form.total_tickets && 
+                    form.min_tickets && 
+                    form.end_date &&
+                    parseFloat(form.ticket_price) >= 100 && // Minimum ticket price
+                    parseInt(form.total_tickets) >= 10 && // Minimum tickets
+                    parseInt(form.min_tickets) >= 10 &&
+                    parseInt(form.min_tickets) <= parseInt(form.total_tickets) &&
+                    new Date(form.end_date) > new Date() // End date in future
+    
+    // Clear step 3 errors if valid
+    if (isValid) {
+      errors.ticket_price = ''
+      errors.total_tickets = ''
+      errors.min_tickets = ''
+      errors.end_date = ''
+    }
+    
+    return isValid
+  }
+  
+  return false
 }
 
 // Methods
@@ -727,17 +841,21 @@ const handleSubmit = async () => {
     const productResponse = await post('/products', productData)
     
     if (productResponse.product) {
-      // Create lottery for the product
-      const lotteryData = {
-        duration_days: calculateDurationDays()
-      }
-      
-      try {
-        await post(`/products/${productResponse.product.id}/create-lottery`, lotteryData)
-        showSuccessToast('Produit et tombola créés avec succès !')
-      } catch (lotteryError) {
-        console.error('Error creating lottery:', lotteryError)
-        showWarningToast('Produit créé mais erreur lors de la création de la tombola')
+      // Create lottery only if lottery mode is selected
+      if (form.sale_mode === 'lottery') {
+        const lotteryData = {
+          duration_days: calculateDurationDays()
+        }
+        
+        try {
+          await post(`/products/${productResponse.product.id}/create-lottery`, lotteryData)
+          showSuccessToast('Produit et tombola créés avec succès !')
+        } catch (lotteryError) {
+          console.error('Error creating lottery:', lotteryError)
+          showWarningToast('Produit créé mais erreur lors de la création de la tombola')
+        }
+      } else {
+        showSuccessToast('Produit créé avec succès !')
       }
       
       // Redirect to products list
