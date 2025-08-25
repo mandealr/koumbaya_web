@@ -76,8 +76,7 @@
           <select
             v-model="filters.category"
             @change="applyFilters"
-            class="w-full py-2 px-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0099cc] focus:border-transparent text-black"
-          >
+            class="w-full py-2 px-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0099cc] focus:border-transparent text-black">
             <option value="">Toutes les catégories</option>
             <option v-for="category in categories" :key="category.id" :value="category.id">
               {{ category.name }}
@@ -118,8 +117,7 @@
           <select
             v-model="filters.sortBy"
             @change="applyFilters"
-            class="w-full py-2 px-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0099cc] focus:border-transparent text-black"
-          >
+            class="w-full py-2 px-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0099cc] focus:border-transparent text-black">
             <option value="date_desc">Date de création (récent)</option>
             <option value="date_asc">Date de création (ancien)</option>
             <option value="price_desc">Prix (élevé à bas)</option>
@@ -180,7 +178,7 @@
         </div>
 
         <!-- Product Content -->
-        <div class="p-6">
+        <div class="p-6 relative">
           <div class="flex items-start justify-between mb-3">
             <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ product.name }}</h3>
             <div class="text-right ml-2">
@@ -266,7 +264,7 @@
               Modifier
             </button>
 
-            <div class="relative">
+            <div class="relative z-10">
               <button
                 @click="toggleProductMenu(product.id)"
                 :data-product-id="product.id"
@@ -277,8 +275,8 @@
 
               <div
                 v-if="showProductMenu === product.id"
-                class="fixed w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-[9999]"
-                :style="menuPosition"
+                data-dropdown-menu
+                class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-[9999]"
               >
                 <button
                   @click="duplicateProduct(product)"
@@ -454,7 +452,6 @@ const { get, post, put, delete: del, loading, error } = useApi()
 const showProductModal = ref(false)
 const selectedProduct = ref(null)
 const showProductMenu = ref(null)
-const menuPosition = ref({ top: '0px', left: '0px' })
 
 const filters = reactive({
   search: '',
@@ -751,27 +748,16 @@ const formatCurrency = (amount) => {
 }
 
 const toggleProductMenu = (productId) => {
-  if (showProductMenu.value === productId) {
-    showProductMenu.value = null
-  } else {
-    showProductMenu.value = productId
-    // Calculer la position une seule fois quand on ouvre le menu
-    nextTick(() => {
-      const button = document.querySelector(`[data-product-id="${productId}"]`)
-      if (button) {
-        const rect = button.getBoundingClientRect()
-        menuPosition.value = {
-          top: `${rect.bottom + 8}px`,
-          left: `${Math.max(rect.right - 192, 10)}px` // 192px = w-48, minimum 10px du bord
-        }
-      }
-    })
-  }
+  showProductMenu.value = showProductMenu.value === productId ? null : productId
 }
 
 // Close menu when clicking outside
 const handleClickOutside = (event) => {
-  if (!event.target.closest('.relative')) {
+  // Vérifier si le clic est en dehors du menu et du bouton
+  const menuElement = event.target.closest('[data-dropdown-menu]')
+  const buttonElement = event.target.closest('[data-product-id]')
+  
+  if (!menuElement && !buttonElement) {
     showProductMenu.value = null
   }
 }
