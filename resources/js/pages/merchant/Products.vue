@@ -120,10 +120,13 @@
             @change="applyFilters"
             class="w-full py-2 px-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0099cc] focus:border-transparent text-black"
           >
-            <option value="created_at">Date de création</option>
-            <option value="sales">Ventes</option>
-            <option value="end_date">Date de fin</option>
-            <option value="value">Valeur</option>
+            <option value="date_desc">Date de création (récent)</option>
+            <option value="date_asc">Date de création (ancien)</option>
+            <option value="price_desc">Prix (élevé à bas)</option>
+            <option value="price_asc">Prix (bas à élevé)</option>
+            <option value="name_asc">Nom (A-Z)</option>
+            <option value="name_desc">Nom (Z-A)</option>
+            <option value="popularity">Popularité</option>
           </select>
         </div>
       </div>
@@ -455,7 +458,7 @@ const filters = reactive({
   category: '',
   status: '',
   saleMode: '',
-  sortBy: 'created_at'
+  sortBy: 'date_desc'
 })
 
 const categories = ref([])
@@ -469,8 +472,8 @@ const filteredProducts = computed(() => {
 })
 
 // Methods
-const applyFilters = () => {
-  // Triggers reactivity
+const applyFilters = async () => {
+  await loadProducts()
 }
 
 const getStatusClass = (status) => {

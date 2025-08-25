@@ -117,6 +117,10 @@ class ProductController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('sale_mode')) {
+            $query->where('sale_mode', $request->sale_mode);
+        }
+
         if ($request->boolean('featured')) {
             $query->where('is_featured', true);
         }
