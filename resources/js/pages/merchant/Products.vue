@@ -124,7 +124,7 @@
     <div v-else-if="filteredProducts.length === 0" class="text-center py-12">
       <GiftIcon class="w-16 h-16 text-gray-400 mx-auto mb-4" />
       <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun produit</h3>
-      <p class="text-gray-600 mb-6">Vous n'avez pas encore de produits. Créez votre première tombola !</p>
+      <p class="text-gray-600 mb-6">Vous n'avez pas encore de produits. Créez votre premier produit !</p>
       <router-link
         to="/merchant/products/create"
         class="inline-flex items-center px-6 py-3 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-xl font-semibold transition-colors"
@@ -519,8 +519,8 @@ const loadProducts = async () => {
     if (filters.sortBy) params.append('sort_by', filters.sortBy)
     
     const response = await get(`/products?${params.toString()}`)
-    if (response && response.data && Array.isArray(response.data)) {
-      products.value = response.data.map(product => ({
+    if (response && response.data && response.data.products && Array.isArray(response.data.products)) {
+      products.value = response.data.products.map(product => ({
         ...product,
         lottery: product.lottery || null,
         ticket_price: parseFloat(product.ticket_price || 0),
@@ -539,8 +539,8 @@ const loadProducts = async () => {
 const loadCategories = async () => {
   try {
     const response = await get('/categories')
-    if (response && response.data) {
-      categories.value = response.data
+    if (response && response.categories) {
+      categories.value = response.categories
     }
   } catch (error) {
     console.error('Error loading categories:', error)
