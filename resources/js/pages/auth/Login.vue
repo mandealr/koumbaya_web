@@ -37,7 +37,7 @@
                   {{ registrationSuccess.verification_message }}
                 </div>
                 <div v-if="registrationSuccess.email" class="mt-2 text-xs text-green-600 bg-green-100 rounded-lg p-2">
-                  <div class="font-medium mb-1">📧 Que faire maintenant :</div>
+                  <div class="font-medium mb-1">Que faire maintenant :</div>
                   <ul class="space-y-1 list-disc list-inside ml-2">
                     <li>Consultez votre boîte email : <strong>{{ registrationSuccess.email }}</strong></li>
                     <li>Cliquez sur le lien de vérification dans l'email</li>
@@ -504,21 +504,21 @@ const handleSubmit = async (event) => {
       if (errorMsg.toLowerCase().includes('identifiants incorrects') ||
           errorMsg.toLowerCase().includes('invalid credentials') ||
           errorMsg.includes('401')) {
-        errors.general = '🚫 Identifiants incorrects. Vérifiez votre adresse email et votre mot de passe.'
+        errors.general = 'Identifiants incorrects. Vérifiez votre adresse email et votre mot de passe.'
         errors.email = 'Adresse email ou mot de passe incorrect'
         errors.password = 'Adresse email ou mot de passe incorrect'
       } else if (errorMsg.toLowerCase().includes('trop de tentatives') ||
                  errorMsg.toLowerCase().includes('too many') ||
                  errorMsg.includes('429')) {
-        errors.general = '⏳ Trop de tentatives de connexion. Veuillez patienter 15 minutes avant de réessayer.'
+        errors.general = 'Trop de tentatives de connexion. Veuillez patienter 15 minutes avant de réessayer.'
       } else if (errorMsg.toLowerCase().includes('network') ||
                  errorMsg.toLowerCase().includes('réseau') ||
                  errorMsg.toLowerCase().includes('connexion')) {
-        errors.general = '🌐 Problème de connexion internet. Vérifiez votre connexion et réessayez.'
+        errors.general = 'Problème de connexion internet. Vérifiez votre connexion et réessayez.'
       } else if (errorMsg.toLowerCase().includes('email') && errorMsg.toLowerCase().includes('verify')) {
-        errors.general = '📧 Votre compte n\'est pas encore vérifié. Vérifiez votre boîte email et cliquez sur le lien de vérification.'
+        errors.general = 'Votre compte n\'est pas encore vérifié. Vérifiez votre boîte email et cliquez sur le lien de vérification.'
       } else if (errorMsg.toLowerCase().includes('blocked') || errorMsg.toLowerCase().includes('suspendu')) {
-        errors.general = '🔒 Votre compte est temporairement suspendu. Contactez le support client.'
+        errors.general = 'Votre compte est temporairement suspendu. Contactez le support client.'
       } else {
         errors.general = `${errorMsg}`
       }

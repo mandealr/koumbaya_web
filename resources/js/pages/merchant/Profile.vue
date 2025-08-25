@@ -158,7 +158,7 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Rôle</label>
                   <div class="text-sm text-gray-600 bg-gray-100 rounded-lg p-3">
-                    {{ user?.role || 'Non défini' }}
+                    {{ displayUserRoles }}
                   </div>
                 </div>
 
@@ -223,6 +223,36 @@ const userInitials = computed(() => {
   const first = user.value.first_name?.[0] || ''
   const last = user.value.last_name?.[0] || ''
   return (first + last).toUpperCase()
+})
+
+const displayUserRoles = computed(() => {
+  if (!user.value) return 'Non défini'
+  
+  // Vérifier s'il y a des rôles dans la relation roles
+  if (user.value.roles && Array.isArray(user.value.roles) && user.value.roles.length > 0) {
+    const roleNames = user.value.roles.map(role => role.name)
+    return roleNames.join(', ')
+  }
+  
+  // Fallback sur account_type
+  if (user.value.account_type) {
+    const accountTypeMapping = {
+      'business': 'Marchand',
+      'personal': 'Particulier'
+    }
+    return accountTypeMapping[user.value.account_type] || user.value.account_type
+  }
+  
+  // Fallback sur user_type si disponible
+  if (user.value.userType?.name) {
+    const userTypeMapping = {
+      'MANAGER': 'Manager',
+      'CUSTOMER': 'Client'
+    }
+    return userTypeMapping[user.value.userType.name] || user.value.userType.name
+  }
+  
+  return 'Non défini'
 })
 
 // Form data

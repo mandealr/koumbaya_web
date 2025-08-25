@@ -203,7 +203,7 @@ class User extends Authenticatable
 
     public function getIsMerchantAttribute()
     {
-        return $this->hasRole('Business');
+        return $this->isMerchant();
     }
 
     /**
@@ -266,7 +266,7 @@ class User extends Authenticatable
 
     public function isMerchant(): bool
     {
-        // Un merchant doit avoir les 2 rôles: Particulier + Business
-        return $this->hasRole('Particulier') && $this->hasRole('Business');
+        // Système de rôles simplifié : Business = marchand uniquement
+        return $this->hasRole('Business');
     }
 }
