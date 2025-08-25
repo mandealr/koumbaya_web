@@ -25,7 +25,7 @@ class AdminDashboardController extends Controller
             
             // Users statistics
             $totalUsers = User::count();
-            $activeUsers = User::where('last_login', '>=', $now->copy()->subDays(30))->count();
+            $activeUsers = User::where('last_login_date', '>=', $now->copy()->subDays(30))->count();
             $usersGrowth = $this->calculateGrowth(
                 User::where('created_at', '>=', $lastMonth)->count(),
                 User::where('created_at', '>=', $lastMonth->copy()->subMonth())
