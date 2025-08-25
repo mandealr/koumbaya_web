@@ -1,303 +1,308 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Header -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900">Gestion des Remboursements</h1>
-            <p class="text-gray-600 mt-1">Administration des remboursements automatiques et manuels</p>
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Gestion des Remboursements</h1>
+        <p class="mt-2 text-gray-600">Administration des remboursements automatiques et manuels</p>
+      </div>
+      <div class="flex space-x-3">
+        <button
+          @click="checkEligibleLotteries"
+          class="admin-btn-secondary"
+        >
+          <MagnifyingGlassIcon class="w-4 h-4 mr-2" />
+          Vérifier les tombolas
+        </button>
+        <button
+          @click="showProcessAutomatic = true"
+          class="admin-btn-primary"
+        >
+          <CogIcon class="w-4 h-4 mr-2" />
+          Traiter automatique
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Dashboard -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="admin-card hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center">
+          <div class="p-3 rounded-lg bg-green-100">
+            <BanknotesIcon class="w-6 h-6 text-green-600" />
           </div>
-          <div class="flex space-x-3">
-            <button
-              @click="checkEligibleLotteries"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              <MagnifyingGlassIcon class="w-4 h-4 mr-2" />
-              Vérifier les tombolas
-            </button>
-            <button
-              @click="showProcessAutomatic = true"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              🤖 Traiter automatique
-            </button>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Total remboursements</p>
+            <p class="text-2xl font-bold text-gray-900">{{ stats.total_refunds || 0 }}</p>
           </div>
         </div>
       </div>
 
-      <!-- Stats Dashboard -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center">
-            <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
-              💰
-            </div>
-            <div>
-              <div class="text-2xl font-bold text-gray-900">{{ stats.total_refunds || 0 }}</div>
-              <div class="text-sm text-gray-600">Total remboursements</div>
-            </div>
+      <div class="admin-card hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center">
+          <div class="p-3 rounded-lg bg-blue-100">
+            <CheckCircleIcon class="w-6 h-6 text-[#0099cc]" />
           </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center">
-            <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
-              ✅
-            </div>
-            <div>
-              <div class="text-2xl font-bold text-gray-900">{{ formatCurrencyShort(stats.total_amount_refunded) }}</div>
-              <div class="text-sm text-gray-600">Montant remboursé</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center">
-            <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
-              ⏳
-            </div>
-            <div>
-              <div class="text-2xl font-bold text-gray-900">{{ stats.pending_refunds || 0 }}</div>
-              <div class="text-sm text-gray-600">En attente</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center">
-            <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
-              🤖
-            </div>
-            <div>
-              <div class="text-2xl font-bold text-gray-900">{{ stats.auto_processed || 0 }}</div>
-              <div class="text-sm text-gray-600">Auto-traités</div>
-            </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Montant remboursé</p>
+            <p class="text-2xl font-bold text-gray-900">{{ formatCurrencyShort(stats.total_amount_refunded) }}</p>
           </div>
         </div>
       </div>
 
-      <!-- Eligible Lotteries Panel -->
-      <div v-if="eligibleLotteries.expired_insufficient?.length || eligibleLotteries.cancelled?.length" class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-        <div class="p-6 border-b border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-900">🎯 Tombolas éligibles aux remboursements</h3>
+      <div class="admin-card hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center">
+          <div class="p-3 rounded-lg bg-yellow-100">
+            <ClockIcon class="w-6 h-6 text-yellow-600" />
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">En attente</p>
+            <p class="text-2xl font-bold text-gray-900">{{ stats.pending_refunds || 0 }}</p>
+          </div>
         </div>
-        <div class="p-6">
-          <!-- Expired with Insufficient Participants -->
-          <div v-if="eligibleLotteries.expired_insufficient?.length" class="mb-6">
-            <h4 class="text-md font-medium text-orange-700 mb-3">⏰ Expirées - Participants insuffisants</h4>
-            <div class="space-y-3">
-              <div
-                v-for="lottery in eligibleLotteries.expired_insufficient"
-                :key="lottery.id"
-                class="flex items-center justify-between bg-orange-50 border border-orange-200 rounded-lg p-4"
-              >
-                <div>
-                  <div class="font-medium">{{ lottery.lottery_number }}</div>
-                  <div class="text-sm text-gray-600">{{ lottery.product_title }}</div>
-                  <div class="text-sm">{{ lottery.participants }}/{{ lottery.min_participants }} participants</div>
-                </div>
-                <div class="text-right">
-                  <div class="font-semibold text-orange-700">{{ formatCurrency(lottery.estimated_refund) }}</div>
-                  <button
-                    @click="processLottery(lottery.id, false)"
-                    class="mt-2 px-3 py-1 bg-orange-600 text-white text-sm rounded hover:bg-orange-700"
-                  >
-                    Rembourser
-                  </button>
-                </div>
+      </div>
+
+      <div class="admin-card hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center">
+          <div class="p-3 rounded-lg bg-purple-100">
+            <CogIcon class="w-6 h-6 text-purple-600" />
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Auto-traités</p>
+            <p class="text-2xl font-bold text-gray-900">{{ stats.auto_processed || 0 }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Eligible Lotteries Panel -->
+    <div v-if="eligibleLotteries.expired_insufficient?.length || eligibleLotteries.cancelled?.length" class="admin-card">
+      <div class="admin-card-header">
+        <h3 class="text-lg font-semibold text-gray-900">Tombolas éligibles aux remboursements</h3>
+      </div>
+      <div class="p-6">
+        <!-- Expired with Insufficient Participants -->
+        <div v-if="eligibleLotteries.expired_insufficient?.length" class="mb-6">
+          <h4 class="text-md font-medium text-orange-700 mb-3 flex items-center">
+            <ClockIcon class="w-4 h-4 mr-1" />
+            Expirées - Participants insuffisants
+          </h4>
+          <div class="space-y-3">
+            <div
+              v-for="lottery in eligibleLotteries.expired_insufficient"
+              :key="lottery.id"
+              class="flex items-center justify-between bg-orange-50 border border-orange-200 rounded-lg p-4"
+            >
+              <div>
+                <div class="font-medium">{{ lottery.lottery_number }}</div>
+                <div class="text-sm text-gray-600">{{ lottery.product_title }}</div>
+                <div class="text-sm">{{ lottery.participants }}/{{ lottery.min_participants }} participants</div>
               </div>
-            </div>
-          </div>
-
-          <!-- Cancelled Lotteries -->
-          <div v-if="eligibleLotteries.cancelled?.length">
-            <h4 class="text-md font-medium text-red-700 mb-3">Tombolas annulées</h4>
-            <div class="space-y-3">
-              <div
-                v-for="lottery in eligibleLotteries.cancelled"
-                :key="lottery.id"
-                class="flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-4"
-              >
-                <div>
-                  <div class="font-medium">{{ lottery.lottery_number }}</div>
-                  <div class="text-sm text-gray-600">{{ lottery.product_title }}</div>
-                  <div class="text-sm">{{ lottery.participants }} participants</div>
-                </div>
-                <div class="text-right">
-                  <div class="font-semibold text-red-700">{{ formatCurrency(lottery.estimated_refund) }}</div>
-                  <button
-                    @click="processLottery(lottery.id, false)"
-                    class="mt-2 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
-                  >
-                    Rembourser
-                  </button>
-                </div>
+              <div class="text-right">
+                <div class="font-semibold text-orange-700">{{ formatCurrency(lottery.estimated_refund) }}</div>
+                <button
+                  @click="processLottery(lottery.id, false)"
+                  class="admin-btn-accent text-sm"
+                >
+                  Rembourser
+                </button>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Filters -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-8">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div class="flex flex-wrap items-center space-x-4">
-            <select
-              v-model="filters.status"
-              @change="loadRefunds"
-              class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+        <!-- Cancelled Lotteries -->
+        <div v-if="eligibleLotteries.cancelled?.length">
+          <h4 class="text-md font-medium text-red-700 mb-3 flex items-center">
+            <XCircleIcon class="w-4 h-4 mr-1" />
+            Tombolas annulées
+          </h4>
+          <div class="space-y-3">
+            <div
+              v-for="lottery in eligibleLotteries.cancelled"
+              :key="lottery.id"
+              class="flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-4"
             >
-              <option value="">Tous les statuts</option>
-              <option value="pending">En attente</option>
-              <option value="approved">Approuvé</option>
-              <option value="processed">Traité</option>
-              <option value="completed">Terminé</option>
-              <option value="rejected">Rejeté</option>
-            </select>
-
-            <select
-              v-model="filters.type"
-              @change="loadRefunds"
-              class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            >
-              <option value="">Tous les types</option>
-              <option value="automatic">Automatique</option>
-              <option value="manual">Manuel</option>
-              <option value="admin">Admin</option>
-            </select>
-
-            <select
-              v-model="filters.reason"
-              @change="loadRefunds"
-              class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            >
-              <option value="">Toutes les raisons</option>
-              <option value="insufficient_participants">Participants insuffisants</option>
-              <option value="lottery_cancelled">Tombola annulée</option>
-              <option value="accidental_purchase">Achat accidentel</option>
-              <option value="technical_issue">Problème technique</option>
-            </select>
-
-            <button
-              @click="resetFilters"
-              class="px-3 py-2 text-gray-600 hover:text-gray-800 text-sm"
-            >
-              Réinitialiser
-            </button>
-          </div>
-
-          <div class="text-sm text-gray-500">
-            {{ refunds.length }} remboursement(s)
+              <div>
+                <div class="font-medium">{{ lottery.lottery_number }}</div>
+                <div class="text-sm text-gray-600">{{ lottery.product_title }}</div>
+                <div class="text-sm">{{ lottery.participants }} participants</div>
+              </div>
+              <div class="text-right">
+                <div class="font-semibold text-red-700">{{ formatCurrency(lottery.estimated_refund) }}</div>
+                <button
+                  @click="processLottery(lottery.id, false)"
+                  class="admin-btn-danger text-sm"
+                >
+                  Rembourser
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Refunds List -->
-      <div v-if="loading" class="text-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p class="mt-4 text-gray-600">Chargement des remboursements...</p>
+    <!-- Filters -->
+    <div class="admin-card">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="flex flex-wrap items-center space-x-4">
+          <select
+            v-model="filters.status"
+            @change="loadRefunds"
+            class="admin-input"
+          >
+            <option value="">Tous les statuts</option>
+            <option value="pending">En attente</option>
+            <option value="approved">Approuvé</option>
+            <option value="processed">Traité</option>
+            <option value="completed">Terminé</option>
+            <option value="rejected">Rejeté</option>
+          </select>
+
+          <select
+            v-model="filters.type"
+            @change="loadRefunds"
+            class="admin-input"
+          >
+            <option value="">Tous les types</option>
+            <option value="automatic">Automatique</option>
+            <option value="manual">Manuel</option>
+            <option value="admin">Admin</option>
+          </select>
+
+          <select
+            v-model="filters.reason"
+            @change="loadRefunds"
+            class="admin-input"
+          >
+            <option value="">Toutes les raisons</option>
+            <option value="insufficient_participants">Participants insuffisants</option>
+            <option value="lottery_cancelled">Tombola annulée</option>
+            <option value="accidental_purchase">Achat accidentel</option>
+            <option value="technical_issue">Problème technique</option>
+          </select>
+
+          <button
+            @click="resetFilters"
+            class="admin-btn-secondary text-sm"
+          >
+            Réinitialiser
+          </button>
+        </div>
+
+        <div class="text-sm text-gray-500">
+          {{ refunds.length }} remboursement(s)
+        </div>
       </div>
+    </div>
 
-      <div v-else-if="refunds.length === 0" class="text-center py-12">
-        <BanknotesIcon class="mx-auto h-16 w-16 text-gray-400 mb-4" />
-        <h3 class="text-xl font-medium text-gray-900 mb-2">Aucun remboursement</h3>
-        <p class="text-gray-600">Aucun remboursement ne correspond aux filtres sélectionnés.</p>
-      </div>
+    <!-- Refunds List -->
+    <div v-if="loading" class="text-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+      <p class="mt-4 text-gray-600">Chargement des remboursements...</p>
+    </div>
 
-      <div v-else class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remboursement</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisateur</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Raison</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="refund in refunds" :key="refund.id" class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div>
-                    <div class="font-mono text-sm font-medium text-gray-900">{{ refund.refund_number }}</div>
-                    <div class="text-sm text-gray-500">{{ refund.type }}</div>
-                    <div v-if="refund.auto_processed" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 mt-1">
-                      🤖 Auto
-                    </div>
+    <div v-else-if="refunds.length === 0" class="text-center py-12">
+      <BanknotesIcon class="mx-auto h-16 w-16 text-gray-400 mb-4" />
+      <h3 class="text-xl font-medium text-gray-900 mb-2">Aucun remboursement</h3>
+      <p class="text-gray-600">Aucun remboursement ne correspond aux filtres sélectionnés.</p>
+    </div>
+
+    <div v-else class="admin-card">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remboursement</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisateur</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Raison</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="refund in refunds" :key="refund.id" class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div>
+                  <div class="font-mono text-sm font-medium text-gray-900">{{ refund.refund_number }}</div>
+                  <div class="text-sm text-gray-500">{{ refund.type }}</div>
+                  <div v-if="refund.auto_processed" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 mt-1">
+                    <CogIcon class="w-3 h-3 mr-1" />
+                    Auto
                   </div>
-                </td>
+                </div>
+              </td>
 
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div>
-                    <div class="text-sm font-medium text-gray-900">
-                      {{ refund.user?.full_name || `${refund.user?.first_name || ''} ${refund.user?.last_name || ''}`.trim() || 'N/A' }}
-                    </div>
-                    <div class="text-sm text-gray-500">{{ refund.user?.email || 'N/A' }}</div>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div>
+                  <div class="text-sm font-medium text-gray-900">
+                    {{ refund.user?.full_name || `${refund.user?.first_name || ''} ${refund.user?.last_name || ''}`.trim() || 'N/A' }}
                   </div>
-                </td>
+                  <div class="text-sm text-gray-500">{{ refund.user?.email || 'N/A' }}</div>
+                </div>
+              </td>
 
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-semibold text-gray-900">{{ formatCurrency(refund.amount) }}</div>
-                  <div class="text-xs text-gray-500">{{ refund.currency }}</div>
-                </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-semibold text-gray-900">{{ formatCurrency(refund.amount) }}</div>
+                <div class="text-xs text-gray-500">{{ refund.currency }}</div>
+              </td>
 
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ getReasonText(refund.reason) }}</div>
-                  <div v-if="refund.lottery" class="text-xs text-gray-500">
-                    {{ refund.lottery.lottery_number }}
-                  </div>
-                  <div v-else-if="refund.ticket" class="text-xs text-gray-500">
-                    Ticket #{{ refund.ticket.ticket_number }}
-                  </div>
-                </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">{{ getReasonText(refund.reason) }}</div>
+                <div v-if="refund.lottery" class="text-xs text-gray-500">
+                  {{ refund.lottery.lottery_number }}
+                </div>
+                <div v-else-if="refund.ticket" class="text-xs text-gray-500">
+                  Ticket #{{ refund.ticket.ticket_number }}
+                </div>
+              </td>
 
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                    :class="getStatusClass(refund.status)"
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span
+                  class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                  :class="getStatusClass(refund.status)"
+                >
+                  {{ getStatusText(refund.status) }}
+                </span>
+              </td>
+
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ formatDate(refund.created_at) }}
+              </td>
+
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div class="flex space-x-2">
+                  <button
+                    v-if="refund.status === 'pending'"
+                    @click="approveRefund(refund)"
+                    class="text-blue-600 hover:text-blue-900"
                   >
-                    {{ getStatusText(refund.status) }}
-                  </span>
-                </td>
+                    Approuver
+                  </button>
 
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ formatDate(refund.created_at) }}
-                </td>
+                  <button
+                    v-if="refund.status === 'pending'"
+                    @click="showRejectModal(refund)"
+                    class="text-red-600 hover:text-red-900"
+                  >
+                    Rejeter
+                  </button>
 
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div class="flex space-x-2">
-                    <button
-                      v-if="refund.status === 'pending'"
-                      @click="approveRefund(refund)"
-                      class="text-blue-600 hover:text-blue-900"
-                    >
-                      Approuver
-                    </button>
-
-                    <button
-                      v-if="refund.status === 'pending'"
-                      @click="showRejectModal(refund)"
-                      class="text-red-600 hover:text-red-900"
-                    >
-                      Rejeter
-                    </button>
-
-                    <button
-                      @click="viewRefundDetails(refund)"
-                      class="text-blue-600 hover:text-blue-900"
-                    >
-                      👁️ Détails
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                  <button
+                    @click="viewRefundDetails(refund)"
+                    class="text-[#0099cc] hover:text-[#0088bb] flex items-center"
+                    title="Voir détails"
+                  >
+                    <EyeIcon class="w-4 h-4" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -308,7 +313,10 @@
         <div class="relative bg-white rounded-lg max-w-md w-full">
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold">🤖 Traitement Automatique</h3>
+              <h3 class="text-lg font-semibold flex items-center">
+                <CogIcon class="w-5 h-5 mr-2" />
+                Traitement Automatique
+              </h3>
               <button @click="showProcessAutomatic = false" class="text-gray-400 hover:text-gray-600">
                 <XMarkIcon class="w-6 h-6" />
               </button>
@@ -328,7 +336,10 @@
 
               <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                 <div class="text-sm text-yellow-800">
-                  <p class="font-medium mb-1">⚠️ Attention</p>
+                  <p class="font-medium mb-1 flex items-center">
+                    <ExclamationTriangleIcon class="w-4 h-4 mr-1" />
+                    Attention
+                  </p>
                   <p>Cette action va traiter automatiquement tous les remboursements éligibles.</p>
                 </div>
               </div>
@@ -337,14 +348,14 @@
             <div class="flex justify-end space-x-3 mt-6">
               <button
                 @click="showProcessAutomatic = false"
-                class="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg"
+                class="admin-btn-secondary"
               >
                 Annuler
               </button>
               <button
                 @click="processAutomatic"
                 :disabled="processing"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                class="admin-btn-primary disabled:opacity-50"
               >
                 {{ processing ? 'Traitement...' : 'Traiter' }}
               </button>
@@ -374,7 +385,7 @@
                   v-model="rejectReason"
                   rows="3"
                   required
-                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
+                  class="admin-input focus:border-red-500 focus:ring-red-500"
                   placeholder="Expliquez pourquoi ce remboursement est rejeté..."
                 ></textarea>
               </div>
@@ -383,14 +394,14 @@
             <div class="flex justify-end space-x-3 mt-6">
               <button
                 @click="refundToReject = null; rejectReason = ''"
-                class="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg"
+                class="admin-btn-secondary"
               >
                 Annuler
               </button>
               <button
                 @click="rejectRefund"
                 :disabled="processing || !rejectReason.trim()"
-                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                class="admin-btn-danger disabled:opacity-50"
               >
                 {{ processing ? 'Rejet...' : 'Rejeter' }}
               </button>
