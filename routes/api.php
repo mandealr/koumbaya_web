@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\RefundController;
 use App\Http\Controllers\Api\AdminRefundController;
 use App\Http\Controllers\Api\TicketPriceController;
 use App\Http\Controllers\Api\AdminDashboardController;
+use App\Http\Controllers\Api\AdminUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -207,6 +208,15 @@ Route::group([
     Route::get('/lotteries/recent', [AdminDashboardController::class, 'getRecentLotteries']);
     Route::get('/activities/recent', [AdminDashboardController::class, 'getRecentActivities']);
     Route::get('/products/top', [AdminDashboardController::class, 'getTopProducts']);
+    
+    // Admin Users Management
+    Route::prefix('users')->group(function () {
+        Route::get('/', [AdminUserController::class, 'index']);
+        Route::get('/{id}', [AdminUserController::class, 'show']);
+        Route::post('/', [AdminUserController::class, 'store']);
+        Route::put('/{id}', [AdminUserController::class, 'update']);
+        Route::post('/{id}/toggle-status', [AdminUserController::class, 'toggleStatus']);
+    });
     
     // Admin Refunds
     Route::prefix('refunds')->group(function () {

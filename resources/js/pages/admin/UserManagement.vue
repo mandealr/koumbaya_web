@@ -7,11 +7,11 @@
           <p class="mt-2 text-gray-600">Gérez tous les utilisateurs de la plateforme</p>
         </div>
         <button 
-          @click="showCreateModal = true"
+          @click="loadUsers"
           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
         >
-          <PlusIcon class="w-5 h-5 inline mr-2" />
-          Nouvel Utilisateur
+          <ArrowPathIcon class="w-5 h-5 inline mr-2" :class="loading ? 'animate-spin' : ''" />
+          Recharger
         </button>
       </div>
     </div>
@@ -35,9 +35,9 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les rôles</option>
-            <option value="CUSTOMER">Client</option>
-            <option value="MERCHANT">Marchand</option>
-            <option value="ADMIN">Administrateur</option>
+            <option v-for="role in availableRoles" :key="role.value" :value="role.value">
+              {{ role.label }}
+            </option>
           </select>
         </div>
         <div>
@@ -133,12 +133,9 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <span :class="[
                   'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
-                  user.role === 'ADMIN' ? 'bg-red-100 text-red-800' :
-                  user.role === 'MERCHANT' ? 'bg-blue-100 text-blue-800' :
-                  'bg-blue-100 text-blue-800'
+                  getRoleClass(user.primary_role)
                 ]">
-                  {{ user.role === 'ADMIN' ? 'Administrateur' :
-                     user.role === 'MERCHANT' ? 'Marchand' : 'Client' }}
+                  {{ getRoleLabel(user.primary_role) }}
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
@@ -183,8 +180,8 @@
         <div class="flex items-center justify-between">
           <div class="text-sm text-gray-700">
             Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à 
-            {{ Math.min(currentPage * itemsPerPage, filteredUsers.length) }} sur 
-            {{ filteredUsers.length }} résultats
+            {{ Math.min(currentPage * itemsPerPage, totalUsers) }} sur 
+            {{ totalUsers }} résultats
           </div>
           <div class="flex space-x-2">
             <button 
@@ -209,128 +206,76 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { PlusIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
-import api from '@/composables/api'
+import { useApi } from '@/composables/api'
+
+const { get, post } = useApi()
 
 const users = ref([])
 const loading = ref(false)
 const showCreateModal = ref(false)
 const currentPage = ref(1)
-const itemsPerPage = 10
+const itemsPerPage = ref(20)
+const totalUsers = ref(0)
+const availableRoles = ref([])
 
-const filters = ref({
+const filters = reactive({
   search: '',
   role: '',
   status: ''
 })
 
-// Mock data for now
-const mockUsers = [
-  {
-    id: 1,
-    first_name: 'Jean',
-    last_name: 'Dupont',
-    email: 'jean.dupont@email.com',
-    phone: '+237 123 456 789',
-    role: 'CUSTOMER',
-    is_active: true,
-    verified_at: new Date(),
-    created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+// Watch for filter changes and reload
+watch(
+  () => filters,
+  () => {
+    currentPage.value = 1
+    loadUsers()
   },
-  {
-    id: 2,
-    first_name: 'Marie',
-    last_name: 'Claire',
-    email: 'marie.claire@email.com',
-    phone: '+237 987 654 321',
-    role: 'MERCHANT',
-    is_active: true,
-    verified_at: null,
-    created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000)
-  },
-  {
-    id: 3,
-    first_name: 'Paul',
-    last_name: 'Martin',
-    email: 'paul.martin@email.com',
-    phone: '+237 555 123 456',
-    role: 'ADMIN',
-    is_active: false,
-    verified_at: new Date(),
-    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-  }
-]
+  { deep: true }
+)
 
-const filteredUsers = computed(() => {
-  let filtered = users.value
+// No need for client-side filtering, API handles it
+const filteredUsers = computed(() => users.value)
 
-  if (filters.value.search) {
-    const search = filters.value.search.toLowerCase()
-    filtered = filtered.filter(user => 
-      user.first_name.toLowerCase().includes(search) ||
-      user.last_name.toLowerCase().includes(search) ||
-      user.email.toLowerCase().includes(search)
-    )
-  }
-
-  if (filters.value.role) {
-    filtered = filtered.filter(user => user.role === filters.value.role)
-  }
-
-  if (filters.value.status) {
-    filtered = filtered.filter(user => {
-      switch (filters.value.status) {
-        case 'active':
-          return user.is_active
-        case 'inactive':
-          return !user.is_active
-        case 'verified':
-          return user.verified_at !== null
-        case 'unverified':
-          return user.verified_at === null
-        default:
-          return true
-      }
-    })
-  }
-
-  return filtered
-})
-
-const paginatedUsers = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredUsers.value.slice(start, end)
-})
+// Users are already paginated from API
+const paginatedUsers = computed(() => users.value)
 
 const totalPages = computed(() => {
-  return Math.ceil(filteredUsers.value.length / itemsPerPage)
+  return Math.ceil(totalUsers.value / itemsPerPage.value)
 })
 
 const loadUsers = async () => {
   loading.value = true
   try {
-    // const response = await api.get('/users')
-    // users.value = response.data.users
+    const params = new URLSearchParams()
+    params.append('page', currentPage.value)
+    params.append('per_page', itemsPerPage.value)
     
-    // Using mock data for now
-    setTimeout(() => {
-      users.value = mockUsers
-      loading.value = false
-    }, 1000)
+    if (filters.search) params.append('search', filters.search)
+    if (filters.role) params.append('role', filters.role)
+    if (filters.status) params.append('status', filters.status)
+    
+    const response = await get(`/admin/users?${params.toString()}`)
+    
+    if (response && response.data) {
+      users.value = response.data.users || []
+      totalUsers.value = response.data.pagination?.total || 0
+      availableRoles.value = response.data.available_roles || []
+    }
   } catch (error) {
     console.error('Erreur lors du chargement des utilisateurs:', error)
+    users.value = []
+  } finally {
     loading.value = false
   }
 }
 
 const resetFilters = () => {
-  filters.value = {
-    search: '',
-    role: '',
-    status: ''
-  }
+  filters.search = ''
+  filters.role = ''
+  filters.status = ''
   currentPage.value = 1
 }
 
@@ -340,11 +285,19 @@ const editUser = (user) => {
 
 const toggleUserStatus = async (user) => {
   try {
-    // await api.patch(`/users/${user.id}/toggle-status`)
-    user.is_active = !user.is_active
-    console.log('Statut modifié pour:', user)
+    const response = await post(`/admin/users/${user.id}/toggle-status`)
+    if (response && response.success) {
+      // Reload users to get updated data
+      await loadUsers()
+      if (window.$toast) {
+        window.$toast.success(response.message || 'Statut modifié', '✓ Succès')
+      }
+    }
   } catch (error) {
     console.error('Erreur lors de la modification du statut:', error)
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la modification du statut', '✘ Erreur')
+    }
   }
 }
 
@@ -355,6 +308,35 @@ const formatDate = (date) => {
     year: 'numeric'
   }).format(new Date(date))
 }
+
+const getRoleLabel = (role) => {
+  const roleMap = {
+    'Super Admin': 'Super Admin',
+    'Admin': 'Administrateur',
+    'Agent': 'Agent',
+    'Agent Back Office': 'Agent BO',
+    'Marchand': 'Marchand',
+    'Client': 'Client'
+  }
+  return roleMap[role] || role
+}
+
+const getRoleClass = (role) => {
+  const classMap = {
+    'Super Admin': 'bg-purple-100 text-purple-800',
+    'Admin': 'bg-red-100 text-red-800',
+    'Agent': 'bg-yellow-100 text-yellow-800',
+    'Agent Back Office': 'bg-orange-100 text-orange-800',
+    'Marchand': 'bg-blue-100 text-blue-800',
+    'Client': 'bg-green-100 text-green-800'
+  }
+  return classMap[role] || 'bg-gray-100 text-gray-800'
+}
+
+// Watch for page changes
+watch(currentPage, () => {
+  loadUsers()
+})
 
 onMounted(() => {
   loadUsers()
