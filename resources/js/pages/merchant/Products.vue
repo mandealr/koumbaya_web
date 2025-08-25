@@ -142,10 +142,11 @@
       >
         <!-- Product Image -->
         <div class="relative h-48 bg-gray-200">
-          <img
+          <ProductImage
             :src="product.image"
             :alt="product.name"
-            class="w-full h-full object-cover"
+            container-class="w-full h-full"
+            image-class="w-full h-full object-cover"
           />
           <div class="absolute top-3 left-3">
             <span :class="getStatusClass(product.status)">
@@ -245,14 +246,14 @@
               >
                 <button
                   @click="duplicateProduct(product)"
-                  class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded-t-lg"
+                  class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg"
                 >
                   <DocumentDuplicateIcon class="w-4 h-4 inline mr-2" />
                   Dupliquer
                 </button>
                 <button
                   @click="viewAnalytics(product)"
-                  class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                 >
                   <ChartBarIcon class="w-4 h-4 inline mr-2" />
                   Analytiques
@@ -287,12 +288,14 @@
           <div v-if="selectedProduct.images && selectedProduct.images.length > 0">
             <h4 class="text-md font-semibold text-gray-900 mb-3">Images</h4>
             <div class="grid grid-cols-3 gap-2">
-              <img
+              <ProductImage
                 v-for="(image, index) in selectedProduct.images.slice(0, 6)"
                 :key="index"
                 :src="image"
                 :alt="`Produit ${index + 1}`"
-                class="w-full h-20 object-cover rounded-lg"
+                container-class="w-full h-20 rounded-lg"
+                image-class="w-full h-full object-cover rounded-lg"
+                fallback-class="w-full h-full rounded-lg"
               />
             </div>
           </div>
@@ -320,7 +323,7 @@
           <!-- Description -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-            <p class="text-sm text-gray-900 bg-gray-50 p-3 rounded-lg">{{ selectedProduct.description }}</p>
+            <p class="text-sm text-gray-900 bg-gray-100 p-3 rounded-lg">{{ selectedProduct.description }}</p>
           </div>
 
           <!-- Lottery Stats -->
@@ -363,6 +366,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import ProductImage from '@/components/common/ProductImage.vue'
 import { useApi } from '@/composables/api'
 import {
   PlusIcon,

@@ -136,11 +136,11 @@
                   <p class="text-sm font-medium text-gray-800">{{ authStore.user?.first_name }} {{ authStore.user?.last_name }}</p>
                   <p class="text-xs text-gray-500">{{ authStore.user?.email }}</p>
                 </div>
-                <a href="#" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                <a href="#" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                   <UserIcon class="w-4 h-4 mr-3 text-gray-400" />
                   Mon Profil
                 </a>
-                <a href="#" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                <a href="#" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                   <Cog6ToothIcon class="w-4 h-4 mr-3 text-gray-400" />
                   Paramètres
                 </a>

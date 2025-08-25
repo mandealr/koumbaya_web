@@ -154,10 +154,12 @@
               >
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <img
+                    <ProductImage
                       :src="product.image"
                       :alt="product.title"
-                      class="w-12 h-12 rounded-lg object-cover"
+                      container-class="w-12 h-12 rounded-lg"
+                      image-class="w-full h-full object-cover rounded-lg"
+                      fallback-class="w-full h-full rounded-lg"
                     />
                     <div class="ml-4">
                       <div class="text-sm font-medium text-gray-900">{{ product.title }}</div>
@@ -230,10 +232,11 @@
               class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
             >
               <div class="relative">
-                <img
+                <ProductImage
                   :src="product.image"
                   :alt="product.title"
-                  class="w-full h-48 object-cover"
+                  container-class="w-full h-48"
+                  image-class="w-full h-full object-cover"
                 />
                 <div class="absolute top-2 left-2">
                   <span :class="[
@@ -455,6 +458,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import ProductImage from '@/components/common/ProductImage.vue'
 import {
   PlusIcon,
   PencilIcon,

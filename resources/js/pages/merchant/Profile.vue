@@ -150,14 +150,14 @@
               <div class="space-y-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Type de compte</label>
-                  <div class="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
+                  <div class="text-sm text-gray-600 bg-gray-100 rounded-lg p-3">
                     {{ user?.account_type === 'business' ? 'Compte Business' : 'Compte Personnel' }}
                   </div>
                 </div>
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Rôle</label>
-                  <div class="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
+                  <div class="text-sm text-gray-600 bg-gray-100 rounded-lg p-3">
                     {{ user?.role || 'Non défini' }}
                   </div>
                 </div>

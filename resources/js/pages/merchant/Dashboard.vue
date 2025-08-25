@@ -149,7 +149,7 @@
             <div
               v-for="order in recentOrders"
               :key="order.id"
-              class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+              class="flex items-center justify-between p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
             >
               <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">

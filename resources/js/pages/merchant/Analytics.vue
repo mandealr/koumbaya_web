@@ -144,7 +144,7 @@
           <div v-else-if="lotteryPerformance && lotteryPerformance.length > 0" class="h-64 overflow-y-auto">
             <div class="space-y-3">
               <div v-for="lottery in lotteryPerformance.slice(0, 5)" :key="lottery.id" 
-                   class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                   class="flex items-center justify-between p-3 bg-gray-100 rounded-lg">
                 <div>
                   <h4 class="font-medium text-gray-900">{{ lottery.name }}</h4>
                   <p class="text-sm text-gray-600">{{ lottery.tickets_sold }} tickets vendus</p>

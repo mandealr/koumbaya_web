@@ -135,7 +135,7 @@
               :value="calculation ? formatCurrency(calculation.final_ticket_price) : ''"
               type="text"
               readonly
-              class="koumbaya-input bg-gray-50 cursor-not-allowed"
+              class="koumbaya-input bg-gray-100 cursor-not-allowed"
               placeholder="Saisissez d'abord le prix du produit"
             />
             <input

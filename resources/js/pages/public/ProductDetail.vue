@@ -35,10 +35,11 @@
           <!-- Product Images -->
           <div class="space-y-4">
             <div class="relative overflow-hidden rounded-2xl bg-gray-100">
-              <img
-                :src="product.image || placeholderImg"
+              <ProductImage
+                :src="product.image"
                 :alt="product.name"
-                class="w-full h-96 lg:h-[500px] object-cover"
+                container-class="w-full h-96 lg:h-[500px]"
+                image-class="w-full h-full object-cover"
               />
               <div v-if="hasActiveLottery" class="absolute top-4 right-4">
                 <span class="bg-[#0099cc] text-white px-4 py-2 rounded-full font-semibold">
@@ -60,10 +61,11 @@
             <!-- Thumbnail Gallery -->
             <div class="grid grid-cols-4 gap-4">
               <div v-for="n in 4" :key="n" class="relative overflow-hidden rounded-xl bg-gray-100 cursor-pointer hover:ring-2 hover:ring-[#0099cc] transition-all">
-                <img
-                  :src="product.image || placeholderImg"
+                <ProductImage
+                  :src="product.image"
                   :alt="`${product.name} - Vue ${n}`"
-                  class="w-full h-20 object-cover"
+                  container-class="w-full h-20"
+                  image-class="w-full h-full object-cover"
                 />
               </div>
             </div>
@@ -341,10 +343,11 @@
               class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all cursor-pointer"
             >
               <div class="relative overflow-hidden rounded-xl mb-4">
-                <img
-                  :src="relatedProduct.image || placeholderImg"
+                <ProductImage
+                  :src="relatedProduct.image"
                   :alt="relatedProduct.name"
-                  class="w-full h-40 object-cover"
+                  container-class="w-full h-40"
+                  image-class="w-full h-full object-cover"
                 />
                 <div class="absolute top-2 right-2">
                   <span class="bg-[#0099cc] text-white px-2 py-1 rounded-full text-xs">
@@ -394,6 +397,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import ProductImage from '@/components/common/ProductImage.vue'
 import { useApi } from '@/composables/api'
 import { useAuthStore } from '@/stores/auth'
 import placeholderImg from '@/assets/placeholder.jpg'

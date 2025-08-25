@@ -70,7 +70,7 @@
               <div class="relative">
                 <button
                   @click="userMenuOpen = !userMenuOpen"
-                  class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50"
+                  class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100"
                 >
                   <div class="w-8 h-8 bg-[#0099cc] rounded-full flex items-center justify-center">
                     <span class="text-sm font-medium text-white">{{ userInitials }}</span>

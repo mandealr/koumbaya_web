@@ -44,22 +44,22 @@
               <h4 class="text-lg font-semibold text-gray-900">Statistiques</h4>
               
               <div class="grid grid-cols-2 gap-4">
-                <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="bg-gray-100 p-4 rounded-lg">
                   <div class="text-2xl font-bold text-blue-600">{{ lottery.soldTickets || 0 }}</div>
                   <div class="text-sm text-gray-600">Tickets vendus</div>
                 </div>
                 
-                <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="bg-gray-100 p-4 rounded-lg">
                   <div class="text-2xl font-bold text-gray-900">{{ lottery.totalTickets || 1000 }}</div>
                   <div class="text-sm text-gray-600">Total tickets</div>
                 </div>
                 
-                <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="bg-gray-100 p-4 rounded-lg">
                   <div class="text-2xl font-bold text-blue-600">{{ formatPrice(lottery.revenue) }}</div>
                   <div class="text-sm text-gray-600">Revenus</div>
                 </div>
                 
-                <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="bg-gray-100 p-4 rounded-lg">
                   <div class="text-2xl font-bold text-purple-600">{{ lottery.participants || 0 }}</div>
                   <div class="text-sm text-gray-600">Participants</div>
                 </div>

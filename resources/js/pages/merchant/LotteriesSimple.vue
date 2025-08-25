@@ -206,7 +206,7 @@
                 <div class="flex gap-2 mt-4">
                   <router-link 
                     :to="{ name: 'merchant.lottery.view', params: { id: lottery.id } }"
-                    class="flex-1 text-center px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                    class="flex-1 text-center px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
                   >
                     Détails
                   </router-link>
@@ -234,14 +234,14 @@
               <button
                 @click="changePage(pagination.current_page - 1)"
                 :disabled="pagination.current_page <= 1"
-                class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
                 Précédent
               </button>
               <button
                 @click="changePage(pagination.current_page + 1)"
                 :disabled="pagination.current_page >= pagination.last_page"
-                class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
                 Suivant
               </button>
@@ -263,7 +263,7 @@
         <div class="flex gap-3 justify-end">
           <button
             @click="showDrawModal = false"
-            class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+            class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100"
           >
             Annuler
           </button>

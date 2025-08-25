@@ -120,7 +120,13 @@
                 <tr v-for="lottery in recentLotteries" :key="lottery.id" class="hover:bg-gray-50">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
-                      <img class="h-10 w-10 rounded-lg object-cover" :src="lottery.product.image" :alt="lottery.product.name" />
+                      <ProductImage 
+                        :src="lottery.product.image" 
+                        :alt="lottery.product.name"
+                        container-class="h-10 w-10 rounded-lg"
+                        image-class="h-full w-full object-cover rounded-lg"
+                        fallback-class="h-full w-full rounded-lg"
+                      />
                       <div class="ml-4">
                         <div class="text-sm font-medium text-gray-900">{{ lottery.product.name }}</div>
                         <div class="text-sm text-gray-500">{{ lottery.lottery_number }}</div>
@@ -227,10 +233,12 @@
                   {{ index + 1 }}
                 </span>
               </div>
-              <img 
+              <ProductImage 
                 :src="product.image" 
                 :alt="product.title"
-                class="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                container-class="w-10 h-10 rounded-lg flex-shrink-0"
+                image-class="w-full h-full object-cover rounded-lg"
+                fallback-class="w-full h-full rounded-lg"
               />
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-gray-900 truncate">{{ product.title }}</p>
@@ -275,6 +283,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import ProductImage from '@/components/common/ProductImage.vue'
 import {
   UsersIcon,
   ShoppingBagIcon,

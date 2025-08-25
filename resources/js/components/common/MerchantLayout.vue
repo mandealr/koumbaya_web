@@ -124,7 +124,7 @@
             'block pl-3 pr-4 py-2 border-l-4 text-base font-medium',
             $route.path.startsWith(item.href)
               ? 'bg-blue-50 border-blue-500 text-blue-700'
-              : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
+              : 'border-transparent text-gray-500 hover:bg-gray-100 hover:border-gray-300 hover:text-gray-700'
           ]"
         >
           <component :is="item.icon" class="w-5 h-5 mr-3 inline" />

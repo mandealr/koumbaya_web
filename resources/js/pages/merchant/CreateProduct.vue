@@ -393,7 +393,7 @@
         </div>
 
         <!-- Terms -->
-        <div class="mt-8 p-4 bg-gray-50 rounded-xl">
+        <div class="mt-8 p-4 bg-gray-100 rounded-xl">
           <label class="flex items-start space-x-3">
             <input
               v-model="form.terms_accepted"

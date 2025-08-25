@@ -3,11 +3,11 @@
     <!-- Image avec gradient overlay -->
     <div class="relative overflow-hidden">
       <div class="aspect-w-16 aspect-h-10 bg-gradient-to-br from-koumbaya-primary/5 to-koumbaya-primary/20">
-        <img 
-          :src="product.image || '/images/products/placeholder.jpg'" 
+        <ProductImage 
+          :src="product.image" 
           :alt="product.name"
-          class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
-          @error="handleImageError"
+          container-class="w-full h-48"
+          image-class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
       </div>
       
@@ -133,6 +133,7 @@ import {
   EyeIcon,
   ShoppingCartIcon
 } from '@heroicons/vue/24/outline'
+import ProductImage from './ProductImage.vue'
 
 const props = defineProps({
   product: {
@@ -163,10 +164,6 @@ const formatDate = (date) => {
     month: 'long',
     year: 'numeric'
   })
-}
-
-const handleImageError = (event) => {
-  event.target.src = '/images/products/placeholder.jpg'
 }
 
 const onViewDetails = () => {
