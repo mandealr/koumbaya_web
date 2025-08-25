@@ -852,8 +852,8 @@ const validateTotalTickets = () => {
 const loadCategories = async () => {
   try {
     const response = await get('/categories')
-    if (response.data) {
-      categories.value = response.data
+    if (response.categories) {
+      categories.value = response.categories
     }
   } catch (error) {
     console.error('Error loading categories:', error)
