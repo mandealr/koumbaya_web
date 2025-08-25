@@ -41,11 +41,11 @@ class AdminPaymentController extends Controller
         // Status filter
         if ($request->filled('status')) {
             if ($request->status === 'completed') {
-                $query->where('is_paid', true);
+                $query->whereIn('status', ['paid', 'processed']);
             } elseif ($request->status === 'pending') {
-                $query->where('is_paid', false);
+                $query->where('status', 'pending');
             } elseif ($request->status === 'failed') {
-                $query->where('is_paid', false)->where('failed_at', '!=', null);
+                $query->whereIn('status', ['failed', 'expired']);
             }
         }
 
@@ -151,7 +151,7 @@ class AdminPaymentController extends Controller
     {
         $payment = Payment::findOrFail($id);
 
-        if (!$payment->is_paid) {
+        if (!in_array($payment->status, ['paid', 'processed'])) {
             return response()->json([
                 'success' => false,
                 'message' => 'Seuls les paiements complétés peuvent être remboursés'
@@ -227,11 +227,11 @@ class AdminPaymentController extends Controller
 
         if ($request->filled('status')) {
             if ($request->status === 'completed') {
-                $query->where('is_paid', true);
+                $query->whereIn('status', ['paid', 'processed']);
             } elseif ($request->status === 'pending') {
-                $query->where('is_paid', false);
+                $query->where('status', 'pending');
             } elseif ($request->status === 'failed') {
-                $query->where('is_paid', false)->where('failed_at', '!=', null);
+                $query->whereIn('status', ['failed', 'expired']);
             }
         }
 
@@ -285,20 +285,20 @@ class AdminPaymentController extends Controller
         $lastMonth = $now->copy()->subMonth();
 
         // Current month stats
-        $currentMonthRevenue = Payment::where('is_paid', true)
+        $currentMonthRevenue = Payment::whereIn('status', ['paid', 'processed'])
             ->whereBetween('paid_at', [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()])
             ->sum('amount');
 
-        $currentMonthTransactions = Payment::where('is_paid', true)
+        $currentMonthTransactions = Payment::whereIn('status', ['paid', 'processed'])
             ->whereBetween('paid_at', [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()])
             ->count();
 
         // Last month stats for comparison
-        $lastMonthRevenue = Payment::where('is_paid', true)
+        $lastMonthRevenue = Payment::whereIn('status', ['paid', 'processed'])
             ->whereBetween('paid_at', [$lastMonth->copy()->startOfMonth(), $lastMonth->copy()->endOfMonth()])
             ->sum('amount');
 
-        $lastMonthTransactions = Payment::where('is_paid', true)
+        $lastMonthTransactions = Payment::whereIn('status', ['paid', 'processed'])
             ->whereBetween('paid_at', [$lastMonth->copy()->startOfMonth(), $lastMonth->copy()->endOfMonth()])
             ->count();
 
@@ -313,7 +313,7 @@ class AdminPaymentController extends Controller
 
         // Success rate
         $totalTransactions = Payment::count();
-        $successfulTransactions = Payment::where('is_paid', true)->count();
+        $successfulTransactions = Payment::whereIn('status', ['paid', 'processed'])->count();
         $successRate = $totalTransactions > 0 ? ($successfulTransactions / $totalTransactions) * 100 : 0;
 
         $lastMonthTotal = Payment::whereBetween('created_at', [
@@ -321,7 +321,7 @@ class AdminPaymentController extends Controller
             $lastMonth->copy()->endOfMonth()
         ])->count();
 
-        $lastMonthSuccessful = Payment::where('is_paid', true)
+        $lastMonthSuccessful = Payment::whereIn('status', ['paid', 'processed'])
             ->whereBetween('paid_at', [
                 $lastMonth->copy()->startOfMonth(), 
                 $lastMonth->copy()->endOfMonth()
@@ -333,12 +333,10 @@ class AdminPaymentController extends Controller
             : 0;
 
         // Failed transactions
-        $failedTransactions = Payment::where('is_paid', false)
-            ->where('failed_at', '!=', null)
-            ->count();
+        $failedTransactions = Payment::whereIn('status', ['failed', 'expired'])->count();
 
         return [
-            'total_revenue' => Payment::where('is_paid', true)->sum('amount'),
+            'total_revenue' => Payment::whereIn('status', ['paid', 'processed'])->sum('amount'),
             'current_month_revenue' => $currentMonthRevenue,
             'revenue_change' => round($revenueChange, 1),
             'successful_transactions' => $successfulTransactions,
@@ -347,9 +345,7 @@ class AdminPaymentController extends Controller
             'success_rate' => round($successRate, 1),
             'success_rate_change' => round($successRateChange, 1),
             'failed_transactions' => $failedTransactions,
-            'pending_transactions' => Payment::where('is_paid', false)
-                ->whereNull('failed_at')
-                ->count(),
+            'pending_transactions' => Payment::where('status', 'pending')->count(),
         ];
     }
 }
