@@ -109,6 +109,31 @@
                 </div>
               </div>
 
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Langue par défaut</label>
+                  <select
+                    v-model="generalSettings.default_language"
+                    class="admin-input"
+                  >
+                    <option v-for="language in activeLanguages" :key="language.id" :value="language.code">
+                      {{ language.name }}
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Pays par défaut</label>
+                  <select
+                    v-model="generalSettings.default_country"
+                    class="admin-input"
+                  >
+                    <option v-for="country in activeCountries" :key="country.id" :value="country.code">
+                      {{ country.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
               <div class="flex justify-end">
                 <button 
                   type="submit"
@@ -348,7 +373,8 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Devise par défaut</label>
                   <select v-model="paymentSettings.default_currency" class="admin-input">
-                    <option value="XOF">Franc CFA (XOF)</option>
+                    <option value="XAF">Franc CFA Afrique Centrale (XAF)</option>
+                    <option value="XOF">Franc CFA Afrique de l'Ouest (XOF)</option>
                     <option value="EUR">Euro (EUR)</option>
                     <option value="USD">Dollar US (USD)</option>
                   </select>
@@ -427,7 +453,7 @@
                     type="number" 
                     min="100"
                     class="admin-input"
-                    placeholder="500"
+                    placeholder="1000"
                   >
                 </div>
                 
@@ -438,7 +464,7 @@
                     type="number" 
                     min="1000"
                     class="admin-input"
-                    placeholder="50000"
+                    placeholder="100000"
                   >
                 </div>
               </div>
@@ -884,11 +910,13 @@ const generalSettings = reactive({
   app_url: 'https://koumbaya.com',
   app_description: 'Plateforme de tombolas en ligne',
   contact_email: 'contact@koumbaya.com',
-  contact_phone: '+225 XX XX XX XX'
+  contact_phone: '+241 XX XX XX XX',
+  default_language: 'fr',
+  default_country: 'GA'
 })
 
 const paymentSettings = reactive({
-  default_currency: 'XOF',
+  default_currency: 'XAF',
   platform_commission: 5.0
 })
 
@@ -924,8 +952,8 @@ const paymentMethods = ref([
 ])
 
 const lotterySettings = reactive({
-  min_ticket_price: 500,
-  max_ticket_price: 50000,
+  min_ticket_price: 1000,
+  max_ticket_price: 100000,
   min_participants: 10,
   max_duration_days: 30,
   auto_refund: true,
@@ -973,6 +1001,14 @@ const maintenanceSettings = reactive({
 const countries = ref([
   {
     id: 1,
+    name: 'Gabon',
+    code: 'GA',
+    currency: 'XAF',
+    flag: 'https://flagcdn.com/w40/ga.png',
+    is_active: true
+  },
+  {
+    id: 2,
     name: 'France',
     code: 'FR',
     currency: 'EUR',
@@ -980,7 +1016,7 @@ const countries = ref([
     is_active: true
   },
   {
-    id: 2,
+    id: 3,
     name: 'Sénégal',
     code: 'SN',
     currency: 'XOF',
@@ -988,7 +1024,7 @@ const countries = ref([
     is_active: true
   },
   {
-    id: 3,
+    id: 4,
     name: 'Côte d\'Ivoire',
     code: 'CI',
     currency: 'XOF',
@@ -996,7 +1032,7 @@ const countries = ref([
     is_active: true
   },
   {
-    id: 4,
+    id: 5,
     name: 'Mali',
     code: 'ML',
     currency: 'XOF',
@@ -1077,6 +1113,15 @@ const countryFilters = reactive({
 
 const languageFilters = reactive({
   search: ''
+})
+
+// Computed properties for active countries and languages
+const activeCountries = computed(() => {
+  return countries.value.filter(country => country.is_active)
+})
+
+const activeLanguages = computed(() => {
+  return languages.value.filter(language => language.is_active)
 })
 
 // Methods

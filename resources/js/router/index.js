@@ -36,7 +36,8 @@ import AdminDashboard from '@/pages/admin/Dashboard.vue'
 import UserManagement from '@/pages/admin/UserManagement.vue'
 import ProductManagement from '@/pages/admin/ProductManagement.vue'
 import LotteryManagement from '@/pages/admin/LotteryManagement.vue'
-import CountryLanguageManagement from '@/pages/admin/CountryLanguageManagement.vue'
+import AdminSettings from '@/pages/admin/Settings.vue'
+import AdminProfile from '@/pages/admin/Profile.vue'
 import RefundManagement from '@/pages/admin/RefundManagement.vue'
 import PaymentManagement from '@/pages/admin/PaymentManagement.vue'
 
@@ -195,7 +196,12 @@ const routes = [
       {
         path: 'settings',
         name: 'admin.settings',
-        component: CountryLanguageManagement
+        component: AdminSettings
+      },
+      {
+        path: 'profile',
+        name: 'admin.profile',
+        component: AdminProfile
       },
       {
         path: 'refunds',

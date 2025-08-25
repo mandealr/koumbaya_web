@@ -24,6 +24,7 @@ export default defineConfig({
         },
     },
     build: {
+        outDir: 'public/build',
         rollupOptions: {
             output: {
                 manualChunks: {
@@ -35,5 +36,5 @@ export default defineConfig({
         chunkSizeWarningLimit: 600
     },
     assetsInclude: ['**/*.jpg', '**/*.png', '**/*.gif', '**/*.svg', '**/*.ttf', '**/*.woff', '**/*.woff2'],
-    publicDir: 'public'
+    publicDir: 'resources/assets'
 });

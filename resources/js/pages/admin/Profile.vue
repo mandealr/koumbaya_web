@@ -315,6 +315,7 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Fuseau horaire</label>
                 <select v-model="profileData.timezone" class="admin-input">
+                  <option value="Africa/Libreville">Afrique/Libreville (WAT)</option>
                   <option value="UTC">UTC (Temps universel)</option>
                   <option value="Africa/Abidjan">Afrique/Abidjan (GMT)</option>
                   <option value="Europe/Paris">Europe/Paris (CET)</option>
@@ -461,7 +462,7 @@ const profileData = reactive({
   phone: '',
   position: '',
   bio: '',
-  timezone: 'Africa/Abidjan',
+  timezone: 'Africa/Libreville',
   language: 'fr',
   two_factor_enabled: false
 })

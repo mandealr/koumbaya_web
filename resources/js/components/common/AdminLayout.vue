@@ -8,7 +8,7 @@
       <div class="flex items-center justify-between h-16 px-6 border-b border-gray-700">
         <div class="flex items-center space-x-3">
           <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center p-1">
-            <img src="/icon.png" alt="Koumbaya" class="w-full h-full object-contain" />
+            <img :src="logoIcon" alt="Koumbaya" class="w-full h-full object-contain" />
           </div>
           <div class="text-white">
             <h1 class="text-lg font-bold">Koumbaya</h1>
@@ -136,11 +136,19 @@
                   <p class="text-sm font-medium text-gray-800">{{ authStore.user?.first_name }} {{ authStore.user?.last_name }}</p>
                   <p class="text-xs text-gray-500">{{ authStore.user?.email }}</p>
                 </div>
-                <router-link :to="{ name: 'admin.profile' }" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                <router-link 
+                  :to="{ name: 'admin.profile' }" 
+                  @click="userDropdownOpen = false"
+                  class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                >
                   <UserIcon class="w-4 h-4 mr-3 text-gray-400" />
                   Mon Profil
                 </router-link>
-                <router-link :to="{ name: 'admin.settings' }" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                <router-link 
+                  :to="{ name: 'admin.settings' }" 
+                  @click="userDropdownOpen = false"
+                  class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                >
                   <Cog6ToothIcon class="w-4 h-4 mr-3 text-gray-400" />
                   Paramètres
                 </router-link>
@@ -172,6 +180,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter, useRoute } from 'vue-router'
 import { useApi } from '@/composables/api'
+import logoIcon from '/icon.png'
 import {
   HomeIcon,
   UsersIcon,
