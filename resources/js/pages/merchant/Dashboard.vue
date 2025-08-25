@@ -193,7 +193,14 @@
               <div class="flex-shrink-0 w-6 h-6 bg-[#0099cc] text-white text-xs font-bold rounded-full flex items-center justify-center">
                 {{ index + 1 }}
               </div>
-              <img :src="product.image" :alt="product.name" class="w-12 h-12 rounded-lg object-cover" />
+              <ProductImage 
+                :src="product.image" 
+                :alt="product.name"
+                container-class="w-12 h-12 rounded-lg"
+                image-class="w-12 h-12 rounded-lg object-cover"
+                fallback-class="w-12 h-12 rounded-lg"
+                fallback-text="Photo"
+              />
               <div class="flex-1 min-w-0">
                 <p class="font-medium text-gray-900 truncate">{{ product.name }}</p>
                 <div class="flex items-center space-x-2 text-sm text-gray-500">
@@ -217,6 +224,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useApi } from '@/composables/api'
+import ProductImage from '@/components/common/ProductImage.vue'
 import {
   PlusIcon,
   ShoppingBagIcon,

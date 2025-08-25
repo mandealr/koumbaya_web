@@ -125,10 +125,13 @@
               <tr v-for="lottery in lotteries" :key="lottery.id" class="hover:bg-gray-100">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <img 
-                      :src="lottery.product?.image_url || '/images/products/placeholder.jpg'" 
+                    <ProductImage 
+                      :src="lottery.product?.image_url || lottery.product?.image" 
                       :alt="lottery.product_title"
-                      class="w-12 h-12 rounded-lg object-cover mr-4"
+                      container-class="w-12 h-12 rounded-lg mr-4"
+                      image-class="w-12 h-12 rounded-lg object-cover"
+                      fallback-class="w-12 h-12 rounded-lg"
+                      fallback-text="Photo"
                     />
                     <div>
                       <div class="text-sm font-medium text-gray-900">
@@ -283,6 +286,7 @@ import { useApi } from '@/composables/api'
 import LotteryDrawModal from '@/components/merchant/LotteryDrawModal.vue'
 import LotteryExtendModal from '@/components/merchant/LotteryExtendModal.vue'
 import LotteryDetailsModal from '@/components/merchant/LotteryDetailsModal.vue'
+import ProductImage from '@/components/common/ProductImage.vue'
 import {
   GiftIcon,
   EyeIcon,

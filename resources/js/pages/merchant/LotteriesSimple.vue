@@ -145,17 +145,14 @@
             >
               <!-- Image du produit -->
               <div class="h-48 bg-gray-200 relative">
-                <img
-                  v-if="lottery.product?.main_image"
-                  :src="lottery.product.main_image"
+                <ProductImage 
+                  :src="lottery.product?.main_image || lottery.product?.image_url || lottery.product?.image" 
                   :alt="lottery.product?.name"
-                  class="w-full h-full object-cover"
+                  container-class="h-48 w-full"
+                  image-class="w-full h-full object-cover"
+                  fallback-class="h-48 w-full"
+                  fallback-text="Photo"
                 />
-                <div v-else class="w-full h-full flex items-center justify-center">
-                  <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
                 
                 <!-- Badge de statut -->
                 <div class="absolute top-2 right-2">
@@ -169,7 +166,7 @@
               <div class="p-4">
                 <div class="flex justify-between items-start mb-2">
                   <h4 class="font-semibold text-gray-900 truncate">{{ lottery.product?.name || 'Produit sans nom' }}</h4>
-                  <span class="text-sm text-gray-500 ml-2">#{{ lottery.lottery_number }}</span>
+                  <span class="text-sm text-gray-600 ml-2">#{{ lottery.lottery_number }}</span>
                 </div>
                 
                 <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ lottery.product?.description }}</p>
@@ -177,17 +174,17 @@
                 <!-- Informations de la tombola -->
                 <div class="space-y-2 text-sm">
                   <div class="flex justify-between">
-                    <span class="text-gray-500">Prix du ticket:</span>
+                    <span class="text-gray-600">Prix du ticket:</span>
                     <span class="font-medium">{{ lottery.ticket_price }} XAF</span>
                   </div>
                   
                   <div class="flex justify-between">
-                    <span class="text-gray-500">Tickets vendus:</span>
+                    <span class="text-gray-600">Tickets vendus:</span>
                     <span class="font-medium">{{ lottery.sold_tickets || 0 }}/{{ lottery.total_tickets }}</span>
                   </div>
                   
                   <div class="flex justify-between">
-                    <span class="text-gray-500">Temps restant:</span>
+                    <span class="text-gray-600">Temps restant:</span>
                     <span class="font-medium" :class="{ 'text-red-600': getTimeRemaining(lottery.end_date) === 'Terminée' }">
                       {{ getTimeRemaining(lottery.end_date) }}
                     </span>
@@ -304,6 +301,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useMerchantLotteries } from '../../composables/useMerchantLotteries.js'
+import ProductImage from '@/components/common/ProductImage.vue'
 
 // Composable pour la gestion des tombolas
 const {

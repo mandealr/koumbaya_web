@@ -181,17 +181,20 @@
               <tr v-for="result in results" :key="result.lottery_id" class="hover:bg-gray-50">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <img
-                      :src="result.product.image_url || '/images/products/placeholder.jpg'"
+                    <ProductImage 
+                      :src="result.product.image_url || result.product.image" 
                       :alt="result.product.title"
-                      class="w-12 h-12 rounded-lg object-cover mr-4"
+                      container-class="w-12 h-12 rounded-lg mr-4"
+                      image-class="w-12 h-12 rounded-lg object-cover"
+                      fallback-class="w-12 h-12 rounded-lg"
+                      fallback-text="Photo"
                     />
                     <div>
                       <div class="text-sm font-medium text-gray-900">{{ result.product.title }}</div>
                       <div class="text-sm text-gray-500">
                         {{ result.product.category }} • {{ formatCurrency(result.product.price) }}
                       </div>
-                      <div class="text-xs text-gray-400">{{ result.lottery_number }}</div>
+                      <div class="text-xs text-gray-600">{{ result.lottery_number }}</div>
                     </div>
                   </div>
                 </td>
@@ -252,6 +255,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useApi } from '@/composables/api'
+import ProductImage from '@/components/common/ProductImage.vue'
 import {
   GiftIcon,
   CheckCircleIcon,
