@@ -277,8 +277,8 @@
 
               <div
                 v-if="showProductMenu === product.id"
-                class="fixed mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-[9999]"
-                :style="getMenuPosition(product.id)"
+                class="fixed w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-[9999]"
+                :style="menuPosition"
               >
                 <button
                   @click="duplicateProduct(product)"
@@ -423,7 +423,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import ProductImage from '@/components/common/ProductImage.vue'
 import { useApi } from '@/composables/api'
@@ -454,6 +454,7 @@ const { get, post, put, delete: del, loading, error } = useApi()
 const showProductModal = ref(false)
 const selectedProduct = ref(null)
 const showProductMenu = ref(null)
+const menuPosition = ref({ top: '0px', left: '0px' })
 
 const filters = reactive({
   search: '',
@@ -750,20 +751,22 @@ const formatCurrency = (amount) => {
 }
 
 const toggleProductMenu = (productId) => {
-  showProductMenu.value = showProductMenu.value === productId ? null : productId
-}
-
-const getMenuPosition = (productId) => {
-  // Obtenir la position du bouton relatif à la fenêtre
-  const button = document.querySelector(`[data-product-id="${productId}"]`)
-  if (button) {
-    const rect = button.getBoundingClientRect()
-    return {
-      top: `${rect.bottom + 8}px`,
-      left: `${rect.right - 192}px` // 192px = w-48
-    }
+  if (showProductMenu.value === productId) {
+    showProductMenu.value = null
+  } else {
+    showProductMenu.value = productId
+    // Calculer la position une seule fois quand on ouvre le menu
+    nextTick(() => {
+      const button = document.querySelector(`[data-product-id="${productId}"]`)
+      if (button) {
+        const rect = button.getBoundingClientRect()
+        menuPosition.value = {
+          top: `${rect.bottom + 8}px`,
+          left: `${Math.max(rect.right - 192, 10)}px` // 192px = w-48, minimum 10px du bord
+        }
+      }
+    })
   }
-  return { top: '0px', left: '0px' }
 }
 
 // Close menu when clicking outside
