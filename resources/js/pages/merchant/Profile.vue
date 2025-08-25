@@ -114,12 +114,11 @@
                   <label class="block text-sm font-medium text-gray-700 mb-2">
                     Téléphone <span class="text-red-500">*</span>
                   </label>
-                  <input 
+                  <PhoneInput
                     v-model="profileForm.phone"
-                    type="tel" 
-                    required
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
-                  >
+                    placeholder="Numéro de téléphone"
+                    :initial-country="'ga'"
+                  />
                 </div>
               </div>
 
@@ -202,6 +201,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/api'
+import PhoneInput from '@/components/PhoneInput.vue'
 
 const authStore = useAuthStore()
 const { get, put } = useApi()

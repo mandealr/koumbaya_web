@@ -126,11 +126,10 @@
                   <label class="block text-sm font-medium text-gray-700 mb-2">
                     Numéro de téléphone
                   </label>
-                  <input
+                  <PhoneInput
                     v-model="form.phone"
-                    type="tel"
-                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
-                    placeholder="+241 XX XX XX XX"
+                    placeholder="Numéro de téléphone"
+                    :initial-country="'ga'"
                   />
                 </div>
 
@@ -333,6 +332,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import PhoneInput from '@/components/PhoneInput.vue'
 import {
   PhoneIcon,
   EnvelopeIcon,

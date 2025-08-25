@@ -100,12 +100,11 @@
                 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone de contact</label>
-                  <input 
+                  <PhoneInputAdmin
                     v-model="generalSettings.contact_phone"
-                    type="tel" 
-                    class="admin-input"
-                    placeholder="+225 XX XX XX XX"
-                  >
+                    placeholder="Téléphone de contact"
+                    :initial-country="'ga'"
+                  />
                 </div>
               </div>
 
@@ -1128,6 +1127,7 @@ import {
   PlusIcon,
   PencilIcon
 } from '@heroicons/vue/24/outline'
+import PhoneInputAdmin from '@/components/PhoneInputAdmin.vue'
 
 const { get, post, put } = useApi()
 
@@ -1145,20 +1145,20 @@ const settingSections = [
   { id: 'maintenance', name: 'Maintenance', icon: WrenchScrewdriverIcon }
 ]
 
-// Settings forms
+// Settings forms - these will be loaded from API
 const generalSettings = reactive({
-  app_name: 'Koumbaya',
-  app_url: 'https://koumbaya.com',
-  app_description: 'Plateforme de tombolas en ligne',
-  contact_email: 'contact@koumbaya.com',
-  contact_phone: '+241 XX XX XX XX',
+  app_name: '',
+  app_url: '',
+  app_description: '',
+  contact_email: '',
+  contact_phone: '',
   default_language: 'fr',
   default_country: 'GA'
 })
 
 const paymentSettings = reactive({
   default_currency: 'XAF',
-  platform_commission: 5.0
+  platform_commission: 0
 })
 
 const paymentMethods = ref([
@@ -1195,30 +1195,6 @@ const paymentMethods = ref([
     gateway: 'ebilling'
   },
   {
-    id: 'orange_money',
-    name: 'Orange Money',
-    description: 'Paiement mobile via Orange Money',
-    icon: DevicePhoneMobileIcon,
-    active: false,
-    type: 'mobile_money'
-  },
-  {
-    id: 'mtn_money',
-    name: 'MTN Mobile Money',
-    description: 'Paiement mobile via MTN Mobile Money',
-    icon: DevicePhoneMobileIcon,
-    active: false,
-    type: 'mobile_money'
-  },
-  {
-    id: 'credit_card',
-    name: 'Cartes bancaires',
-    description: 'Paiement par carte Visa/Mastercard',
-    icon: CreditCardIcon,
-    active: false,
-    type: 'card'
-  },
-  {
     id: 'flutterwave',
     name: 'Flutterwave',
     description: 'Passerelle Flutterwave (Cards, Mobile Money, Bank Transfer)',
@@ -1245,14 +1221,6 @@ const paymentMethods = ref([
     }
   },
   {
-    id: 'wave',
-    name: 'Wave',
-    description: 'Paiement mobile Wave (Sénégal, Côte d\'Ivoire)',
-    icon: DevicePhoneMobileIcon,
-    active: false,
-    type: 'mobile_money'
-  },
-  {
     id: 'bank_transfer',
     name: 'Virement bancaire',
     description: 'Paiement par virement bancaire local',
@@ -1263,133 +1231,29 @@ const paymentMethods = ref([
 ])
 
 const lotterySettings = reactive({
-  min_ticket_price: 1000,
-  max_ticket_price: 100000,
-  min_participants: 10,
-  max_duration_days: 30,
-  auto_refund: true,
+  min_ticket_price: 0,
+  max_ticket_price: 0,
+  min_participants: 0,
+  max_duration_days: 0,
+  auto_refund: false,
   auto_draw: false
 })
 
 const notificationSettings = reactive({
-  from_email: 'noreply@koumbaya.com',
-  from_name: 'Koumbaya'
+  from_email: '',
+  from_name: ''
 })
 
-const notificationTypes = ref([
-  {
-    id: 'new_user',
-    name: 'Nouvel utilisateur',
-    description: 'Email de bienvenue aux nouveaux utilisateurs',
-    enabled: true
-  },
-  {
-    id: 'lottery_winner',
-    name: 'Gagnant tombola',
-    description: 'Notification au gagnant d\'une tombola',
-    enabled: true
-  },
-  {
-    id: 'payment_success',
-    name: 'Paiement réussi',
-    description: 'Confirmation de paiement',
-    enabled: true
-  },
-  {
-    id: 'refund_processed',
-    name: 'Remboursement traité',
-    description: 'Confirmation de remboursement',
-    enabled: true
-  }
-])
+const notificationTypes = ref([])
 
 const maintenanceSettings = reactive({
   maintenance_mode: false,
-  maintenance_message: 'La plateforme est temporairement en maintenance. Nous reviendrons bientôt !'
+  maintenance_message: ''
 })
 
-// Countries and Languages data
-const countries = ref([
-  {
-    id: 1,
-    name: 'Gabon',
-    code: 'GA',
-    currency: 'XAF',
-    flag: 'https://flagcdn.com/w40/ga.png',
-    is_active: true
-  },
-  {
-    id: 2,
-    name: 'France',
-    code: 'FR',
-    currency: 'EUR',
-    flag: 'https://flagcdn.com/w40/fr.png',
-    is_active: true
-  },
-  {
-    id: 3,
-    name: 'Sénégal',
-    code: 'SN',
-    currency: 'XOF',
-    flag: 'https://flagcdn.com/w40/sn.png',
-    is_active: true
-  },
-  {
-    id: 4,
-    name: 'Côte d\'Ivoire',
-    code: 'CI',
-    currency: 'XOF',
-    flag: 'https://flagcdn.com/w40/ci.png',
-    is_active: true
-  },
-  {
-    id: 5,
-    name: 'Mali',
-    code: 'ML',
-    currency: 'XOF',
-    flag: 'https://flagcdn.com/w40/ml.png',
-    is_active: false
-  }
-])
-
-const languages = ref([
-  {
-    id: 1,
-    name: 'Français',
-    native_name: 'Français',
-    code: 'fr',
-    flag: '🇫🇷',
-    direction: 'ltr',
-    is_active: true
-  },
-  {
-    id: 2,
-    name: 'English',
-    native_name: 'English',
-    code: 'en',
-    flag: '🇺🇸',
-    direction: 'ltr',
-    is_active: true
-  },
-  {
-    id: 3,
-    name: 'العربية',
-    native_name: 'العربية',
-    code: 'ar',
-    flag: '🇸🇦',
-    direction: 'rtl',
-    is_active: false
-  },
-  {
-    id: 4,
-    name: 'Español',
-    native_name: 'Español',
-    code: 'es',
-    flag: '🇪🇸',
-    direction: 'ltr',
-    is_active: false
-  }
-])
+// Countries and Languages data - these will be loaded from API
+const countries = ref([])
+const languages = ref([])
 
 // Modal states
 const showCountryModal = ref(false)
@@ -1482,6 +1346,10 @@ const loadSettings = async () => {
       if (response.data.languages) {
         languages.value = response.data.languages
       }
+      
+      if (response.data.notification_types) {
+        notificationTypes.value = response.data.notification_types
+      }
     }
   } catch (error) {
     console.error('Error loading settings:', error)
@@ -1491,8 +1359,101 @@ const loadSettings = async () => {
         window.$toast.error('Erreur lors du chargement des paramètres', '✗ Erreur')
       }
     } else {
-      // API pas encore implémentée, utiliser les données par défaut
-      console.info('API /admin/settings pas encore implémentée, utilisation des données par défaut')
+      // API pas encore implémentée, charger les données par défaut pour le développement
+      console.info('API /admin/settings pas encore implémentée, chargement des données par défaut')
+      
+      // Données par défaut pour le développement
+      Object.assign(generalSettings, {
+        app_name: 'Koumbaya',
+        app_url: 'https://koumbaya.com',
+        app_description: 'Plateforme de tombolas en ligne',
+        contact_email: 'contact@koumbaya.com',
+        contact_phone: '+241 XX XX XX XX',
+        default_language: 'fr',
+        default_country: 'GA'
+      })
+      
+      Object.assign(paymentSettings, {
+        default_currency: 'XAF',
+        platform_commission: 5.0
+      })
+      
+      Object.assign(lotterySettings, {
+        min_ticket_price: 1000,
+        max_ticket_price: 100000,
+        min_participants: 10,
+        max_duration_days: 30,
+        auto_refund: true,
+        auto_draw: false
+      })
+      
+      Object.assign(notificationSettings, {
+        from_email: 'noreply@koumbaya.com',
+        from_name: 'Koumbaya'
+      })
+      
+      Object.assign(maintenanceSettings, {
+        maintenance_mode: false,
+        maintenance_message: 'La plateforme est temporairement en maintenance. Nous reviendrons bientôt !'
+      })
+      
+      // Données par défaut pour les pays (Gabon en premier)
+      countries.value = [
+        {
+          id: 1,
+          name: 'Gabon',
+          code: 'GA', 
+          currency: 'XAF',
+          flag: 'https://flagcdn.com/w40/ga.png',
+          is_active: true
+        },
+        {
+          id: 2,
+          name: 'France',
+          code: 'FR',
+          currency: 'EUR', 
+          flag: 'https://flagcdn.com/w40/fr.png',
+          is_active: true
+        }
+      ]
+      
+      // Données par défaut pour les langues
+      languages.value = [
+        {
+          id: 1,
+          name: 'Français',
+          native_name: 'Français',
+          code: 'fr',
+          flag: '🇫🇷',
+          direction: 'ltr',
+          is_active: true
+        },
+        {
+          id: 2,
+          name: 'English',
+          native_name: 'English',
+          code: 'en',
+          flag: '🇺🇸',
+          direction: 'ltr',
+          is_active: true
+        }
+      ]
+      
+      // Données par défaut pour les types de notification
+      notificationTypes.value = [
+        {
+          id: 'new_user',
+          name: 'Nouvel utilisateur',
+          description: 'Email de bienvenue aux nouveaux utilisateurs',
+          enabled: true
+        },
+        {
+          id: 'lottery_winner',
+          name: 'Gagnant tombola',
+          description: 'Notification au gagnant d\'une tombola',
+          enabled: true
+        }
+      ]
     }
   } finally {
     loading.value = false

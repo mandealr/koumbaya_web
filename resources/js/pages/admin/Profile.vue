@@ -142,12 +142,11 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
-                  <input 
+                  <PhoneInputAdmin
                     v-model="profileData.phone"
-                    type="tel" 
-                    class="admin-input"
-                    placeholder="+225 XX XX XX XX"
-                  >
+                    placeholder="Numéro de téléphone"
+                    :initial-country="'ga'"
+                  />
                 </div>
                 
                 <div>
@@ -444,6 +443,7 @@ import {
   XMarkIcon,
   PhotoIcon
 } from '@heroicons/vue/24/outline'
+import PhoneInputAdmin from '@/components/PhoneInputAdmin.vue'
 
 const authStore = useAuthStore()
 const { get, post, put } = useApi()
@@ -482,51 +482,11 @@ const adminStats = ref({
   created_at: null
 })
 
-// Active sessions
-const activeSessions = ref([
-  {
-    id: 1,
-    device: 'Chrome sur Windows',
-    location: 'Abidjan, Côte d\'Ivoire',
-    last_activity: new Date(),
-    current: true
-  },
-  {
-    id: 2,
-    device: 'Safari sur iPhone',
-    location: 'Yamoussoukro, Côte d\'Ivoire',
-    last_activity: new Date(Date.now() - 1000 * 60 * 30),
-    current: false
-  }
-])
+// Active sessions - loaded from API
+const activeSessions = ref([])
 
-// Admin notifications
-const adminNotifications = ref([
-  {
-    id: 'new_user_registration',
-    name: 'Nouveaux utilisateurs',
-    description: 'Notification lors de l\'inscription d\'un nouvel utilisateur',
-    enabled: true
-  },
-  {
-    id: 'suspicious_activity',
-    name: 'Activité suspecte',
-    description: 'Alertes de sécurité et activités inhabituelles',
-    enabled: true
-  },
-  {
-    id: 'system_errors',
-    name: 'Erreurs système',
-    description: 'Notification des erreurs critiques du système',
-    enabled: true
-  },
-  {
-    id: 'daily_reports',
-    name: 'Rapports quotidiens',
-    description: 'Recevoir un résumé quotidien des activités',
-    enabled: false
-  }
-])
+// Admin notifications - loaded from API
+const adminNotifications = ref([])
 
 // Utility function to handle API errors gracefully during development
 const handleApiError = (error, action, successMessage) => {
@@ -580,13 +540,40 @@ const loadProfile = async () => {
           two_factor_enabled: profileData.two_factor_enabled
         })
       }
-      // Données d'exemple pour les stats admin
+      // Données par défaut pour les stats admin (développement)
       adminStats.value = {
         actions_count: 127,
         login_streak: 12,
-        last_login: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
-        created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 90).toISOString() // 3 months ago
+        last_login: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+        created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 90).toISOString()
       }
+      
+      // Données par défaut pour les sessions actives (développement)
+      activeSessions.value = [
+        {
+          id: 1,
+          device: 'Chrome sur Mac',
+          location: 'Libreville, Gabon',
+          last_activity: new Date(),
+          current: true
+        }
+      ]
+      
+      // Données par défaut pour les notifications admin (développement)
+      adminNotifications.value = [
+        {
+          id: 'new_user_registration',
+          name: 'Nouveaux utilisateurs',
+          description: 'Notification lors de l\'inscription d\'un nouvel utilisateur',
+          enabled: true
+        },
+        {
+          id: 'suspicious_activity',
+          name: 'Activité suspecte',
+          description: 'Alertes de sécurité et activités inhabituelles',
+          enabled: true
+        }
+      ]
     }
   } finally {
     loading.value = false
@@ -820,9 +807,7 @@ const downloadActivityLog = async () => {
     }
   } catch (error) {
     console.error('Error downloading activity log:', error)
-    if (window.$toast) {
-      window.$toast.error('Erreur lors du téléchargement', '✗ Erreur')
-    }
+    handleApiError(error, '/admin/profile/activity-log/export', 'Journal d\'activité téléchargé')
   }
 }
 
