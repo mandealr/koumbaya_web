@@ -171,6 +171,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter, useRoute } from 'vue-router'
+import { useApi } from '@/composables/api'
 import {
   HomeIcon,
   UsersIcon,
@@ -190,11 +191,17 @@ import {
 const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
+const { get } = useApi()
 
 const sidebarOpen = ref(true) // Open by default on desktop
 const userDropdownOpen = ref(false)
+const badgeCounts = ref({
+  users: 0,
+  lotteries: 0,
+  refunds: 0
+})
 
-const menuItems = [
+const menuItems = computed(() => [
   {
     name: 'admin.dashboard',
     to: { name: 'admin.dashboard' },
@@ -206,7 +213,7 @@ const menuItems = [
     to: { name: 'admin.users' },
     label: 'Utilisateurs',
     icon: UsersIcon,
-    badge: '12'
+    badge: badgeCounts.value.users > 0 ? badgeCounts.value.users.toString() : null
   },
   {
     name: 'admin.products',
@@ -219,13 +226,14 @@ const menuItems = [
     to: { name: 'admin.lotteries' },
     label: 'Tombolas',
     icon: GiftIcon,
-    badge: '3'
+    badge: badgeCounts.value.lotteries > 0 ? badgeCounts.value.lotteries.toString() : null
   },
   {
     name: 'admin.refunds',
     to: { name: 'admin.refunds' },
     label: 'Remboursements',
-    icon: CurrencyDollarIcon
+    icon: CurrencyDollarIcon,
+    badge: badgeCounts.value.refunds > 0 ? badgeCounts.value.refunds.toString() : null
   },
   {
     name: 'admin.payments',
@@ -239,12 +247,46 @@ const menuItems = [
     label: 'Paramètres',
     icon: Cog6ToothIcon
   }
-]
+])
 
 const currentPageTitle = computed(() => {
-  const currentItem = menuItems.find(item => item.name === route.name)
+  const currentItem = menuItems.value.find(item => item.name === route.name)
   return currentItem?.label || 'Page'
 })
+
+// Charger les compteurs de badges
+const loadBadgeCounts = async () => {
+  try {
+    // Nombre d'utilisateurs récemment inscrits (dernières 24h)
+    const usersResponse = await get('/admin/dashboard/stats')
+    if (usersResponse?.data?.users) {
+      // Afficher le badge seulement s'il y a une croissance positive
+      badgeCounts.value.users = usersResponse.data.users.growth > 0 ? 
+        Math.ceil(usersResponse.data.users.total * (usersResponse.data.users.growth / 100)) : 0
+    }
+
+    // Nombre de tombolas en attente de tirage
+    const lotteriesResponse = await get('/admin/lotteries?status=active')
+    if (lotteriesResponse?.data?.lotteries) {
+      // Compter les tombolas qui arrivent à échéance dans les 24h
+      const endingSoon = lotteriesResponse.data.lotteries.filter(lottery => {
+        const endDate = new Date(lottery.end_date)
+        const now = new Date()
+        const hoursLeft = (endDate - now) / (1000 * 60 * 60)
+        return hoursLeft <= 24 && hoursLeft > 0
+      })
+      badgeCounts.value.lotteries = endingSoon.length
+    }
+
+    // Nombre de demandes de remboursement en attente
+    const refundsResponse = await get('/admin/refunds?status=pending')
+    if (refundsResponse?.data?.refunds) {
+      badgeCounts.value.refunds = refundsResponse.data.refunds.length
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement des compteurs de badges:', error)
+  }
+}
 
 const userInitials = computed(() => {
   const user = authStore.user
@@ -266,9 +308,14 @@ const handleClickOutside = (event) => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
+  loadBadgeCounts()
+  
+  // Recharger les compteurs toutes les 5 minutes
+  const interval = setInterval(loadBadgeCounts, 5 * 60 * 1000)
+  
+  onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside)
+    clearInterval(interval)
+  })
 })
 </script>

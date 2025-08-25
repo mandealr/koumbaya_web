@@ -14,7 +14,14 @@ class AdminMiddleware
     {
         $user = auth('sanctum')->user();
 
-        if (!$user || $user->role !== 'MANAGER') {
+        if (!$user) {
+            return response()->json(['error' => 'Authentification requise'], 401);
+        }
+
+        // Vérifier si l'utilisateur a le rôle Admin ou Super Admin
+        $hasAdminRole = $user->roles()->whereIn('name', ['Admin', 'Super Admin'])->exists();
+        
+        if (!$hasAdminRole) {
             return response()->json(['error' => 'Accès non autorisé'], 403);
         }
 

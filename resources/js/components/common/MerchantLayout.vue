@@ -162,7 +162,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/api'
@@ -255,6 +255,18 @@ const loadQuickStats = async () => {
   }
 }
 
+const loadNotifications = async () => {
+  try {
+    const response = await get('/notifications/unread-count')
+    if (response && response.data && response.data.unread_count !== undefined) {
+      unreadNotifications.value = response.data.unread_count
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement des notifications:', error)
+    unreadNotifications.value = 0
+  }
+}
+
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('fr-FR', {
     minimumFractionDigits: 0,
@@ -265,12 +277,27 @@ const formatCurrency = (amount) => {
 // Lifecycle
 onMounted(() => {
   loadQuickStats()
+  loadNotifications()
+  
+  // Recharger les notifications toutes les 2 minutes
+  const notificationInterval = setInterval(loadNotifications, 2 * 60 * 1000)
+  
+  // Recharger les stats toutes les 5 minutes
+  const statsInterval = setInterval(loadQuickStats, 5 * 60 * 1000)
 
   // Close menus when clicking outside
-  document.addEventListener('click', (e) => {
+  const handleClickOutside = (e) => {
     if (!e.target.closest('.relative')) {
       userMenuOpen.value = false
     }
+  }
+  
+  document.addEventListener('click', handleClickOutside)
+  
+  onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside)
+    clearInterval(notificationInterval)
+    clearInterval(statsInterval)
   })
 })
 </script>
