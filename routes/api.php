@@ -272,6 +272,9 @@ Route::group([
         Route::put('/maintenance', [AdminSettingsController::class, 'updateMaintenance']);
         Route::post('/backup', [AdminSettingsController::class, 'createBackup']);
         Route::post('/cache/clear', [AdminSettingsController::class, 'clearCache']);
+        Route::post('/sitemap/generate', [AdminSettingsController::class, 'generateSitemap']);
+        Route::post('/database/optimize', [AdminSettingsController::class, 'optimizeDatabase']);
+        Route::post('/email/test', [AdminSettingsController::class, 'testEmail']);
     });
 
     // Admin Profile

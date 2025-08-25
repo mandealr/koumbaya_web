@@ -126,7 +126,7 @@
                     v-model="generalSettings.default_country"
                     class="admin-input"
                   >
-                    <option v-for="country in activeCountries" :key="country.id" :value="country.code">
+                    <option v-for="country in activeCountries" :key="country.id" :value="country.iso_code_2">
                       {{ country.name }}
                     </option>
                   </select>
@@ -215,10 +215,10 @@
                       </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {{ country.code }}
+                      {{ country.iso_code_2 }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {{ country.currency }}
+                      {{ country.currency_code }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <span :class="[
@@ -1602,7 +1602,7 @@ const clearCache = async () => {
   
   loading.value = true
   try {
-    const response = await post('/admin/maintenance/clear-cache')
+    const response = await post('/admin/settings/cache/clear')
     if (response && response.success) {
       if (window.$toast) {
         window.$toast.success('Cache vidé avec succès', '✅ Maintenance')
@@ -1623,7 +1623,7 @@ const optimizeDatabase = async () => {
   
   loading.value = true
   try {
-    const response = await post('/admin/maintenance/optimize-database')
+    const response = await post('/admin/settings/database/optimize')
     if (response && response.success) {
       if (window.$toast) {
         window.$toast.success('Base de données optimisée', '✅ Maintenance')
@@ -1642,7 +1642,7 @@ const optimizeDatabase = async () => {
 const generateSitemap = async () => {
   loading.value = true
   try {
-    const response = await post('/admin/maintenance/generate-sitemap')
+    const response = await post('/admin/settings/sitemap/generate')
     if (response && response.success) {
       if (window.$toast) {
         window.$toast.success('Sitemap généré avec succès', '✅ Maintenance')
@@ -1661,7 +1661,7 @@ const generateSitemap = async () => {
 const testEmailConfig = async () => {
   loading.value = true
   try {
-    const response = await post('/admin/maintenance/test-email')
+    const response = await post('/admin/settings/email/test')
     if (response && response.success) {
       if (window.$toast) {
         window.$toast.success('Email de test envoyé', '✅ Test')
@@ -1686,8 +1686,9 @@ const filteredCountries = computed(() => {
   if (countryFilters.search) {
     const search = countryFilters.search.toLowerCase()
     filtered = filtered.filter(country => 
-      country.name.toLowerCase().includes(search) ||
-      country.code.toLowerCase().includes(search)
+      country.name?.toLowerCase().includes(search) ||
+      country.iso_code_2?.toLowerCase().includes(search) ||
+      country.iso_code_3?.toLowerCase().includes(search)
     )
   }
 
@@ -1714,8 +1715,8 @@ const editCountry = (country) => {
   editingCountry.value = country
   Object.assign(countryForm, {
     name: country.name,
-    code: country.code,
-    currency: country.currency,
+    code: country.iso_code_2,
+    currency: country.currency_code,
     flag: country.flag,
     is_active: country.is_active
   })
