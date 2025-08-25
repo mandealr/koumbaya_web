@@ -166,9 +166,12 @@
               {{ getStatusLabel(product.status) }}
             </span>
           </div>
-          <div class="absolute top-3 right-3">
+          <div class="absolute top-3 right-3 flex flex-col gap-2">
             <div class="bg-black/50 text-white px-2 py-1 rounded-lg text-xs font-medium">
               {{ product.category?.name || 'Sans catégorie' }}
+            </div>
+            <div :class="getSaleModeClass(product.sale_mode)">
+              {{ getSaleModeLabel(product.sale_mode) }}
             </div>
           </div>
         </div>
@@ -346,6 +349,14 @@
               <label class="block text-sm font-medium text-gray-700">Condition</label>
               <p class="text-sm text-gray-900">{{ getConditionLabel(selectedProduct.condition) }}</p>
             </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Mode de vente</label>
+              <span :class="getSaleModeClass(selectedProduct.sale_mode)">{{ getSaleModeLabel(selectedProduct.sale_mode) }}</span>
+            </div>
+            <div v-if="selectedProduct.sale_mode === 'lottery' && selectedProduct.ticket_price">
+              <label class="block text-sm font-medium text-gray-700">Prix du ticket</label>
+              <p class="text-sm text-gray-900 font-semibold">{{ formatAmount(selectedProduct.ticket_price) }} FCFA</p>
+            </div>
           </div>
 
           <!-- Description -->
@@ -355,7 +366,7 @@
           </div>
 
           <!-- Lottery Stats -->
-          <div>
+          <div v-if="selectedProduct.sale_mode === 'lottery'">
             <h4 class="text-md font-semibold text-gray-900 mb-3">Statistiques de la tombola</h4>
             <div class="grid grid-cols-3 gap-4 text-center">
               <div class="bg-[#0099cc]/10 p-4 rounded-lg">
@@ -369,6 +380,21 @@
               <div class="bg-purple-100 p-4 rounded-lg">
                 <p class="text-2xl font-bold text-purple-600">{{ selectedProduct.progress }}%</p>
                 <p class="text-sm text-gray-600">Progression</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Direct Sale Info -->
+          <div v-else-if="selectedProduct.sale_mode === 'direct'" class="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-md font-semibold text-green-800">Vente directe</h4>
+                <p class="text-sm text-green-600">Les clients peuvent acheter ce produit directement sans participer à une tombola.</p>
               </div>
             </div>
           </div>
@@ -465,6 +491,22 @@ const getStatusLabel = (status) => {
     'cancelled': 'Annulé'
   }
   return labels[status] || status
+}
+
+const getSaleModeClass = (saleMode) => {
+  const classes = {
+    'direct': 'bg-green-100 text-green-800 px-2 py-1 text-xs font-medium rounded-lg',
+    'lottery': 'bg-purple-100 text-purple-800 px-2 py-1 text-xs font-medium rounded-lg'
+  }
+  return classes[saleMode] || 'bg-gray-100 text-gray-800 px-2 py-1 text-xs font-medium rounded-lg'
+}
+
+const getSaleModeLabel = (saleMode) => {
+  const labels = {
+    'direct': 'Vente directe',
+    'lottery': 'Tombola'
+  }
+  return labels[saleMode] || 'Non défini'
 }
 
 const getConditionLabel = (condition) => {

@@ -38,10 +38,15 @@
 
     <!-- Contenu -->
     <div class="koumbaya-card-body space-y-4">
-      <!-- Catégorie -->
-      <div class="flex items-center text-koumbaya-primary text-sm font-medium">
-        <TagIcon class="w-4 h-4 mr-2" />
-        {{ product.category?.name || product.category || 'Électronique' }}
+      <!-- Catégorie et Mode de vente -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center text-koumbaya-primary text-sm font-medium">
+          <TagIcon class="w-4 h-4 mr-2" />
+          {{ product.category?.name || product.category || 'Électronique' }}
+        </div>
+        <div :class="getSaleModeClass(product.sale_mode)">
+          {{ getSaleModeLabel(product.sale_mode) }}
+        </div>
       </div>
 
       <!-- Titre et description -->
@@ -164,6 +169,22 @@ const formatDate = (date) => {
     month: 'long',
     year: 'numeric'
   })
+}
+
+const getSaleModeClass = (saleMode) => {
+  const classes = {
+    'direct': 'bg-green-100 text-green-800 px-2 py-1 text-xs font-medium rounded-lg',
+    'lottery': 'bg-purple-100 text-purple-800 px-2 py-1 text-xs font-medium rounded-lg'
+  }
+  return classes[saleMode] || 'bg-gray-100 text-gray-800 px-2 py-1 text-xs font-medium rounded-lg'
+}
+
+const getSaleModeLabel = (saleMode) => {
+  const labels = {
+    'direct': 'Direct',
+    'lottery': 'Tombola'
+  }
+  return labels[saleMode] || 'Non défini'
 }
 
 const onViewDetails = () => {
