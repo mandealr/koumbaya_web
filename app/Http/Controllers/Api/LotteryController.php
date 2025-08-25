@@ -468,7 +468,7 @@ class LotteryController extends Controller
      */
     public function drawLottery($id)
     {
-        $user = auth('api')->user();
+        $user = auth()->user();
         $lottery = Lottery::with('product.merchant')->findOrFail($id);
 
         // Vérifier les permissions (propriétaire du produit ou admin)

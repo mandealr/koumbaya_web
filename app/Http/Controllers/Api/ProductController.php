@@ -434,7 +434,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $user = auth('api')->user();
+        $user = auth()->user();
 
         // Vérifier que l'utilisateur est un marchand
         if (!$user->is_merchant) {
@@ -496,7 +496,7 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $user = auth('api')->user();
+        $user = auth()->user();
         $product = Product::findOrFail($id);
 
         // Vérifier que l'utilisateur est le propriétaire
@@ -556,7 +556,7 @@ class ProductController extends Controller
      */
     public function createLottery(Request $request, $id)
     {
-        $user = auth('api')->user();
+        $user = auth()->user();
         $product = Product::findOrFail($id);
 
         if ($product->merchant_id !== $user->id) {
