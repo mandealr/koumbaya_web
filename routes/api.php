@@ -22,6 +22,8 @@ use App\Http\Controllers\Api\AdminDashboardController;
 use App\Http\Controllers\Api\AdminUserController;
 use App\Http\Controllers\Api\AdminProductController;
 use App\Http\Controllers\Api\AdminPaymentController;
+use App\Http\Controllers\Api\AdminSettingsController;
+use App\Http\Controllers\Api\AdminProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -258,6 +260,31 @@ Route::group([
         Route::get('/{id}', 'show');
         Route::post('/{id}/refund', 'refund');
         Route::get('/export', 'export');
+    });
+    
+    // Admin Settings
+    Route::prefix('settings')->group(function () {
+        Route::get('/', [AdminSettingsController::class, 'index']);
+        Route::put('/general', [AdminSettingsController::class, 'updateGeneral']);
+        Route::put('/payment', [AdminSettingsController::class, 'updatePayment']);
+        Route::put('/lottery', [AdminSettingsController::class, 'updateLottery']);
+        Route::put('/notifications', [AdminSettingsController::class, 'updateNotifications']);
+        Route::put('/maintenance', [AdminSettingsController::class, 'updateMaintenance']);
+        Route::post('/backup', [AdminSettingsController::class, 'createBackup']);
+        Route::post('/cache/clear', [AdminSettingsController::class, 'clearCache']);
+    });
+
+    // Admin Profile
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [AdminProfileController::class, 'index']);
+        Route::put('/', [AdminProfileController::class, 'update']);
+        Route::put('/password', [AdminProfileController::class, 'updatePassword']);
+        Route::put('/preferences', [AdminProfileController::class, 'updatePreferences']);
+        Route::post('/2fa/toggle', [AdminProfileController::class, 'toggle2FA']);
+        Route::post('/sessions/terminate', [AdminProfileController::class, 'terminateSession']);
+        Route::post('/sessions/terminate-all', [AdminProfileController::class, 'terminateAllSessions']);
+        Route::post('/image', [AdminProfileController::class, 'uploadImage']);
+        Route::get('/activity-log/export', [AdminProfileController::class, 'exportActivityLog']);
     });
 });
 
