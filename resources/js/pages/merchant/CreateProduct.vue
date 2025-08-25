@@ -832,9 +832,14 @@ const handleSubmit = async () => {
       description: form.description,
       category_id: parseInt(form.category_id),
       price: parseFloat(form.price),
-      ticket_price: parseFloat(form.ticket_price),
-      min_participants: parseInt(form.min_tickets),
+      sale_mode: form.sale_mode,
       images: form.images.map(img => img.preview) // For now, use base64 images
+    }
+
+    // Add lottery-specific fields only if lottery mode
+    if (form.sale_mode === 'lottery') {
+      productData.ticket_price = parseFloat(form.ticket_price)
+      productData.min_participants = parseInt(form.min_tickets)
     }
 
     // Create product

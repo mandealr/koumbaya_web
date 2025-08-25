@@ -21,6 +21,7 @@ class Product extends Model
         'stock_quantity',
         'category_id',
         'merchant_id',
+        'sale_mode',
         'status',
         'is_featured',
     ];

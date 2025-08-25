@@ -441,34 +441,50 @@ class ProductController extends Controller
             return response()->json(['error' => 'Seuls les marchands peuvent créer des produits'], 403);
         }
 
-        $validator = Validator::make($request->all(), [
+        // Build validation rules based on sale mode
+        $rules = [
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric|min:1000',
-            'ticket_price' => 'required|numeric|min:100',
             'category_id' => 'required|exists:categories,id',
+            'sale_mode' => 'required|string|in:direct,lottery',
             'images' => 'nullable|array',
             'images.*' => 'string',
-            'min_participants' => 'nullable|integer|min:10|max:10000',
-        ]);
+        ];
+
+        // Add lottery-specific validation rules only if lottery mode
+        if ($request->sale_mode === 'lottery') {
+            $rules['ticket_price'] = 'required|numeric|min:100';
+            $rules['min_participants'] = 'nullable|integer|min:10|max:10000';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $product = Product::create([
+        // Prepare product data
+        $productData = [
             'name' => $request->name,
             'slug' => Str::slug($request->name) . '-' . time(),
             'description' => $request->description,
             'images' => $request->images,
             'price' => $request->price,
-            'ticket_price' => $request->ticket_price,
-            'min_participants' => $request->min_participants ?? 50,
             'category_id' => $request->category_id,
             'merchant_id' => $user->id,
+            'sale_mode' => $request->sale_mode,
             'stock_quantity' => 1,
             'status' => 'active',
-        ]);
+        ];
+
+        // Add lottery-specific fields only if lottery mode
+        if ($request->sale_mode === 'lottery') {
+            $productData['ticket_price'] = $request->ticket_price;
+            $productData['min_participants'] = $request->min_participants ?? 50;
+        }
+
+        $product = Product::create($productData);
 
         $product->load(['category', 'merchant']);
 
