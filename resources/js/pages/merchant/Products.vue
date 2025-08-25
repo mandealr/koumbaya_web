@@ -517,7 +517,7 @@ const loadProducts = async () => {
     if (filters.status) params.append('status', filters.status)
     if (filters.sortBy) params.append('sort_by', filters.sortBy)
     
-    const response = await get(`/products?${params.toString()}`)
+    const response = await get(`/merchant/products?${params.toString()}`)
     if (response && response.data && Array.isArray(response.data)) {
       products.value = response.data.map(product => ({
         ...product,

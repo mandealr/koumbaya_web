@@ -168,6 +168,7 @@ Route::group([
     'middleware' => ['auth:sanctum', 'merchant', 'throttle.api:100,1']
 ], function () {
     // Products (Marchands seulement)
+    Route::get('merchant/products', [ProductController::class, 'merchantProducts']);
     Route::post('products', [ProductController::class, 'store']);
     Route::put('products/{id}', [ProductController::class, 'update']);
     Route::post('products/{id}/create-lottery', [ProductController::class, 'createLottery']);

@@ -495,6 +495,57 @@ class ProductController extends Controller
     }
 
     /**
+     * Get products for the authenticated merchant
+     */
+    public function merchantProducts(Request $request)
+    {
+        $user = auth()->user();
+        $perPage = min($request->get('per_page', 15), 50);
+
+        $query = Product::where('merchant_id', $user->id)
+            ->with(['category', 'activeLottery']);
+
+        // Apply filters
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('sale_mode')) {
+            $query->where('sale_mode', $request->sale_mode);
+        }
+
+        // Apply sorting
+        $sortBy = $request->get('sort_by', 'created_at_desc');
+        $this->applySorting($query, $sortBy);
+
+        $products = $query->paginate($perPage);
+
+        return response()->json([
+            'data' => $products->items(),
+            'pagination' => [
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'per_page' => $products->perPage(),
+                'total' => $products->total(),
+                'from' => $products->firstItem(),
+                'to' => $products->lastItem()
+            ]
+        ]);
+    }
+
+    /**
      * @OA\Put(
      *     path="/api/products/{id}",
      *     tags={"Products"},
