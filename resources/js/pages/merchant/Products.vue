@@ -588,25 +588,57 @@ const loadProductStats = async () => {
 }
 
 const publishProduct = async (product) => {
-  if (confirm(`Publier la tombola pour "${product.title || product.name}" ?`)) {
+  const actionText = product.sale_mode === 'lottery' ? 'tombola' : 'produit'
+  const confirmText = `Publier ${actionText === 'tombola' ? 'la' : 'le'} ${actionText} "${product.title || product.name}" ?`
+  
+  if (confirm(confirmText)) {
     try {
-      const response = await post(`/products/${product.id}/create-lottery`, {
-        total_tickets: 1000,
-        ticket_price: product.ticket_price || 1000
-      })
+      let response
       
-      if (response && response.success) {
+      if (product.sale_mode === 'lottery') {
+        // Pour les produits en mode tombola, créer la tombola
+        if (!product.ticket_price || product.ticket_price < 100) {
+          if (window.$toast) {
+            window.$toast.error('Le prix du ticket doit être défini et supérieur à 100 FCFA', '❌ Erreur')
+          }
+          return
+        }
+        
+        response = await post(`/products/${product.id}/create-lottery`, {
+          duration_days: 7
+        })
+      } else {
+        // Pour les produits en mode direct, juste changer le statut
+        response = await put(`/products/${product.id}`, {
+          status: 'active'
+        })
+      }
+      
+      if (response && (response.success || response.product)) {
         await loadProducts() // Refresh products
         if (window.$toast) {
-          window.$toast.success('Tombola publiée avec succès !', '✅ Publication')
+          const successMessage = product.sale_mode === 'lottery' ? 
+            'Tombola publiée avec succès !' : 
+            'Produit publié avec succès !'
+          window.$toast.success(successMessage, '✅ Publication')
         }
       } else {
         throw new Error(response?.message || 'Erreur lors de la publication')
       }
     } catch (error) {
       console.error('Error publishing product:', error)
+      let errorMessage = 'Erreur lors de la publication'
+      
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+      
       if (window.$toast) {
-        window.$toast.error('Erreur lors de la publication', '❌ Erreur')
+        window.$toast.error(errorMessage, '❌ Erreur')
       }
     }
   }

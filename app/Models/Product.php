@@ -172,6 +172,8 @@ class Product extends Model
     {
         return $this->status === 'active' && 
                $this->stock_quantity > 0 && 
+               $this->sale_mode === 'lottery' &&
+               $this->ticket_price >= 100 &&
                !$this->activeLottery()->exists();
     }
 
