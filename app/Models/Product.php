@@ -43,6 +43,14 @@ class Product extends Model
         'popularity_score'
     ];
 
+    /**
+     * Default attributes values
+     */
+    protected $attributes = [
+        'sale_mode' => 'direct',
+        'status' => 'draft',
+    ];
+
     protected function casts(): array
     {
         return [

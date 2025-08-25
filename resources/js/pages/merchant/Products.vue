@@ -506,7 +506,7 @@ const getSaleModeLabel = (saleMode) => {
     'direct': 'Vente directe',
     'lottery': 'Tombola'
   }
-  return labels[saleMode] || 'Non défini'
+  return labels[saleMode] || labels['direct'] // Par défaut 'Vente directe' si non défini
 }
 
 const getConditionLabel = (condition) => {

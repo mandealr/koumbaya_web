@@ -29,6 +29,7 @@ class ProductResource extends JsonResource
             'main_image' => $this->main_image,
             'category_id' => $this->category_id,
             'merchant_id' => $this->merchant_id,
+            'sale_mode' => $this->sale_mode,
             'status' => $this->status,
             'is_featured' => $this->is_featured,
             'is_available' => $this->is_available,

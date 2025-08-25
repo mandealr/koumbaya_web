@@ -184,7 +184,7 @@ const getSaleModeLabel = (saleMode) => {
     'direct': 'Direct',
     'lottery': 'Tombola'
   }
-  return labels[saleMode] || 'Non défini'
+  return labels[saleMode] || labels['direct'] // Par défaut 'Direct' si non défini
 }
 
 const onViewDetails = () => {
