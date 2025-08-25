@@ -2,22 +2,8 @@
   <div>
     <!-- Page Header -->
     <div class="mb-8">
-      <div class="flex justify-between items-center">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">Gestion des tombolas</h1>
-          <p class="mt-2 text-gray-600">Gérez les tirages et suivez les résultats des tombolas</p>
-        </div>
-        <button
-          @click="refreshData"
-          :disabled="loading"
-          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center disabled:bg-gray-400"
-        >
-          <svg class="w-4 h-4 mr-2" :class="loading ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-          </svg>
-          Actualiser
-        </button>
-      </div>
+      <h1 class="text-3xl font-bold text-gray-900">Gestion des tombolas</h1>
+      <p class="mt-2 text-gray-600">Gérez les tirages et suivez les résultats des tombolas</p>
     </div>
 
     <!-- Stats Cards -->
@@ -55,7 +41,7 @@
             ]"
           >
             {{ tab.label }}
-            <span v-if="tab.count !== undefined" class="ml-2 bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">
+            <span v-if="tab.count" class="ml-2 bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">
               {{ tab.count }}
             </span>
           </button>
@@ -72,7 +58,18 @@
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
             </svg>
-            Tirages disponibles ({{ statistics.pending_draws || 0 }})
+            Tirages disponibles ({{ statistics.pending_draws }})
+          </button>
+          
+          <button
+            @click="refreshData"
+            :disabled="loading"
+            class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 disabled:opacity-50"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Actualiser
           </button>
         </div>
         
@@ -82,14 +79,8 @@
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="text-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-      <p class="mt-4 text-gray-600">Chargement des tombolas...</p>
-    </div>
-
     <!-- Pending Draws Tab -->
-    <div v-else-if="activeTab === 'pending'">
+    <div v-if="activeTab === 'pending'">
       <div class="bg-white rounded-lg shadow-sm border border-gray-200">
         <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900">Tirages en attente</h3>
@@ -111,19 +102,19 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-4">
                 <img
-                  :src="lottery.product?.image_url || lottery.product?.main_image || '/images/placeholder.jpg'"
-                  :alt="lottery.product?.title || lottery.product?.name"
+                  :src="lottery.product.image_url || lottery.product.main_image || lottery.product.image"
+                  :alt="lottery.product.title"
                   class="w-16 h-16 rounded-lg object-cover"
                 />
                 <div>
-                  <h4 class="text-lg font-semibold text-gray-900">{{ lottery.product?.title || lottery.product?.name }}</h4>
-                  <p class="text-sm text-gray-600">{{ lottery.product?.description }}</p>
+                  <h4 class="text-lg font-semibold text-gray-900">{{ lottery.product.title }}</h4>
+                  <p class="text-sm text-gray-600">{{ lottery.product.description }}</p>
                   <div class="flex items-center space-x-4 mt-2">
                     <span class="text-sm font-medium text-blue-600">
-                      {{ lottery.sold_tickets || 0 }}/{{ lottery.total_tickets }} tickets vendus
+                      {{ lottery.sold_tickets }}/{{ lottery.total_tickets }} tickets vendus
                     </span>
                     <span class="text-sm text-gray-500">
-                      Tirage prévu: {{ formatDate(lottery.draw_date || lottery.end_date) }}
+                      Tirage prévu: {{ formatDate(lottery.draw_date) }}
                     </span>
                   </div>
                 </div>
@@ -162,7 +153,7 @@
     </div>
 
     <!-- Active Draws Tab -->
-    <div v-else-if="activeTab === 'active'">
+    <div v-if="activeTab === 'active'">
       <div class="bg-white rounded-lg shadow-sm border border-gray-200">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <div>
@@ -209,13 +200,13 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <img
-                      :src="lottery.product?.image_url || lottery.product?.main_image || '/images/placeholder.jpg'"
-                      :alt="lottery.product?.title || lottery.product?.name"
+                      :src="lottery.product.image_url || lottery.product.main_image || lottery.product.image"
+                      :alt="lottery.product.title"
                       class="w-12 h-12 rounded-lg object-cover"
                     />
                     <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-900">{{ lottery.product?.title || lottery.product?.name }}</div>
-                      <div class="text-sm text-gray-500">{{ formatAmount(lottery.product?.price || 0) }} FCFA</div>
+                      <div class="text-sm font-medium text-gray-900">{{ lottery.product.title }}</div>
+                      <div class="text-sm text-gray-500">{{ lottery.product.price }} FCFA</div>
                     </div>
                   </div>
                 </td>
@@ -228,28 +219,26 @@
                     ></div>
                   </div>
                   <div class="text-xs text-gray-500 mt-1">
-                    {{ lottery.sold_tickets || 0 }}/{{ lottery.total_tickets }}
+                    {{ lottery.sold_tickets }}/{{ lottery.total_tickets }}
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ formatAmount((lottery.sold_tickets || 0) * (lottery.ticket_price || 0)) }} FCFA
+                  {{ (lottery.sold_tickets * lottery.ticket_price).toLocaleString() }} FCFA
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ formatDate(lottery.draw_date || lottery.end_date) }}
+                  {{ formatDate(lottery.draw_date) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex space-x-2">
                     <button
                       @click="editLottery(lottery)"
                       class="text-blue-600 hover:text-blue-900"
-                      title="Modifier"
                     >
                       <PencilIcon class="w-4 h-4" />
                     </button>
                     <button
                       @click="viewParticipants(lottery)"
                       class="text-blue-600 hover:text-blue-900"
-                      title="Voir participants"
                     >
                       <UsersIcon class="w-4 h-4" />
                     </button>
@@ -263,7 +252,7 @@
     </div>
 
     <!-- Completed Draws Tab -->
-    <div v-else-if="activeTab === 'completed'">
+    <div v-if="activeTab === 'completed'">
       <div class="bg-white rounded-lg shadow-sm border border-gray-200">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <div>
@@ -298,48 +287,48 @@
             <div class="flex items-start justify-between">
               <div class="flex items-start space-x-4">
                 <img
-                  :src="lottery.product?.image_url || lottery.product?.main_image || '/images/placeholder.jpg'"
-                  :alt="lottery.product?.title || lottery.product?.name"
+                  :src="lottery.product.image_url || lottery.product.main_image || lottery.product.image"
+                  :alt="lottery.product.title"
                   class="w-16 h-16 rounded-lg object-cover"
                 />
                 <div>
-                  <h4 class="text-lg font-semibold text-gray-900">{{ lottery.product?.title || lottery.product?.name }}</h4>
-                  <p class="text-sm text-gray-600">{{ lottery.product?.description }}</p>
+                  <h4 class="text-lg font-semibold text-gray-900">{{ lottery.product.title }}</h4>
+                  <p class="text-sm text-gray-600">{{ lottery.product.description }}</p>
                   <div class="flex items-center space-x-4 mt-2">
                     <span class="text-sm text-gray-500">
-                      Tirage effectué: {{ formatDate(lottery.draw_date || lottery.updated_at) }}
+                      Tirage effectué: {{ formatDate(lottery.draw_date) }}
                     </span>
                     <span class="text-sm font-medium text-blue-600">
-                      Revenus: {{ formatAmount((lottery.sold_tickets || 0) * (lottery.ticket_price || 0)) }} FCFA
+                      Revenus: {{ (lottery.sold_tickets * lottery.ticket_price).toLocaleString() }} FCFA
                     </span>
                   </div>
                 </div>
               </div>
               
               <div class="text-right">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
                   <CheckCircleIcon class="w-4 h-4 mr-1" />
                   Terminé
                 </span>
                 <div class="mt-2 text-sm text-gray-600">
-                  Gagnant: {{ lottery.winner ? `${lottery.winner.first_name} ${lottery.winner.last_name}` : 'Non réclamé' }}
+                  Gagnant: {{ lottery.winner?.name || 'Non réclamé' }}
                 </div>
               </div>
             </div>
             
             <!-- Winner Details -->
-            <div v-if="lottery.winner" class="mt-4 bg-green-50 p-4 rounded-lg">
+            <div v-if="lottery.winner" class="mt-4 bg-blue-50 p-4 rounded-lg">
               <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                  <TrophyIcon class="w-5 h-5 text-green-600 mr-2" />
+                  <TrophyIcon class="w-5 h-5 text-blue-600 mr-2" />
                   <div>
-                    <p class="font-semibold text-green-900">{{ lottery.winner.first_name }} {{ lottery.winner.last_name }}</p>
-                    <p class="text-sm text-green-800">Ticket gagnant: #{{ lottery.winning_ticket_number || 'N/A' }}</p>
+                    <p class="font-semibold text-blue-900">{{ lottery.winner.name }}</p>
+                    <p class="text-sm text-blue-800">Ticket gagnant: #{{ lottery.winning_ticket }}</p>
                   </div>
                 </div>
                 <div class="text-right">
-                  <p class="text-sm text-green-800">{{ lottery.winner.email }}</p>
-                  <p class="text-sm text-green-600">{{ lottery.winner.phone }}</p>
+                  <p class="text-sm text-blue-800">{{ lottery.winner.email }}</p>
+                  <p class="text-sm text-blue-600">{{ lottery.winner.phone }}</p>
                 </div>
               </div>
             </div>
@@ -368,7 +357,7 @@
       <div class="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h3 class="text-lg font-semibold text-gray-900">
-            Participants - {{ selectedLottery?.product?.title || selectedLottery?.product?.name }}
+            Participants - {{ selectedLottery?.product.title }}
           </h3>
           <button
             @click="showParticipantsModal = false"
@@ -409,23 +398,23 @@
               <tbody class="bg-white divide-y divide-gray-200">
                 <tr
                   v-for="participant in filteredParticipants"
-                  :key="participant.user?.id"
+                  :key="participant.id"
                   class="hover:bg-gray-50"
                 >
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div class="text-sm font-medium text-gray-900">{{ participant.user?.first_name }} {{ participant.user?.last_name }}</div>
-                      <div class="text-sm text-gray-500">{{ participant.user?.email }}</div>
+                      <div class="text-sm font-medium text-gray-900">{{ participant.name }}</div>
+                      <div class="text-sm text-gray-500">{{ participant.email }}</div>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {{ participant.tickets_count }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ formatAmount(participant.total_spent) }} FCFA
+                    {{ participant.total_spent }} FCFA
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {{ formatDate(participant.tickets?.[0]?.purchased_at || participant.tickets?.[0]?.created_at) }}
+                    {{ formatDate(participant.purchase_date) }}
                   </td>
                 </tr>
               </tbody>
@@ -445,13 +434,13 @@
         <div class="px-6 py-4">
           <p class="text-gray-600 mb-4">
             Êtes-vous sûr de vouloir effectuer le tirage pour 
-            <span class="font-semibold">{{ selectedLottery?.product?.title || selectedLottery?.product?.name }}</span> ?
+            <span class="font-semibold">{{ selectedLottery?.product.title }}</span> ?
           </p>
           <div class="bg-gray-50 p-4 rounded-lg mb-4">
             <p class="text-sm text-gray-600">
-              • {{ selectedLottery?.sold_tickets || 0 }} tickets vendus<br>
-              • {{ selectedLottery?.participants_list?.length || 0 }} participants<br>
-              • Revenus: {{ formatAmount((selectedLottery?.sold_tickets || 0) * (selectedLottery?.ticket_price || 0)) }} FCFA
+              • {{ selectedLottery?.sold_tickets }} tickets vendus<br>
+              • {{ selectedLottery?.participants?.length }} participants<br>
+              • Revenus: {{ (selectedLottery?.sold_tickets * selectedLottery?.ticket_price || 0).toLocaleString() }} FCFA
             </p>
           </div>
           <p class="text-sm text-red-600">
@@ -509,46 +498,34 @@ const currentPage = ref(1)
 const totalPages = ref(1)
 const itemsPerPage = ref(20)
 
-const tabs = computed(() => [
-  { 
-    key: 'pending', 
-    label: 'Tirages en attente',
-    count: statistics.value.pending_draws || 0
-  },
-  { 
-    key: 'active', 
-    label: 'Tombolas actives',
-    count: statistics.value.active_lotteries || 0
-  },
-  { 
-    key: 'completed', 
-    label: 'Historique',
-    count: statistics.value.completed_lotteries || 0
-  }
-])
+const tabs = [
+  { key: 'pending', label: 'Tirages en attente' },
+  { key: 'active', label: 'Tombolas actives' },
+  { key: 'completed', label: 'Historique' }
+]
 
-const stats = computed(() => [
+const stats = ref([
   {
     label: 'Tirages en attente',
-    value: statistics.value.pending_draws || '0',
+    value: '3',
     color: 'bg-yellow-500',
     icon: ClockIcon
   },
   {
     label: 'Actives',
-    value: statistics.value.active_lotteries || '0',
+    value: '12',
     color: 'bg-blue-500',
     icon: TrophyIcon
   },
   {
-    label: 'Revenus totaux',
-    value: formatAmount(statistics.value.total_revenue || 0) + ' FCFA',
-    color: 'bg-green-500',
+    label: 'Revenus du mois',
+    value: '850K FCFA',
+    color: 'bg-blue-500',
     icon: CurrencyDollarIcon
   },
   {
     label: 'Taux de participation',
-    value: Math.round(statistics.value.average_participation_rate || 0) + '%',
+    value: '85%',
     color: 'bg-purple-500',
     icon: ChartBarIcon
   }
@@ -563,27 +540,132 @@ const completedFilters = reactive({
   period: ''
 })
 
-// Computed values for different lottery states
-const pendingDraws = computed(() => {
-  return lotteries.value.filter(lottery => 
-    lottery.status === 'active' && 
-    !lottery.is_drawn &&
-    new Date(lottery.end_date) <= new Date()
-  )
-})
+const pendingDraws = ref([
+  {
+    id: 1,
+    product: {
+      id: 1,
+      title: 'iPhone 15 Pro',
+      description: 'Le dernier flagship d\'Apple',
+      price: 750000,
+      image: '/images/products/iphone15.jpg'
+    },
+    total_tickets: 750,
+    sold_tickets: 750,
+    ticket_price: 1000,
+    progress: 100,
+    draw_date: new Date(),
+    participants: Array.from({ length: 150 }, (_, i) => ({
+      id: i + 1,
+      name: `Utilisateur ${i + 1}`,
+      email: `user${i + 1}@example.com`,
+      tickets_count: Math.floor(Math.random() * 5) + 1,
+      total_spent: (Math.floor(Math.random() * 5) + 1) * 1000,
+      purchase_date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
+    }))
+  },
+  {
+    id: 2,
+    product: {
+      id: 2,
+      title: 'PlayStation 5',
+      description: 'Console de jeu nouvelle génération',
+      price: 350000,
+      image: '/images/products/ps5.jpg'
+    },
+    total_tickets: 700,
+    sold_tickets: 700,
+    ticket_price: 500,
+    progress: 100,
+    draw_date: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    participants: Array.from({ length: 200 }, (_, i) => ({
+      id: i + 1,
+      name: `Participant ${i + 1}`,
+      email: `participant${i + 1}@example.com`,
+      tickets_count: Math.floor(Math.random() * 3) + 1,
+      total_spent: (Math.floor(Math.random() * 3) + 1) * 500,
+      purchase_date: new Date(Date.now() - Math.random() * 15 * 24 * 60 * 60 * 1000)
+    }))
+  }
+])
 
-const activeLotteries = computed(() => {
-  return lotteries.value.filter(lottery => 
-    lottery.status === 'active' && 
-    new Date(lottery.end_date) > new Date()
-  )
-})
+const activeLotteries = ref([
+  {
+    id: 3,
+    product: {
+      id: 3,
+      title: 'MacBook Pro M3',
+      description: 'Puissance et performance pour les créateurs',
+      price: 1200000,
+      image: '/images/products/macbook.jpg'
+    },
+    total_tickets: 600,
+    sold_tickets: 372,
+    ticket_price: 2000,
+    progress: 62,
+    draw_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+  },
+  {
+    id: 4,
+    product: {
+      id: 4,
+      title: 'AirPods Pro',
+      description: 'Audio haute qualité avec réduction de bruit',
+      price: 150000,
+      image: '/images/products/airpods.jpg'
+    },
+    total_tickets: 500,
+    sold_tickets: 225,
+    ticket_price: 300,
+    progress: 45,
+    draw_date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000)
+  }
+])
 
-const completedLotteries = computed(() => {
-  return lotteries.value.filter(lottery => 
-    lottery.status === 'completed' || lottery.is_drawn
-  )
-})
+const completedLotteries = ref([
+  {
+    id: 5,
+    product: {
+      id: 5,
+      title: 'Samsung Galaxy S24',
+      description: 'Smartphone Android premium',
+      price: 650000,
+      image: '/images/products/samsung.jpg'
+    },
+    total_tickets: 650,
+    sold_tickets: 650,
+    ticket_price: 1000,
+    progress: 100,
+    draw_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    winner: {
+      name: 'Marie Dubois',
+      email: 'marie.dubois@example.com',
+      phone: '+33 6 12 34 56 78'
+    },
+    winning_ticket: '001234'
+  },
+  {
+    id: 6,
+    product: {
+      id: 6,
+      title: 'Nintendo Switch OLED',
+      description: 'Console de jeu portable',
+      price: 200000,
+      image: '/images/products/switch.jpg'
+    },
+    total_tickets: 400,
+    sold_tickets: 400,
+    ticket_price: 500,
+    progress: 100,
+    draw_date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+    winner: {
+      name: 'Pierre Martin',
+      email: 'pierre.martin@example.com',
+      phone: '+33 6 98 76 54 32'
+    },
+    winning_ticket: '000987'
+  }
+])
 
 const filteredActiveLotteries = computed(() => {
   let filtered = activeLotteries.value
@@ -591,10 +673,8 @@ const filteredActiveLotteries = computed(() => {
   if (activeFilters.search) {
     const search = activeFilters.search.toLowerCase()
     filtered = filtered.filter(lottery => 
-      lottery.product?.title?.toLowerCase().includes(search) ||
-      lottery.product?.name?.toLowerCase().includes(search) ||
-      lottery.product?.description?.toLowerCase().includes(search) ||
-      lottery.lottery_number?.toLowerCase().includes(search)
+      lottery.product.title.toLowerCase().includes(search) ||
+      lottery.product.description.toLowerCase().includes(search)
     )
   }
 
@@ -607,12 +687,8 @@ const filteredCompletedLotteries = computed(() => {
   if (completedFilters.search) {
     const search = completedFilters.search.toLowerCase()
     filtered = filtered.filter(lottery => 
-      lottery.product?.title?.toLowerCase().includes(search) ||
-      lottery.product?.name?.toLowerCase().includes(search) ||
-      lottery.winner?.first_name?.toLowerCase().includes(search) ||
-      lottery.winner?.last_name?.toLowerCase().includes(search) ||
-      lottery.winner?.email?.toLowerCase().includes(search) ||
-      lottery.lottery_number?.toLowerCase().includes(search)
+      lottery.product.title.toLowerCase().includes(search) ||
+      lottery.winner?.name.toLowerCase().includes(search)
     )
   }
 
@@ -621,7 +697,7 @@ const filteredCompletedLotteries = computed(() => {
     const period = completedFilters.period
     
     filtered = filtered.filter(lottery => {
-      const drawDate = new Date(lottery.draw_date || lottery.created_at)
+      const drawDate = new Date(lottery.draw_date)
       
       if (period === 'week') {
         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -642,18 +718,16 @@ const filteredCompletedLotteries = computed(() => {
 })
 
 const filteredParticipants = computed(() => {
-  if (!selectedLottery.value?.participants_list) return []
+  if (!selectedLottery.value?.participants) return []
 
-  let filtered = selectedLottery.value.participants_list
+  let filtered = selectedLottery.value.participants
 
   if (participantsSearch.value) {
     const search = participantsSearch.value.toLowerCase()
-    filtered = filtered.filter(participant => {
-      const user = participant.user
-      const fullName = `${user?.first_name || ''} ${user?.last_name || ''}`.toLowerCase()
-      return fullName.includes(search) ||
-             user?.email?.toLowerCase().includes(search)
-    })
+    filtered = filtered.filter(participant => 
+      participant.name.toLowerCase().includes(search) ||
+      participant.email.toLowerCase().includes(search)
+    )
   }
 
   return filtered
@@ -669,86 +743,9 @@ const formatDate = (date) => {
   }).format(new Date(date))
 }
 
-const formatAmount = (amount) => {
-  return new Intl.NumberFormat('fr-FR').format(amount || 0)
-}
-
-// Watch activeTab to load appropriate data
-watch(activeTab, () => {
-  loadLotteries()
-})
-
-// API Functions
-const loadStatistics = async () => {
-  try {
-    const response = await get('/admin/lotteries/statistics')
-    if (response) {
-      statistics.value = response
-    }
-  } catch (error) {
-    console.error('Erreur lors du chargement des statistiques:', error)
-  }
-}
-
-const loadLotteries = async () => {
-  loading.value = true
-  try {
-    const params = new URLSearchParams()
-    params.append('per_page', itemsPerPage.value)
-    params.append('page', currentPage.value)
-    
-    // Filter by tab
-    if (activeTab.value === 'active') {
-      params.append('status', 'active')
-      params.append('is_drawn', 'false')
-    } else if (activeTab.value === 'pending') {
-      params.append('status', 'active')
-      params.append('is_drawn', 'false')
-      // Additional filter for pending draws can be added
-    } else if (activeTab.value === 'completed') {
-      params.append('is_drawn', 'true')
-    }
-
-    const response = await get(`/admin/lotteries?${params.toString()}`)
-    
-    if (response && response.data) {
-      lotteries.value = response.data.map(lottery => ({
-        ...lottery,
-        progress: lottery.sold_tickets && lottery.total_tickets 
-          ? Math.round((lottery.sold_tickets / lottery.total_tickets) * 100)
-          : 0
-      }))
-      currentPage.value = response.current_page || 1
-      totalPages.value = response.last_page || 1
-    }
-  } catch (error) {
-    console.error('Erreur lors du chargement des tombolas:', error)
-    lotteries.value = []
-  } finally {
-    loading.value = false
-  }
-}
-
-const refreshData = async () => {
-  await Promise.all([
-    loadStatistics(),
-    loadLotteries()
-  ])
-}
-
-const viewParticipants = async (lottery) => {
-  try {
-    const response = await get(`/admin/lotteries/${lottery.id}`)
-    if (response) {
-      selectedLottery.value = response
-      showParticipantsModal.value = true
-    }
-  } catch (error) {
-    console.error('Erreur lors du chargement des participants:', error)
-    if (window.$toast) {
-      window.$toast.error('Erreur lors du chargement des participants', '✗ Erreur')
-    }
-  }
+const viewParticipants = (lottery) => {
+  selectedLottery.value = lottery
+  showParticipantsModal.value = true
 }
 
 const conductDraw = (lottery) => {
@@ -760,25 +757,32 @@ const confirmDraw = async () => {
   conductingDraw.value = true
   
   try {
-    const response = await post(`/admin/lotteries/${selectedLottery.value.id}/draw`)
+    await new Promise(resolve => setTimeout(resolve, 3000))
     
-    if (response && response.success) {
-      if (window.$toast) {
-        window.$toast.success('Tirage effectué avec succès', '✓ Succès')
-      }
-      
-      // Refresh data to update the lists
-      await refreshData()
-      
-      // Switch to completed tab to show the result
-      activeTab.value = 'completed'
+    // Simulate draw result
+    const randomParticipant = selectedLottery.value.participants[
+      Math.floor(Math.random() * selectedLottery.value.participants.length)
+    ]
+    
+    const completedLottery = {
+      ...selectedLottery.value,
+      winner: randomParticipant,
+      winning_ticket: String(Math.floor(Math.random() * 999999)).padStart(6, '0')
     }
+    
+    // Move to completed
+    completedLotteries.value.unshift(completedLottery)
+    
+    // Remove from pending
+    const index = pendingDraws.value.findIndex(l => l.id === selectedLottery.value.id)
+    if (index !== -1) {
+      pendingDraws.value.splice(index, 1)
+    }
+    
+    console.log('Draw completed:', completedLottery)
+    
   } catch (error) {
-    console.error('Erreur lors du tirage:', error)
-    if (window.$toast) {
-      const message = error.response?.data?.message || 'Erreur lors du tirage'
-      window.$toast.error(message, '✗ Erreur')
-    }
+    console.error('Error conducting draw:', error)
   } finally {
     conductingDraw.value = false
     showDrawModal.value = false
@@ -787,68 +791,19 @@ const confirmDraw = async () => {
 }
 
 const editLottery = (lottery) => {
-  // TODO: Implement lottery editing modal
   console.log('Edit lottery:', lottery.id)
 }
 
-const viewDrawDetails = async (lottery) => {
-  try {
-    const response = await get(`/admin/lotteries/${lottery.id}`)
-    if (response) {
-      // TODO: Show detailed draw information modal
-      console.log('Draw details:', response)
-    }
-  } catch (error) {
-    console.error('Erreur lors du chargement des détails:', error)
-  }
+const viewDrawDetails = (lottery) => {
+  console.log('View draw details:', lottery.id)
 }
 
-const exportResults = async (lottery) => {
-  try {
-    const response = await get(`/admin/lotteries/${lottery.id}/export`)
-    if (response) {
-      // TODO: Trigger file download
-      const blob = new Blob([JSON.stringify(response, null, 2)], {
-        type: 'application/json'
-      })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `lottery-${lottery.lottery_number}-export.json`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-      
-      if (window.$toast) {
-        window.$toast.success('Export téléchargé avec succès', '✓ Succès')
-      }
-    }
-  } catch (error) {
-    console.error('Erreur lors de l\'export:', error)
-    if (window.$toast) {
-      window.$toast.error('Erreur lors de l\'export', '✗ Erreur')
-    }
-  }
-}
-
-const showEligibleDraws = async () => {
-  try {
-    const response = await get('/admin/lotteries/eligible-for-draw')
-    if (response) {
-      // TODO: Show eligible draws modal
-      console.log('Eligible draws:', response)
-      if (window.$toast) {
-        window.$toast.info(`${response.count} tirages disponibles`, 'ℹ Info')
-      }
-    }
-  } catch (error) {
-    console.error('Erreur lors du chargement des tirages disponibles:', error)
-  }
+const exportResults = (lottery) => {
+  console.log('Export results:', lottery.id)
 }
 
 onMounted(() => {
-  loadStatistics()
-  loadLotteries()
+  // Load lottery data
+  console.log('Lottery management mounted')
 })
 </script>

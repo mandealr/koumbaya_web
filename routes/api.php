@@ -20,6 +20,8 @@ use App\Http\Controllers\Api\AdminRefundController;
 use App\Http\Controllers\Api\TicketPriceController;
 use App\Http\Controllers\Api\AdminDashboardController;
 use App\Http\Controllers\Api\AdminUserController;
+use App\Http\Controllers\Api\AdminProductController;
+use App\Http\Controllers\Api\AdminPaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -218,6 +220,14 @@ Route::group([
         Route::post('/{id}/toggle-status', [AdminUserController::class, 'toggleStatus']);
     });
     
+    // Admin Products Management
+    Route::prefix('products')->group(function () {
+        Route::get('/', [AdminProductController::class, 'index']);
+        Route::get('/{id}', [AdminProductController::class, 'show']);
+        Route::put('/{id}', [AdminProductController::class, 'update']);
+        Route::delete('/{id}', [AdminProductController::class, 'destroy']);
+    });
+    
     // Admin Refunds
     Route::prefix('refunds')->group(function () {
         Route::get('/', [AdminRefundController::class, 'index']);
@@ -239,6 +249,15 @@ Route::group([
         Route::post('/{id}/cancel', 'cancel');
         Route::put('/{id}', 'update');
         Route::get('/{id}/export', 'export');
+    });
+    
+    // Admin Payments Management
+    Route::prefix('payments')->controller(App\Http\Controllers\Api\AdminPaymentController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::get('/stats', 'stats');
+        Route::get('/{id}', 'show');
+        Route::post('/{id}/refund', 'refund');
+        Route::get('/export', 'export');
     });
 });
 

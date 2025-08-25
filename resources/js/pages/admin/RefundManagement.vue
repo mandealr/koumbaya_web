@@ -232,8 +232,10 @@
 
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div>
-                    <div class="text-sm font-medium text-gray-900">{{ refund.user.full_name }}</div>
-                    <div class="text-sm text-gray-500">{{ refund.user.email }}</div>
+                    <div class="text-sm font-medium text-gray-900">
+                      {{ refund.user?.full_name || `${refund.user?.first_name || ''} ${refund.user?.last_name || ''}`.trim() || 'N/A' }}
+                    </div>
+                    <div class="text-sm text-gray-500">{{ refund.user?.email || 'N/A' }}</div>
                   </div>
                 </td>
 
@@ -246,6 +248,9 @@
                   <div class="text-sm text-gray-900">{{ getReasonText(refund.reason) }}</div>
                   <div v-if="refund.lottery" class="text-xs text-gray-500">
                     {{ refund.lottery.lottery_number }}
+                  </div>
+                  <div v-else-if="refund.ticket" class="text-xs text-gray-500">
+                    Ticket #{{ refund.ticket.ticket_number }}
                   </div>
                 </td>
 
@@ -442,50 +447,15 @@ const loadRefunds = async () => {
     })
 
     const response = await get(`/admin/refunds?${params}`)
-    refunds.value = response.data.refunds || []
+    if (response && response.success && response.data) {
+      refunds.value = response.data.refunds || []
+    }
   } catch (error) {
     console.error('Error loading refunds:', error)
-    // Use mock data as fallback
-    refunds.value = [
-      {
-        id: 1,
-        refund_number: 'REF-2025-001',
-        type: 'automatic',
-        auto_processed: true,
-        user: {
-          full_name: 'Jean Dupont',
-          email: 'jean@example.com'
-        },
-        lottery: {
-          lottery_number: 'KMB-2025-001',
-          product_name: 'iPhone 15 Pro'
-        },
-        amount: 5000,
-        currency: 'FCFA',
-        status: 'pending',
-        reason: 'lottery_cancelled',
-        created_at: '2025-01-08T10:30:00Z'
-      },
-      {
-        id: 2,
-        refund_number: 'REF-2025-002',
-        type: 'manual',
-        auto_processed: false,
-        user: {
-          full_name: 'Marie Martin',
-          email: 'marie@example.com'
-        },
-        lottery: {
-          lottery_number: 'KMB-2025-002',
-          product_name: 'MacBook Pro M3'
-        },
-        amount: 20000,
-        currency: 'FCFA',
-        status: 'approved',
-        reason: 'user_request',
-        created_at: '2025-01-07T14:15:00Z'
-      }
-    ]
+    if (window.$toast) {
+      window.$toast.error('Erreur lors du chargement des remboursements', '✗ Erreur')
+    }
+    refunds.value = []
   } finally {
     loading.value = false
   }
@@ -494,15 +464,19 @@ const loadRefunds = async () => {
 const loadStats = async () => {
   try {
     const response = await get('/admin/refunds/stats')
-    stats.value = response.data
+    if (response && response.success && response.data) {
+      stats.value = response.data
+    }
   } catch (error) {
     console.error('Error loading stats:', error)
-    // Use mock data as fallback
+    if (window.$toast) {
+      window.$toast.error('Erreur lors du chargement des statistiques', '✗ Erreur')
+    }
     stats.value = {
-      total_refunds: 168,
-      total_amount_refunded: 2300000,
-      pending_refunds: 12,
-      processing_time_avg: 24
+      total_refunds: 0,
+      total_amount_refunded: 0,
+      pending_refunds: 0,
+      auto_processed: 0
     }
   }
 }
@@ -510,30 +484,23 @@ const loadStats = async () => {
 const checkEligibleLotteries = async () => {
   try {
     const response = await get('/admin/refunds/eligible-lotteries')
-    eligibleLotteries.value = response.data
+    if (response && response.success && response.data) {
+      eligibleLotteries.value = response.data
+    }
   } catch (error) {
     console.error('Error loading eligible lotteries:', error)
-    // Use mock data as fallback
+    if (window.$toast) {
+      window.$toast.error('Erreur lors du chargement des tombolas éligibles', '✗ Erreur')
+    }
     eligibleLotteries.value = {
-      need_refund: [
-        {
-          id: 1,
-          lottery_number: 'KMB-2025-001',
-          product_title: 'iPhone 15 Pro',
-          participants: 45,
-          min_participants: 100,
-          estimated_refund: 225000
-        }
-      ],
-      in_progress: [
-        {
-          id: 2,
-          lottery_number: 'KMB-2025-002',
-          product_title: 'MacBook Pro M3',
-          participants: 28,
-          estimated_refund: 560000
-        }
-      ]
+      expired_insufficient: [],
+      cancelled: [],
+      summary: {
+        expired_count: 0,
+        expired_estimated_refund: 0,
+        cancelled_count: 0,
+        cancelled_estimated_refund: 0
+      }
     }
   }
 }
@@ -545,8 +512,11 @@ const processAutomatic = async () => {
       dry_run: processOptions.value.dryRun
     })
 
-    if (window.$toast) {
-      window.$toast.success('Traitement automatique terminé : ' + response.data.message, '✅ Traitement')
+    if (response && response.success) {
+      if (window.$toast) {
+        const message = response.data.message || 'Traitement automatique terminé'
+        window.$toast.success(message, '✅ Traitement')
+      }
     }
 
     // Reload data
@@ -559,19 +529,10 @@ const processAutomatic = async () => {
     showProcessAutomatic.value = false
   } catch (error) {
     console.error('Error processing automatic refunds:', error)
-    // Show success message even if API fails (for demo purposes)
     if (window.$toast) {
-      window.$toast.success('Traitement automatique simulé : ' + (processOptions.value.dryRun ? 'Mode test activé' : '3 remboursements traités'), '✅ Simulation')
+      const message = error.response?.data?.message || 'Erreur lors du traitement automatique'
+      window.$toast.error(message, '✗ Erreur')
     }
-
-    // Reload data with fallback
-    await Promise.all([
-      loadRefunds(),
-      loadStats(),
-      checkEligibleLotteries()
-    ])
-
-    showProcessAutomatic.value = false
   } finally {
     processing.value = false
   }
@@ -587,8 +548,11 @@ const processLottery = async (lotteryId, dryRun = false) => {
       dry_run: dryRun
     })
 
-    if (window.$toast) {
-      window.$toast.success('Traitement terminé : ' + response.data.message, '✅ Traitement')
+    if (response && response.success) {
+      if (window.$toast) {
+        const message = response.data.message || 'Traitement terminé'
+        window.$toast.success(message, '✅ Traitement')
+      }
     }
 
     await Promise.all([
@@ -599,7 +563,8 @@ const processLottery = async (lotteryId, dryRun = false) => {
   } catch (error) {
     console.error('Error processing lottery refunds:', error)
     if (window.$toast) {
-      window.$toast.error('Erreur lors du traitement', 'Erreur')
+      const message = error.response?.data?.message || 'Erreur lors du traitement'
+      window.$toast.error(message, '✗ Erreur')
     }
   } finally {
     processing.value = false
@@ -613,33 +578,27 @@ const approveRefund = async (refund) => {
   try {
     const response = await post(`/admin/refunds/${refund.id}/approve`)
 
-    if (window.$toast) {
-      window.$toast.success('Remboursement approuvé et traité', '✅ Approbation')
-    }
+    if (response && response.success) {
+      if (window.$toast) {
+        const message = response.data.message || 'Remboursement approuvé et traité'
+        window.$toast.success(message, '✅ Approbation')
+      }
 
-    // Update refund in list
-    const index = refunds.value.findIndex(r => r.id === refund.id)
-    if (index !== -1) {
-      refunds.value[index] = response.data.refund
-    }
+      // Update refund in list
+      const index = refunds.value.findIndex(r => r.id === refund.id)
+      if (index !== -1 && response.data.refund) {
+        refunds.value[index] = response.data.refund
+      }
 
-    // Reload stats
-    await loadStats()
+      // Reload stats
+      await loadStats()
+    }
   } catch (error) {
     console.error('Error approving refund:', error)
-    // Simulate successful approval
     if (window.$toast) {
-      window.$toast.success('Remboursement simulé : approuvé et traité', '✅ Simulation')
+      const message = error.response?.data?.message || 'Erreur lors de l\'approbation'
+      window.$toast.error(message, '✗ Erreur')
     }
-
-    // Update refund status in list
-    const index = refunds.value.findIndex(r => r.id === refund.id)
-    if (index !== -1) {
-      refunds.value[index].status = 'approved'
-    }
-
-    // Reload stats with fallback
-    await loadStats()
   } finally {
     processing.value = false
   }
@@ -659,40 +618,33 @@ const rejectRefund = async () => {
       reason: rejectReason.value
     })
 
-    if (window.$toast) {
-      window.$toast.warning('Remboursement rejeté', '⚠️ Rejet')
-    }
+    if (response && response.success) {
+      if (window.$toast) {
+        const message = response.data.message || 'Remboursement rejeté'
+        window.$toast.warning(message, '⚠️ Rejet')
+      }
 
-    // Update refund in list
-    const index = refunds.value.findIndex(r => r.id === refundToReject.value.id)
-    if (index !== -1) {
-      refunds.value[index] = response.data.refund
+      // Update refund in list
+      const index = refunds.value.findIndex(r => r.id === refundToReject.value.id)
+      if (index !== -1 && response.data.refund) {
+        refunds.value[index] = response.data.refund
+      }
+
+      // Reload stats
+      await loadStats()
     }
 
     refundToReject.value = null
     rejectReason.value = ''
-
-    // Reload stats
-    await loadStats()
   } catch (error) {
     console.error('Error rejecting refund:', error)
-    // Simulate successful rejection
     if (window.$toast) {
-      window.$toast.warning('Remboursement simulé : rejeté avec motif', '⚠️ Simulation')
-    }
-
-    // Update refund status in list
-    const index = refunds.value.findIndex(r => r.id === refundToReject.value.id)
-    if (index !== -1) {
-      refunds.value[index].status = 'rejected'
-      refunds.value[index].reason = rejectReason.value
+      const message = error.response?.data?.message || 'Erreur lors du rejet'
+      window.$toast.error(message, '✗ Erreur')
     }
 
     refundToReject.value = null
     rejectReason.value = ''
-
-    // Reload stats with fallback
-    await loadStats()
   } finally {
     processing.value = false
   }

@@ -301,35 +301,35 @@ const { get, post } = useApi()
 // Reactive data
 const loading = ref(false)
 const payments = ref([])
-const paymentStats = ref([
+const paymentStats = computed(() => [
   {
     label: 'Total des revenus',
-    value: '45,2M FCFA',
-    change: 15.3,
+    value: formatAmount(realTimeStats.value.total_revenue) + ' FCFA',
+    change: realTimeStats.value.revenue_change,
     icon: CurrencyDollarIcon,
-    bgColor: 'bg-blue-100',
-    iconColor: 'text-blue-600'
+    bgColor: 'bg-green-100',
+    iconColor: 'text-green-600'
   },
   {
     label: 'Transactions réussies',
-    value: '2,847',
-    change: 8.7,
+    value: realTimeStats.value.successful_transactions.toString(),
+    change: realTimeStats.value.transactions_change,
     icon: CreditCardIcon,
     bgColor: 'bg-blue-100',
     iconColor: 'text-[#0099cc]'
   },
   {
     label: 'Taux de réussite',
-    value: '96.8%',
-    change: 2.1,
+    value: realTimeStats.value.success_rate + '%',
+    change: realTimeStats.value.success_rate_change,
     icon: ChartBarIcon,
     bgColor: 'bg-purple-100',
     iconColor: 'text-purple-600'
   },
   {
     label: 'Transactions échouées',
-    value: '94',
-    change: -12.5,
+    value: realTimeStats.value.failed_transactions.toString(),
+    change: -Math.abs(realTimeStats.value.failed_transactions / Math.max(realTimeStats.value.successful_transactions, 1) * 100),
     icon: ExclamationTriangleIcon,
     bgColor: 'bg-red-100',
     iconColor: 'text-red-600'
@@ -349,48 +349,19 @@ const totalPayments = ref(0)
 const showPaymentModal = ref(false)
 const selectedPayment = ref(null)
 
-// Mock data for demonstration
-const mockPayments = ref([
-  {
-    id: 1,
-    transaction_id: 'TXN-2025-001',
-    user_name: 'Jean Dupont',
-    user_email: 'jean@example.com',
-    product_name: 'iPhone 15 Pro Max',
-    tickets_count: 2,
-    amount: 5000,
-    currency: 'FCFA',
-    status: 'completed',
-    payment_method: 'Mobile Money',
-    created_at: '2025-01-09T10:30:00Z'
-  },
-  {
-    id: 2,
-    transaction_id: 'TXN-2025-002',
-    user_name: 'Marie Martin',
-    user_email: 'marie@example.com',
-    product_name: 'MacBook Pro M3',
-    tickets_count: 1,
-    amount: 2500,
-    currency: 'FCFA',
-    status: 'pending',
-    payment_method: 'Carte bancaire',
-    created_at: '2025-01-09T09:15:00Z'
-  },
-  {
-    id: 3,
-    transaction_id: 'TXN-2025-003',
-    user_name: 'Paul Durand',
-    user_email: 'paul@example.com',
-    product_name: 'PlayStation 5',
-    tickets_count: 3,
-    amount: 7500,
-    currency: 'FCFA',
-    status: 'failed',
-    payment_method: 'Mobile Money',
-    created_at: '2025-01-09T08:45:00Z'
-  }
-])
+// Real-time statistics
+const realTimeStats = ref({
+  total_revenue: 0,
+  current_month_revenue: 0,
+  revenue_change: 0,
+  successful_transactions: 0,
+  current_month_transactions: 0,
+  transactions_change: 0,
+  success_rate: 0,
+  success_rate_change: 0,
+  failed_transactions: 0,
+  pending_transactions: 0
+})
 
 // Computed properties
 const totalPages = computed(() => Math.ceil(totalPayments.value / perPage.value))
@@ -401,19 +372,32 @@ const endIndex = computed(() => Math.min(currentPage.value * perPage.value, tota
 const loadPayments = async () => {
   loading.value = true
   try {
-    // TODO: Replace with actual API call
-    // const response = await get('/admin/payments', { params: filters })
-    // payments.value = response.data
-    // totalPayments.value = response.total
+    const params = new URLSearchParams()
+    params.append('page', currentPage.value)
+    params.append('per_page', perPage.value)
     
-    // Using mock data for now
-    payments.value = mockPayments.value
-    totalPayments.value = mockPayments.value.length
+    if (filters.search) params.append('search', filters.search)
+    if (filters.status) params.append('status', filters.status)
+    if (filters.startDate) params.append('start_date', filters.startDate)
+    if (filters.endDate) params.append('end_date', filters.endDate)
+    
+    const response = await get(`/admin/payments?${params.toString()}`)
+    
+    if (response && response.success && response.data) {
+      payments.value = response.data.payments || []
+      totalPayments.value = response.data.pagination?.total || 0
+      
+      if (response.data.stats) {
+        realTimeStats.value = response.data.stats
+      }
+    }
   } catch (error) {
     console.error('Error loading payments:', error)
-    // Use mock data as fallback
-    payments.value = mockPayments.value
-    totalPayments.value = mockPayments.value.length
+    if (window.$toast) {
+      window.$toast.error('Erreur lors du chargement des paiements', '✗ Erreur')
+    }
+    payments.value = []
+    totalPayments.value = 0
   } finally {
     loading.value = false
   }
@@ -422,6 +406,17 @@ const loadPayments = async () => {
 const applyFilters = () => {
   currentPage.value = 1
   loadPayments()
+}
+
+const loadStats = async () => {
+  try {
+    const response = await get('/admin/payments/stats')
+    if (response && response.success && response.data) {
+      realTimeStats.value = response.data
+    }
+  } catch (error) {
+    console.error('Error loading payment stats:', error)
+  }
 }
 
 const formatAmount = (amount) => {
@@ -471,32 +466,68 @@ const closePaymentModal = () => {
 const initiateRefund = async (payment) => {
   if (confirm('Êtes-vous sûr de vouloir initier un remboursement pour cette transaction ?')) {
     try {
-      // TODO: Implement refund API call
-      console.log('Initiating refund for:', payment.transaction_id)
-      // await post(`/admin/payments/${payment.id}/refund`)
-      if (window.$toast) {
-        window.$toast.success('Remboursement initié avec succès', '✅ Remboursement')
+      const response = await post(`/admin/payments/${payment.id}/refund`, {
+        reason: 'admin_initiated'
+      })
+      
+      if (response && response.success) {
+        if (window.$toast) {
+          window.$toast.success('Remboursement initié avec succès', '✅ Remboursement')
+        }
+        loadPayments()
+        closePaymentModal()
       }
-      loadPayments()
     } catch (error) {
       console.error('Error initiating refund:', error)
       if (window.$toast) {
-        window.$toast.error('Erreur lors de l\'initiation du remboursement', 'Erreur')
+        const message = error.response?.data?.message || 'Erreur lors de l\'initiation du remboursement'
+        window.$toast.error(message, '✗ Erreur')
       }
     }
   }
 }
 
-const exportPayments = () => {
-  // TODO: Implement export functionality
-  console.log('Exporting payments...')
-  if (window.$toast) {
-    window.$toast.info('Fonctionnalité d\'export en cours de développement', '🚀 En développement')
+const exportPayments = async () => {
+  try {
+    const params = new URLSearchParams()
+    if (filters.search) params.append('search', filters.search)
+    if (filters.status) params.append('status', filters.status)
+    if (filters.startDate) params.append('start_date', filters.startDate)
+    if (filters.endDate) params.append('end_date', filters.endDate)
+    
+    const response = await get(`/admin/payments/export?${params.toString()}`)
+    
+    if (response && response.success && response.data) {
+      // Create and download file
+      const blob = new Blob([JSON.stringify(response.data, null, 2)], {
+        type: 'application/json'
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `payments-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      
+      if (window.$toast) {
+        window.$toast.success('Export téléchargé avec succès', '✅ Export')
+      }
+    }
+  } catch (error) {
+    console.error('Error exporting payments:', error)
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de l\'export', '✗ Erreur')
+    }
   }
 }
 
-const refreshData = () => {
-  loadPayments()
+const refreshData = async () => {
+  await Promise.all([
+    loadPayments(),
+    loadStats()
+  ])
 }
 
 const previousPage = () => {
@@ -515,5 +546,6 @@ const nextPage = () => {
 
 onMounted(() => {
   loadPayments()
+  loadStats()
 })
 </script>
