@@ -207,7 +207,7 @@
                     </div>
                     <div class="ml-4">
                       <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
-                      <div class="text-sm text-gray-500">{{ product.category }}</div>
+                      <div class="text-sm text-gray-500">{{ product.category?.name || product.category || 'Sans catégorie' }}</div>
                     </div>
                   </div>
                 </td>

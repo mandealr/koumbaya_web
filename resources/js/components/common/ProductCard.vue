@@ -41,7 +41,7 @@
       <!-- Catégorie -->
       <div class="flex items-center text-koumbaya-primary text-sm font-medium">
         <TagIcon class="w-4 h-4 mr-2" />
-        {{ product.category || 'Électronique' }}
+        {{ product.category?.name || product.category || 'Électronique' }}
       </div>
 
       <!-- Titre et description -->

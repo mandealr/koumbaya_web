@@ -135,7 +135,7 @@
                   </div>
                   <div>
                     <p class="text-sm font-medium text-gray-500">Catégorie</p>
-                    <p class="text-lg font-semibold text-gray-900">{{ lottery.category }}</p>
+                    <p class="text-lg font-semibold text-gray-900">{{ lottery.category?.name || lottery.category || 'Sans catégorie' }}</p>
                   </div>
                   <div>
                     <p class="text-sm font-medium text-gray-500">Date de fin</p>

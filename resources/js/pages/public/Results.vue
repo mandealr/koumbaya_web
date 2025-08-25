@@ -192,7 +192,7 @@
                     <div>
                       <div class="text-sm font-medium text-gray-900">{{ result.product.title }}</div>
                       <div class="text-sm text-gray-500">
-                        {{ result.product.category }} • {{ formatCurrency(result.product.price) }}
+                        {{ result.product.category?.name || result.product.category || 'Sans catégorie' }} • {{ formatCurrency(result.product.price) }}
                       </div>
                       <div class="text-xs text-gray-600">{{ result.lottery_number }}</div>
                     </div>

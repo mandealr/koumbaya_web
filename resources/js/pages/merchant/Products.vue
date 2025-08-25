@@ -336,11 +336,11 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Catégorie</label>
-              <p class="text-sm text-gray-900">{{ selectedProduct.category }}</p>
+              <p class="text-sm text-gray-900">{{ selectedProduct.category?.name || selectedProduct.category || 'Sans catégorie' }}</p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Valeur</label>
-              <p class="text-sm text-gray-900 font-semibold">{{ formatAmount(selectedProduct.value) }} FCFA</p>
+              <p class="text-sm text-gray-900 font-semibold">{{ formatAmount(selectedProduct.price || selectedProduct.value) }} FCFA</p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Condition</label>

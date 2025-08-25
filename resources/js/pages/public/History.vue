@@ -133,7 +133,7 @@
               </div>
               <div class="absolute bottom-3 left-3">
                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-white text-gray-900">
-                  {{ lottery.product.category }}
+                  {{ lottery.product.category?.name || lottery.product.category || 'Sans catégorie' }}
                 </span>
               </div>
             </div>
@@ -262,7 +262,7 @@
                 <div class="flex-1">
                   <h4 class="text-xl font-bold text-gray-900">{{ selectedLottery.product.title }}</h4>
                   <p class="text-lg text-purple-600 font-semibold">{{ formatCurrency(selectedLottery.product.price) }}</p>
-                  <p class="text-sm text-gray-600">{{ selectedLottery.product.category }}</p>
+                  <p class="text-sm text-gray-600">{{ selectedLottery.product.category?.name || selectedLottery.product.category || 'Sans catégorie' }}</p>
                 </div>
               </div>
 

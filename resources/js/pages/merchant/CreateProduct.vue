@@ -29,7 +29,7 @@
               'flex items-center justify-center w-10 h-10 rounded-full border-2 font-medium text-sm transition-all',
               currentStep >= step.id
                 ? 'border-[#0099cc] bg-[#0099cc] text-white'
-                : 'border-gray-300 bg-white text-gray-400'
+                : 'border-gray-300 bg-white text-gray-600'
             ]">
               <component :is="step.icon" v-if="currentStep >= step.id" class="w-5 h-5" />
               <span v-else>{{ step.id }}</span>
@@ -37,11 +37,11 @@
             <div class="ml-3">
               <p :class="[
                 'text-sm font-medium',
-                currentStep >= step.id ? 'text-[#0099cc]' : 'text-gray-400'
+                currentStep >= step.id ? 'text-[#0099cc]' : 'text-gray-600'
               ]">
                 {{ step.title }}
               </p>
-              <p class="text-xs text-gray-500">{{ step.description }}</p>
+              <p class="text-xs text-gray-700">{{ step.description }}</p>
             </div>
           </div>
           <div
@@ -141,7 +141,7 @@
                   </div>
                   <div>
                     <p class="font-medium text-gray-900">Vente directe</p>
-                    <p class="text-sm text-gray-500">Les clients achètent directement</p>
+                    <p class="text-sm text-gray-700">Les clients achètent directement</p>
                   </div>
                 </div>
               </label>
@@ -156,7 +156,7 @@
                   </div>
                   <div>
                     <p class="font-medium text-gray-900">Tombola</p>
-                    <p class="text-sm text-gray-500">Les clients achètent des tickets</p>
+                    <p class="text-sm text-gray-700">Les clients achètent des tickets</p>
                   </div>
                 </div>
               </label>
@@ -206,9 +206,9 @@
               @drop.prevent="handleFileDrop"
               class="border-2 border-dashed border-gray-300 rounded-xl p-8 hover:border-[#0099cc] transition-colors cursor-pointer"
             >
-              <CameraIcon class="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <CameraIcon class="w-16 h-16 text-gray-600 mx-auto mb-4" />
               <p class="text-lg font-medium text-gray-700 mb-2">Ajoutez des photos</p>
-              <p class="text-sm text-gray-500 mb-4">Glissez-déposez ou cliquez pour sélectionner</p>
+              <p class="text-sm text-gray-700 mb-4">Glissez-déposez ou cliquez pour sélectionner</p>
               <div class="flex justify-center">
                 <span class="bg-[#0099cc] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#0088bb] transition-colors">
                   Choisir des fichiers
@@ -299,7 +299,7 @@
               </div>
             </div>
             
-            <p class="text-sm text-gray-500 mt-4">
+            <p class="text-sm text-gray-700 mt-4">
               Les clients pourront acheter votre produit directement au prix affiché.
             </p>
           </div>
@@ -326,7 +326,7 @@
             />
             <p v-if="errors.ticket_price" class="mt-1 text-sm text-red-600">{{ errors.ticket_price }}</p>
             <p v-else-if="form.ticket_price && parseFloat(form.ticket_price) < 100" class="mt-1 text-sm text-orange-600">Le prix minimum est de 100 FCFA</p>
-            <p v-else class="text-sm text-gray-500 mt-1">Minimum 100 FCFA</p>
+            <p v-else class="text-sm text-gray-700 mt-1">Minimum 100 FCFA</p>
           </div>
 
           <div>
@@ -346,7 +346,7 @@
             />
             <p v-if="errors.total_tickets" class="mt-1 text-sm text-red-600">{{ errors.total_tickets }}</p>
             <p v-else-if="form.total_tickets && (parseInt(form.total_tickets) < 10 || parseInt(form.total_tickets) > 10000)" class="mt-1 text-sm text-orange-600">Entre 10 et 10,000 tickets</p>
-            <p v-else class="text-sm text-gray-500 mt-1">Entre 10 et 10,000 tickets</p>
+            <p v-else class="text-sm text-gray-700 mt-1">Entre 10 et 10,000 tickets</p>
           </div>
 
           <div>
@@ -379,7 +379,7 @@
             />
             <p v-if="errors.min_tickets" class="mt-1 text-sm text-red-600">{{ errors.min_tickets }}</p>
             <p v-else-if="form.min_tickets && form.total_tickets && parseInt(form.min_tickets) > parseInt(form.total_tickets)" class="mt-1 text-sm text-orange-600">Ne peut pas dépasser le nombre total de tickets</p>
-            <p v-else class="text-sm text-gray-500 mt-1">Si pas atteint, remboursement automatique</p>
+            <p v-else class="text-sm text-gray-700 mt-1">Si pas atteint, remboursement automatique</p>
           </div>
 
           <!-- Lottery Metrics -->
@@ -416,23 +416,23 @@
             <h3 class="font-semibold text-gray-900 mb-4">Résumé du produit</h3>
             <div class="space-y-3">
               <div class="flex justify-between">
-                <span class="text-gray-600">Nom :</span>
+                <span class="text-gray-800">Nom :</span>
                 <span class="font-medium">{{ form.name }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Valeur :</span>
+                <span class="text-gray-800">Valeur :</span>
                 <span class="font-medium">{{ formatAmount(form.price) }} FCFA</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Condition :</span>
+                <span class="text-gray-800">Condition :</span>
                 <span class="font-medium">{{ getConditionLabel(form.condition) }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Localisation :</span>
+                <span class="text-gray-800">Localisation :</span>
                 <span class="font-medium">{{ form.location }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Photos :</span>
+                <span class="text-gray-800">Photos :</span>
                 <span class="font-medium">{{ form.images.length }} image(s)</span>
               </div>
             </div>
@@ -447,19 +447,19 @@
             <!-- Direct Sale Summary -->
             <div v-if="form.sale_mode === 'direct'" class="space-y-3">
               <div class="flex justify-between">
-                <span class="text-gray-600">Mode de vente :</span>
+                <span class="text-gray-800">Mode de vente :</span>
                 <span class="font-medium text-[#0099cc]">Vente directe</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Prix de vente :</span>
+                <span class="text-gray-800">Prix de vente :</span>
                 <span class="font-medium">{{ formatAmount(form.price) }} FCFA</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Commission (5%) :</span>
+                <span class="text-gray-800">Commission (5%) :</span>
                 <span class="font-medium">{{ formatAmount(form.price * 0.05) }} FCFA</span>
               </div>
               <div class="flex justify-between border-t pt-3">
-                <span class="text-gray-600">Vous recevrez :</span>
+                <span class="text-gray-800">Vous recevrez :</span>
                 <span class="font-bold text-[#0099cc]">{{ formatAmount(form.price * 0.95) }} FCFA</span>
               </div>
             </div>
@@ -467,27 +467,27 @@
             <!-- Lottery Summary -->
             <div v-else-if="form.sale_mode === 'lottery'" class="space-y-3">
               <div class="flex justify-between">
-                <span class="text-gray-600">Mode de vente :</span>
+                <span class="text-gray-800">Mode de vente :</span>
                 <span class="font-medium text-purple-600">Tombola</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Prix/ticket :</span>
+                <span class="text-gray-800">Prix/ticket :</span>
                 <span class="font-medium">{{ formatAmount(form.ticket_price) }} FCFA</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Total tickets :</span>
+                <span class="text-gray-800">Total tickets :</span>
                 <span class="font-medium">{{ form.total_tickets }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Minimum requis :</span>
+                <span class="text-gray-800">Minimum requis :</span>
                 <span class="font-medium">{{ form.min_tickets }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Date de fin :</span>
+                <span class="text-gray-800">Date de fin :</span>
                 <span class="font-medium">{{ formatDate(form.end_date) }}</span>
               </div>
               <div class="flex justify-between border-t pt-3">
-                <span class="text-gray-600">Revenus max :</span>
+                <span class="text-gray-800">Revenus max :</span>
                 <span class="font-bold text-[#0099cc]">{{ formatAmount(lotteryMetrics.totalRevenue) }} FCFA</span>
               </div>
             </div>
@@ -503,7 +503,7 @@
               required
               class="mt-1 h-4 w-4 text-[#0099cc] focus:ring-[#0099cc] border-gray-300 rounded"
             />
-            <span class="text-sm text-gray-700">
+            <span class="text-sm text-gray-900">
               J'accepte les <a href="#" class="text-[#0099cc] hover:underline">conditions de vente</a>
               et confirme que toutes les informations sont exactes. Je comprends que Koumbaya prélèvera
               des frais de 5% sur les revenus {{ form.sale_mode === 'lottery' ? 'de la tombola' : 'de la vente' }}.
@@ -525,7 +525,7 @@
         </button>
         <div v-else></div>
 
-        <div class="text-sm text-gray-500">
+        <div class="text-sm text-gray-700">
           Étape {{ currentStep }} sur {{ steps.length }}
         </div>
 
