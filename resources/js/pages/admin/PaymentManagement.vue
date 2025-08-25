@@ -54,8 +54,8 @@
 
     <!-- Filters and Search -->
     <div class="admin-card">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="flex flex-col">
           <label class="block text-sm font-medium text-gray-700 mb-2">Recherche</label>
           <div class="relative">
             <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -63,14 +63,14 @@
               v-model="filters.search"
               type="text"
               placeholder="Transaction ID, utilisateur..."
-              class="admin-input pl-10"
+              class="admin-input pl-10 w-full"
               @input="applyFilters"
             />
           </div>
         </div>
-        <div>
+        <div class="flex flex-col">
           <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-          <select v-model="filters.status" @change="applyFilters" class="admin-input">
+          <select v-model="filters.status" @change="applyFilters" class="admin-input w-full">
             <option value="">Tous les statuts</option>
             <option value="pending">En attente</option>
             <option value="completed">Complété</option>
@@ -78,21 +78,21 @@
             <option value="refunded">Remboursé</option>
           </select>
         </div>
-        <div>
+        <div class="flex flex-col">
           <label class="block text-sm font-medium text-gray-700 mb-2">Date début</label>
           <input
             v-model="filters.startDate"
             type="date"
-            class="admin-input"
+            class="admin-input w-full"
             @change="applyFilters"
           />
         </div>
-        <div>
+        <div class="flex flex-col">
           <label class="block text-sm font-medium text-gray-700 mb-2">Date fin</label>
           <input
             v-model="filters.endDate"
             type="date"
-            class="admin-input"
+            class="admin-input w-full"
             @change="applyFilters"
           />
         </div>
