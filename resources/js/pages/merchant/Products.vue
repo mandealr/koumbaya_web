@@ -56,7 +56,7 @@
 
     <!-- Filters and Search -->
     <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-      <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Rechercher</label>
           <div class="relative">
@@ -154,7 +154,7 @@
       <div
         v-for="product in filteredProducts"
         :key="product.id"
-        class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-200 hover:scale-[1.02]"
+        class="bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200 hover:scale-[1.02]"
       >
         <!-- Product Image -->
         <div class="relative h-48 bg-gray-200">
@@ -276,7 +276,7 @@
 
               <div
                 v-if="showProductMenu === product.id"
-                class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10"
+                class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
               >
                 <button
                   @click="duplicateProduct(product)"
@@ -386,7 +386,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Direct Sale Info -->
           <div v-else-if="selectedProduct.sale_mode === 'direct'" class="bg-green-50 border border-green-200 rounded-lg p-4">
             <div class="flex items-center space-x-3">
@@ -561,7 +561,7 @@ const loadProducts = async () => {
     if (filters.status) params.append('status', filters.status)
     if (filters.saleMode) params.append('sale_mode', filters.saleMode)
     if (filters.sortBy) params.append('sort_by', filters.sortBy)
-    
+
     const response = await get(`/products?${params.toString()}`)
     if (response && response.data && response.data.products && Array.isArray(response.data.products)) {
       products.value = response.data.products.map(product => ({
@@ -569,7 +569,7 @@ const loadProducts = async () => {
         lottery: product.lottery || null,
         ticket_price: parseFloat(product.ticket_price || 0),
         price: parseFloat(product.price || 0),
-        progress: product.lottery ? 
+        progress: product.lottery ?
           Math.round(((product.lottery.sold_tickets || 0) / (product.lottery.total_tickets || 1)) * 100) : 0
       }))
     } else {
@@ -635,11 +635,11 @@ const loadProductStats = async () => {
 const publishProduct = async (product) => {
   const actionText = product.sale_mode === 'lottery' ? 'tombola' : 'produit'
   const confirmText = `Publier ${actionText === 'tombola' ? 'la' : 'le'} ${actionText} "${product.title || product.name}" ?`
-  
+
   if (confirm(confirmText)) {
     try {
       let response
-      
+
       if (product.sale_mode === 'lottery') {
         // Pour les produits en mode tombola, créer la tombola
         if (!product.ticket_price || product.ticket_price < 100) {
@@ -648,7 +648,7 @@ const publishProduct = async (product) => {
           }
           return
         }
-        
+
         response = await post(`/products/${product.id}/create-lottery`, {
           duration_days: 7
         })
@@ -658,12 +658,12 @@ const publishProduct = async (product) => {
           status: 'active'
         })
       }
-      
+
       if (response && (response.success || response.product)) {
         await loadProducts() // Refresh products
         if (window.$toast) {
-          const successMessage = product.sale_mode === 'lottery' ? 
-            'Tombola publiée avec succès !' : 
+          const successMessage = product.sale_mode === 'lottery' ?
+            'Tombola publiée avec succès !' :
             'Produit publié avec succès !'
           window.$toast.success(successMessage, '✅ Publication')
         }
@@ -673,7 +673,7 @@ const publishProduct = async (product) => {
     } catch (error) {
       console.error('Error publishing product:', error)
       let errorMessage = 'Erreur lors de la publication'
-      
+
       if (error.response?.data?.error) {
         errorMessage = error.response.data.error
       } else if (error.response?.data?.message) {
@@ -681,7 +681,7 @@ const publishProduct = async (product) => {
       } else if (error.message) {
         errorMessage = error.message
       }
-      
+
       if (window.$toast) {
         window.$toast.error(errorMessage, '❌ Erreur')
       }
@@ -698,7 +698,7 @@ const duplicateProduct = async (product) => {
       category_id: product.category_id,
       image: product.image
     })
-    
+
     if (response && response.success) {
       await loadProducts() // Refresh products
       if (window.$toast) {
