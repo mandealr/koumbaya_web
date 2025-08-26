@@ -83,7 +83,7 @@
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-3">
                       <div 
-                        class="bg-gradient-to-r from-[#0099cc] to-[#0088bb] h-3 rounded-full animate-pulse transition-all duration-500"
+                        class="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full animate-pulse transition-all duration-500"
                         :style="{ width: (latestLotteryProduct?.progress || 75) + '%' }"
                       ></div>
                     </div>
@@ -91,8 +91,9 @@
                       {{ latestLotteryProduct?.soldTickets || 750 }}/{{ latestLotteryProduct?.totalTickets || 1000 }} tickets
                     </div>
                   </div>
-                  <button class="w-full bg-[#0099cc] text-white font-semibold py-3 rounded-xl hover:bg-[#0088bb] transition-colors">
-                    Acheter maintenant
+                  <button class="w-full bg-purple-600 text-white font-semibold py-3 rounded-xl hover:bg-purple-700 transition-colors flex items-center justify-center gap-2">
+                    <TicketIcon class="h-5 w-5" />
+                    Participer maintenant
                   </button>
                 </div>
               </div>
@@ -583,15 +584,19 @@ const loadLatestLotteryProduct = async () => {
       const product = response.data.product
       const lottery = response.data.lottery
       
+      const soldTickets = lottery?.sold_tickets || 0
+      const totalTickets = lottery?.total_tickets || 1000
+      const calculatedProgress = totalTickets > 0 ? Math.round((soldTickets / totalTickets) * 100) : 0
+      
       latestLotteryProduct.value = {
         id: product.id,
         name: product.name || product.title,
         value: product.price || 0,
         ticketPrice: lottery?.ticket_price || product.ticket_price || 1500,
         image: product.image_url || product.main_image || placeholderImg,
-        soldTickets: lottery?.sold_tickets || 0,
-        totalTickets: lottery?.total_tickets || 1000,
-        progress: lottery?.progress_percentage || 0,
+        soldTickets: soldTickets,
+        totalTickets: totalTickets,
+        progress: calculatedProgress,
         timeRemaining: lottery?.time_remaining,
         isEndingSoon: lottery?.is_ending_soon || false
       }
