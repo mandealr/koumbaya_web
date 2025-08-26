@@ -213,10 +213,20 @@ const uploadAvatar = async () => {
       console.log(pair[0] + ': ', pair[1])
     }
 
-    // Test avec l'endpoint de diagnostic d'abord
-    console.log('Testing with /user/test-upload first...')
-    const testResponse = await post('/user/test-upload', formData)
-    console.log('Test response:', testResponse)
+    // Test direct avec axios
+    console.log('Testing direct axios upload...')
+    const axiosInstance = useApi().api
+    
+    try {
+      const testResponse = await axiosInstance.post('/user/test-upload', formData, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      })
+      console.log('Direct axios test response:', testResponse.data)
+    } catch (err) {
+      console.log('Direct axios test error:', err.response?.data)
+    }
 
     // Upload - Ne pas définir Content-Type manuellement avec FormData
     const response = await post(props.uploadEndpoint, formData)
