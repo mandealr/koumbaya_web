@@ -165,17 +165,27 @@ class UserProfileController extends Controller
     {
         $user = auth()->user();
 
-        // Validation plus flexible pour les types de champs
-        $validator = \Validator::make($request->all(), [
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB max
-            'image' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Alternative field name
+        // Debug : voir ce qui est envoyé
+        \Log::info('Avatar upload request data:', [
+            'files' => array_keys($request->files->all()),
+            'has_avatar' => $request->hasFile('avatar'),
+            'has_image' => $request->hasFile('image'),
+            'all_data' => $request->all()
         ]);
 
-        // Si 'avatar' n'existe pas, essayer 'image'
-        if (!$request->hasFile('avatar') && $request->hasFile('image')) {
+        // Validation flexible : accepter soit avatar soit image
+        if ($request->hasFile('avatar')) {
+            $validator = \Validator::make($request->all(), [
+                'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            ]);
+        } elseif ($request->hasFile('image')) {
             $validator = \Validator::make($request->all(), [
                 'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             ]);
+        } else {
+            return $this->sendError('No image file provided', [
+                'avatar' => ['Please provide an avatar or image file']
+            ], 422);
         }
 
         if ($validator->fails()) {
