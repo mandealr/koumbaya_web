@@ -137,11 +137,12 @@ class EBillingService
         $globalArray = [
             'payer_email' => $paymentData['payer_email'],
             'payer_msisdn' => $paymentData['payer_msisdn'],
-            'amount' => $paymentData['amount'],
+            'amount' => (int) $paymentData['amount'], // S'assurer que c'est un entier
             'short_description' => $paymentData['short_description'],
             'external_reference' => $paymentData['external_reference'],
             'payer_name' => $paymentData['payer_name'],
-            'expiry_period' => $paymentData['expiry_period']
+            'expiry_period' => (int) $paymentData['expiry_period'], // S'assurer que c'est un entier
+            'callback_url' => $paymentData['callback_url'] ?? null
         ];
 
         try {
@@ -155,6 +156,12 @@ class EBillingService
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post($serverUrl, $globalArray);
 
+            Log::info('E-BILLING :: API response received', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'headers' => $response->headers()
+            ]);
+
             if (!$response->successful()) {
                 Log::error('E-BILLING :: API call failed', [
                     'status' => $response->status(),
@@ -166,7 +173,21 @@ class EBillingService
             }
 
             $responseData = $response->json();
-            return $responseData['e_bill']['bill_id'] ?? false;
+            Log::info('E-BILLING :: Parsed response data', ['response_data' => $responseData]);
+            
+            // Essayer différents formats de réponse
+            if (isset($responseData['e_bill']['bill_id'])) {
+                return $responseData['e_bill']['bill_id'];
+            } elseif (isset($responseData['bill_id'])) {
+                return $responseData['bill_id'];
+            } elseif (isset($responseData['id'])) {
+                return $responseData['id'];
+            } elseif (is_string($responseData)) {
+                return $responseData; // Peut-être que la réponse est juste l'ID
+            }
+            
+            Log::error('E-BILLING :: Could not extract bill_id from response', ['response' => $responseData]);
+            return false;
 
         } catch (\Exception $e) {
             Log::error('E-BILLING :: Exception during API call', [
