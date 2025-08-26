@@ -214,7 +214,7 @@ class EBillingService
     {
         $paymentToSave = [
             'reference' => $paymentDataFromSetup['external_reference'],
-            'transaction_id' => 'PENDING_' . $paymentDataFromSetup['external_reference'], // Temporaire, sera mis à jour
+            'transaction_id' => 0, // Valeur temporaire, sera mis à jour lors du callback
             'ebilling_id' => $billId,
             'amount' => $paymentDataFromSetup['amount'],
             'description' => $paymentDataFromSetup['short_description'],
