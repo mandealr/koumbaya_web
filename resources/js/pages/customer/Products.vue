@@ -39,6 +39,7 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
           >
             <option value="">Toutes les catégories</option>
+            <option v-if="categories.length === 0" disabled>Aucune catégorie disponible</option>
             <option 
               v-for="category in categories" 
               :key="category.id" 
@@ -191,10 +192,21 @@ const loadProducts = async () => {
 
 const loadCategories = async () => {
   try {
+    console.log('Customer - Chargement des catégories...')
     const response = await get('/categories')
-    categories.value = response.data || []
+    console.log('Customer - Réponse API categories:', response)
+    
+    if (response && response.success) {
+      categories.value = response.data || []
+      console.log('Customer - Catégories chargées:', categories.value.length)
+    } else {
+      console.log('Customer - Structure de réponse inattendue:', response)
+      // Fallback au cas où la structure serait différente
+      categories.value = response?.data || response || []
+    }
   } catch (err) {
-    console.error('Erreur lors du chargement des catégories:', err)
+    console.error('Customer - Erreur lors du chargement des catégories:', err)
+    categories.value = []
   }
 }
 

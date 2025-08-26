@@ -64,6 +64,7 @@
               class="w-full py-3 px-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900 bg-white"
             >
               <option value="">Toutes catégories</option>
+              <option v-if="categories.length === 0" disabled>Aucune catégorie disponible</option>
               <option 
                 v-for="category in categories" 
                 :key="category.id" 
@@ -72,6 +73,10 @@
                 {{ category.name }}
               </option>
             </select>
+            <!-- Debug info -->
+            <div v-if="categories.length === 0" class="mt-2 text-sm text-red-600">
+              Aucune catégorie trouvée ({{ categories.length }})
+            </div>
           </div>
 
           <!-- Price Range -->
@@ -251,12 +256,21 @@ const loadProducts = async () => {
 
 const loadCategories = async () => {
   try {
+    console.log('Chargement des catégories...')
     const response = await get('/categories')
+    console.log('Réponse API categories:', response)
+    
     if (response && response.success) {
       categories.value = response.data || []
+      console.log('Catégories chargées:', categories.value.length)
+    } else {
+      console.log('Structure de réponse inattendue:', response)
+      // Fallback au cas où la structure serait différente
+      categories.value = response?.data || response || []
     }
   } catch (err) {
     console.error('Erreur lors du chargement des catégories:', err)
+    categories.value = []
   }
 }
 

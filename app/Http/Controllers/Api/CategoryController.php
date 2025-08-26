@@ -46,7 +46,8 @@ class CategoryController extends Controller
         $categories = $query->with('children')->orderBy('name')->get();
 
         return response()->json([
-            'categories' => $categories
+            'success' => true,
+            'data' => $categories
         ]);
     }
 
@@ -79,7 +80,8 @@ class CategoryController extends Controller
         }])->findOrFail($id);
 
         return response()->json([
-            'category' => $category
+            'success' => true,
+            'data' => $category
         ]);
     }
 
@@ -132,8 +134,11 @@ class CategoryController extends Controller
             ->paginate($perPage);
 
         return response()->json([
-            'products' => $products,
-            'category' => $category
+            'success' => true,
+            'data' => [
+                'products' => $products,
+                'category' => $category
+            ]
         ]);
     }
 }
