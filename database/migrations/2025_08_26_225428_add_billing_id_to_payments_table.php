@@ -15,6 +15,9 @@ return new class extends Migration
             if (!Schema::hasColumn('payments', 'billing_id')) {
                 $table->string('billing_id')->nullable()->after('reference');
             }
+            if (!Schema::hasColumn('payments', 'timeout')) {
+                $table->integer('timeout')->nullable()->after('billing_id');
+            }
             if (!Schema::hasColumn('payments', 'operator')) {
                 $table->string('operator')->nullable()->after('transaction_id');
             }
@@ -35,6 +38,7 @@ return new class extends Migration
         Schema::table('payments', function (Blueprint $table) {
             $columns = [];
             if (Schema::hasColumn('payments', 'billing_id')) $columns[] = 'billing_id';
+            if (Schema::hasColumn('payments', 'timeout')) $columns[] = 'timeout';
             if (Schema::hasColumn('payments', 'operator')) $columns[] = 'operator';
             if (Schema::hasColumn('payments', 'paid_at')) $columns[] = 'paid_at';
             if (Schema::hasColumn('payments', 'error_message')) $columns[] = 'error_message';
