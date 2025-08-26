@@ -146,10 +146,15 @@ class PaymentController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
-            Log::error('Payment initiation failed: ' . $e->getMessage());
+            Log::error('Payment initiation failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de l\'initiation du paiement'
+                'message' => 'Erreur lors de l\'initiation du paiement',
+                'error' => $e->getMessage(),
+                'trace' => config('app.debug') ? $e->getTraceAsString() : null
             ], 500);
         }
     }

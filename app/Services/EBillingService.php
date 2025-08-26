@@ -93,7 +93,7 @@ class EBillingService
             case 'lottery_ticket':
                 return [
                     'payer_email' => $data->user->email,
-                    'payer_msisdn' => $data->user->phone ?? '074808000',
+                    'payer_msisdn' => $data->phone ?? $data->user->phone ?? '074808000',
                     'amount' => $data->amount + $fees,
                     'short_description' => "Achat de {$data->quantity} ticket(s) pour la tombola #{$data->lottery_id}",
                     'external_reference' => $reference,
@@ -145,6 +145,12 @@ class EBillingService
         ];
 
         try {
+            Log::info('E-BILLING :: Sending request to API', [
+                'url' => $serverUrl,
+                'username' => $username,
+                'data' => $globalArray
+            ]);
+
             $response = Http::withBasicAuth($username, $sharedKey)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post($serverUrl, $globalArray);
@@ -152,7 +158,9 @@ class EBillingService
             if (!$response->successful()) {
                 Log::error('E-BILLING :: API call failed', [
                     'status' => $response->status(),
-                    'response' => $response->body()
+                    'response' => $response->body(),
+                    'headers' => $response->headers(),
+                    'request_data' => $globalArray
                 ]);
                 return false;
             }
