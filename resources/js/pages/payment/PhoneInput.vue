@@ -256,15 +256,11 @@ const processPayment = async () => {
   loading.value = true
   
   try {
-    // Appeler l'API de paiement existante d'Ebilling
-    const response = await post('/payments/initiate', {
-      type: route.query.type || 'lottery_ticket',
-      lottery_id: route.query.lottery_id,
-      product_id: route.query.product_id,
-      quantity: route.query.quantity || 1,
-      phone: '+241' + phoneNumber.value.replace(/\s/g, ''),
-      operator: selectedOperator.value,
-      reference: orderId.value
+    // Utiliser le nouvel endpoint pour créer le paiement depuis une transaction existante
+    const response = await post('/payments/initiate-from-transaction', {
+      transaction_id: route.query.transaction_id,
+      phone: phoneNumber.value.replace(/\s/g, ''),
+      operator: selectedOperator.value
     })
     
     if (response.success) {
@@ -274,9 +270,10 @@ const processPayment = async () => {
         query: {
           bill_id: response.data.bill_id,
           reference: response.data.reference,
-          amount: amount.value,
+          amount: response.data.amount,
           phone: phoneNumber.value,
-          operator: selectedOperator.value
+          operator: selectedOperator.value,
+          transaction_id: response.data.transaction_id
         }
       })
     } else {
@@ -310,7 +307,7 @@ const formatPrice = (price) => {
 onMounted(() => {
   paymentMethod.value = route.query.method || 'airtel_money'
   amount.value = parseFloat(route.query.amount) || 0
-  orderId.value = route.query.order
+  orderId.value = route.query.transaction_id
   
   // Définir l'opérateur par défaut basé sur la méthode
   if (paymentMethod.value === 'airtel_money') {
@@ -319,7 +316,7 @@ onMounted(() => {
     selectedOperator.value = 'moov'
   }
   
-  if (!orderId.value || !amount.value) {
+  if (!route.query.transaction_id) {
     router.push('/')
   }
 })

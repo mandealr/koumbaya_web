@@ -149,7 +149,9 @@ Route::group([
     
     // Payments - Legacy
     Route::post('payments/initiate', [PaymentController::class, 'initiate']);
+    Route::post('payments/initiate-from-transaction', [PaymentController::class, 'initiateFromTransaction']);
     Route::post('payments/ussd-push', [PaymentController::class, 'pushUssd']);
+    Route::post('payments/retry-ussd', [PaymentController::class, 'retryUssd']);
     Route::get('payments/kyc', [PaymentController::class, 'kyc']);
     Route::get('payments/status/{billId}', [PaymentController::class, 'status']);
     

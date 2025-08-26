@@ -31,6 +31,160 @@ class PaymentController extends Controller
 
     /**
      * @OA\Post(
+     *     path="/api/payments/initiate-from-transaction",
+     *     tags={"Payments"},
+     *     summary="Créer un paiement eBilling à partir d'une transaction existante",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"transaction_id", "phone", "operator"},
+     *             @OA\Property(property="transaction_id", type="string", example="TXN-1234567890-ABC123"),
+     *             @OA\Property(property="phone", type="string", example="074123456"),
+     *             @OA\Property(property="operator", type="string", enum={"airtel", "moov"}, example="airtel")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Paiement eBilling créé",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="bill_id", type="string"),
+     *                 @OA\Property(property="reference", type="string"),
+     *                 @OA\Property(property="amount", type="number")
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function initiateFromTransaction(Request $request)
+    {
+        $user = auth('sanctum')->user();
+
+        $validator = Validator::make($request->all(), [
+            'transaction_id' => 'required|string',
+            'phone' => 'required|string|max:20',
+            'operator' => 'required|string|in:airtel,moov'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Récupérer la transaction
+            $transaction = Transaction::where('transaction_id', $request->transaction_id)
+                                   ->where('user_id', $user->id)
+                                   ->where('status', 'pending')
+                                   ->first();
+
+            if (!$transaction) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Transaction introuvable ou déjà traitée'
+                ], 404);
+            }
+
+            // Préparer les données pour eBilling
+            if ($transaction->type === 'ticket_purchase') {
+                $lottery = Lottery::find($transaction->lottery_id);
+                if (!$lottery) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Tombola introuvable'
+                    ], 404);
+                }
+
+                $data = (object) [
+                    'user' => $user,
+                    'lottery_id' => $lottery->id,
+                    'quantity' => $transaction->quantity,
+                    'amount' => $transaction->amount,
+                    'reference' => $transaction->reference,
+                    'phone' => $request->phone
+                ];
+
+                $type = 'lottery_ticket';
+
+            } elseif ($transaction->type === 'product_purchase') {
+                $product = Product::find($transaction->product_id);
+                if (!$product) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Produit introuvable'
+                    ], 404);
+                }
+
+                $data = (object) [
+                    'user' => $user,
+                    'product' => $product,
+                    'amount' => $transaction->amount,
+                    'reference' => $transaction->reference,
+                    'phone' => $request->phone
+                ];
+
+                $type = 'product_purchase';
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Type de transaction non supporté'
+                ], 422);
+            }
+
+            // Créer le paiement eBilling
+            $billId = EBillingService::initiate($type, $data);
+
+            if (!$billId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erreur lors de la création du paiement eBilling'
+                ], 500);
+            }
+
+            // Mettre à jour la transaction avec l'ID du paiement
+            $transaction->update([
+                'payment_provider_id' => $billId,
+                'payment_provider' => 'ebilling',
+                'phone_number' => $request->phone
+            ]);
+
+            // Déclencher automatiquement le push USSD
+            $paymentSystemName = $request->operator === 'airtel' ? 'airtel_money' : 'moov_money';
+            $ussdResult = EBillingService::pushUssd($billId, $paymentSystemName, $request->phone);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Paiement créé avec succès. Push USSD envoyé.',
+                'data' => [
+                    'bill_id' => $billId,
+                    'reference' => $transaction->reference,
+                    'amount' => $transaction->amount,
+                    'transaction_id' => $transaction->transaction_id,
+                    'ussd_push' => $ussdResult
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            Log::error('Payment creation from transaction failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la création du paiement',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * @OA\Post(
      *     path="/api/payments/initiate",
      *     tags={"Payments"},
      *     summary="Initier un paiement pour achat de tickets ou produit",
@@ -321,6 +475,81 @@ class PaymentController extends Controller
         );
 
         return response()->json($result);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/payments/retry-ussd",
+     *     tags={"Payments"},
+     *     summary="Relancer le push USSD pour un paiement existant",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"bill_id", "operator"},
+     *             @OA\Property(property="bill_id", type="string", example="5570928698"),
+     *             @OA\Property(property="operator", type="string", enum={"airtel", "moov"}, example="airtel")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Push USSD relancé")
+     * )
+     */
+    public function retryUssd(Request $request)
+    {
+        $user = auth('sanctum')->user();
+        
+        $validator = Validator::make($request->all(), [
+            'bill_id' => 'required|string',
+            'operator' => 'required|string|in:airtel,moov'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Rechercher le paiement par bill_id
+            $payment = Payment::where('ebilling_id', $request->bill_id)
+                             ->where('user_id', $user->id)
+                             ->where('status', 'pending')
+                             ->first();
+
+            if (!$payment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Paiement introuvable ou déjà traité'
+                ], 404);
+            }
+
+            // Relancer le push USSD
+            $paymentSystemName = $request->operator === 'airtel' ? 'airtel_money' : 'moov_money';
+            $result = EBillingService::pushUssd(
+                $request->bill_id,
+                $paymentSystemName,
+                $payment->customer_phone
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Push USSD relancé avec succès',
+                'data' => $result
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('USSD retry failed: ' . $e->getMessage(), [
+                'bill_id' => $request->bill_id,
+                'user_id' => $user->id
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors du relancement du push USSD'
+            ], 500);
+        }
     }
 
     /**

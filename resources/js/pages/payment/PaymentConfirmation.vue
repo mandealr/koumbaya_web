@@ -151,12 +151,28 @@
         </button>
 
         <button
+          v-if="paymentStatus === 'pending'"
+          @click="retryUssdPush"
+          :disabled="loading"
+          class="w-full py-3 px-4 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-300 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center"
+        >
+          <span v-if="loading">
+            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+            Relance...
+          </span>
+          <span v-else>
+            <ArrowPathIcon class="h-5 w-5 mr-2" />
+            Relancer le push USSD
+          </span>
+        </button>
+
+        <button
           v-if="['failed', 'expired'].includes(paymentStatus)"
           @click="retryPayment"
           class="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center"
         >
           <ArrowPathIcon class="h-5 w-5 mr-2" />
-          Réessayer
+          Réessayer le paiement
         </button>
 
         <button 
@@ -186,7 +202,7 @@ import {
 
 const route = useRoute()
 const router = useRouter()
-const { get } = useApi()
+const { get, post } = useApi()
 
 // State
 const paymentStatus = ref('pending') // 'pending', 'success', 'failed', 'expired'
@@ -315,6 +331,36 @@ const startStatusCheck = () => {
       checkPaymentStatus()
     }
   }, 5000)
+}
+
+const retryUssdPush = async () => {
+  if (!billId.value || !operator.value) return
+  
+  loading.value = true
+  
+  try {
+    const response = await post('/payments/retry-ussd', {
+      bill_id: billId.value,
+      operator: operator.value
+    })
+    
+    if (response.success) {
+      if (window.$toast) {
+        window.$toast.success('Push USSD relancé avec succès !', '✅ Succès')
+      }
+    } else {
+      if (window.$toast) {
+        window.$toast.error(response.message || 'Erreur lors du relancement du push USSD', '❌ Erreur')
+      }
+    }
+  } catch (error) {
+    console.error('Error retrying USSD push:', error)
+    if (window.$toast) {
+      window.$toast.error('Erreur lors du relancement du push USSD', '❌ Erreur')
+    }
+  } finally {
+    loading.value = false
+  }
 }
 
 const retryPayment = () => {

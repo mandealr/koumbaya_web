@@ -63,7 +63,6 @@ class TicketController extends Controller
         $validator = Validator::make($request->all(), [
             'lottery_id' => 'required|exists:lotteries,id',
             'quantity' => 'required|integer|min:1|max:10',
-            'phone_number' => 'required|string|min:8|max:20',
             'total_amount' => 'required|numeric|min:100',
         ]);
 
@@ -92,17 +91,16 @@ class TicketController extends Controller
 
         DB::beginTransaction();
         try {
-            // Créer la transaction
+            // Créer la transaction/commande sans paiement
             $transactionId = 'TXN-' . time() . '-' . Str::random(6);
             $transaction = Transaction::create([
                 'transaction_id' => $transactionId,
-                'reference' => $transactionId, // Utiliser transaction_id comme référence
+                'reference' => $transactionId,
                 'user_id' => $user->id,
                 'lottery_id' => $lottery->id,
                 'amount' => $request->total_amount,
-                'phone_number' => $request->phone_number,
                 'quantity' => $request->quantity,
-                'status' => 'pending',
+                'status' => 'pending', // En attente de paiement
                 'type' => 'ticket_purchase',
                 'description' => "Achat de {$request->quantity} ticket(s) pour la tombola {$lottery->title}",
             ]);
@@ -125,51 +123,26 @@ class TicketController extends Controller
                 $tickets[] = $ticket;
             }
 
-            // Initier le paiement Mobile Money
-            $paymentData = (object) [
-                'amount' => $request->total_amount,
-                'quantity' => $request->quantity,
-                'lottery_id' => $lottery->id,
-                'user' => $user,
-                'reference' => $transaction->transaction_id,
-                'description' => "Achat de {$request->quantity} ticket(s) - Tombola {$lottery->lottery_number}",
-                'callback_url' => url('/api/payment/callback'),
-                'return_url' => url('/api/payment/return'),
-            ];
-            
-            $paymentResult = $this->eBillingService->initiate('lottery_ticket', $paymentData);
+            DB::commit();
 
-            if ($paymentResult !== false) {
-                // Mettre à jour la transaction avec les détails du paiement
-                $transaction->update([
-                    'payment_provider_id' => $paymentResult,
-                    'payment_provider' => 'ebilling',
-                    'status' => 'pending',
-                ]);
-
-                DB::commit();
-
-                return $this->sendResponse([
-                    'transaction_id' => $transaction->transaction_id,
-                    'payment_id' => $paymentResult,
-                    'tickets' => collect($tickets)->map(function ($ticket) {
-                        return [
-                            'id' => $ticket->id,
-                            'ticket_number' => $ticket->ticket_number,
-                            'status' => $ticket->status,
-                        ];
-                    }),
-                    'instructions' => 'Suivez les instructions sur votre téléphone pour confirmer le paiement.',
-                ], 'Achat initié avec succès. Confirmez le paiement sur votre téléphone.');
-
-            } else {
-                DB::rollback();
-                return $this->sendError('Erreur lors de l\'initiation du paiement.');
-            }
+            // Retourner la transaction créée pour redirection vers la page de paiement
+            return $this->sendResponse([
+                'transaction_id' => $transaction->transaction_id,
+                'transaction' => $transaction,
+                'lottery' => $lottery,
+                'tickets' => collect($tickets)->map(function ($ticket) {
+                    return [
+                        'id' => $ticket->id,
+                        'ticket_number' => $ticket->ticket_number,
+                        'status' => $ticket->status,
+                    ];
+                }),
+                'redirect_to' => '/payment/method', // URL de redirection vers la sélection du moyen de paiement
+            ], 'Commande créée avec succès. Choisissez votre moyen de paiement.');
 
         } catch (\Exception $e) {
             DB::rollback();
-            return $this->sendError('Erreur lors de l\'achat: ' . $e->getMessage());
+            return $this->sendError('Erreur lors de la création de la commande: ' . $e->getMessage());
         }
     }
 
