@@ -80,6 +80,8 @@ Route::group([
     Route::get('products', [ProductController::class, 'index']);
     Route::get('products/search', [ProductController::class, 'search']);
     Route::get('products/featured', [ProductController::class, 'featured']);
+    Route::get('products/latest', [ProductController::class, 'latest']);
+    Route::get('products/latest-lottery', [ProductController::class, 'latestLottery']);
     Route::get('products/{id}', [ProductController::class, 'show']);
     
     // Lotteries (routes spécifiques avant les routes avec paramètres)

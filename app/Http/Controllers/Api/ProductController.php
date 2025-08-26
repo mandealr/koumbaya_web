@@ -679,4 +679,110 @@ class ProductController extends Controller
             'lottery' => $lottery->load('product')
         ], 201);
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/products/latest",
+     *     tags={"Products"},
+     *     summary="Récupérer les derniers produits",
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         description="Nombre de produits à retourner",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=8)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des derniers produits",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function latest(Request $request)
+    {
+        $limit = min($request->get('limit', 8), 20);
+        
+        $products = Product::with(['category', 'merchant', 'activeLottery'])
+            ->where('status', 'active')
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+
+        // Ajouter des métadonnées utiles
+        $products->each(function ($product) {
+            $product->append(['has_active_lottery', 'lottery_ends_soon', 'popularity_score', 'image_url']);
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'products' => ProductResource::collection($products),
+                'count' => $products->count()
+            ]
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/products/latest-lottery",
+     *     tags={"Products"},
+     *     summary="Récupérer le dernier produit tombola actif",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Dernier produit tombola",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Aucun produit tombola trouvé",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     )
+     * )
+     */
+    public function latestLottery(Request $request)
+    {
+        $product = Product::with(['category', 'merchant', 'activeLottery'])
+            ->where('status', 'active')
+            ->where('sale_mode', 'lottery')
+            ->whereHas('activeLottery', function ($query) {
+                $query->where('status', 'active')
+                      ->where('end_date', '>', now());
+            })
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucun produit tombola actif trouvé'
+            ], 404);
+        }
+
+        // Ajouter des métadonnées utiles
+        $product->append(['has_active_lottery', 'lottery_ends_soon', 'popularity_score', 'image_url']);
+
+        // Charger les détails de la tombola active
+        $activeLottery = $product->activeLottery;
+        if ($activeLottery) {
+            $activeLottery->append(['remaining_tickets', 'progress_percentage', 'time_remaining', 'participation_rate', 'is_ending_soon']);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'product' => new ProductResource($product),
+                'lottery' => $activeLottery ? new LotteryResource($activeLottery) : null
+            ]
+        ]);
+    }
 }

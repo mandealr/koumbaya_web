@@ -63,28 +63,33 @@
               <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm relative z-10 border border-gray-100">
                 <div class="relative mb-6">
                   <img
-                    :src="placeholderImg"
-                    alt="iPhone 15 Pro"
+                    :src="latestLotteryProduct?.image || placeholderImg"
+                    :alt="latestLotteryProduct?.name || 'Produit tombola'"
                     class="w-full h-48 object-cover rounded-2xl bg-gray-100"
                   />
                   <div class="absolute -top-2 -right-2 bg-[#0099cc] text-white px-3 py-1 rounded-full text-sm font-bold">
-                    1500 FCFA
+                    {{ formatPrice(latestLotteryProduct?.ticketPrice || 1500) }}
                   </div>
                 </div>
                 <div class="space-y-4">
                   <div>
-                    <h3 class="text-xl font-bold text-black">iPhone 15 Pro Max</h3>
-                    <p class="text-gray-600">Valeur: 1 299 000 FCFA</p>
+                    <h3 class="text-xl font-bold text-black">{{ latestLotteryProduct?.name || 'iPhone 15 Pro Max' }}</h3>
+                    <p class="text-gray-600">Valeur: {{ formatPrice(latestLotteryProduct?.value || 1299000) }}</p>
                   </div>
                   <div class="space-y-2">
                     <div class="flex justify-between text-sm text-gray-600">
                       <span>Progression</span>
-                      <span class="font-semibold">75%</span>
+                      <span class="font-semibold">{{ latestLotteryProduct?.progress || 75 }}%</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-3">
-                      <div class="bg-gradient-to-r from-[#0099cc] to-[#0088bb] h-3 rounded-full w-3/4 animate-pulse"></div>
+                      <div 
+                        class="bg-gradient-to-r from-[#0099cc] to-[#0088bb] h-3 rounded-full animate-pulse transition-all duration-500"
+                        :style="{ width: (latestLotteryProduct?.progress || 75) + '%' }"
+                      ></div>
                     </div>
-                    <div class="text-center text-sm text-gray-500">750/1000 tickets</div>
+                    <div class="text-center text-sm text-gray-500">
+                      {{ latestLotteryProduct?.soldTickets || 750 }}/{{ latestLotteryProduct?.totalTickets || 1000 }} tickets
+                    </div>
                   </div>
                   <button class="w-full bg-[#0099cc] text-white font-semibold py-3 rounded-xl hover:bg-[#0088bb] transition-colors">
                     Acheter maintenant
@@ -96,7 +101,16 @@
               <div class="absolute inline-flex items-center -top-8 -left-8 bg-[#0099cc]/10 text-[#0099cc] px-4 py-2 rounded-full text-sm font-medium z-20 animate-float">
                 <SparklesIcon class="h-4 w-4" /> Nouvelle tombola
               </div>
-              <div class="absolute -bottom-4 -right-8 bg-yellow-100 text-yellow-600 px-4 py-2 rounded-full text-sm font-medium z-20 animate-float-delayed">
+              <div 
+                v-if="latestLotteryProduct?.isEndingSoon" 
+                class="absolute -bottom-4 -right-8 bg-red-100 text-red-600 px-4 py-2 rounded-full text-sm font-medium z-20 animate-float-delayed"
+              >
+                ⏰ Se termine bientôt !
+              </div>
+              <div 
+                v-else
+                class="absolute -bottom-4 -right-8 bg-yellow-100 text-yellow-600 px-4 py-2 rounded-full text-sm font-medium z-20 animate-float-delayed"
+              >
                 🔥 Populaire
               </div>
             </div>
@@ -384,8 +398,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useApi } from '@/composables/api'
 import placeholderImg from '@/assets/placeholder.jpg'
 import avatarPlaceholder from '@/assets/avatar-placeholder.jpg'
 import {
@@ -405,36 +420,143 @@ import {
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
+const { get, loading, error } = useApi()
 
-const featuredProducts = ref([
-  {
-    id: 1,
-    name: 'iPhone 15 Pro Max',
-    value: 1299000,
-    ticketPrice: 1500,
-    image: placeholderImg,
-    soldTickets: 750,
-    isNew: true
-  },
-  {
-    id: 2,
-    name: 'MacBook Pro M3',
-    value: 2500000,
-    ticketPrice: 2500,
-    image: placeholderImg,
-    soldTickets: 420,
-    isNew: true
-  },
-  {
-    id: 3,
-    name: 'Tesla Model Y',
-    value: 45000000,
-    ticketPrice: 50000,
-    image: placeholderImg,
-    soldTickets: 320,
-    isNew: false
+// State for dynamic data
+const featuredProducts = ref([])
+const latestLotteryProduct = ref(null)
+const stats = ref({
+  participants: '12 000+',
+  productsWon: '250+',
+  amountDistributed: '500M+',
+  rating: '4.9/5'
+})
+
+// API Functions
+const loadFeaturedProducts = async () => {
+  try {
+    console.log('Chargement des derniers produits...')
+    const response = await get('/products/latest?limit=8')
+    console.log('Réponse API derniers produits:', response)
+    
+    if (response && response.success && response.data) {
+      const products = response.data.products || response.data
+      featuredProducts.value = products.slice(0, 3).map(product => ({
+        id: product.id,
+        name: product.name || product.title,
+        value: product.price || 0,
+        ticketPrice: product.ticket_price || 1000,
+        image_url: product.image_url || product.main_image,
+        image: product.image_url || product.main_image || placeholderImg,
+        soldTickets: product.active_lottery?.sold_tickets || Math.floor(Math.random() * 800),
+        isNew: isNewProduct(product.created_at),
+        sale_mode: product.sale_mode || 'lottery',
+        has_active_lottery: product.has_active_lottery || false,
+        lottery_ends_soon: product.lottery_ends_soon || false
+      }))
+    } else {
+      // Fallback avec données par défaut
+      setFallbackProducts()
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement des derniers produits:', error)
+    setFallbackProducts()
   }
-])
+}
+
+const loadLatestLotteryProduct = async () => {
+  try {
+    console.log('Chargement du dernier produit tombola...')
+    const response = await get('/products/latest-lottery')
+    console.log('Réponse API dernier produit tombola:', response)
+    
+    if (response && response.success && response.data) {
+      const product = response.data.product
+      const lottery = response.data.lottery
+      
+      latestLotteryProduct.value = {
+        id: product.id,
+        name: product.name || product.title,
+        value: product.price || 0,
+        ticketPrice: lottery?.ticket_price || product.ticket_price || 1500,
+        image: product.image_url || product.main_image || placeholderImg,
+        soldTickets: lottery?.sold_tickets || 0,
+        totalTickets: lottery?.total_tickets || 1000,
+        progress: lottery?.progress_percentage || 0,
+        timeRemaining: lottery?.time_remaining,
+        isEndingSoon: lottery?.is_ending_soon || false
+      }
+    } else {
+      // Si pas de produit trouvé, utiliser un fallback
+      latestLotteryProduct.value = {
+        id: 'fallback',
+        name: 'iPhone 15 Pro Max',
+        value: 1299000,
+        ticketPrice: 1500,
+        image: placeholderImg,
+        soldTickets: 750,
+        totalTickets: 1000,
+        progress: 75
+      }
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement du dernier produit tombola:', error)
+    // Fallback
+    latestLotteryProduct.value = {
+      id: 'fallback',
+      name: 'iPhone 15 Pro Max',
+      value: 1299000,
+      ticketPrice: 1500,
+      image: placeholderImg,
+      soldTickets: 750,
+      totalTickets: 1000,
+      progress: 75
+    }
+  }
+}
+
+const setFallbackProducts = () => {
+  featuredProducts.value = [
+    {
+      id: 'fallback-1',
+      name: 'iPhone 15 Pro Max',
+      value: 1299000,
+      ticketPrice: 1500,
+      image: placeholderImg,
+      soldTickets: 750,
+      isNew: true,
+      sale_mode: 'lottery'
+    },
+    {
+      id: 'fallback-2',
+      name: 'MacBook Pro M3',
+      value: 2500000,
+      ticketPrice: 2500,
+      image: placeholderImg,
+      soldTickets: 420,
+      isNew: true,
+      sale_mode: 'lottery'
+    },
+    {
+      id: 'fallback-3',
+      name: 'Tesla Model Y',
+      value: 45000000,
+      ticketPrice: 50000,
+      image: placeholderImg,
+      soldTickets: 320,
+      isNew: false,
+      sale_mode: 'lottery'
+    }
+  ]
+}
+
+const isNewProduct = (createdAt) => {
+  if (!createdAt) return false
+  const now = new Date()
+  const created = new Date(createdAt)
+  const diffInDays = (now - created) / (1000 * 60 * 60 * 24)
+  return diffInDays <= 7 // Nouveau si créé dans les 7 derniers jours
+}
 
 const testimonials = ref([
   {
@@ -474,6 +596,14 @@ const formatPrice = (price) => {
 const viewProduct = (product) => {
   router.push({ name: 'public.product.detail', params: { id: product.id } })
 }
+
+// Initialize data on component mount
+onMounted(async () => {
+  await Promise.all([
+    loadFeaturedProducts(),
+    loadLatestLotteryProduct()
+  ])
+})
 </script>
 
 <style scoped>
