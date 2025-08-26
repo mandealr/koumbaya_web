@@ -1,0 +1,157 @@
+/* Amélioration de la visibilité des formulaires */
+
+/* Champs de formulaire généraux */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="search"],
+input[type="url"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="time"],
+input[type="week"],
+textarea,
+select {
+  /* Couleurs de base */
+  color: #111827 !important; /* gray-900 */
+  background-color: #ffffff !important;
+  border-color: #d1d5db !important; /* gray-300 */
+  
+  /* Amélioration du contraste */
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  
+  /* Ombres pour améliorer la visibilité */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) inset;
+}
+
+/* Placeholders plus visibles */
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+  color: #6b7280 !important; /* gray-500 */
+  opacity: 1 !important;
+  font-weight: 400;
+}
+
+/* Focus amélioré */
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #0099cc !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0, 153, 204, 0.1) !important;
+  background-color: #ffffff !important;
+}
+
+/* Labels */
+label {
+  color: #374151 !important; /* gray-700 */
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Select options */
+select option {
+  color: #111827 !important;
+  background-color: #ffffff !important;
+  padding: 8px;
+  font-weight: 500;
+}
+
+select option:hover {
+  background-color: #f3f4f6 !important; /* gray-100 */
+}
+
+/* Disabled states */
+input:disabled,
+textarea:disabled,
+select:disabled {
+  color: #9ca3af !important; /* gray-400 */
+  background-color: #f9fafb !important; /* gray-50 */
+  cursor: not-allowed;
+}
+
+/* Error states */
+input.error,
+textarea.error,
+select.error {
+  border-color: #ef4444 !important; /* red-500 */
+  background-color: #fef2f2 !important; /* red-50 */
+}
+
+/* Success states */
+input.success,
+textarea.success,
+select.success {
+  border-color: #10b981 !important; /* green-500 */
+  background-color: #f0fdf4 !important; /* green-50 */
+}
+
+/* Amélioration des boutons radio et checkbox */
+input[type="radio"],
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+input[type="radio"]:checked,
+input[type="checkbox"]:checked {
+  background-color: #0099cc !important;
+  border-color: #0099cc !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  input,
+  textarea,
+  select {
+    color: #f9fafb !important; /* gray-50 */
+    background-color: #1f2937 !important; /* gray-800 */
+    border-color: #4b5563 !important; /* gray-600 */
+  }
+  
+  input::placeholder,
+  textarea::placeholder {
+    color: #9ca3af !important; /* gray-400 */
+  }
+  
+  label {
+    color: #e5e7eb !important; /* gray-200 */
+  }
+  
+  select option {
+    color: #f9fafb !important;
+    background-color: #1f2937 !important;
+  }
+}
+
+/* Spécifique pour les filtres de produits */
+.product-filter input,
+.product-filter select {
+  min-height: 48px;
+  padding: 12px 16px;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.product-filter input:hover,
+.product-filter select:hover {
+  border-color: #0099cc !important;
+}
+
+/* Amélioration de l'accessibilité */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #0099cc !important;
+  outline-offset: 2px !important;
+}

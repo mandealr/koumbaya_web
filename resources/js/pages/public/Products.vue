@@ -35,18 +35,33 @@
               <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 v-model="searchQuery"
+                @input="debouncedSearch"
                 type="text"
                 placeholder="Rechercher un produit..."
-                class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all"
+                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900 placeholder-gray-500 bg-white"
               />
             </div>
+          </div>
+
+          <!-- Sale Mode Filter -->
+          <div class="lg:w-48">
+            <select
+              v-model="selectedSaleMode"
+              @change="applyFilters"
+              class="w-full py-3 px-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900 bg-white"
+            >
+              <option value="">Tous les types</option>
+              <option value="direct">Achat direct</option>
+              <option value="lottery">Tombola</option>
+            </select>
           </div>
 
           <!-- Category Filter -->
           <div class="lg:w-64">
             <select
               v-model="selectedCategory"
-              class="w-full py-3 px-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all"
+              @change="applyFilters"
+              class="w-full py-3 px-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900 bg-white"
             >
               <option value="">Toutes catégories</option>
               <option 
@@ -59,11 +74,27 @@
             </select>
           </div>
 
+          <!-- Price Range -->
+          <div class="lg:w-48">
+            <select
+              v-model="selectedPriceRange"
+              @change="applyFilters"
+              class="w-full py-3 px-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900 bg-white"
+            >
+              <option value="">Tous les prix</option>
+              <option value="0-50000">0 - 50,000 FCFA</option>
+              <option value="50000-100000">50,000 - 100,000 FCFA</option>
+              <option value="100000-500000">100,000 - 500,000 FCFA</option>
+              <option value="500000+">Plus de 500,000 FCFA</option>
+            </select>
+          </div>
+
           <!-- Sort -->
           <div class="lg:w-48">
             <select
               v-model="sortBy"
-              class="w-full py-3 px-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all"
+              @change="applyFilters"
+              class="w-full py-3 px-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all text-gray-900 bg-white"
             >
               <option value="newest">Plus récents</option>
               <option value="price-asc">Prix croissant</option>
@@ -90,78 +121,39 @@
         </div>
 
         <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <div
-            v-for="product in filteredProducts"
+          <ProductCardV2
+            v-for="product in paginatedProducts"
             :key="product.id"
-            @click="viewProduct(product)"
-            class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer group"
-          >
-            <!-- Product Image -->
-            <div class="relative overflow-hidden rounded-xl mb-4">
-              <img
-                :src="product.image_url || product.main_image || placeholderImg"
-                :alt="product.name"
-                class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div class="absolute top-3 right-3">
-                <span class="bg-[#0099cc] text-white px-3 py-1 rounded-full text-xs font-medium">
-                  {{ formatPrice(product.active_lottery?.ticket_price || product.ticket_price || 1000) }} FCFA
-                </span>
-              </div>
-              <div v-if="product.featured" class="absolute top-3 left-3">
-                <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                  Vedette
-                </span>
-              </div>
-            </div>
-
-            <!-- Product Info -->
-            <div class="space-y-2">
-              <h3 class="font-bold text-lg text-black group-hover:text-[#0099cc] transition-colors">
-                {{ product.name }}
-              </h3>
-              <p class="text-gray-600 text-sm line-clamp-2">
-                {{ product.description }}
-              </p>
-              
-              <!-- Product Value -->
-              <div class="flex items-center justify-between">
-                <div class="text-2xl font-bold text-[#0099cc]">
-                  {{ formatPrice(product.price) }}
-                </div>
-                <div class="text-sm text-gray-500">
-                  Valeur du lot
-                </div>
-              </div>
-
-              <!-- Progress -->
-              <div class="space-y-2">
-                <div class="flex justify-between text-sm">
-                  <span class="text-gray-600">Progression</span>
-                  <span class="font-medium">{{ calculateProgress(product) }}%</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    class="bg-gradient-to-r from-[#0099cc] to-cyan-500 h-2 rounded-full transition-all duration-500"
-                    :style="{ width: calculateProgress(product) + '%' }"
-                  ></div>
-                </div>
-                <div class="flex justify-between text-xs text-gray-500" v-if="product.active_lottery">
-                  <span>{{ product.active_lottery.sold_tickets || 0 }} vendus</span>
-                  <span>{{ product.active_lottery.total_tickets || 1000 }} tickets total</span>
-                </div>
-              </div>
-
-              <!-- CTA Button -->
-              <button class="w-full mt-4 bg-[#0099cc] hover:bg-[#0088bb] text-white font-medium py-3 rounded-xl transition-all duration-200 group-hover:scale-[1.02]">
-                Participer maintenant
-              </button>
-            </div>
-          </div>
+            :product="product"
+            @view-product="viewProduct"
+          />
         </div>
 
         <!-- No Results -->
-        <div v-if="!loading && filteredProducts.length === 0" class="text-center py-16">
+        <!-- Pagination -->
+        <div v-if="totalPages > 1" class="mt-8 flex justify-center">
+          <nav class="flex space-x-2">
+            <button
+              @click="currentPage = Math.max(1, currentPage - 1)"
+              :disabled="currentPage === 1"
+              class="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              Précédent
+            </button>
+            <span class="px-4 py-2 text-gray-700">
+              Page {{ currentPage }} sur {{ totalPages }}
+            </span>
+            <button
+              @click="currentPage = Math.min(totalPages, currentPage + 1)"
+              :disabled="currentPage === totalPages"
+              class="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              Suivant
+            </button>
+          </nav>
+        </div>
+
+        <div v-if="!loading && sortedProducts.length === 0" class="text-center py-16">
           <div class="w-32 h-32 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
             <MagnifyingGlassIcon class="w-16 h-16 text-gray-400" />
           </div>
@@ -206,11 +198,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/api'
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
-import placeholderImg from '@/assets/placeholder.jpg'
+import ProductCardV2 from '@/components/common/ProductCardV2.vue'
+import { debounce } from 'lodash-es'
 
 const router = useRouter()
 const { get, loading, error } = useApi()
@@ -218,23 +211,41 @@ const { get, loading, error } = useApi()
 // Reactive data
 const searchQuery = ref('')
 const selectedCategory = ref('')
+const selectedSaleMode = ref('')
+const selectedPriceRange = ref('')
 const sortBy = ref('newest')
 const products = ref([])
 const categories = ref([])
+const currentPage = ref(1)
+const itemsPerPage = 12
 
 // API Functions
 const loadProducts = async () => {
   try {
-    const response = await get('/products')
-    console.log('Response from /products:', response)
+    // Construire les paramètres de requête
+    const params = new URLSearchParams()
+    
+    if (searchQuery.value) params.append('search', searchQuery.value)
+    if (selectedCategory.value) params.append('category_id', selectedCategory.value)
+    if (selectedSaleMode.value) params.append('sale_mode', selectedSaleMode.value)
+    
+    // Gérer la plage de prix
+    if (selectedPriceRange.value) {
+      const [min, max] = selectedPriceRange.value.split('-')
+      if (min) params.append('min_price', min)
+      if (max && max !== '+') params.append('max_price', max)
+    }
+    
+    const url = params.toString() ? `/products?${params.toString()}` : '/products'
+    const response = await get(url)
+    
     if (response && response.success && response.data) {
-      products.value = response.data.products || []
-      console.log('Products loaded:', products.value.length)
-    } else {
-      console.log('Response structure not as expected:', response)
+      products.value = response.data.products || response.data || []
+      currentPage.value = 1 // Reset pagination when filters change
     }
   } catch (err) {
     console.error('Erreur lors du chargement des produits:', err)
+    products.value = []
   }
 }
 
@@ -250,35 +261,39 @@ const loadCategories = async () => {
 }
 
 // Computed properties
-const filteredProducts = computed(() => {
-  let filtered = products.value
-
-  // Filter by category
-  if (selectedCategory.value) {
-    filtered = filtered.filter(p => p.category_id == selectedCategory.value)
-  }
-
-  // Filter by search query
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(p => 
-      p.name.toLowerCase().includes(query) || 
-      p.description.toLowerCase().includes(query)
-    )
-  }
+const sortedProducts = computed(() => {
+  let sorted = [...products.value]
 
   // Sort products
   if (sortBy.value === 'price-asc') {
-    filtered.sort((a, b) => a.price - b.price)
+    sorted.sort((a, b) => a.price - b.price)
   } else if (sortBy.value === 'price-desc') {
-    filtered.sort((a, b) => b.price - a.price)
+    sorted.sort((a, b) => b.price - a.price)
   } else if (sortBy.value === 'popular') {
-    filtered.sort((a, b) => (b.active_lottery?.sold_tickets || 0) - (a.active_lottery?.sold_tickets || 0))
+    sorted.sort((a, b) => {
+      const aPopularity = a.sale_mode === 'lottery' 
+        ? (a.active_lottery?.sold_tickets || 0) 
+        : (a.views_count || 0)
+      const bPopularity = b.sale_mode === 'lottery' 
+        ? (b.active_lottery?.sold_tickets || 0) 
+        : (b.views_count || 0)
+      return bPopularity - aPopularity
+    })
   } else if (sortBy.value === 'newest') {
-    filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
   }
 
-  return filtered
+  return sorted
+})
+
+const paginatedProducts = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return sortedProducts.value.slice(start, end)
+})
+
+const totalPages = computed(() => {
+  return Math.ceil(sortedProducts.value.length / itemsPerPage)
 })
 
 // Methods
@@ -300,7 +315,20 @@ const viewProduct = (product) => {
 const clearFilters = () => {
   searchQuery.value = ''
   selectedCategory.value = ''
+  selectedSaleMode.value = ''
+  selectedPriceRange.value = ''
   sortBy.value = 'newest'
+  loadProducts()
+}
+
+// Debounced search
+const debouncedSearch = debounce(() => {
+  loadProducts()
+}, 300)
+
+// Apply filters
+const applyFilters = () => {
+  loadProducts()
 }
 
 // Lifecycle
