@@ -144,7 +144,7 @@ class TicketController extends Controller
                 $transaction->update([
                     'payment_provider_id' => $paymentResult,
                     'payment_provider' => 'ebilling',
-                    'status' => 'payment_initiated',
+                    'status' => 'pending',
                 ]);
 
                 DB::commit();
