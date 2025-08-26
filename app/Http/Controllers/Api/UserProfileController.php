@@ -165,31 +165,67 @@ class UserProfileController extends Controller
     {
         $user = auth()->user();
 
-        $request->validate([
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        // Validation plus flexible pour les types de champs
+        $validator = \Validator::make($request->all(), [
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB max
+            'image' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Alternative field name
         ]);
 
+        // Si 'avatar' n'existe pas, essayer 'image'
+        if (!$request->hasFile('avatar') && $request->hasFile('image')) {
+            $validator = \Validator::make($request->all(), [
+                'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            ]);
+        }
+
+        if ($validator->fails()) {
+            return $this->sendError('Validation failed', $validator->errors(), 422);
+        }
+
         try {
-            // Delete old avatar if exists
-            if ($user->avatar_url && Storage::disk('public')->exists($user->avatar_url)) {
-                Storage::disk('public')->delete($user->avatar_url);
+            // Récupérer le fichier (avatar ou image)
+            $file = $request->hasFile('avatar') ? $request->file('avatar') : $request->file('image');
+            
+            if (!$file) {
+                return $this->sendError('No image file provided', ['file' => ['Please provide an image file']], 422);
             }
 
-            // Store new avatar
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            // Créer un nom de fichier unique
+            $filename = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
             
-            // Update user avatar
+            // Supprimer l'ancien avatar s'il existe
+            if ($user->avatar_url) {
+                // Si c'est un chemin relatif
+                if (!str_starts_with($user->avatar_url, 'http') && Storage::disk('public')->exists($user->avatar_url)) {
+                    Storage::disk('public')->delete($user->avatar_url);
+                }
+            }
+
+            // Stocker la nouvelle image
+            $avatarPath = $file->storeAs('avatars', $filename, 'public');
+            
+            // Mettre à jour l'utilisateur
             $user->update([
                 'avatar_url' => $avatarPath
             ]);
 
+            // URL complète pour la réponse
+            $fullAvatarUrl = Storage::disk('public')->url($avatarPath);
+
             return $this->sendResponse([
-                'avatar_url' => Storage::disk('public')->url($avatarPath),
+                'avatar_url' => $fullAvatarUrl,
+                'avatar_path' => $avatarPath,
                 'user' => $user->fresh()
             ], 'Avatar uploaded successfully');
 
         } catch (\Exception $e) {
-            return $this->sendError('Failed to upload avatar', [], 500);
+            \Log::error('Avatar upload failed', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return $this->sendError('Failed to upload avatar: ' . $e->getMessage(), [], 500);
         }
     }
 

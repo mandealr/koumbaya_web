@@ -11,19 +11,17 @@
       <div class="lg:col-span-1">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="text-center mb-6">
-            <div class="relative inline-block">
-              <img
-                :src="user.avatar_url ? `/storage/${user.avatar_url}` : 'https://ui-avatars.com/api/?name=' + encodeURIComponent((user.first_name || '') + '+' + (user.last_name || '')) + '&background=3b82f6&color=ffffff&size=128'"
-                :alt="user.first_name + ' ' + user.last_name"
-                class="w-24 h-24 rounded-full object-cover"
-              />
-              <button
-                @click="showAvatarUpload = true"
-                class="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
-              >
-                <CameraIcon class="w-4 h-4" />
-              </button>
-            </div>
+            <!-- Composant Avatar Upload -->
+            <AvatarUpload
+              :current-avatar-url="user.avatar_url ? `/storage/${user.avatar_url}` : getDefaultAvatar()"
+              upload-endpoint="/user/avatar"
+              field-name="avatar"
+              :alt-text="`Photo de profil de ${user.first_name} ${user.last_name}`"
+              help-text="Cliquez pour modifier votre photo de profil"
+              :max-size-m-b="5"
+              @success="onAvatarUploadSuccess"
+              @error="onAvatarUploadError"
+            />
             <h3 class="mt-4 text-lg font-semibold text-gray-900">
               {{ user.first_name }} {{ user.last_name }}
             </h3>
@@ -375,43 +373,6 @@
       </div>
     </div>
 
-    <!-- Avatar Upload Modal -->
-    <div v-if="showAvatarUpload" class="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Changer la photo de profil</h3>
-        <div class="mb-4">
-          <input
-            ref="avatarInput"
-            type="file"
-            accept="image/*"
-            @change="handleAvatarUpload"
-            class="hidden"
-          />
-          <button
-            @click="$refs.avatarInput.click()"
-            class="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-blue-500 transition-colors"
-          >
-            <CameraIcon class="w-8 h-8 text-gray-400 mx-auto mb-2" />
-            <p class="text-sm text-gray-600">Cliquez pour choisir une image</p>
-          </button>
-        </div>
-        <div class="flex justify-end space-x-3">
-          <button
-            @click="showAvatarUpload = false"
-            class="px-4 py-2 text-gray-600 hover:text-gray-900"
-          >
-            Annuler
-          </button>
-          <button
-            @click="uploadAvatar"
-            :disabled="!selectedAvatar"
-            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
-          >
-            Sauvegarder
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -429,6 +390,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import { useApi } from '@/composables/api'
 import PhoneInput from '@/components/PhoneInput.vue'
+import AvatarUpload from '@/components/common/AvatarUpload.vue'
 
 const authStore = useAuthStore()
 const { get, put, post, loading, error } = useApi()
@@ -438,8 +400,6 @@ const updatingPersonal = ref(false)
 const updatingAddress = ref(false)
 const updatingPassword = ref(false)
 const updatingNotifications = ref(false)
-const showAvatarUpload = ref(false)
-const selectedAvatar = ref(null)
 const phoneInputRef = ref(null)
 
 const tabs = [
@@ -824,45 +784,32 @@ const revokeSession = async (sessionId) => {
   }
 }
 
-const handleAvatarUpload = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    selectedAvatar.value = file
-  }
+// Avatar upload handlers pour le nouveau composant
+const getDefaultAvatar = () => {
+  const fullName = encodeURIComponent((user.first_name || '') + '+' + (user.last_name || ''))
+  return `https://ui-avatars.com/api/?name=${fullName}&background=3b82f6&color=ffffff&size=128`
 }
 
-const uploadAvatar = async () => {
-  if (!selectedAvatar.value) return
+const onAvatarUploadSuccess = async (data) => {
+  console.log('Avatar upload success:', data)
+  
+  // Mettre à jour l'utilisateur local
+  user.avatar_url = data.avatar_url
+  
+  // Afficher le toast de succès
+  if (window.$toast) {
+    window.$toast.success('Photo de profil mise à jour avec succès', '✅ Avatar')
+  }
+  
+  // Actualiser les données utilisateur
+  await loadUserProfile()
+}
 
-  try {
-    const formData = new FormData()
-    formData.append('avatar', selectedAvatar.value)
-    
-    console.log('Uploading avatar:', selectedAvatar.value)
-    
-    const response = await post('/user/avatar', formData)
-    
-    console.log('Avatar upload response:', response)
-    
-    if (response && response.success && response.data) {
-      user.avatar = response.data.avatar_url
-      user.avatar_url = response.data.avatar_url
-      showAvatarUpload.value = false
-      selectedAvatar.value = null
-      if (window.$toast) {
-        window.$toast.success('Photo de profil mise à jour avec succès', '✅ Avatar')
-      }
-      
-      // Refresh user data
-      await loadUserProfile()
-    } else {
-      throw new Error(response?.message || 'Erreur lors du téléchargement')
-    }
-  } catch (error) {
-    console.error('Error uploading avatar:', error)
-    if (window.$toast) {
-      window.$toast.error('Erreur lors du téléchargement de la photo', '❌ Erreur')
-    }
+const onAvatarUploadError = (error) => {
+  console.error('Avatar upload error:', error)
+  
+  if (window.$toast) {
+    window.$toast.error('Erreur lors de l\'upload de l\'avatar', '❌ Erreur')
   }
 }
 

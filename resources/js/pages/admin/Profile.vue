@@ -29,17 +29,15 @@
       <div class="lg:col-span-1">
         <div class="admin-card text-center">
           <div class="p-6">
-            <div class="relative inline-block">
-              <div class="w-32 h-32 rounded-full bg-gradient-to-r from-[#0099cc] to-blue-600 flex items-center justify-center mx-auto mb-4">
-                <UserIcon class="w-16 h-16 text-white" />
-              </div>
-              <button
-                @click="showImageUpload = true"
-                class="absolute bottom-2 right-2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
-              >
-                <CameraIcon class="w-4 h-4 text-gray-600" />
-              </button>
-            </div>
+            <AvatarUpload
+              :current-avatar-url="profileData.avatar_url"
+              upload-endpoint="/admin/profile/avatar"
+              field-name="avatar"
+              alt-text="Photo de profil administrateur"
+              help-text="Cliquez pour modifier votre photo de profil"
+              @success="handleAvatarUploadSuccess"
+              @error="handleAvatarUploadError"
+            />
             
             <h2 class="text-xl font-bold text-gray-900 mb-1">
               {{ profileData.first_name }} {{ profileData.last_name }}
@@ -366,62 +364,6 @@
       </div>
     </div>
 
-    <!-- Image Upload Modal -->
-    <div v-if="showImageUpload" class="fixed inset-0 z-50 overflow-y-auto">
-      <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-black/20" @click="showImageUpload = false"></div>
-        <div class="relative bg-white rounded-lg max-w-md w-full">
-          <div class="p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold">Photo de profil</h3>
-              <button @click="showImageUpload = false" class="text-gray-400 hover:text-gray-600">
-                <XMarkIcon class="w-6 h-6" />
-              </button>
-            </div>
-
-            <div class="text-center">
-              <div class="w-32 h-32 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                <UserIcon class="w-16 h-16 text-gray-400" />
-              </div>
-              
-              <input
-                ref="fileInput"
-                type="file"
-                accept="image/*"
-                class="hidden"
-                @change="handleImageUpload"
-              >
-              
-              <button
-                @click="$refs.fileInput.click()"
-                class="admin-btn-primary mb-3"
-              >
-                <PhotoIcon class="w-4 h-4 mr-2" />
-                Choisir une image
-              </button>
-              
-              <p class="text-xs text-gray-500">JPG, PNG ou GIF. Max 2MB.</p>
-            </div>
-
-            <div class="flex justify-end space-x-3 mt-6">
-              <button
-                @click="showImageUpload = false"
-                class="admin-btn-secondary"
-              >
-                Annuler
-              </button>
-              <button
-                @click="uploadProfileImage"
-                :disabled="!selectedImage || uploading"
-                class="admin-btn-primary disabled:opacity-50"
-              >
-                {{ uploading ? 'Upload...' : 'Sauvegarder' }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -444,6 +386,7 @@ import {
   PhotoIcon
 } from '@heroicons/vue/24/outline'
 import PhoneInputAdmin from '@/components/PhoneInputAdmin.vue'
+import AvatarUpload from '@/components/common/AvatarUpload.vue'
 
 const authStore = useAuthStore()
 const { get, post, put } = useApi()
@@ -464,7 +407,8 @@ const profileData = reactive({
   bio: '',
   timezone: 'Africa/Libreville',
   language: 'fr',
-  two_factor_enabled: false
+  two_factor_enabled: false,
+  avatar_url: authStore.user?.avatar_url || null
 })
 
 // Password form
@@ -537,7 +481,8 @@ const loadProfile = async () => {
           bio: profileData.bio,
           timezone: profileData.timezone,
           language: profileData.language,
-          two_factor_enabled: profileData.two_factor_enabled
+          two_factor_enabled: profileData.two_factor_enabled,
+          avatar_url: authStore.user.avatar_url || null
         })
       }
       // Données par défaut pour les stats admin (développement)
@@ -774,6 +719,21 @@ const uploadProfileImage = async () => {
     }
   } finally {
     uploading.value = false
+  }
+}
+
+const handleAvatarUploadSuccess = (data) => {
+  profileData.avatar_url = data.avatar_url
+  authStore.updateUser({ avatar_url: data.avatar_url })
+  if (window.$toast) {
+    window.$toast.success('Photo de profil mise à jour avec succès', '✅ Profil')
+  }
+}
+
+const handleAvatarUploadError = (error) => {
+  console.error('Avatar upload error:', error)
+  if (window.$toast) {
+    window.$toast.error('Erreur lors de l\'upload de l\'avatar', '✗ Erreur')
   }
 }
 

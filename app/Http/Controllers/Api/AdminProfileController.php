@@ -283,25 +283,77 @@ class AdminProfileController extends Controller
     public function uploadImage(Request $request): JsonResponse
     {
         try {
-            $request->validate([
-                'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+            // Validation flexible pour différents noms de champs
+            $validator = \Validator::make($request->all(), [
+                'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+                'avatar' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+                'image' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             ]);
+
+            // Si profile_image n'existe pas, essayer avatar ou image
+            if (!$request->hasFile('profile_image') && $request->hasFile('avatar')) {
+                $validator = \Validator::make($request->all(), [
+                    'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+                ]);
+            } elseif (!$request->hasFile('profile_image') && !$request->hasFile('avatar') && $request->hasFile('image')) {
+                $validator = \Validator::make($request->all(), [
+                    'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+                ]);
+            }
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
             $user = Auth::user();
             
+            // Récupérer le fichier (profile_image, avatar, ou image)
+            $file = null;
             if ($request->hasFile('profile_image')) {
-                $path = $request->file('profile_image')->store('avatars', 'public');
-                
-                $user->update([
-                    'avatar' => $path
-                ]);
+                $file = $request->file('profile_image');
+            } elseif ($request->hasFile('avatar')) {
+                $file = $request->file('avatar');
+            } elseif ($request->hasFile('image')) {
+                $file = $request->file('image');
             }
+
+            if (!$file) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No image file provided'
+                ], 422);
+            }
+
+            // Créer un nom de fichier unique
+            $filename = 'admin_avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            
+            // Supprimer l'ancien avatar s'il existe
+            if ($user->avatar_url) {
+                if (!\Str::startsWith($user->avatar_url, 'http') && \Storage::disk('public')->exists($user->avatar_url)) {
+                    \Storage::disk('public')->delete($user->avatar_url);
+                }
+            }
+
+            // Stocker la nouvelle image
+            $path = $file->storeAs('avatars', $filename, 'public');
+            
+            // Mettre à jour avec avatar_url (uniformisation)
+            $user->update([
+                'avatar_url' => $path
+            ]);
+
+            $fullAvatarUrl = \Storage::disk('public')->url($path);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Photo de profil mise à jour avec succès',
                 'data' => [
-                    'avatar_url' => $user->avatar ? asset('storage/' . $user->avatar) : null
+                    'avatar_url' => $fullAvatarUrl,
+                    'avatar_path' => $path
                 ]
             ]);
         } catch (\Exception $e) {

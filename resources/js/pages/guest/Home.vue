@@ -103,15 +103,17 @@
               </div>
               <div 
                 v-if="latestLotteryProduct?.isEndingSoon" 
-                class="absolute -bottom-4 -right-8 bg-red-100 text-red-600 px-4 py-2 rounded-full text-sm font-medium z-20 animate-float-delayed"
+                class="absolute -bottom-4 -right-8 bg-red-100 text-red-600 px-4 py-2 rounded-full text-sm font-medium z-20 animate-float-delayed flex items-center gap-1"
               >
-                ⏰ Se termine bientôt !
+                <ClockIcon class="h-4 w-4" />
+                Se termine bientôt !
               </div>
               <div 
                 v-else
-                class="absolute -bottom-4 -right-8 bg-yellow-100 text-yellow-600 px-4 py-2 rounded-full text-sm font-medium z-20 animate-float-delayed"
+                class="absolute -bottom-4 -right-8 bg-yellow-100 text-yellow-600 px-4 py-2 rounded-full text-sm font-medium z-20 animate-float-delayed flex items-center gap-1"
               >
-                🔥 Populaire
+                <FireIcon class="h-4 w-4" />
+                Populaire
               </div>
             </div>
           </div>
@@ -264,15 +266,17 @@
             <div class="absolute top-4 left-4 z-10">
               <span 
                 v-if="product.sale_mode === 'lottery'" 
-                class="bg-gradient-to-r from-[#0099cc] to-cyan-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg"
+                class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg flex items-center gap-1"
               >
-                🎯 Tombola
+                <TicketIcon class="h-4 w-4" />
+                Tombola
               </span>
               <span 
                 v-else 
-                class="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg"
+                class="bg-gradient-to-r from-[#0099cc] to-cyan-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg flex items-center gap-1"
               >
-                🛒 Achat direct
+                <ShoppingCartIcon class="h-4 w-4" />
+                Achat direct
               </span>
             </div>
             
@@ -280,15 +284,17 @@
             <div class="absolute top-4 right-4 z-10">
               <span 
                 v-if="product.lottery_ends_soon && product.sale_mode === 'lottery'" 
-                class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg animate-pulse"
+                class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg animate-pulse flex items-center gap-1"
               >
-                ⏰ Fin proche !
+                <ClockIcon class="h-4 w-4" />
+                Fin proche !
               </span>
               <span 
                 v-else-if="product.isNew" 
-                class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg"
+                class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg flex items-center gap-1"
               >
-                ✨ Nouveau
+                <SparklesIcon class="h-4 w-4" />
+                Nouveau
               </span>
             </div>
 
@@ -301,13 +307,13 @@
               <div class="absolute -bottom-3 -right-3">
                 <div 
                   v-if="product.sale_mode === 'lottery'" 
-                  class="bg-[#0099cc] text-white px-4 py-2 rounded-full font-semibold shadow-lg"
+                  class="bg-purple-600 text-white px-4 py-2 rounded-full font-semibold shadow-lg"
                 >
                   {{ formatPrice(product.ticketPrice || product.ticket_price) }}/ticket
                 </div>
                 <div 
                   v-else 
-                  class="bg-green-600 text-white px-4 py-2 rounded-full font-semibold shadow-lg"
+                  class="bg-[#0099cc] text-white px-4 py-2 rounded-full font-semibold shadow-lg"
                 >
                   {{ formatPrice(product.price || product.value) }}
                 </div>
@@ -318,7 +324,7 @@
               <div>
                 <h3 
                   class="text-xl font-bold text-black group-hover:transition-colors"
-                  :class="product.sale_mode === 'lottery' ? 'group-hover:text-[#0099cc]' : 'group-hover:text-green-600'"
+                  :class="product.sale_mode === 'lottery' ? 'group-hover:text-purple-600' : 'group-hover:text-[#0099cc]'"
                 >
                   {{ product.name }}
                 </h3>
@@ -338,7 +344,7 @@
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-3">
                   <div
-                    class="bg-gradient-to-r from-[#0099cc] to-cyan-500 h-3 rounded-full transition-all duration-500"
+                    class="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-500"
                     :style="{ width: Math.round(((product.soldTickets || 0) / (product.totalTickets || 1000)) * 100) + '%' }"
                   ></div>
                 </div>
@@ -350,16 +356,21 @@
               <!-- Section spécifique achat direct -->
               <div v-else class="flex items-center justify-between py-2">
                 <span class="text-sm text-gray-500">Statut</span>
-                <span class="text-sm font-medium text-green-600">🟢 Disponible</span>
+                <span class="text-sm font-medium text-green-600 flex items-center gap-1">
+                  <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                  Disponible
+                </span>
               </div>
 
               <button 
-                class="w-full font-semibold py-3 rounded-xl transition-all duration-200 group-hover:scale-105 group-hover:shadow-lg"
+                class="w-full font-semibold py-3 rounded-xl transition-all duration-200 group-hover:scale-105 group-hover:shadow-lg flex items-center justify-center gap-2"
                 :class="product.sale_mode === 'lottery' 
-                  ? 'bg-gradient-to-r from-[#0099cc] to-cyan-500 hover:from-[#0088bb] hover:to-cyan-600 text-white' 
-                  : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white'"
+                  ? 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white' 
+                  : 'bg-gradient-to-r from-[#0099cc] to-cyan-500 hover:from-[#0088bb] hover:to-cyan-600 text-white'"
               >
-                {{ product.sale_mode === 'lottery' ? '🎲 Participer maintenant' : '💳 Acheter maintenant' }}
+                <TicketIcon v-if="product.sale_mode === 'lottery'" class="h-5 w-5" />
+                <CreditCardIcon v-else class="h-5 w-5" />
+                {{ product.sale_mode === 'lottery' ? 'Participer maintenant' : 'Acheter maintenant' }}
               </button>
             </div>
           </div>
@@ -472,7 +483,12 @@ import {
   StarIcon,
   ArrowRightIcon,
   UserPlusIcon,
-  EyeIcon
+  EyeIcon,
+  ClockIcon,
+  FireIcon,
+  TicketIcon,
+  ShoppingCartIcon,
+  CreditCardIcon
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
