@@ -6,7 +6,7 @@
         <h1 class="text-4xl md:text-6xl font-bold mb-6">
           Comment ça marche ?
         </h1>
-        <p class="text-xl md:text-2xl text-[#0099cc]/70 leading-relaxed max-w-3xl mx-auto">
+        <p class="text-xl md:text-2xl text-blue-100 leading-relaxed max-w-3xl mx-auto">
           Découvrez comment obtenir des produits incroyables à prix réduit en quelques clics seulement. 
           C'est simple, transparent et malin !
         </p>
@@ -354,7 +354,7 @@
         <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
           Prêt à acheter malin ?
         </h2>
-        <p class="text-xl text-[#0099cc]/70 mb-8">
+        <p class="text-xl text-blue-100 mb-8">
           Rejoignez les milliers de participants qui ont déjà acheté malin
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
