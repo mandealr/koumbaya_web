@@ -4,7 +4,6 @@ import { ref } from 'vue'
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
   headers: {
-    'Content-Type': 'application/json',
     'Accept': 'application/json'
   }
 })
@@ -73,10 +72,29 @@ export function useApi() {
     // Handle FormData without overriding Content-Type
     if (data instanceof FormData) {
       const formConfig = { ...config }
-      delete formConfig.headers?.['Content-Type']
-      return makeRequest(() => api.post(url, data, formConfig))
+      // Remove any Content-Type header to let browser set it with boundary
+      if (formConfig.headers) {
+        delete formConfig.headers['Content-Type']
+      }
+      // Also ensure no default Content-Type is applied
+      return makeRequest(() => api.post(url, data, {
+        ...formConfig,
+        headers: {
+          ...formConfig.headers,
+          // Explicitly avoid setting Content-Type for FormData
+        }
+      }))
     }
-    return makeRequest(() => api.post(url, data, config))
+    
+    // For non-FormData, add Content-Type: application/json
+    const jsonConfig = {
+      ...config,
+      headers: {
+        'Content-Type': 'application/json',
+        ...config.headers
+      }
+    }
+    return makeRequest(() => api.post(url, data, jsonConfig))
   }
   const put = (url, data = {}, config = {}) => makeRequest(() => api.put(url, data, config))
   const del = (url, config = {}) => makeRequest(() => api.delete(url, config))
