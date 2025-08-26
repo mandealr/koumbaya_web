@@ -30,7 +30,7 @@ class EBillingService
     public static function initiate($type, $data, $fees = 0)
     {
         $reference = $data->reference ?? self::generateReference();
-        
+
         Log::info('E-BILLING :: Initiating payment', [
             'type' => $type,
             'reference' => $reference
@@ -48,7 +48,7 @@ class EBillingService
         try {
             // Setup payment attributes based on type
             $paymentData = self::setupPaymentData($type, $data, $fees);
-            
+
             if (!$paymentData) {
                 Log::error('E-BILLING :: Failed to setup payment data');
                 return false;
@@ -56,7 +56,7 @@ class EBillingService
 
             // Create e-billing invoice
             $billId = self::createEBillingInvoice($paymentData);
-            
+
             if (!$billId) {
                 Log::error('E-BILLING :: Failed to create e-billing invoice');
                 return false;
@@ -71,7 +71,6 @@ class EBillingService
             ]);
 
             return $billId;
-
         } catch (\Exception $e) {
             Log::error('E-BILLING :: Error initiating payment', [
                 'error' => $e->getMessage(),
@@ -133,7 +132,6 @@ class EBillingService
             return false;
         }
 
-
         $globalArray = [
             'payer_email' => $paymentData['payer_email'],
             'payer_msisdn' => $paymentData['payer_msisdn'],
@@ -152,43 +150,55 @@ class EBillingService
                 'data' => $globalArray
             ]);
 
-            $response = Http::withBasicAuth($username, $sharedKey)
-                ->withHeaders(['Content-Type' => 'application/json'])
-                ->post($serverUrl, $globalArray);
+            // Utiliser cURL comme dans l'exemple original
+            $content = json_encode($globalArray);
+            $curl = curl_init($serverUrl);
+            curl_setopt($curl, CURLOPT_USERPWD, $username . ":" . $sharedKey);
+            curl_setopt($curl, CURLOPT_HEADER, false);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-type: application/json"));
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $content);
+            $json_response = curl_exec($curl);
+
+            // Get status code
+            $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
             Log::info('E-BILLING :: API response received', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-                'headers' => $response->headers()
+                'status' => $status,
+                'body' => $json_response,
+                'curl_error' => curl_error($curl),
+                'curl_errno' => curl_errno($curl)
             ]);
 
-            if (!$response->successful()) {
+            // Check status comme dans l'exemple original
+            if ($status < 200 || $status > 299) {
                 Log::error('E-BILLING :: API call failed', [
-                    'status' => $response->status(),
-                    'response' => $response->body(),
-                    'headers' => $response->headers(),
+                    'status' => $status,
+                    'response' => $json_response,
+                    'curl_error' => curl_error($curl),
+                    'curl_errno' => curl_errno($curl),
                     'request_data' => $globalArray
                 ]);
+                curl_close($curl);
                 return false;
             }
 
-            $responseData = $response->json();
-            Log::info('E-BILLING :: Parsed response data', ['response_data' => $responseData]);
+            curl_close($curl);
+
+            // Get response in JSON format
+            $response = json_decode($json_response, true);
+            Log::info('E-BILLING :: Parsed response data', ['response_data' => $response]);
             
-            // Essayer différents formats de réponse
-            if (isset($responseData['e_bill']['bill_id'])) {
-                return $responseData['e_bill']['bill_id'];
-            } elseif (isset($responseData['bill_id'])) {
-                return $responseData['bill_id'];
-            } elseif (isset($responseData['id'])) {
-                return $responseData['id'];
-            } elseif (is_string($responseData)) {
-                return $responseData; // Peut-être que la réponse est juste l'ID
+            // Get unique transaction id comme dans l'exemple
+            $bill_id = $response['e_bill']['bill_id'] ?? null;
+            
+            if (!$bill_id) {
+                Log::error('E-BILLING :: Could not extract bill_id from response', ['response' => $response]);
+                return false;
             }
             
-            Log::error('E-BILLING :: Could not extract bill_id from response', ['response' => $responseData]);
-            return false;
-
+            return $bill_id;
         } catch (\Exception $e) {
             Log::error('E-BILLING :: Exception during API call', [
                 'error' => $e->getMessage()
@@ -216,7 +226,7 @@ class EBillingService
                 $payment->lottery_id = $data->lottery_id;
                 $payment->type = 'lottery_ticket';
                 break;
-            
+
             case 'product_purchase':
                 $payment->product_id = $data->product->id;
                 $payment->type = 'product_purchase';
@@ -249,7 +259,6 @@ class EBillingService
             }
 
             return ['success' => false, 'message' => $responseData['message'] ?? 'USSD push failed'];
-
         } catch (\Exception $e) {
             Log::error('E-BILLING :: USSD push failed', [
                 'error' => $e->getMessage(),
@@ -281,7 +290,6 @@ class EBillingService
             }
 
             return ['success' => false, 'message' => 'KYC failed'];
-
         } catch (\Exception $e) {
             Log::error('E-BILLING :: KYC failed', [
                 'error' => $e->getMessage(),
@@ -373,7 +381,6 @@ class EBillingService
 
             // Send email notifications
             self::sendPaymentNotifications($payment);
-
         } catch (\Exception $e) {
             Log::error('E-BILLING :: Error in after payment processing', [
                 'payment_id' => $payment->id,
@@ -389,7 +396,7 @@ class EBillingService
     private static function processLotteryTicketPayment(Payment $payment)
     {
         $lottery = Lottery::find($payment->lottery_id);
-        
+
         if (!$lottery) {
             Log::error('E-BILLING :: Lottery not found for ticket payment', [
                 'lottery_id' => $payment->lottery_id
@@ -425,8 +432,8 @@ class EBillingService
     private static function processProductPurchasePayment(Payment $payment)
     {
         $lottery = Lottery::where('product_id', $payment->product_id)
-                          ->where('status', 'active')
-                          ->first();
+            ->where('status', 'active')
+            ->first();
 
         if ($lottery) {
             // Cancel the lottery and refund participants
@@ -435,7 +442,7 @@ class EBillingService
 
             // Refund all lottery participants
             $tickets = LotteryTicket::where('lottery_id', $lottery->id)->get();
-            
+
             foreach ($tickets as $ticket) {
                 $userWallet = UserWallet::firstOrCreate(['user_id' => $ticket->user_id]);
                 $userWallet->balance += $lottery->ticket_price;
@@ -507,17 +514,16 @@ class EBillingService
         try {
             // Send notification to customer
             Mail::to($payment->user->email)->send(new \App\Mail\PaymentConfirmation($payment));
-            
+
             // Send notification to merchant (admin for now)
             if (config('mail.admin_email')) {
                 Mail::to(config('mail.admin_email'))->send(new \App\Mail\MerchantPaymentNotification($payment));
             }
-            
+
             Log::info('E-BILLING :: Email notifications sent', [
                 'payment_id' => $payment->id,
                 'customer_email' => $payment->user->email
             ]);
-            
         } catch (\Exception $e) {
             Log::error('E-BILLING :: Failed to send email notifications', [
                 'payment_id' => $payment->id,

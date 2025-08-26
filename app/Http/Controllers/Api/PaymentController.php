@@ -201,8 +201,10 @@ class PaymentController extends Controller
     {
         $user = auth('sanctum')->user();
         
-        // Rechercher par billing_id au lieu de l'ID classique
-        $payment = Payment::where('billing_id', $billId)->first();
+        // Rechercher par billing_id ou par reference (cas où billing_id = external_reference)
+        $payment = Payment::where('billing_id', $billId)
+                         ->orWhere('reference', $billId)
+                         ->first();
         
         if (!$payment) {
             return response()->json([
