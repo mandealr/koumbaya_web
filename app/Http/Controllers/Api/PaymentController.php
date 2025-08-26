@@ -201,8 +201,8 @@ class PaymentController extends Controller
     {
         $user = auth('sanctum')->user();
         
-        // Rechercher par billing_id ou par reference (cas où billing_id = external_reference)
-        $payment = Payment::where('billing_id', $billId)
+        // Rechercher par ebilling_id ou par reference
+        $payment = Payment::where('ebilling_id', $billId)
                          ->orWhere('reference', $billId)
                          ->first();
         

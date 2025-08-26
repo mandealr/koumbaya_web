@@ -210,30 +210,42 @@ class EBillingService
     /**
      * Save payment to database
      */
-    private static function savePayment($type, $data, $paymentData, $billId)
+    private static function savePayment($type, $data, $paymentDataFromSetup, $billId)
     {
-        $payment = new Payment();
-        $payment->reference = $paymentData['external_reference'];
-        $payment->billing_id = $billId;
-        $payment->amount = $paymentData['amount'];
-        $payment->description = $paymentData['short_description'];
-        $payment->status = self::STATUS_PENDING;
-        $payment->timeout = $paymentData['expiry_period'];
-        $payment->user_id = $data->user->id;
+        $paymentToSave = [
+            'reference' => $paymentDataFromSetup['external_reference'],
+            'ebilling_id' => $billId,
+            'amount' => $paymentDataFromSetup['amount'],
+            'description' => $paymentDataFromSetup['short_description'],
+            'status' => self::STATUS_PENDING,
+            'user_id' => $data->user->id,
+            'customer_name' => $paymentDataFromSetup['payer_name'],
+            'customer_phone' => $paymentDataFromSetup['payer_msisdn'],
+            'customer_email' => $paymentDataFromSetup['payer_email'],
+            'payment_gateway' => 'ebilling',
+            'callback_url' => $paymentDataFromSetup['callback_url'] ?? null
+        ];
 
+        // Ajouter les données spécifiques selon le type
+        $gatewayConfig = [
+            'type' => $type,
+            'expiry_period' => $paymentDataFromSetup['expiry_period']
+        ];
+        
         switch ($type) {
             case 'lottery_ticket':
-                $payment->lottery_id = $data->lottery_id;
-                $payment->type = 'lottery_ticket';
+                $gatewayConfig['lottery_id'] = $data->lottery_id;
+                $gatewayConfig['quantity'] = $data->quantity;
                 break;
 
             case 'product_purchase':
-                $payment->product_id = $data->product->id;
-                $payment->type = 'product_purchase';
+                $gatewayConfig['product_id'] = $data->product->id;
                 break;
         }
-
-        $payment->save();
+        
+        $paymentToSave['gateway_config'] = $gatewayConfig;
+        
+        Payment::create($paymentToSave);
     }
 
     /**
@@ -332,8 +344,8 @@ class EBillingService
 
         // Update payment status
         $payment->status = self::STATUS_PAID;
-        $payment->transaction_id = $notificationData['transactionid'] ?? null;
-        $payment->operator = $notificationData['paymentsystem'] ?? null;
+        $payment->external_transaction_id = $notificationData['transactionid'] ?? null;
+        $payment->payment_method = $notificationData['paymentsystem'] ?? null;
         $payment->amount = $notificationData['amount'] ?? $payment->amount;
         $payment->paid_at = now();
 
@@ -395,11 +407,20 @@ class EBillingService
      */
     private static function processLotteryTicketPayment(Payment $payment)
     {
-        $lottery = Lottery::find($payment->lottery_id);
-
+        // Récupérer la lottery_id depuis gateway_config
+        $gatewayConfig = $payment->gateway_config;
+        $lotteryId = $gatewayConfig['lottery_id'] ?? null;
+        
+        if (!$lotteryId) {
+            Log::error('E-BILLING :: Lottery ID not found in gateway config');
+            return;
+        }
+        
+        $lottery = Lottery::find($lotteryId);
+        
         if (!$lottery) {
             Log::error('E-BILLING :: Lottery not found for ticket payment', [
-                'lottery_id' => $payment->lottery_id
+                'lottery_id' => $lotteryId
             ]);
             return;
         }
@@ -431,7 +452,16 @@ class EBillingService
      */
     private static function processProductPurchasePayment(Payment $payment)
     {
-        $lottery = Lottery::where('product_id', $payment->product_id)
+        // Récupérer le product_id depuis gateway_config
+        $gatewayConfig = $payment->gateway_config;
+        $productId = $gatewayConfig['product_id'] ?? null;
+        
+        if (!$productId) {
+            Log::error('E-BILLING :: Product ID not found in gateway config');
+            return;
+        }
+        
+        $lottery = Lottery::where('product_id', $productId)
             ->where('status', 'active')
             ->first();
 
