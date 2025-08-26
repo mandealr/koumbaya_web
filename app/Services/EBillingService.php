@@ -214,6 +214,7 @@ class EBillingService
     {
         $paymentToSave = [
             'reference' => $paymentDataFromSetup['external_reference'],
+            'transaction_id' => null, // Sera mis à jour lors de la confirmation
             'ebilling_id' => $billId,
             'amount' => $paymentDataFromSetup['amount'],
             'description' => $paymentDataFromSetup['short_description'],
