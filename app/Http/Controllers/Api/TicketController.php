@@ -152,7 +152,7 @@ class TicketController extends Controller
                 return $this->sendResponse([
                     'transaction_id' => $transaction->transaction_id,
                     'payment_id' => $paymentResult,
-                    'tickets' => $tickets->map(function ($ticket) {
+                    'tickets' => collect($tickets)->map(function ($ticket) {
                         return [
                             'id' => $ticket->id,
                             'ticket_number' => $ticket->ticket_number,
