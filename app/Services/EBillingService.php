@@ -214,7 +214,7 @@ class EBillingService
     {
         $paymentToSave = [
             'reference' => $paymentDataFromSetup['external_reference'],
-            'transaction_id' => null, // Sera mis à jour lors de la confirmation
+            'transaction_id' => 'PENDING_' . $paymentDataFromSetup['external_reference'], // Temporaire, sera mis à jour
             'ebilling_id' => $billId,
             'amount' => $paymentDataFromSetup['amount'],
             'description' => $paymentDataFromSetup['short_description'],
@@ -345,6 +345,7 @@ class EBillingService
 
         // Update payment status
         $payment->status = self::STATUS_PAID;
+        $payment->transaction_id = $notificationData['transactionid'] ?? $payment->transaction_id;
         $payment->external_transaction_id = $notificationData['transactionid'] ?? null;
         $payment->payment_method = $notificationData['paymentsystem'] ?? null;
         $payment->amount = $notificationData['amount'] ?? $payment->amount;
