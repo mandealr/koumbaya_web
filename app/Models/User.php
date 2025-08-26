@@ -212,13 +212,13 @@ class User extends Authenticatable
             return null;
         }
         
-        // Si c'est déjà une URL complète, la retourner
+        // Si c'est déjà une URL complète, la retourner telle quelle
         if (str_starts_with($value, 'http')) {
             return $value;
         }
         
-        // Sinon, construire l'URL avec le storage
-        return \Storage::disk('public')->url($value);
+        // Si c'est un chemin relatif, construire l'URL complète
+        return url('storage/' . $value);
     }
 
     /**
