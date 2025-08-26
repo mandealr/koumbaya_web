@@ -206,13 +206,15 @@ const uploadAvatar = async () => {
     console.log('Uploading avatar:', selectedFile.value)
     console.log('Using endpoint:', props.uploadEndpoint)
     console.log('Field name:', props.fieldName)
+    
+    // Debug FormData
+    console.log('FormData entries:')
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ': ', pair[1])
+    }
 
-    // Upload
-    const response = await post(props.uploadEndpoint, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
+    // Upload - Ne pas définir Content-Type manuellement avec FormData
+    const response = await post(props.uploadEndpoint, formData)
 
     console.log('Upload response:', response)
 
