@@ -31,7 +31,7 @@
           <div class="p-6">
             <AvatarUpload
               :current-avatar-url="profileData.avatar_url"
-              upload-endpoint="/admin/profile/avatar"
+              upload-endpoint="/admin/profile/image"
               field-name="avatar"
               alt-text="Photo de profil administrateur"
               help-text="Cliquez pour modifier votre photo de profil"
