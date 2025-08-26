@@ -785,4 +785,221 @@ class ProductController extends Controller
             ]
         ]);
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/products/latest-direct",
+     *     tags={"Products"},
+     *     summary="Récupérer les derniers produits en achat direct",
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         description="Nombre de produits à retourner",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=8)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des derniers produits en achat direct",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function latestDirect(Request $request)
+    {
+        $limit = min($request->get('limit', 8), 20);
+        
+        $products = Product::with(['category', 'merchant'])
+            ->where('status', 'active')
+            ->where('sale_mode', 'direct')
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+
+        // Ajouter des métadonnées utiles
+        $products->each(function ($product) {
+            $product->append(['image_url']);
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'products' => ProductResource::collection($products),
+                'count' => $products->count(),
+                'sale_mode' => 'direct'
+            ]
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/products/latest-lottery-only",
+     *     tags={"Products"},
+     *     summary="Récupérer les derniers produits tombola uniquement",
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         description="Nombre de produits à retourner",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=8)
+     *     ),
+     *     @OA\Parameter(
+     *         name="active_only",
+     *         in="query",
+     *         description="Produits avec tombola active uniquement",
+     *         required=false,
+     *         @OA\Schema(type="boolean", default=true)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des derniers produits tombola",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function latestLotteryOnly(Request $request)
+    {
+        $limit = min($request->get('limit', 8), 20);
+        $activeOnly = $request->boolean('active_only', true);
+        
+        $query = Product::with(['category', 'merchant', 'activeLottery'])
+            ->where('status', 'active')
+            ->where('sale_mode', 'lottery');
+
+        // Si on veut seulement les tombolas actives
+        if ($activeOnly) {
+            $query->whereHas('activeLottery', function ($lotteryQuery) {
+                $lotteryQuery->where('status', 'active')
+                              ->where('end_date', '>', now());
+            });
+        }
+
+        $products = $query->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+
+        // Ajouter des métadonnées utiles
+        $products->each(function ($product) {
+            $product->append(['has_active_lottery', 'lottery_ends_soon', 'popularity_score', 'image_url']);
+            
+            // Ajouter les détails de la tombola active si elle existe
+            if ($product->activeLottery) {
+                $product->activeLottery->append(['remaining_tickets', 'progress_percentage', 'time_remaining', 'participation_rate', 'is_ending_soon']);
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'products' => ProductResource::collection($products),
+                'count' => $products->count(),
+                'sale_mode' => 'lottery',
+                'active_only' => $activeOnly
+            ]
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/products/by-sale-mode/{mode}",
+     *     tags={"Products"},
+     *     summary="Récupérer les produits par mode de vente",
+     *     @OA\Parameter(
+     *         name="mode",
+     *         in="path",
+     *         description="Mode de vente (direct ou lottery)",
+     *         required=true,
+     *         @OA\Schema(type="string", enum={"direct", "lottery"})
+     *     ),
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         description="Nombre de produits à retourner",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=15)
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page à récupérer",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des produits par mode de vente",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function getBySaleMode(Request $request, $mode)
+    {
+        if (!in_array($mode, ['direct', 'lottery'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mode de vente invalide. Utilisez "direct" ou "lottery".'
+            ], 400);
+        }
+
+        $query = Product::with(['category', 'merchant']);
+        
+        // Ajouter la relation activeLottery pour les produits tombola
+        if ($mode === 'lottery') {
+            $query->with('activeLottery');
+        }
+
+        $query->where('status', 'active')
+              ->where('sale_mode', $mode);
+
+        // Pour les tombolas, on peut filtrer sur les actives seulement
+        if ($mode === 'lottery' && $request->boolean('active_lottery_only')) {
+            $query->whereHas('activeLottery', function ($lotteryQuery) {
+                $lotteryQuery->where('status', 'active')
+                              ->where('end_date', '>', now());
+            });
+        }
+
+        // Tri des résultats
+        $this->applySorting($query, $request->get('sort_by', 'date_desc'));
+
+        // Pagination
+        $perPage = min($request->get('per_page', 15), 50);
+        $products = $query->paginate($perPage);
+
+        // Ajouter des métadonnées selon le mode
+        $products->getCollection()->transform(function ($product) use ($mode) {
+            if ($mode === 'lottery') {
+                $product->append(['has_active_lottery', 'lottery_ends_soon', 'popularity_score', 'image_url']);
+                if ($product->activeLottery) {
+                    $product->activeLottery->append(['remaining_tickets', 'progress_percentage', 'time_remaining', 'participation_rate', 'is_ending_soon']);
+                }
+            } else {
+                $product->append(['image_url']);
+            }
+            return $product;
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'products' => ProductResource::collection($products->items()),
+                'pagination' => [
+                    'current_page' => $products->currentPage(),
+                    'last_page' => $products->lastPage(),
+                    'per_page' => $products->perPage(),
+                    'total' => $products->total(),
+                ],
+                'sale_mode' => $mode
+            ]
+        ]);
+    }
 }

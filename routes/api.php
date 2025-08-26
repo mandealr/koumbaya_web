@@ -81,7 +81,10 @@ Route::group([
     Route::get('products/search', [ProductController::class, 'search']);
     Route::get('products/featured', [ProductController::class, 'featured']);
     Route::get('products/latest', [ProductController::class, 'latest']);
+    Route::get('products/latest-direct', [ProductController::class, 'latestDirect']);
     Route::get('products/latest-lottery', [ProductController::class, 'latestLottery']);
+    Route::get('products/latest-lottery-only', [ProductController::class, 'latestLotteryOnly']);
+    Route::get('products/by-sale-mode/{mode}', [ProductController::class, 'getBySaleMode']);
     Route::get('products/{id}', [ProductController::class, 'show']);
     
     // Lotteries (routes spécifiques avant les routes avec paramètres)

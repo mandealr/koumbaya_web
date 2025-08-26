@@ -241,7 +241,7 @@
               Produits en vedette
             </h2>
             <p class="text-xl text-gray-600">
-              Découvrez les lots les plus convoités du moment
+              Découvrez les derniers produits - tombolas et achat direct
             </p>
           </div>
           <router-link
@@ -258,52 +258,108 @@
             v-for="product in featuredProducts"
             :key="product.id"
             @click="viewProduct(product)"
-            class="bg-white rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group border border-gray-100"
+            class="bg-white rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group border border-gray-100 relative overflow-hidden"
           >
-            <div class="relative mb-6">
+            <!-- Badge mode de vente -->
+            <div class="absolute top-4 left-4 z-10">
+              <span 
+                v-if="product.sale_mode === 'lottery'" 
+                class="bg-gradient-to-r from-[#0099cc] to-cyan-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg"
+              >
+                🎯 Tombola
+              </span>
+              <span 
+                v-else 
+                class="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg"
+              >
+                🛒 Achat direct
+              </span>
+            </div>
+            
+            <!-- Badge statut spécial -->
+            <div class="absolute top-4 right-4 z-10">
+              <span 
+                v-if="product.lottery_ends_soon && product.sale_mode === 'lottery'" 
+                class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg animate-pulse"
+              >
+                ⏰ Fin proche !
+              </span>
+              <span 
+                v-else-if="product.isNew" 
+                class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg"
+              >
+                ✨ Nouveau
+              </span>
+            </div>
+
+            <div class="relative mb-6 mt-4">
               <img
                 :src="product.image_url || product.main_image || product.image || '/images/products/placeholder.jpg'"
                 :alt="product.name"
                 class="w-full h-48 object-cover rounded-2xl bg-gray-100 group-hover:scale-105 transition-transform duration-300"
               />
-              <div class="absolute -top-2 -right-2">
-                <span class="bg-[#0099cc] text-white px-4 py-2 rounded-full font-semibold shadow-lg">
-                  {{ formatPrice(product.ticketPrice) }}
-                </span>
-              </div>
-              <div v-if="product.isNew" class="absolute top-4 left-4">
-                <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                  Nouveau
-                </span>
+              <div class="absolute -bottom-3 -right-3">
+                <div 
+                  v-if="product.sale_mode === 'lottery'" 
+                  class="bg-[#0099cc] text-white px-4 py-2 rounded-full font-semibold shadow-lg"
+                >
+                  {{ formatPrice(product.ticketPrice || product.ticket_price) }}/ticket
+                </div>
+                <div 
+                  v-else 
+                  class="bg-green-600 text-white px-4 py-2 rounded-full font-semibold shadow-lg"
+                >
+                  {{ formatPrice(product.price || product.value) }}
+                </div>
               </div>
             </div>
 
             <div class="space-y-4">
               <div>
-                <h3 class="text-xl font-bold text-black group-hover:text-[#0099cc] transition-colors">
+                <h3 
+                  class="text-xl font-bold text-black group-hover:transition-colors"
+                  :class="product.sale_mode === 'lottery' ? 'group-hover:text-[#0099cc]' : 'group-hover:text-green-600'"
+                >
                   {{ product.name }}
                 </h3>
-                <p class="text-gray-600">Valeur: {{ formatPrice(product.value) }}</p>
+                <p v-if="product.sale_mode === 'lottery'" class="text-gray-600">
+                  Valeur totale: {{ formatPrice(product.value || product.price) }}
+                </p>
+                <p v-else class="text-gray-600">
+                  {{ product.category?.name || 'Catégorie' }}
+                </p>
               </div>
 
-              <div class="space-y-2">
+              <!-- Section spécifique tombola -->
+              <div v-if="product.sale_mode === 'lottery'" class="space-y-2">
                 <div class="flex justify-between text-sm text-gray-600">
                   <span>Progression</span>
-                  <span class="font-semibold">{{ Math.round((product.soldTickets / 1000) * 100) }}%</span>
+                  <span class="font-semibold">{{ Math.round(((product.soldTickets || 0) / (product.totalTickets || 1000)) * 100) }}%</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-3">
                   <div
                     class="bg-gradient-to-r from-[#0099cc] to-cyan-500 h-3 rounded-full transition-all duration-500"
-                    :style="{ width: Math.round((product.soldTickets / 1000) * 100) + '%' }"
+                    :style="{ width: Math.round(((product.soldTickets || 0) / (product.totalTickets || 1000)) * 100) + '%' }"
                   ></div>
                 </div>
                 <div class="text-center text-sm text-gray-500">
-                  {{ product.soldTickets }}/1000 tickets
+                  {{ product.soldTickets || 0 }}/{{ product.totalTickets || 1000 }} tickets vendus
                 </div>
               </div>
 
-              <button class="w-full bg-[#0099cc] hover:bg-[#0088bb] text-white font-semibold py-3 rounded-xl transition-colors group-hover:scale-105 group-hover:shadow-lg">
-                Acheter maintenant
+              <!-- Section spécifique achat direct -->
+              <div v-else class="flex items-center justify-between py-2">
+                <span class="text-sm text-gray-500">Statut</span>
+                <span class="text-sm font-medium text-green-600">🟢 Disponible</span>
+              </div>
+
+              <button 
+                class="w-full font-semibold py-3 rounded-xl transition-all duration-200 group-hover:scale-105 group-hover:shadow-lg"
+                :class="product.sale_mode === 'lottery' 
+                  ? 'bg-gradient-to-r from-[#0099cc] to-cyan-500 hover:from-[#0088bb] hover:to-cyan-600 text-white' 
+                  : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white'"
+              >
+                {{ product.sale_mode === 'lottery' ? '🎲 Participer maintenant' : '💳 Acheter maintenant' }}
               </button>
             </div>
           </div>
@@ -435,31 +491,68 @@ const stats = ref({
 // API Functions
 const loadFeaturedProducts = async () => {
   try {
-    console.log('Chargement des derniers produits...')
-    const response = await get('/products/latest?limit=8')
-    console.log('Réponse API derniers produits:', response)
+    console.log('Chargement des derniers produits mixtes...')
     
-    if (response && response.success && response.data) {
-      const products = response.data.products || response.data
-      featuredProducts.value = products.slice(0, 3).map(product => ({
+    // Charger à la fois les produits tombola et achat direct
+    const [lotteryResponse, directResponse] = await Promise.all([
+      get('/products/latest-lottery-only?limit=3'),
+      get('/products/latest-direct?limit=3')
+    ])
+    
+    console.log('Réponses API:', { lottery: lotteryResponse, direct: directResponse })
+    
+    let allProducts = []
+    
+    // Ajouter les produits tombola
+    if (lotteryResponse && lotteryResponse.success && lotteryResponse.data) {
+      const lotteryProducts = (lotteryResponse.data.products || lotteryResponse.data).slice(0, 2).map(product => ({
         id: product.id,
         name: product.name || product.title,
         value: product.price || 0,
-        ticketPrice: product.ticket_price || 1000,
+        price: product.price || 0,
+        ticketPrice: product.ticket_price || product.active_lottery?.ticket_price || 1000,
+        ticket_price: product.ticket_price || product.active_lottery?.ticket_price || 1000,
         image_url: product.image_url || product.main_image,
         image: product.image_url || product.main_image || placeholderImg,
-        soldTickets: product.active_lottery?.sold_tickets || Math.floor(Math.random() * 800),
+        soldTickets: product.active_lottery?.sold_tickets || 0,
+        totalTickets: product.active_lottery?.total_tickets || 1000,
         isNew: isNewProduct(product.created_at),
-        sale_mode: product.sale_mode || 'lottery',
+        sale_mode: 'lottery',
         has_active_lottery: product.has_active_lottery || false,
-        lottery_ends_soon: product.lottery_ends_soon || false
+        lottery_ends_soon: product.lottery_ends_soon || false,
+        category: product.category
       }))
-    } else {
-      // Fallback avec données par défaut
+      allProducts.push(...lotteryProducts)
+    }
+    
+    // Ajouter les produits achat direct
+    if (directResponse && directResponse.success && directResponse.data) {
+      const directProducts = (directResponse.data.products || directResponse.data).slice(0, 2).map(product => ({
+        id: product.id,
+        name: product.name || product.title,
+        value: product.price || 0,
+        price: product.price || 0,
+        image_url: product.image_url || product.main_image,
+        image: product.image_url || product.main_image || placeholderImg,
+        isNew: isNewProduct(product.created_at),
+        sale_mode: 'direct',
+        category: product.category
+      }))
+      allProducts.push(...directProducts)
+    }
+    
+    // Mélanger les produits et en prendre 6 max
+    featuredProducts.value = allProducts
+      .sort(() => Math.random() - 0.5) // Mélanger aléatoirement
+      .slice(0, 6)
+    
+    // Si pas de produits, utiliser le fallback
+    if (featuredProducts.value.length === 0) {
       setFallbackProducts()
     }
+    
   } catch (error) {
-    console.error('Erreur lors du chargement des derniers produits:', error)
+    console.error('Erreur lors du chargement des produits mixtes:', error)
     setFallbackProducts()
   }
 }
@@ -521,31 +614,51 @@ const setFallbackProducts = () => {
       id: 'fallback-1',
       name: 'iPhone 15 Pro Max',
       value: 1299000,
+      price: 1299000,
       ticketPrice: 1500,
+      ticket_price: 1500,
       image: placeholderImg,
       soldTickets: 750,
+      totalTickets: 1000,
       isNew: true,
-      sale_mode: 'lottery'
+      sale_mode: 'lottery',
+      lottery_ends_soon: false,
+      category: { name: 'Smartphones' }
     },
     {
       id: 'fallback-2',
       name: 'MacBook Pro M3',
       value: 2500000,
-      ticketPrice: 2500,
+      price: 2500000,
       image: placeholderImg,
-      soldTickets: 420,
       isNew: true,
-      sale_mode: 'lottery'
+      sale_mode: 'direct',
+      category: { name: 'Ordinateurs' }
     },
     {
       id: 'fallback-3',
-      name: 'Tesla Model Y',
-      value: 45000000,
-      ticketPrice: 50000,
+      name: 'Samsung Galaxy S24',
+      value: 950000,
+      price: 950000,
+      ticketPrice: 1200,
+      ticket_price: 1200,
       image: placeholderImg,
       soldTickets: 320,
+      totalTickets: 800,
       isNew: false,
-      sale_mode: 'lottery'
+      sale_mode: 'lottery',
+      lottery_ends_soon: true,
+      category: { name: 'Smartphones' }
+    },
+    {
+      id: 'fallback-4',
+      name: 'AirPods Pro',
+      value: 380000,
+      price: 380000,
+      image: placeholderImg,
+      isNew: false,
+      sale_mode: 'direct',
+      category: { name: 'Audio' }
     }
   ]
 }
