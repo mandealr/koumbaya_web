@@ -466,7 +466,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/api'
 import placeholderImg from '@/assets/placeholder.jpg'
@@ -584,9 +584,23 @@ const loadLatestLotteryProduct = async () => {
       const product = response.data.product
       const lottery = response.data.lottery
       
-      const soldTickets = lottery?.sold_tickets || 0
-      const totalTickets = lottery?.total_tickets || 1000
+      console.log('Données produit:', product)
+      console.log('Données lottery:', lottery)
+      
+      const soldTickets = parseInt(lottery?.sold_tickets || 0)
+      const totalTickets = parseInt(lottery?.total_tickets || 1000)
       const calculatedProgress = totalTickets > 0 ? Math.round((soldTickets / totalTickets) * 100) : 0
+      
+      console.log('Tickets vendus (brut):', lottery?.sold_tickets)
+      console.log('Total tickets (brut):', lottery?.total_tickets)
+      console.log('Tickets vendus (parseInt):', soldTickets)
+      console.log('Total tickets (parseInt):', totalTickets)
+      console.log('Progression calculée:', calculatedProgress)
+      
+      // Vérification supplémentaire
+      if (totalTickets < 100) {
+        console.warn('⚠️ Total tickets semble faible:', totalTickets, '- vérifier les données API')
+      }
       
       latestLotteryProduct.value = {
         id: product.id,
@@ -600,6 +614,8 @@ const loadLatestLotteryProduct = async () => {
         timeRemaining: lottery?.time_remaining,
         isEndingSoon: lottery?.is_ending_soon || false
       }
+      
+      console.log('Produit tombola final:', latestLotteryProduct.value)
     } else {
       // Si pas de produit trouvé, utiliser un fallback
       latestLotteryProduct.value = {
@@ -731,12 +747,21 @@ const viewProduct = (product) => {
   router.push({ name: 'public.product.detail', params: { id: product.id } })
 }
 
+// Watcher pour surveiller les changements
+watch(latestLotteryProduct, (newValue) => {
+  if (newValue) {
+    console.log('🔄 latestLotteryProduct mis à jour:', newValue)
+  }
+}, { deep: true })
+
 // Initialize data on component mount
 onMounted(async () => {
+  console.log('🚀 Montage du composant Home - chargement des données...')
   await Promise.all([
     loadFeaturedProducts(),
     loadLatestLotteryProduct()
   ])
+  console.log('✅ Chargement terminé')
 })
 </script>
 
