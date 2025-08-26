@@ -58,32 +58,41 @@
           <form @submit.prevent="updatePersonalInfo">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Prénom <span class="text-red-500">*</span>
+                </label>
                 <input
                   v-model="personalForm.first_name"
                   type="text"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="color: #5f5f5f"
+                  placeholder="Votre prénom"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Nom</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Nom <span class="text-red-500">*</span>
+                </label>
                 <input
                   v-model="personalForm.last_name"
                   type="text"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="color: #5f5f5f"
+                  placeholder="Votre nom de famille"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Email <span class="text-red-500">*</span>
+                </label>
                 <input
                   v-model="personalForm.email"
                   type="email"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="color: #5f5f5f"
+                  placeholder="votre@email.com"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
@@ -533,6 +542,28 @@ const notificationForm = reactive({
 })
 
 const updatePersonalInfo = async () => {
+  // Validation côté client avant envoi
+  if (!personalForm.first_name || !personalForm.first_name.trim()) {
+    if (window.$toast) {
+      window.$toast.error('Le prénom est requis', '❌ Validation')
+    }
+    return
+  }
+  
+  if (!personalForm.last_name || !personalForm.last_name.trim()) {
+    if (window.$toast) {
+      window.$toast.error('Le nom de famille est requis', '❌ Validation')
+    }
+    return
+  }
+
+  if (!personalForm.email || !personalForm.email.trim()) {
+    if (window.$toast) {
+      window.$toast.error('L\'email est requis', '❌ Validation')
+    }
+    return
+  }
+
   updatingPersonal.value = true
   try {
     console.log('Updating personal info with data:', personalForm)
@@ -550,8 +581,37 @@ const updatePersonalInfo = async () => {
   } catch (error) {
     console.error('Error updating personal info:', error)
     console.error('Error details:', error.response?.data)
-    if (window.$toast) {
-      window.$toast.error('Erreur lors de la mise à jour: ' + (error.response?.data?.message || error.message), ' Erreur')
+    
+    // Gestion des erreurs de validation détaillées
+    if (error.response?.status === 422 && error.response?.data?.errors) {
+      const validationErrors = error.response.data.errors
+      const errorMessages = []
+      
+      // Traduire les erreurs de validation
+      Object.keys(validationErrors).forEach(field => {
+        const fieldErrors = validationErrors[field]
+        fieldErrors.forEach(errorMessage => {
+          let translatedMessage = errorMessage
+          if (errorMessage.includes('validation.required')) {
+            const fieldTranslations = {
+              'first_name': 'Le prénom',
+              'last_name': 'Le nom de famille',
+              'email': 'L\'email',
+              'phone': 'Le téléphone'
+            }
+            translatedMessage = `${fieldTranslations[field] || field} est requis`
+          }
+          errorMessages.push(translatedMessage)
+        })
+      })
+      
+      if (window.$toast) {
+        window.$toast.error(errorMessages.join(', '), '❌ Erreurs de validation')
+      }
+    } else {
+      if (window.$toast) {
+        window.$toast.error('Erreur lors de la mise à jour: ' + (error.response?.data?.message || error.message), '❌ Erreur')
+      }
     }
   } finally {
     updatingPersonal.value = false
@@ -559,10 +619,40 @@ const updatePersonalInfo = async () => {
 }
 
 const updateAddress = async () => {
+  // Validation côté client pour l'adresse
+  // Note: L'adresse peut nécessiter prénom/nom même si on met juste à jour l'adresse
+  // car l'API valide tous les champs requis du profil complet
+  
+  // Créer un objet combiné avec les informations personnelles existantes
+  const combinedData = {
+    first_name: personalForm.first_name || user.first_name || '',
+    last_name: personalForm.last_name || user.last_name || '',
+    email: personalForm.email || user.email || '',
+    phone: personalForm.phone || user.phone || '',
+    birth_date: personalForm.birth_date || user.birth_date || null,
+    gender: personalForm.gender || user.gender || null,
+    ...addressForm
+  }
+
+  // Validation des champs requis
+  if (!combinedData.first_name || !combinedData.first_name.trim()) {
+    if (window.$toast) {
+      window.$toast.error('Le prénom est requis pour mettre à jour l\'adresse', '❌ Validation')
+    }
+    return
+  }
+  
+  if (!combinedData.last_name || !combinedData.last_name.trim()) {
+    if (window.$toast) {
+      window.$toast.error('Le nom de famille est requis pour mettre à jour l\'adresse', '❌ Validation')
+    }
+    return
+  }
+
   updatingAddress.value = true
   try {
-    console.log('Updating address with data:', addressForm)
-    const response = await put('/user/profile', addressForm)
+    console.log('Updating address with data:', combinedData)
+    const response = await put('/user/profile', combinedData)
     console.log('Update address response:', response)
     
     if (response && response.success) {
@@ -576,8 +666,40 @@ const updateAddress = async () => {
   } catch (error) {
     console.error('Error updating address:', error)
     console.error('Error details:', error.response?.data)
-    if (window.$toast) {
-      window.$toast.error('Erreur lors de la mise à jour: ' + (error.response?.data?.message || error.message), ' Erreur')
+    
+    // Gestion des erreurs de validation détaillées pour l'adresse
+    if (error.response?.status === 422 && error.response?.data?.errors) {
+      const validationErrors = error.response.data.errors
+      const errorMessages = []
+      
+      Object.keys(validationErrors).forEach(field => {
+        const fieldErrors = validationErrors[field]
+        fieldErrors.forEach(errorMessage => {
+          let translatedMessage = errorMessage
+          if (errorMessage.includes('validation.required')) {
+            const fieldTranslations = {
+              'first_name': 'Le prénom',
+              'last_name': 'Le nom de famille',
+              'email': 'L\'email',
+              'phone': 'Le téléphone',
+              'address': 'L\'adresse',
+              'city': 'La ville',
+              'postal_code': 'Le code postal',
+              'country': 'Le pays'
+            }
+            translatedMessage = `${fieldTranslations[field] || field} est requis`
+          }
+          errorMessages.push(translatedMessage)
+        })
+      })
+      
+      if (window.$toast) {
+        window.$toast.error(errorMessages.join(', '), '❌ Erreurs de validation')
+      }
+    } else {
+      if (window.$toast) {
+        window.$toast.error('Erreur lors de la mise à jour de l\'adresse: ' + (error.response?.data?.message || error.message), '❌ Erreur')
+      }
     }
   } finally {
     updatingAddress.value = false
