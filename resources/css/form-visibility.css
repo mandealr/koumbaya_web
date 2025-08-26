@@ -1,6 +1,6 @@
 /* Amélioration de la visibilité des formulaires */
 
-/* Champs de formulaire généraux */
+/* Champs de formulaire - Thème clair uniquement */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -15,143 +15,184 @@ input[type="time"],
 input[type="week"],
 textarea,
 select {
-  /* Couleurs de base */
-  color: #111827 !important; /* gray-900 */
-  background-color: #ffffff !important;
+  /* Couleurs optimisées pour le thème clair */
+  color: #1f2937 !important; /* gray-800 - Plus lisible que le noir pur */
+  background-color: #ffffff !important; /* Blanc pur */
   border-color: #d1d5db !important; /* gray-300 */
   
-  /* Amélioration du contraste */
+  /* Typographie optimisée */
   font-weight: 500;
   font-size: 16px;
-  line-height: 24px;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
   
-  /* Ombres pour améliorer la visibilité */
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) inset;
+  /* Effets visuels pour le thème clair */
+  box-shadow: 
+    0 1px 2px 0 rgba(0, 0, 0, 0.05) inset,
+    0 0 0 1px rgba(209, 213, 219, 0.3);
+  transition: all 0.2s ease;
 }
 
-/* Placeholders plus visibles */
+/* Placeholders optimisés pour le thème clair */
 input::placeholder,
 textarea::placeholder,
 select::placeholder {
-  color: #6b7280 !important; /* gray-500 */
+  color: #6b7280 !important; /* gray-500 - Contraste optimal */
   opacity: 1 !important;
   font-weight: 400;
+  font-style: italic;
 }
 
-/* Focus amélioré */
+/* États de focus optimisés pour le thème clair */
 input:focus,
 textarea:focus,
 select:focus {
   border-color: #0099cc !important;
   outline: none !important;
-  box-shadow: 0 0 0 3px rgba(0, 153, 204, 0.1) !important;
+  box-shadow: 
+    0 0 0 3px rgba(0, 153, 204, 0.1),
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
   background-color: #ffffff !important;
+  transform: translateY(-1px);
 }
 
-/* Labels */
+/* Labels optimisés pour le thème clair */
 label {
-  color: #374151 !important; /* gray-700 */
+  color: #1f2937 !important; /* gray-800 - Plus lisible */
   font-weight: 600;
   font-size: 14px;
-  margin-bottom: 8px;
+  line-height: 1.4;
+  margin-bottom: 6px;
   display: block;
+  letter-spacing: 0.025em;
 }
 
-/* Select options */
+/* Options de select pour le thème clair */
 select option {
-  color: #111827 !important;
+  color: #1f2937 !important; /* gray-800 - Plus doux que le noir */
   background-color: #ffffff !important;
-  padding: 8px;
+  padding: 10px 12px;
   font-weight: 500;
+  line-height: 1.5;
 }
 
-select option:hover {
-  background-color: #f3f4f6 !important; /* gray-100 */
+select option:hover,
+select option:focus {
+  background-color: #f8fafc !important; /* gray-50 - Plus subtil */
+  color: #0099cc !important; /* Couleur primaire au hover */
 }
 
-/* Disabled states */
+/* États désactivés pour le thème clair */
 input:disabled,
 textarea:disabled,
 select:disabled {
   color: #9ca3af !important; /* gray-400 */
   background-color: #f9fafb !important; /* gray-50 */
+  border-color: #e5e7eb !important; /* gray-200 */
   cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none;
 }
 
-/* Error states */
+/* États d'erreur pour le thème clair */
 input.error,
 textarea.error,
 select.error {
   border-color: #ef4444 !important; /* red-500 */
   background-color: #fef2f2 !important; /* red-50 */
+  box-shadow: 
+    0 0 0 3px rgba(239, 68, 68, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.05) inset;
 }
 
-/* Success states */
+/* États de succès pour le thème clair */
 input.success,
 textarea.success,
 select.success {
-  border-color: #10b981 !important; /* green-500 */
-  background-color: #f0fdf4 !important; /* green-50 */
+  border-color: #0099cc !important; /* Couleur primaire au lieu du vert */
+  background-color: #f0f9ff !important; /* blue-50 */
+  box-shadow: 
+    0 0 0 3px rgba(0, 153, 204, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.05) inset;
 }
 
-/* Amélioration des boutons radio et checkbox */
+/* Radio et checkbox pour le thème clair */
 input[type="radio"],
 input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
-  margin-right: 8px;
+  margin-right: 10px;
+  border: 2px solid #d1d5db;
+  transition: all 0.2s ease;
 }
 
 input[type="radio"]:checked,
 input[type="checkbox"]:checked {
   background-color: #0099cc !important;
   border-color: #0099cc !important;
+  box-shadow: 0 0 0 2px rgba(0, 153, 204, 0.2);
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  input,
-  textarea,
-  select {
-    color: #f9fafb !important; /* gray-50 */
-    background-color: #1f2937 !important; /* gray-800 */
-    border-color: #4b5563 !important; /* gray-600 */
-  }
-  
-  input::placeholder,
-  textarea::placeholder {
-    color: #9ca3af !important; /* gray-400 */
-  }
-  
-  label {
-    color: #e5e7eb !important; /* gray-200 */
-  }
-  
-  select option {
-    color: #f9fafb !important;
-    background-color: #1f2937 !important;
-  }
+input[type="radio"]:hover,
+input[type="checkbox"]:hover {
+  border-color: #0099cc;
+  box-shadow: 0 0 0 2px rgba(0, 153, 204, 0.1);
 }
 
-/* Spécifique pour les filtres de produits */
+/* Thème clair optimisé - Suppression du support mode sombre */
+
+/* Filtres de produits optimisés pour le thème clair */
 .product-filter input,
 .product-filter select {
   min-height: 48px;
   padding: 12px 16px;
   font-size: 16px;
-  transition: all 0.2s ease;
+  font-weight: 500;
+  background-color: #ffffff !important;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .product-filter input:hover,
 .product-filter select:hover {
   border-color: #0099cc !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
 }
 
-/* Amélioration de l'accessibilité */
+.product-filter input:focus,
+.product-filter select:focus {
+  border-color: #0099cc !important;
+  box-shadow: 
+    0 0 0 3px rgba(0, 153, 204, 0.1),
+    0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Accessibilité optimisée pour le thème clair */
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
+  outline: 2px solid #0099cc !important;
+  outline-offset: 2px !important;
+}
+
+/* Amélioration globale pour tous les éléments interactifs */
+button, 
+input[type="button"], 
+input[type="submit"], 
+input[type="reset"] {
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+button:focus-visible,
+input[type="button"]:focus-visible,
+input[type="submit"]:focus-visible,
+input[type="reset"]:focus-visible {
   outline: 2px solid #0099cc !important;
   outline-offset: 2px !important;
 }

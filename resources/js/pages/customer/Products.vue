@@ -7,7 +7,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6 product-filter">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Rechercher</label>

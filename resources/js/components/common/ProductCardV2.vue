@@ -1,7 +1,7 @@
 <template>
   <div 
     class="group cursor-pointer overflow-hidden bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
-    :class="{'ring-2 ring-purple-500': product.sale_mode === 'lottery', 'ring-2 ring-green-500': product.sale_mode === 'direct'}"
+    :class="{'ring-2 ring-purple-500': product.sale_mode === 'lottery', 'ring-2 ring-[#0099cc]': product.sale_mode === 'direct'}"
   >
     <!-- Image avec badges -->
     <div class="relative overflow-hidden h-48">
@@ -24,7 +24,7 @@
           </svg>
           <span class="text-sm font-semibold">Tombola</span>
         </div>
-        <div v-else class="flex items-center bg-green-600 text-white px-3 py-1.5 rounded-full shadow-lg">
+        <div v-else class="flex items-center bg-[#0099cc] text-white px-3 py-1.5 rounded-full shadow-lg">
           <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
             <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3z" />
             <path d="M16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
@@ -101,15 +101,15 @@
 
       <!-- Prix achat direct -->
       <div v-else class="space-y-3">
-        <div class="bg-green-50 rounded-lg p-3">
+        <div class="bg-blue-50 rounded-lg p-3">
           <p class="text-xs text-gray-600 mb-1">Prix</p>
-          <p class="text-2xl font-bold text-green-700">{{ formatPrice(product.price) }} FCFA</p>
+          <p class="text-2xl font-bold text-[#0099cc]">{{ formatPrice(product.price) }} FCFA</p>
         </div>
         
         <!-- Stock -->
         <div v-if="product.stock !== undefined" class="flex items-center text-sm">
           <span class="text-gray-600">Stock disponible:</span>
-          <span class="ml-2 font-medium" :class="product.stock > 0 ? 'text-green-600' : 'text-red-600'">
+          <span class="ml-2 font-medium" :class="product.stock > 0 ? 'text-[#0099cc]' : 'text-red-600'">
             {{ product.stock > 0 ? product.stock + ' unités' : 'Épuisé' }}
           </span>
         </div>
@@ -121,7 +121,7 @@
         class="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center group-hover:shadow-md"
         :class="product.sale_mode === 'lottery' 
           ? 'bg-purple-600 hover:bg-purple-700 text-white' 
-          : 'bg-green-600 hover:bg-green-700 text-white'"
+          : 'bg-[#0099cc] hover:bg-[#0088bb] text-white'"
       >
         <ShoppingBagIcon class="w-5 h-5 mr-2" />
         {{ product.sale_mode === 'lottery' ? 'Participer à la tombola' : 'Acheter maintenant' }}

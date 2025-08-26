@@ -20,11 +20,12 @@
       <!-- Product Image -->
       <div>
         <div class="relative">
-          <img
-            :src="getProductImageUrl(product)"
+          <ProductImage
+            :src="product.image_url || product.main_image || product.image"
             :alt="product.title || product.name"
-            class="w-full h-96 object-cover rounded-xl"
-            @error="handleImageError"
+            container-class="w-full h-96 rounded-xl overflow-hidden"
+            image-class="w-full h-96 object-cover"
+            fallback-text="Image non disponible"
           />
           <div class="absolute top-4 left-4">
             <span :class="[
@@ -43,12 +44,13 @@
 
         <!-- Additional Images -->
         <div v-if="product.gallery && product.gallery.length > 0" class="grid grid-cols-4 gap-2 mt-4">
-          <img
+          <ProductImage
             v-for="(image, index) in product.gallery"
             :key="index"
             :src="image"
-            :alt="`${product.title} ${index + 1}`"
-            class="w-full h-20 object-cover rounded-lg cursor-pointer hover:opacity-75 transition-opacity"
+            :alt="`${product.title || product.name} ${index + 1}`"
+            container-class="w-full h-20 rounded-lg overflow-hidden cursor-pointer hover:opacity-75 transition-opacity"
+            image-class="w-full h-20 object-cover"
             @click="currentImage = image"
           />
         </div>
@@ -155,12 +157,12 @@
           <div v-else>
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Acheter ce produit</h3>
 
-            <div class="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div class="flex items-center mb-2">
-                <CheckCircleIcon class="w-5 h-5 text-green-600 mr-2" />
-                <span class="font-medium text-green-900">Achat direct disponible</span>
+                <CheckCircleIcon class="w-5 h-5 text-[#0099cc] mr-2" />
+                <span class="font-medium text-blue-900">Achat direct disponible</span>
               </div>
-              <p class="text-sm text-green-700">
+              <p class="text-sm text-blue-700">
                 Ce produit peut être acheté directement sans passer par une tombola.
               </p>
             </div>
@@ -173,7 +175,7 @@
             <button
               @click="purchaseDirectly"
               :disabled="purchasing"
-              class="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              class="w-full bg-[#0099cc] text-white py-3 rounded-lg font-medium hover:bg-[#0088bb] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
               <span v-if="purchasing">Achat en cours...</span>
               <template v-else>
@@ -273,7 +275,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApi } from '@/composables/api'
 import { useAuthStore } from '@/stores/auth'
-import { getImageUrl, handleImageError as handleImgError } from '@/utils/imageUtils'
+import ProductImage from '@/components/common/ProductImage.vue'
 import {
   ArrowLeftIcon,
   StarIcon,
@@ -375,13 +377,6 @@ const getRemainingTime = (dateString) => {
   }
 }
 
-const getProductImageUrl = (product) => {
-  return getImageUrl(product, 'Produit', 400, 300)
-}
-
-const handleImageError = (event) => {
-  handleImgError(event, 'Image non disponible')
-}
 
 const getStatusLabel = (status) => {
   const labels = {

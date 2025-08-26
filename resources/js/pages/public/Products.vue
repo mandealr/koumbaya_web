@@ -27,7 +27,7 @@
 
     <!-- Filters & Search -->
     <section class="bg-white shadow-sm border-b">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 product-filter">
         <div class="flex flex-col lg:flex-row gap-6">
           <!-- Search -->
           <div class="flex-1">
