@@ -151,7 +151,7 @@ Route::group([
     Route::post('payments/initiate', [PaymentController::class, 'initiate']);
     Route::post('payments/ussd-push', [PaymentController::class, 'pushUssd']);
     Route::get('payments/kyc', [PaymentController::class, 'kyc']);
-    Route::get('payments/{id}/status', [PaymentController::class, 'status']);
+    Route::get('payments/status/{billId}', [PaymentController::class, 'status']);
     
     // Notifications
     Route::prefix('notifications')->group(function () {

@@ -9,6 +9,7 @@ use App\Models\UserWallet;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class EBillingService
@@ -341,6 +342,9 @@ class EBillingService
             // Add transaction to user wallet
             self::addTransaction($payment);
 
+            // Send email notifications
+            self::sendPaymentNotifications($payment);
+
         } catch (\Exception $e) {
             Log::error('E-BILLING :: Error in after payment processing', [
                 'payment_id' => $payment->id,
@@ -464,5 +468,32 @@ class EBillingService
     private static function generateTicketNumber()
     {
         return 'TKT_' . strtoupper(Str::random(8));
+    }
+
+    /**
+     * Send email notifications for successful payments
+     */
+    private static function sendPaymentNotifications(Payment $payment)
+    {
+        try {
+            // Send notification to customer
+            Mail::to($payment->user->email)->send(new \App\Mail\PaymentConfirmation($payment));
+            
+            // Send notification to merchant (admin for now)
+            if (config('mail.admin_email')) {
+                Mail::to(config('mail.admin_email'))->send(new \App\Mail\MerchantPaymentNotification($payment));
+            }
+            
+            Log::info('E-BILLING :: Email notifications sent', [
+                'payment_id' => $payment->id,
+                'customer_email' => $payment->user->email
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('E-BILLING :: Failed to send email notifications', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }

@@ -31,6 +31,11 @@ import Profile from '@/pages/customer/Profile.vue'
 import MyTickets from '@/pages/customer/MyTickets.vue'
 import Refunds from '@/pages/customer/Refunds.vue'
 
+// Payment Pages
+import PaymentMethod from '@/pages/payment/PaymentMethod.vue'
+import PaymentPhone from '@/pages/payment/PhoneInput.vue'
+import PaymentConfirmation from '@/pages/payment/PaymentConfirmation.vue'
+
 // Admin Pages
 import AdminDashboard from '@/pages/admin/Dashboard.vue'
 import UserManagement from '@/pages/admin/UserManagement.vue'
@@ -165,6 +170,26 @@ const routes = [
         component: Refunds
       }
     ]
+  },
+
+  // Payment Routes (standalone, no layout)
+  {
+    path: '/payment/method',
+    name: 'payment.method',
+    component: PaymentMethod,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/payment/phone',
+    name: 'payment.phone',
+    component: PaymentPhone,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/payment/confirmation',
+    name: 'payment.confirmation',
+    component: PaymentConfirmation,
+    meta: { requiresAuth: true }
   },
 
   // Admin Routes  

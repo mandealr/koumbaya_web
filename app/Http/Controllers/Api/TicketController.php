@@ -63,7 +63,7 @@ class TicketController extends Controller
         $validator = Validator::make($request->all(), [
             'lottery_id' => 'required|exists:lotteries,id',
             'quantity' => 'required|integer|min:1|max:10',
-            'phone_number' => 'required|string|min:8|max:12',
+            'phone_number' => 'required|string|min:8|max:20',
             'total_amount' => 'required|numeric|min:100',
         ]);
 

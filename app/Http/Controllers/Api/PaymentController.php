@@ -70,7 +70,8 @@ class PaymentController extends Controller
             'lottery_id' => 'required_if:type,lottery_ticket|exists:lotteries,id',
             'product_id' => 'required_if:type,product_purchase|exists:products,id',
             'quantity' => 'nullable|integer|min:1|max:10',
-            'phone' => 'nullable|string|max:20'
+            'phone' => 'required|string|max:20',
+            'operator' => 'required|string|in:airtel,moov'
         ]);
 
         if ($validator->fails()) {
@@ -114,6 +115,10 @@ class PaymentController extends Controller
                 $user->save();
             }
 
+            // Add phone and operator info for USSD push
+            $data->phone = $request->phone;
+            $data->operator = $request->operator;
+
             // Initiate e-billing payment
             $billId = EBillingService::initiate($request->type, $data);
 
@@ -124,6 +129,10 @@ class PaymentController extends Controller
                 ], 500);
             }
 
+            // Déclencher automatiquement le push USSD
+            $paymentSystemName = $request->operator === 'airtel' ? 'airtel_money' : 'moov_money';
+            $ussdResult = EBillingService::pushUssd($billId, $paymentSystemName, $request->phone);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Paiement initié avec succès',
@@ -131,7 +140,8 @@ class PaymentController extends Controller
                     'bill_id' => $billId,
                     'reference' => $data->reference,
                     'amount' => $data->amount,
-                    'type' => $request->type
+                    'type' => $request->type,
+                    'ussd_push' => $ussdResult
                 ]
             ], 201);
 
@@ -182,10 +192,19 @@ class PaymentController extends Controller
      *     @OA\Response(response=200, description="Statut du paiement")
      * )
      */
-    public function status($id)
+    public function status($billId)
     {
         $user = auth('sanctum')->user();
-        $payment = Payment::findOrFail($id);
+        
+        // Rechercher par billing_id au lieu de l'ID classique
+        $payment = Payment::where('billing_id', $billId)->first();
+        
+        if (!$payment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Paiement introuvable'
+            ], 404);
+        }
 
         // Vérifier que le paiement appartient à l'utilisateur
         if ($payment->user_id !== $user->id) {
@@ -197,7 +216,12 @@ class PaymentController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $payment
+            'data' => [
+                'status' => $payment->status,
+                'amount' => $payment->amount,
+                'reference' => $payment->reference,
+                'error_message' => $payment->error_message ?? null
+            ]
         ]);
     }
 

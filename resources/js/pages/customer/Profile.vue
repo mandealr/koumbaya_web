@@ -13,7 +13,7 @@
           <div class="text-center mb-6">
             <!-- Composant Avatar Upload -->
             <AvatarUpload
-              :current-avatar-url="user.avatar_url ? `/storage/${user.avatar_url}` : getDefaultAvatar()"
+              :current-avatar-url="user.avatar_url || getDefaultAvatar()"
               upload-endpoint="/user/avatar"
               field-name="avatar"
               :alt-text="`Photo de profil de ${user.first_name} ${user.last_name}`"
@@ -793,7 +793,7 @@ const getDefaultAvatar = () => {
 const onAvatarUploadSuccess = async (data) => {
   console.log('Avatar upload success:', data)
   
-  // Mettre à jour l'utilisateur local
+  // Mettre à jour l'utilisateur local avec l'URL complète
   user.avatar_url = data.avatar_url
   
   // Afficher le toast de succès
