@@ -213,6 +213,11 @@ const uploadAvatar = async () => {
       console.log(pair[0] + ': ', pair[1])
     }
 
+    // Test avec l'endpoint de diagnostic d'abord
+    console.log('Testing with /user/test-upload first...')
+    const testResponse = await post('/user/test-upload', formData)
+    console.log('Test response:', testResponse)
+
     // Upload - Ne pas définir Content-Type manuellement avec FormData
     const response = await post(props.uploadEndpoint, formData)
 

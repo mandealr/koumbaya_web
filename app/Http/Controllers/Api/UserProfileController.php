@@ -159,6 +159,36 @@ class UserProfileController extends Controller
     }
 
     /**
+     * Test upload configuration
+     */
+    public function testUpload(Request $request)
+    {
+        \Log::info('Test upload request:', [
+            'method' => $request->method(),
+            'content_type' => $request->header('Content-Type'),
+            'content_length' => $request->header('Content-Length'),
+            'files' => array_keys($request->files->all()),
+            'all_keys' => array_keys($request->all()),
+            'php_max_filesize' => ini_get('upload_max_filesize'),
+            'php_post_max_size' => ini_get('post_max_size'),
+            'php_max_file_uploads' => ini_get('max_file_uploads'),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'received_files' => array_keys($request->files->all()),
+                'php_config' => [
+                    'upload_max_filesize' => ini_get('upload_max_filesize'),
+                    'post_max_size' => ini_get('post_max_size'),
+                    'max_file_uploads' => ini_get('max_file_uploads'),
+                ],
+                'request_size' => $request->header('Content-Length'),
+            ]
+        ]);
+    }
+
+    /**
      * Upload user avatar
      */
     public function uploadAvatar(Request $request)

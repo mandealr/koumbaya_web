@@ -302,6 +302,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/user/profile', [UserProfileController::class, 'update']);
     Route::put('/user/password', [UserProfileController::class, 'updatePassword']);
     Route::post('/user/avatar', [UserProfileController::class, 'uploadAvatar']);
+    Route::post('/user/test-upload', [UserProfileController::class, 'testUpload']);
     Route::get('/user/preferences', [UserProfileController::class, 'getPreferences']);
     Route::put('/user/preferences', [UserProfileController::class, 'updatePreferences']);
     Route::put('/user/preferences/detailed', [UserProfileController::class, 'updateDetailedPreferences']);
