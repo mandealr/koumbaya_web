@@ -206,6 +206,21 @@ class User extends Authenticatable
         return $this->isMerchant();
     }
 
+    public function getAvatarUrlAttribute($value)
+    {
+        if (!$value) {
+            return null;
+        }
+        
+        // Si c'est déjà une URL complète, la retourner
+        if (str_starts_with($value, 'http')) {
+            return $value;
+        }
+        
+        // Sinon, construire l'URL avec le storage
+        return \Storage::disk('public')->url($value);
+    }
+
     /**
      * Méthodes pour la gestion des rôles
      */

@@ -341,18 +341,19 @@ class AdminProfileController extends Controller
             // Stocker la nouvelle image
             $path = $file->storeAs('avatars', $filename, 'public');
             
-            // Mettre à jour avec avatar_url (uniformisation)
+            // Mettre à jour avec avatar_url (chemin relatif)
             $user->update([
                 'avatar_url' => $path
             ]);
 
-            $fullAvatarUrl = \Storage::disk('public')->url($path);
+            // Recharger pour avoir l'URL complète via l'accesseur
+            $user->refresh();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Photo de profil mise à jour avec succès',
                 'data' => [
-                    'avatar_url' => $fullAvatarUrl,
+                    'avatar_url' => $user->avatar_url, // URL complète via l'accesseur
                     'avatar_path' => $path
                 ]
             ]);

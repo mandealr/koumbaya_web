@@ -244,18 +244,18 @@ class UserProfileController extends Controller
             // Stocker la nouvelle image
             $avatarPath = $file->storeAs('avatars', $filename, 'public');
             
-            // Mettre à jour l'utilisateur
+            // Mettre à jour l'utilisateur avec le chemin relatif
             $user->update([
                 'avatar_url' => $avatarPath
             ]);
 
-            // URL complète pour la réponse
-            $fullAvatarUrl = Storage::disk('public')->url($avatarPath);
+            // Recharger le user pour avoir l'URL complète via l'accesseur
+            $user->refresh();
 
             return $this->sendResponse([
-                'avatar_url' => $fullAvatarUrl,
+                'avatar_url' => $user->avatar_url, // Utilise l'accesseur pour l'URL complète
                 'avatar_path' => $avatarPath,
-                'user' => $user->fresh()
+                'user' => $user
             ], 'Avatar uploaded successfully');
 
         } catch (\Exception $e) {
