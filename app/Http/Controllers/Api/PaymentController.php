@@ -80,9 +80,9 @@ class PaymentController extends Controller
         try {
             // Récupérer la transaction
             $transaction = Transaction::where('transaction_id', $request->transaction_id)
-                                   ->where('user_id', $user->id)
-                                   ->where('status', 'pending')
-                                   ->first();
+                ->where('user_id', $user->id)
+                ->where('status', 'pending')
+                ->first();
 
             if (!$transaction) {
                 return response()->json([
@@ -111,7 +111,6 @@ class PaymentController extends Controller
                 ];
 
                 $type = 'lottery_ticket';
-
             } elseif ($transaction->type === 'product_purchase') {
                 $product = Product::find($transaction->product_id);
                 if (!$product) {
@@ -155,7 +154,7 @@ class PaymentController extends Controller
             ]);
 
             // Déclencher automatiquement le push USSD
-            $paymentSystemName = $request->operator === 'airtel' ? 'airtel_money' : 'moov_money';
+            $paymentSystemName = $request->operator === 'airtel' ? 'airtelmoney' : 'moovmoney4';
             $ussdResult = EBillingService::pushUssd($billId, $paymentSystemName, $request->phone);
 
             return response()->json([
@@ -169,7 +168,6 @@ class PaymentController extends Controller
                     'ussd_push' => $ussdResult
                 ]
             ], 201);
-
         } catch (\Exception $e) {
             Log::error('Payment creation from transaction failed: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
@@ -244,7 +242,7 @@ class PaymentController extends Controller
 
             if ($request->type === 'lottery_ticket') {
                 $lottery = Lottery::findOrFail($request->lottery_id);
-                
+
                 if ($lottery->status !== 'active') {
                     return response()->json([
                         'success' => false,
@@ -256,7 +254,6 @@ class PaymentController extends Controller
                 $data->lottery_id = $lottery->id;
                 $data->quantity = $quantity;
                 $data->amount = $lottery->ticket_price * $quantity;
-
             } elseif ($request->type === 'product_purchase') {
                 $product = Product::findOrFail($request->product_id);
                 $data->product = $product;
@@ -284,7 +281,7 @@ class PaymentController extends Controller
             }
 
             // Déclencher automatiquement le push USSD
-            $paymentSystemName = $request->operator === 'airtel' ? 'airtel_money' : 'moov_money';
+            $paymentSystemName = $request->operator === 'airtel' ? 'airtelmoney' : 'moovmoney4';
             $ussdResult = EBillingService::pushUssd($billId, $paymentSystemName, $request->phone);
 
             return response()->json([
@@ -298,7 +295,6 @@ class PaymentController extends Controller
                     'ussd_push' => $ussdResult
                 ]
             ], 201);
-
         } catch (\Exception $e) {
             Log::error('Payment initiation failed: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
@@ -354,12 +350,12 @@ class PaymentController extends Controller
     public function status($billId)
     {
         $user = auth('sanctum')->user();
-        
+
         // Rechercher par ebilling_id ou par reference
         $payment = Payment::where('ebilling_id', $billId)
-                         ->orWhere('reference', $billId)
-                         ->first();
-        
+            ->orWhere('reference', $billId)
+            ->first();
+
         if (!$payment) {
             return response()->json([
                 'success' => false,
@@ -404,7 +400,7 @@ class PaymentController extends Controller
     public function success(Request $request)
     {
         $reference = $request->get('reference');
-        
+
         if ($reference) {
             $payment = Payment::where('reference', $reference)->first();
             if ($payment && $payment->is_paid) {
@@ -497,7 +493,7 @@ class PaymentController extends Controller
     public function retryUssd(Request $request)
     {
         $user = auth('sanctum')->user();
-        
+
         $validator = Validator::make($request->all(), [
             'bill_id' => 'required|string',
             'operator' => 'required|string|in:airtel,moov'
@@ -514,9 +510,9 @@ class PaymentController extends Controller
         try {
             // Rechercher le paiement par bill_id
             $payment = Payment::where('ebilling_id', $request->bill_id)
-                             ->where('user_id', $user->id)
-                             ->where('status', 'pending')
-                             ->first();
+                ->where('user_id', $user->id)
+                ->where('status', 'pending')
+                ->first();
 
             if (!$payment) {
                 return response()->json([
@@ -526,7 +522,7 @@ class PaymentController extends Controller
             }
 
             // Relancer le push USSD
-            $paymentSystemName = $request->operator === 'airtel' ? 'airtel_money' : 'moov_money';
+            $paymentSystemName = $request->operator === 'airtel' ? 'airtelmoney' : 'moovmoney4';
             $result = EBillingService::pushUssd(
                 $request->bill_id,
                 $paymentSystemName,
@@ -538,13 +534,12 @@ class PaymentController extends Controller
                 'message' => 'Push USSD relancé avec succès',
                 'data' => $result
             ]);
-
         } catch (\Exception $e) {
             Log::error('USSD retry failed: ' . $e->getMessage(), [
                 'bill_id' => $request->bill_id,
                 'user_id' => $user->id
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors du relancement du push USSD'

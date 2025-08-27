@@ -177,7 +177,8 @@ const unreadNotifications = ref(0)
 const navigationItems = [
   { name: 'customer.dashboard', to: { name: 'customer.dashboard' }, label: 'Accueil' },
   { name: 'customer.products', to: { name: 'customer.products' }, label: 'Produits' },
-  { name: 'customer.tickets', to: { name: 'customer.tickets' }, label: 'Mes Tickets' }
+  { name: 'customer.tickets', to: { name: 'customer.tickets' }, label: 'Mes Tickets' },
+  { name: 'customer.orders', to: { name: 'customer.orders' }, label: 'Mes Commandes' }
 ]
 
 const userInitials = computed(() => {

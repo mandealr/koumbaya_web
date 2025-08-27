@@ -189,15 +189,15 @@ class EBillingService
             // Get response in JSON format
             $response = json_decode($json_response, true);
             Log::info('E-BILLING :: Parsed response data', ['response_data' => $response]);
-            
+
             // Get unique transaction id comme dans l'exemple
             $bill_id = $response['e_bill']['bill_id'] ?? null;
-            
+
             if (!$bill_id) {
                 Log::error('E-BILLING :: Could not extract bill_id from response', ['response' => $response]);
                 return false;
             }
-            
+
             return $bill_id;
         } catch (\Exception $e) {
             Log::error('E-BILLING :: Exception during API call', [
@@ -232,7 +232,7 @@ class EBillingService
             'type' => $type,
             'expiry_period' => $paymentDataFromSetup['expiry_period']
         ];
-        
+
         switch ($type) {
             case 'lottery_ticket':
                 $gatewayConfig['lottery_id'] = $data->lottery_id;
@@ -243,9 +243,9 @@ class EBillingService
                 $gatewayConfig['product_id'] = $data->product->id;
                 break;
         }
-        
+
         $paymentToSave['gateway_config'] = $gatewayConfig;
-        
+
         Payment::create($paymentToSave);
     }
 
@@ -254,11 +254,12 @@ class EBillingService
      */
     public static function pushUssd($billId, $paymentSystemName, $payerMsisdn, $type = 'payment')
     {
-        if ($type == "transfert") {
-            $auth = env('USER_NAME_TR') . ':' . env('SHARED_KEY_TR');
-        } else {
-            $auth = env('USER_NAME') . ':' . env('SHARED_KEY');
-        }
+
+        $username = config('services.ebilling.username');
+        $sharedKey = config('services.ebilling.shared_key');
+
+        $auth = $username . ':' . $sharedKey;
+
         $base64 = base64_encode($auth);
 
         try {
@@ -274,19 +275,19 @@ class EBillingService
             if ($responseData) {
                 if ($responseData->message == "Accepted") {
                     return [
-                        'success' => true, 
+                        'success' => true,
                         'message' => 'Push USSD envoyé avec succès. Gardez votre téléphone à portée de main pour valider la transaction avec votre code PIN secret.',
                         'data' => $responseData
                     ];
                 } else {
                     return [
-                        'success' => false, 
+                        'success' => false,
                         'message' => $responseData->message ?? 'Push USSD échoué'
                     ];
                 }
             } else {
                 return [
-                    'success' => false, 
+                    'success' => false,
                     'message' => 'Échec du Push USSD.'
                 ];
             }
@@ -296,7 +297,7 @@ class EBillingService
                 'bill_id' => $billId
             ]);
             return [
-                'success' => false, 
+                'success' => false,
                 'message' => 'Push USSD échoué'
             ];
         }
@@ -433,14 +434,14 @@ class EBillingService
         // Récupérer la lottery_id depuis gateway_config
         $gatewayConfig = $payment->gateway_config;
         $lotteryId = $gatewayConfig['lottery_id'] ?? null;
-        
+
         if (!$lotteryId) {
             Log::error('E-BILLING :: Lottery ID not found in gateway config');
             return;
         }
-        
+
         $lottery = Lottery::find($lotteryId);
-        
+
         if (!$lottery) {
             Log::error('E-BILLING :: Lottery not found for ticket payment', [
                 'lottery_id' => $lotteryId
@@ -478,12 +479,12 @@ class EBillingService
         // Récupérer le product_id depuis gateway_config
         $gatewayConfig = $payment->gateway_config;
         $productId = $gatewayConfig['product_id'] ?? null;
-        
+
         if (!$productId) {
             Log::error('E-BILLING :: Product ID not found in gateway config');
             return;
         }
-        
+
         $lottery = Lottery::where('product_id', $productId)
             ->where('status', 'active')
             ->first();
