@@ -97,12 +97,12 @@ class AdminProductController extends Controller
         // Get statistics
         $stats = [
             'total' => Product::count(),
-            'active' => Product::where('status', 'active')->count(),
-            'draft' => Product::where('status', 'draft')->count(),
-            'completed' => Product::where('status', 'completed')->count(),
-            'total_value' => Product::where('status', 'active')->sum('price'),
+            'active' => Product::where('is_active', true)->count(),
+            'draft' => Product::where('is_active', false)->count(),
+            'completed' => Product::where('is_active', true)->count(), // Products actifs considérés comme "complétés"
+            'total_value' => Product::where('is_active', true)->sum('price'),
             'total_lottery_value' => Product::where('sale_mode', 'lottery')
-                ->where('status', 'active')
+                ->where('is_active', true)
                 ->sum('price')
         ];
 
@@ -164,8 +164,8 @@ class AdminProductController extends Controller
             'ticket_price' => 'nullable|numeric|min:100',
             'sale_mode' => 'in:direct,lottery',
             'category_id' => 'exists:categories,id',
-            'status' => 'in:draft,active,completed,cancelled',
-            'images' => 'nullable|array',
+            'is_active' => 'boolean',
+            'image' => 'nullable|string',
             'is_featured' => 'boolean'
         ]);
 
@@ -178,7 +178,7 @@ class AdminProductController extends Controller
 
         $product->update($request->only([
             'name', 'description', 'price', 'ticket_price', 
-            'sale_mode', 'category_id', 'status', 'images', 'is_featured'
+            'sale_mode', 'category_id', 'is_active', 'image', 'is_featured'
         ]));
 
         return response()->json([

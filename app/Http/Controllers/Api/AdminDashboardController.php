@@ -34,7 +34,7 @@ class AdminDashboardController extends Controller
             
             // Products statistics
             $totalProducts = Product::count();
-            $activeProducts = Product::where('status', 'active')->count();
+            $activeProducts = Product::where('is_active', true)->count();
             $productsGrowth = $this->calculateGrowth(
                 Product::where('created_at', '>=', $lastMonth)->count(),
                 Product::where('created_at', '>=', $lastMonth->copy()->subMonth())

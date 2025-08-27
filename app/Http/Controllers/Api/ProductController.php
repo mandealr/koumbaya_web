@@ -707,7 +707,7 @@ class ProductController extends Controller
         $limit = min($request->get('limit', 8), 20);
         
         $products = Product::with(['category', 'merchant', 'activeLottery'])
-            ->where('status', 'active')
+            ->where('is_active', true)
             ->orderBy('created_at', 'desc')
             ->limit($limit)
             ->get();
@@ -752,7 +752,7 @@ class ProductController extends Controller
     public function latestLottery(Request $request)
     {
         $product = Product::with(['category', 'merchant', 'activeLottery'])
-            ->where('status', 'active')
+            ->where('is_active', true)
             ->where('sale_mode', 'lottery')
             ->whereHas('activeLottery', function ($query) {
                 $query->where('status', 'active')
@@ -813,7 +813,7 @@ class ProductController extends Controller
         $limit = min($request->get('limit', 8), 20);
         
         $products = Product::with(['category', 'merchant'])
-            ->where('status', 'active')
+            ->where('is_active', true)
             ->where('sale_mode', 'direct')
             ->orderBy('created_at', 'desc')
             ->limit($limit)
@@ -869,7 +869,7 @@ class ProductController extends Controller
         $activeOnly = $request->boolean('active_only', true);
         
         $query = Product::with(['category', 'merchant', 'activeLottery'])
-            ->where('status', 'active')
+            ->where('is_active', true)
             ->where('sale_mode', 'lottery');
 
         // Si on veut seulement les tombolas actives
@@ -957,7 +957,7 @@ class ProductController extends Controller
             $query->with('activeLottery');
         }
 
-        $query->where('status', 'active')
+        $query->where('is_active', true)
               ->where('sale_mode', $mode);
 
         // Pour les tombolas, on peut filtrer sur les actives seulement

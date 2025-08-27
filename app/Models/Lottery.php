@@ -15,8 +15,6 @@ class Lottery extends Model
         'total_tickets',
         'sold_tickets',
         'ticket_price',
-        'start_date',
-        'end_date',
         'draw_date',
         'winner_user_id',
         'winner_ticket_number',
@@ -29,8 +27,6 @@ class Lottery extends Model
     {
         return [
             'ticket_price' => 'decimal:2',
-            'start_date' => 'datetime',
-            'end_date' => 'datetime',
             'draw_date' => 'datetime',
             'is_drawn' => 'boolean',
             'draw_proof' => 'json',
@@ -41,6 +37,7 @@ class Lottery extends Model
      * Attributes that should be appended to arrays.
      */
     protected $appends = [
+        'end_date', // Compatibilité backward
         'remaining_tickets',
         'progress_percentage',
         'is_expired',
@@ -84,6 +81,19 @@ class Lottery extends Model
     }
 
     /**
+     * Accesseurs pour compatibilité backward
+     */
+    public function getEndDateAttribute()
+    {
+        return $this->draw_date;
+    }
+
+    public function setEndDateAttribute($value)
+    {
+        $this->attributes['draw_date'] = $value;
+    }
+
+    /**
      * Scopes
      */
     public function scopeActive($query)
@@ -98,7 +108,7 @@ class Lottery extends Model
 
     public function scopeExpiredToday($query)
     {
-        return $query->where('end_date', '<=', now())
+        return $query->where('draw_date', '<=', now())
                     ->where('status', 'active');
     }
 

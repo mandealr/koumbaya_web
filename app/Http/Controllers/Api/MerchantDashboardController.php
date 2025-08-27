@@ -445,8 +445,14 @@ class MerchantDashboardController extends Controller
 
     private function getAverageTicketPrice($merchantId)
     {
-        return floatval(Product::where('merchant_id', $merchantId)
-            ->avg('ticket_price')) ?: 0;
+        $products = Product::where('merchant_id', $merchantId)->get();
+        if ($products->isEmpty()) return 0;
+        
+        $totalTicketPrice = $products->sum(function($product) {
+            return $product->ticket_price ?? 0;
+        });
+        
+        return round($totalTicketPrice / $products->count(), 2);
     }
 
     private function getProductConversionRate($productId)

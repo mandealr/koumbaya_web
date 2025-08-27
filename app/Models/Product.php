@@ -38,6 +38,9 @@ class Product extends Model
         'main_image',
         'image_url',
         'title', // Alias pour 'name'
+        'ticket_price', // Compatibilité backward
+        'min_participants', // Compatibilité backward
+        'status', // Compatibilité backward
         'has_active_lottery',
         'lottery_ends_soon',
         'popularity_score'
@@ -83,7 +86,7 @@ class Product extends Model
     {
         return $this->hasOne(Lottery::class, 'product_id')
             ->where('status', 'active')
-            ->where('end_date', '>', now());
+            ->where('draw_date', '>', now());
     }
 
     /**
@@ -168,6 +171,58 @@ class Product extends Model
         return $this->name;
     }
 
+    /**
+     * Accesseur pour ticket_price (compatibilité backward)
+     */
+    public function getTicketPriceAttribute()
+    {
+        return $this->meta['ticket_price'] ?? 0;
+    }
+
+    /**
+     * Mutateur pour ticket_price (compatibilité backward)
+     */
+    public function setTicketPriceAttribute($value)
+    {
+        $meta = $this->meta ?? [];
+        $meta['ticket_price'] = $value;
+        $this->attributes['meta'] = json_encode($meta);
+    }
+
+    /**
+     * Accesseur pour min_participants (compatibilité backward)
+     */
+    public function getMinParticipantsAttribute()
+    {
+        return $this->meta['min_participants'] ?? 1000;
+    }
+
+    /**
+     * Mutateur pour min_participants (compatibilité backward)
+     */
+    public function setMinParticipantsAttribute($value)
+    {
+        $meta = $this->meta ?? [];
+        $meta['min_participants'] = $value;
+        $this->attributes['meta'] = json_encode($meta);
+    }
+
+    /**
+     * Accesseur pour status (compatibilité backward)
+     */
+    public function getStatusAttribute()
+    {
+        return $this->is_active ? 'active' : 'draft';
+    }
+
+    /**
+     * Mutateur pour status (compatibilité backward)
+     */
+    public function setStatusAttribute($value)
+    {
+        $this->attributes['is_active'] = ($value === 'active');
+    }
+
     public function getIsAvailableAttribute()
     {
         return $this->is_active === true && $this->stock_quantity > 0;
@@ -222,7 +277,7 @@ class Product extends Model
         $lottery = $this->activeLottery()->first();
         if (!$lottery) return false;
         
-        return $lottery->end_date <= now()->addHours(24) && $lottery->end_date > now();
+        return $lottery->draw_date <= now()->addHours(24) && $lottery->draw_date > now();
     }
 
     /**
