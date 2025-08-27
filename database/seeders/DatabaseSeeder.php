@@ -23,8 +23,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             // === ÉTAPE 1: Données de référence ===
-            CountrySeeder::class,     // Déjà dans migration
-            LanguageSeeder::class,    // Déjà dans migration
+            CountrySeeder::class,
+            LanguageSeeder::class,
             CategorySeeder::class,
             UserTypeSeeder::class,       // Types : customer, merchant, admin
 
