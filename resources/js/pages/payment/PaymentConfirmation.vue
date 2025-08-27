@@ -133,22 +133,7 @@
 
       <!-- Action Buttons -->
       <div class="space-y-3">
-        <button
-          v-if="paymentStatus === 'pending'"
-          @click="checkPaymentStatus"
-          :disabled="loading"
-          class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center"
-        >
-          <span v-if="loading">
-            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-            Vérification...
-          </span>
-          <span v-else>
-            <ArrowPathIcon class="h-5 w-5 mr-2" />
-            Vérifier le statut
-          </span>
-        </button>
-
+        <!-- Bouton pour voir les achats (quand le paiement est réussi) -->
         <button
           v-if="paymentStatus === 'success'"
           @click="goToProfile"
@@ -158,8 +143,9 @@
           Voir mes achats
         </button>
 
+        <!-- Bouton relancer push USSD (seulement quand le timer est expiré) -->
         <button
-          v-if="paymentStatus === 'pending'"
+          v-if="paymentStatus === 'expired'"
           @click="retryUssdPush"
           :disabled="loading"
           class="w-full py-3 px-4 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-300 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center"
@@ -174,8 +160,9 @@
           </span>
         </button>
 
+        <!-- Bouton réessayer le paiement (seulement quand le paiement a échoué) -->
         <button
-          v-if="['failed', 'expired'].includes(paymentStatus)"
+          v-if="paymentStatus === 'failed'"
           @click="retryPayment"
           class="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center"
         >
@@ -354,6 +341,14 @@ const retryUssdPush = async () => {
     })
     
     if (response.success) {
+      // Réinitialiser le statut et le timer
+      paymentStatus.value = 'pending'
+      timeRemaining.value = 90
+      
+      // Relancer le timer et la vérification de statut
+      startTimer()
+      startStatusCheck()
+      
       if (window.$toast) {
         window.$toast.success('Push USSD relancé avec succès !', '✅ Succès')
       }
