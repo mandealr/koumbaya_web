@@ -6,12 +6,12 @@
         <div class="mb-6">
           <img :src="logoUrl" alt="Koumbaya" class="h-12 mx-auto" />
         </div>
-        <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
-             :class="paymentMethod === 'airtel_money' ? 'bg-red-100' : 'bg-blue-100'">
-          <PhoneIcon :class="[
-            'h-8 w-8',
-            paymentMethod === 'airtel_money' ? 'text-red-600' : 'text-blue-600'
-          ]" />
+        <div class="w-20 h-20 mx-auto mb-4 rounded-lg overflow-hidden flex items-center justify-center bg-white border border-gray-200 shadow-sm">
+          <img 
+            :src="paymentMethod === 'airtel_money' ? airtelLogo : moovLogo" 
+            :alt="paymentMethod === 'airtel_money' ? 'Airtel Money' : 'Moov Money'"
+            class="w-16 h-16 object-contain"
+          />
         </div>
         <h1 class="text-2xl font-bold text-gray-900">
           {{ paymentMethod === 'airtel_money' ? 'Airtel Money' : 'Moov Money' }}
@@ -28,66 +28,6 @@
       <!-- Formulaire -->
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <form @submit.prevent="processPayment" class="space-y-6">
-          <!-- Opérateur -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-3">Opérateur</label>
-            <div class="grid grid-cols-2 gap-3">
-              <div 
-                @click="selectedOperator = 'airtel'"
-                :class="[
-                  'p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 flex items-center space-x-3',
-                  selectedOperator === 'airtel' 
-                    ? 'border-red-500 bg-red-50 ring-2 ring-red-200' 
-                    : 'border-gray-200 hover:border-red-300'
-                ]"
-              >
-                <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
-                  <span class="text-xs font-bold text-white">A</span>
-                </div>
-                <span class="font-medium text-gray-900">Airtel</span>
-                <div class="ml-auto">
-                  <div :class="[
-                    'w-4 h-4 rounded-full border-2',
-                    selectedOperator === 'airtel' 
-                      ? 'border-red-500 bg-red-500' 
-                      : 'border-gray-300'
-                  ]">
-                    <div v-if="selectedOperator === 'airtel'" 
-                         class="w-full h-full rounded-full bg-white transform scale-50">
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div 
-                @click="selectedOperator = 'moov'"
-                :class="[
-                  'p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 flex items-center space-x-3',
-                  selectedOperator === 'moov' 
-                    ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' 
-                    : 'border-gray-200 hover:border-blue-300'
-                ]"
-              >
-                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span class="text-xs font-bold text-white">M</span>
-                </div>
-                <span class="font-medium text-gray-900">Moov</span>
-                <div class="ml-auto">
-                  <div :class="[
-                    'w-4 h-4 rounded-full border-2',
-                    selectedOperator === 'moov' 
-                      ? 'border-blue-500 bg-blue-500' 
-                      : 'border-gray-300'
-                  ]">
-                    <div v-if="selectedOperator === 'moov'" 
-                         class="w-full h-full rounded-full bg-white transform scale-50">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <!-- Numéro de téléphone -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -177,6 +117,8 @@ import {
   InformationCircleIcon
 } from '@heroicons/vue/24/outline'
 import logoUrl from '@/assets/logo.png'
+import airtelLogo from '@/assets/am.png'
+import moovLogo from '@/assets/mm.png'
 
 const route = useRoute()
 const router = useRouter()
@@ -306,7 +248,7 @@ onMounted(() => {
   amount.value = parseFloat(route.query.amount) || 0
   orderId.value = route.query.transaction_id
   
-  // Définir l'opérateur par défaut basé sur la méthode
+  // Définir automatiquement l'opérateur basé sur la méthode sélectionnée
   if (paymentMethod.value === 'airtel_money') {
     selectedOperator.value = 'airtel'
   } else if (paymentMethod.value === 'moov_money') {
