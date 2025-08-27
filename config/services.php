@@ -73,11 +73,6 @@ return [
             'code' => 'moov_money', 
             'enabled' => env('MOOV_MONEY_ENABLED', true),
         ],
-        'gtmoney' => [
-            'name' => 'GT Money',
-            'code' => 'gt_money',
-            'enabled' => env('GT_MONEY_ENABLED', true),
-        ],
     ],
 
     /*
