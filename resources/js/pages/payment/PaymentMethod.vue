@@ -209,7 +209,7 @@ const orderSummary = ref({
   unitPrice: 0,
   totalAmount: 0,
   image: '',
-  orderId: null
+  transactionId: null
 })
 
 // Methods
@@ -231,7 +231,7 @@ const proceedToPayment = () => {
     name: 'payment.phone',
     query: {
       method: selectedMethod.value,
-      order: orderSummary.value.orderId,
+      transaction_id: orderSummary.value.transactionId,
       amount: orderSummary.value.totalAmount
     }
   })
@@ -248,9 +248,9 @@ const formatPrice = (price) => {
 // Lifecycle
 onMounted(() => {
   // Récupérer les données de la commande depuis les query params ou le store
-  const { type, product, quantity, amount, orderId } = route.query
+  const { type, product, quantity, amount, transaction_id } = route.query
   
-  if (!orderId) {
+  if (!transaction_id) {
     router.push('/') // Rediriger si pas de commande
     return
   }
@@ -262,7 +262,7 @@ onMounted(() => {
     unitPrice: parseFloat(amount) / (parseInt(quantity) || 1),
     totalAmount: parseFloat(amount) || 0,
     image: '', // À récupérer via API
-    orderId: orderId
+    transactionId: transaction_id
   }
 })
 </script>

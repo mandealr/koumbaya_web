@@ -415,16 +415,21 @@ const purchaseTickets = async () => {
 
     if (response && response.success) {
       if (window.$toast) {
-        window.$toast.success('🎉 Tickets achetés avec succès ! Confirmez le paiement sur votre téléphone.', '✅ Achat initié')
+        window.$toast.success(response.message || 'Commande créée avec succès !', '✅ Commande créée')
       }
 
-      // Refresh product data
-      await loadProduct()
-
-      // Reset quantity
-      ticketQuantity.value = 1
+      // Rediriger vers la page de sélection du moyen de paiement
+      router.push({
+        path: '/payment/method',
+        query: {
+          transaction_id: response.data.transaction_id,
+          amount: totalAmount,
+          lottery_id: lottery?.id,
+          quantity: ticketQuantity.value
+        }
+      })
     } else {
-      throw new Error(response?.message || 'Erreur lors de l\'achat des tickets')
+      throw new Error(response?.message || 'Erreur lors de la création de la commande')
     }
 
   } catch (error) {
