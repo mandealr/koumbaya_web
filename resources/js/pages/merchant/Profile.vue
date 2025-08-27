@@ -35,7 +35,7 @@
 
             <div class="mt-4 text-xs text-gray-500">
               <p>Membre depuis</p>
-              <p>{{ formatDate(user?.created_at) }}</p>
+              <p>{{ user?.created_at ? new Date(user.created_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Non disponible' }}</p>
             </div>
           </div>
         </div>
@@ -58,7 +58,7 @@
             </div>
             <div class="flex justify-between items-center">
               <span class="text-sm text-gray-600">Revenus ce mois</span>
-              <span class="font-semibold text-blue-600">{{ formatCurrency(stats.revenue || 0) }}</span>
+              <span class="font-semibold text-blue-600">{{ (stats.revenue || 0).toLocaleString('fr-FR') }} FCFA</span>
             </div>
           </div>
         </div>
@@ -319,22 +319,7 @@ const resetForm = () => {
   loadUserData()
 }
 
-const formatDate = (dateString) => {
-  if (!dateString) return 'Non disponible'
-  const date = new Date(dateString)
-  return date.toLocaleDateString('fr-FR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
 
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('fr-FR', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(amount || 0) + ' FCFA'
-}
 
 // Lifecycle
 onMounted(() => {
