@@ -10,36 +10,36 @@ class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
-     * 
+     *
      * Ordre de seeding pour la structure BD optimisée Koumbaya :
      * 1. Données de base (pays, langues, catégories)
-     * 2. Système de rôles et privilèges 
+     * 2. Système de rôles et privilèges
      * 3. Utilisateurs avec attribution de rôles
      * 4. Configuration et données métier
      */
     public function run(): void
     {
         $this->command->info('🚀 Démarrage du seeding Koumbaya BD optimisée...');
-        
+
         $this->call([
             // === ÉTAPE 1: Données de référence ===
-            // CountrySeeder::class,     // Déjà dans migration
-            // LanguageSeeder::class,    // Déjà dans migration  
+            CountrySeeder::class,     // Déjà dans migration
+            LanguageSeeder::class,    // Déjà dans migration
             CategorySeeder::class,
             UserTypeSeeder::class,       // Types : customer, merchant, admin
-            
+
             // === ÉTAPE 2: Système de sécurité ===
             RoleSeeder::class,           // Rôles optimisés pour chaque user_type
-            PermissionSeeder::class,     // Privilèges dans table privileges  
+            PermissionSeeder::class,     // Privilèges dans table privileges
             RolePermissionSeeder::class, // Associations roles ↔ privileges
-            
+
             // === ÉTAPE 3: Utilisateurs et profils ===
             UserSeeder::class,           // Utilisateurs avec nouvelle structure
-            
+
             // === ÉTAPE 4: Configuration système ===
             SettingsSeeder::class,       // Paramètres application
             PaymentMethodsSeeder::class, // Méthodes de paiement E-Billing
-            
+
             // === ÉTAPE 5: Données métier ===
             ProductSeeder::class,        // Produits pour démonstration
             LotterySeeder::class,        // Tombolas de test
