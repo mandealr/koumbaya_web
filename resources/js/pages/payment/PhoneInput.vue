@@ -96,7 +96,7 @@
             <input
               v-model="phoneNumber"
               type="tel"
-              :placeholder="selectedOperator === 'airtel' ? '74010203' : '65010203'"
+              :placeholder="selectedOperator === 'airtel' ? '074010203' : '065010203'"
               maxlength="9"
               :class="[
                 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent',
@@ -111,7 +111,7 @@
               {{ errors.phone }}
             </div>
             <div class="mt-2 text-xs text-gray-500">
-              Format: {{ selectedOperator === 'airtel' ? '74010203 (74, 77, 76 pour Airtel)' : '65010203 (65, 62, 66, 60 pour Moov)' }}
+              Format: {{ selectedOperator === 'airtel' ? '074010203 (074, 077, 076 pour Airtel)' : '065010203 (065, 062, 066, 060 pour Moov)' }}
             </div>
           </div>
 
@@ -216,9 +216,9 @@ const validatePhonePrefix = () => {
   const cleanPhone = phoneNumber.value
   
   if (selectedOperator.value === 'airtel') {
-    return cleanPhone.startsWith('74') || cleanPhone.startsWith('77') || cleanPhone.startsWith('76')
+    return cleanPhone.startsWith('074') || cleanPhone.startsWith('077') || cleanPhone.startsWith('076')
   } else if (selectedOperator.value === 'moov') {
-    return cleanPhone.startsWith('65') || cleanPhone.startsWith('62') || cleanPhone.startsWith('66') || cleanPhone.startsWith('60')
+    return cleanPhone.startsWith('065') || cleanPhone.startsWith('062') || cleanPhone.startsWith('066') || cleanPhone.startsWith('060')
   }
   return false
 }
@@ -239,7 +239,7 @@ const validatePhone = () => {
   }
   
   if (!validatePhonePrefix()) {
-    const prefix = selectedOperator.value === 'airtel' ? '74, 77 ou 76' : '65, 62, 66 ou 60'
+    const prefix = selectedOperator.value === 'airtel' ? '074, 077 ou 076' : '065, 062, 066 ou 060'
     errors.value.phone = `Le numéro doit commencer par ${prefix} pour ${selectedOperator.value === 'airtel' ? 'Airtel' : 'Moov'}`
     return false
   }
