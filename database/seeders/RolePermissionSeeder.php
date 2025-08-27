@@ -120,22 +120,23 @@ class RolePermissionSeeder extends Seeder
     }
 
     /**
-     * Assigner les privilèges à un rôle
+     * Assigner les privilèges à un rôle (évite les doublons)
      */
     private function assignPrivilegesToRole($roleId, $privilegeIds)
     {
-        $assignments = [];
         foreach ($privilegeIds as $privilegeId) {
-            $assignments[] = [
-                'role_id' => $roleId,
-                'privilege_id' => $privilegeId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
-
-        if (!empty($assignments)) {
-            DB::table('role_privileges')->insert($assignments);
+            DB::table('role_privileges')->updateOrInsert(
+                [
+                    'role_id' => $roleId,
+                    'privilege_id' => $privilegeId,
+                ],
+                [
+                    'role_id' => $roleId,
+                    'privilege_id' => $privilegeId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
         }
     }
 }

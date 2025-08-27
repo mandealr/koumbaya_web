@@ -1,21 +1,29 @@
 <?php
 
-namespace Database\Seeders;
-
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-class UserTypeSeeder extends Seeder
+return new class extends Migration
 {
-    /**
-     * Run the database seeds.
-     * 
-     * Crée les types d'utilisateurs selon le système Koumbaya
-     */
-    public function run(): void
+    public function up(): void
     {
-        $userTypes = [
+        Schema::create('user_types', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 50);
+            $table->string('code', 20)->unique();
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+            
+            // Index pour performance
+            $table->index('code');
+            $table->index('is_active');
+        });
+        
+        // Données par défaut
+        DB::table('user_types')->insert([
             [
                 'name' => 'Marchand',
                 'code' => 'merchant',
@@ -39,20 +47,12 @@ class UserTypeSeeder extends Seeder
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
-        ];
-
-        // Insérer les types d'utilisateurs (évite les doublons)
-        foreach ($userTypes as $userType) {
-            DB::table('user_types')->updateOrInsert(
-                ['code' => $userType['code']],
-                $userType
-            );
-        }
-
-        echo "✅ Types d'utilisateurs créés :\n";
-        echo "   - Marchand (merchant) : Utilisateurs vendeurs\n";
-        echo "   - Client (customer) : Utilisateurs acheteurs\n";
-        echo "   - Administrateur (admin) : Administrateurs système\n";
+            ]
+        ]);
     }
-}
+
+    public function down(): void
+    {
+        Schema::dropIfExists('user_types');
+    }
+};

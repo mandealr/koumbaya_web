@@ -181,7 +181,16 @@ class UserSeeder extends Seeder
             $roleAssignment = $userData['role_assignment'];
             unset($userData['role_assignment']); // Retirer ce champ pour l'insertion
 
-            $userId = DB::table('users')->insertGetId($userData);
+            // Vérifier si l'utilisateur existe déjà
+            $existingUser = DB::table('users')->where('email', $userData['email'])->first();
+            
+            if ($existingUser) {
+                $userId = $existingUser->id;
+                echo "⚠️  Utilisateur existe déjà : " . $userData['email'] . " (ignoré)\n";
+            } else {
+                $userId = DB::table('users')->insertGetId($userData);
+                echo "✅ Utilisateur créé : " . $userData['email'] . " (" . $roleAssignment . ")\n";
+            }
 
             // Attribution des rôles
             $this->assignUserRole($userId, $roleAssignment);
@@ -190,8 +199,6 @@ class UserSeeder extends Seeder
             if ($userData['user_type_id'] === $customerTypeId || $userData['user_type_id'] === $merchantTypeId) {
                 $this->createUserWallet($userId, $userData['user_type_id'], $customerTypeId, $merchantTypeId);
             }
-
-            echo "✅ Utilisateur créé : " . $userData['email'] . " (" . $roleAssignment . ")\n";
         }
 
         echo "\n🎯 " . count($users) . " utilisateurs de test créés avec la nouvelle structure BD.\n";
@@ -205,12 +212,18 @@ class UserSeeder extends Seeder
         $role = DB::table('roles')->where('name', $roleName)->first();
 
         if ($role) {
-            DB::table('user_roles')->insert([
-                'user_id' => $userId,
-                'role_id' => $role->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            DB::table('user_roles')->updateOrInsert(
+                [
+                    'user_id' => $userId,
+                    'role_id' => $role->id,
+                ],
+                [
+                    'user_id' => $userId,
+                    'role_id' => $role->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
         }
     }
 
@@ -226,14 +239,17 @@ class UserSeeder extends Seeder
             default => 0
         };
 
-        DB::table('user_wallets')->insert([
-            'user_id' => $userId,
-            'balance' => $initialBalance,
-            'pending_balance' => 0,
-            'currency' => 'XAF',
-            'is_active' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        DB::table('user_wallets')->updateOrInsert(
+            ['user_id' => $userId],
+            [
+                'user_id' => $userId,
+                'balance' => $initialBalance,
+                'pending_balance' => 0,
+                'currency' => 'XAF',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
     }
 }

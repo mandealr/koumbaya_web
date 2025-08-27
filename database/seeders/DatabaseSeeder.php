@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
             // === ÉTAPE 5: Données métier ===
             ProductSeeder::class,        // Produits pour démonstration
             LotterySeeder::class,        // Tombolas de test
-            UserRatingSeeder::class,     // Évaluations utilisateurs
+            // UserRatingSeeder::class,     // Évaluations utilisateurs (désactivé)
         ]);
 
         $this->command->info('✅ Seeding Koumbaya BD optimisée terminé avec succès !');

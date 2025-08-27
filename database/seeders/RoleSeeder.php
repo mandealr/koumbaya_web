@@ -76,8 +76,13 @@ class RoleSeeder extends Seeder
             ],
         ];
 
-        // Insérer les rôles dans la table 'roles' existante
-        DB::table('roles')->insert($roles);
+        // Insérer les rôles dans la table 'roles' existante (évite les doublons)
+        foreach ($roles as $role) {
+            DB::table('roles')->updateOrInsert(
+                ['name' => $role['name'], 'user_type_id' => $role['user_type_id']],
+                $role
+            );
+        }
 
         echo "✅ Rôles Koumbaya créés (compatibles code existant) :\n";
         echo "   - Particulier (pour customers)\n";

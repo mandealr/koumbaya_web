@@ -240,8 +240,13 @@ class PermissionSeeder extends Seeder
             ],
         ];
 
-        // Insérer dans la table 'privileges'
-        DB::table('privileges')->insert($permissions);
+        // Insérer dans la table 'privileges' (évite les doublons)
+        foreach ($permissions as $permission) {
+            DB::table('privileges')->updateOrInsert(
+                ['name' => $permission['name'], 'user_type_id' => $permission['user_type_id']],
+                $permission
+            );
+        }
 
         echo "✅ " . count($permissions) . " privilèges créés avec succès.\n";
         echo "   - " . count(array_filter($permissions, fn($p) => $p['user_type_id'] === $customerTypeId)) . " privilèges pour clients\n";
