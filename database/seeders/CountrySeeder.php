@@ -217,9 +217,19 @@ class CountrySeeder extends Seeder
         ];
 
         foreach ($countries as $country) {
-            Country::updateOrCreate(
-                ['iso_code_2' => $country['iso_code_2']],
-                $country
+            // Adapter les champs pour la structure existante
+            $countryData = [
+                'name' => $country['name'],
+                'code' => $country['iso_code_2'], // Utiliser iso_code_2 comme code
+                'phone_code' => $country['phone_code'],
+                'flag' => $country['flag'] ?? null,
+                'is_active' => $country['is_active'] ?? true,
+                'sort_order' => 0,
+            ];
+            
+            Country::firstOrCreate(
+                ['code' => $countryData['code']],
+                $countryData
             );
         }
     }

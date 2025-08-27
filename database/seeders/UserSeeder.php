@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
         $adminTypeId = UserType::where('code', 'admin')->first()->id;
 
         // Récupérer l'ID du Gabon
-        $gabonId = Country::where('iso_code_2', 'GA')->first()->id ?? 1;
+        $gabonId = Country::where('code', 'GA')->first()->id ?? 1;
 
         // Récupérer l'ID de la langue française
         $frenchId = Language::where('code', 'fr')->first()->id ?? 1;

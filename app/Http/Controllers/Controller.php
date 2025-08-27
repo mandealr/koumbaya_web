@@ -105,8 +105,8 @@ use Illuminate\Routing\Controller as BaseController;
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="paid_at", type="string", format="date-time", nullable=true),
  *     @OA\Property(property="fulfilled_at", type="string", format="date-time", nullable=true),
- *     @OA\Property(property="product", type="object", nullable=true, ref="#/components/schemas/ProductSummary"),
- *     @OA\Property(property="lottery", type="object", nullable=true, ref="#/components/schemas/LotterySummary"),
+ *     @OA\Property(property="product", type="object", nullable=true),
+ *     @OA\Property(property="lottery", type="object", nullable=true),
  *     @OA\Property(property="payments_count", type="integer", example=1),
  *     @OA\Property(property="latest_payment_status", type="string", example="paid", nullable=true)
  * )
@@ -128,14 +128,6 @@ use Illuminate\Routing\Controller as BaseController;
  *     @OA\Property(property="draw_date", type="string", format="date-time")
  * )
  * 
- * @OA\Schema(
- *     schema="PaginationMeta",
- *     title="Métadonnées de pagination",
- *     @OA\Property(property="current_page", type="integer", example=1),
- *     @OA\Property(property="last_page", type="integer", example=3),
- *     @OA\Property(property="per_page", type="integer", example=10),
- *     @OA\Property(property="total", type="integer", example=25)
- * )
  * 
  * @OA\Schema(
  *     schema="PaymentCallbackRequest",

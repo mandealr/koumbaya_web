@@ -404,7 +404,7 @@ class PaymentController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *         response=200,
+     *         response=202,
      *         description="Callback déjà traité (idempotence)",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=true),

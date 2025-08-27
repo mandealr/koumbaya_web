@@ -90,7 +90,7 @@ class AdminLotteryController extends Controller
      *         @OA\JsonContent(
      *             type="object",
      *             @OA\Property(property="current_page", type="integer"),
-     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/LotteryWithStats")),
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object")),
      *             @OA\Property(property="total", type="integer"),
      *             @OA\Property(property="per_page", type="integer")
      *         )
@@ -166,7 +166,7 @@ class AdminLotteryController extends Controller
      *                 property="recent_draws",
      *                 type="array",
      *                 description="10 derniers tirages effectués",
-     *                 @OA\Items(ref="#/components/schemas/DrawHistory")
+     *                 @OA\Items(type="object")
      *             ),
      *             @OA\Property(
      *                 property="monthly_revenue",
@@ -237,7 +237,7 @@ class AdminLotteryController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Détails de la tombola avec participants et historique",
-     *         @OA\JsonContent(ref="#/components/schemas/LotteryDetails")
+     *         @OA\JsonContent(type="object")
      *     ),
      *     @OA\Response(response=404, description="Tombola non trouvée"),
      *     @OA\Response(response=403, description="Accès non autorisé")
@@ -296,8 +296,8 @@ class AdminLotteryController extends Controller
      *             type="object",
      *             @OA\Property(property="success", type="boolean"),
      *             @OA\Property(property="message", type="string"),
-     *             @OA\Property(property="winner", ref="#/components/schemas/Winner"),
-     *             @OA\Property(property="draw_history", ref="#/components/schemas/DrawHistory")
+     *             @OA\Property(property="winner", type="object"),
+     *             @OA\Property(property="draw_history", type="object")
      *         )
      *     ),
      *     @OA\Response(
@@ -601,7 +601,7 @@ class AdminLotteryController extends Controller
      *         @OA\JsonContent(
      *             type="object",
      *             @OA\Property(property="message", type="string"),
-     *             @OA\Property(property="lottery", ref="#/components/schemas/Lottery")
+     *             @OA\Property(property="lottery", type="object")
      *         )
      *     ),
      *     @OA\Response(
@@ -655,7 +655,7 @@ class AdminLotteryController extends Controller
      *         description="Données de la tombola pour export",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="lottery", ref="#/components/schemas/Lottery"),
+     *             @OA\Property(property="lottery", type="object"),
      *             @OA\Property(
      *                 property="participants",
      *                 type="array",
