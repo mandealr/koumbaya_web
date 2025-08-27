@@ -12,6 +12,7 @@
           :src="previewUrl || currentAvatarUrl"
           :alt="altText"
           class="w-full h-full object-cover"
+          @error="onImageError"
         />
         <!-- Placeholder si pas d'image -->
         <div v-else class="flex flex-col items-center justify-center text-gray-400">
@@ -95,6 +96,7 @@
 import { ref, computed } from 'vue'
 import { useApi } from '@/composables/api'
 import { UserIcon, CameraIcon, CloudArrowUpIcon } from '@heroicons/vue/24/outline'
+import { handleImageError, PLACEHOLDERS } from '@/utils/imageUtils'
 
 // Props
 const props = defineProps({
@@ -260,6 +262,12 @@ const uploadAvatar = async () => {
     isUploading.value = false
     emit('upload-end')
   }
+}
+
+// Gestion d'erreur pour les images
+const onImageError = (event) => {
+  console.log('Avatar image failed to load, using placeholder')
+  handleImageError(event, 'Avatar')
 }
 </script>
 

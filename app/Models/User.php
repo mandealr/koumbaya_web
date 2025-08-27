@@ -92,6 +92,30 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the full URL for the user's avatar
+     */
+    public function getAvatarUrlAttribute($value)
+    {
+        // Si pas d'avatar, retourner null pour utiliser le placeholder par défaut
+        if (!$value) {
+            return null;
+        }
+
+        // Si c'est déjà une URL complète, la retourner telle quelle
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            return $value;
+        }
+
+        // Construire l'URL via l'API avatar pour gérer les erreurs
+        $baseUrl = config('app.url', 'https://koumbaya.com');
+        
+        // Extraire le nom du fichier
+        $filename = basename($value);
+        
+        return $baseUrl . '/api/avatars/' . $filename;
+    }
+
+    /**
      * Relations
      */
     public function userType()

@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\AdminSettingsController;
 use App\Http\Controllers\Api\AdminProfileController;
 use App\Http\Controllers\Api\OrderTrackingController;
 use App\Http\Controllers\Api\PaymentTrackingController;
+use App\Http\Controllers\Api\AvatarController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +39,10 @@ use App\Http\Controllers\Api\PaymentTrackingController;
 |
 */
 
+// Route publique pour les avatars
+Route::get('/avatars/{filename}', [AvatarController::class, 'show'])
+    ->name('avatar.show')
+    ->where('filename', '.*');
 
 // Routes d'authentification avec rate limiting
 Route::group([
