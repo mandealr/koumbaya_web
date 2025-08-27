@@ -15,8 +15,7 @@ class Product extends Model
         'description',
         'image',
         'price',
-        'ticket_price',
-        'min_participants',
+        'currency',
         'stock_quantity',
         'category_id',
         'merchant_id',
@@ -24,6 +23,7 @@ class Product extends Model
         'is_featured',
         'is_active',
         'views_count',
+        'meta',
     ];
 
     /**
@@ -55,9 +55,9 @@ class Product extends Model
     {
         return [
             'price' => 'decimal:2',
-            'ticket_price' => 'decimal:2',
             'is_featured' => 'boolean',
             'is_active' => 'boolean',
+            'meta' => 'array',
         ];
     }
 
@@ -178,16 +178,19 @@ class Product extends Model
      */
     public function canCreateLottery()
     {
+        $ticketPrice = $this->meta['ticket_price'] ?? 100;
         return $this->is_active === true && 
                $this->stock_quantity > 0 && 
                $this->sale_mode === 'lottery' &&
-               $this->ticket_price >= 100 &&
+               $ticketPrice >= 100 &&
                !$this->activeLottery()->exists();
     }
 
     public function getTotalParticipationAmount()
     {
-        return $this->ticket_price * $this->min_participants;
+        $ticketPrice = $this->meta['ticket_price'] ?? 100;
+        $minParticipants = $this->meta['min_participants'] ?? 1000;
+        return $ticketPrice * $minParticipants;
     }
 
     /**
@@ -329,8 +332,8 @@ class Product extends Model
             'slug' => $this->slug,
             'description' => $this->description,
             'price' => (float) $this->price,
-            'ticket_price' => (float) $this->ticket_price,
-            'min_participants' => $this->min_participants,
+            'ticket_price' => (float) ($this->meta['ticket_price'] ?? 0),
+            'min_participants' => $this->meta['min_participants'] ?? 1000,
             'image' => $this->image,
             'image_url' => $this->image_url,
             'main_image' => $this->main_image,
