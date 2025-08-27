@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Lottery;
 use App\Models\LotteryTicket;
 use App\Models\Transaction;
+use App\Models\Order;
 use App\Models\Product;
 use App\Services\EBillingService;
 use App\Services\NotificationService;
 use App\Services\LotteryDrawService;
+use App\Services\MetricsService;
 use App\Models\DrawHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -26,12 +28,14 @@ class LotteryController extends Controller
 {
     protected $notificationService;
     protected $drawService;
+    protected MetricsService $metricsService;
 
-    public function __construct(NotificationService $notificationService, LotteryDrawService $drawService)
+    public function __construct(NotificationService $notificationService, LotteryDrawService $drawService, MetricsService $metricsService)
     {
         $this->middleware('auth:sanctum', ['except' => ['index', 'show', 'active']]);
         $this->notificationService = $notificationService;
         $this->drawService = $drawService;
+        $this->metricsService = $metricsService;
     }
 
     /**
@@ -371,10 +375,22 @@ class LotteryController extends Controller
 
         DB::beginTransaction();
         try {
-            // Créer la transaction
+            // Créer d'abord l'ordre
+            $order = Order::create([
+                'order_number' => Order::generateOrderNumber(),
+                'user_id' => $user->id,
+                'type' => Order::TYPE_LOTTERY,
+                'lottery_id' => $lottery->id,
+                'total_amount' => $totalAmount,
+                'currency' => 'XAF',
+                'status' => Order::STATUS_PENDING,
+            ]);
+
+            // Créer la transaction liée à l'ordre
             $transaction = Transaction::create([
                 'reference' => 'TKT-' . time() . '-' . $user->id,
                 'user_id' => $user->id,
+                'order_id' => $order->id,
                 'type' => 'ticket_purchase',
                 'amount' => $totalAmount,
                 'currency' => 'XAF',

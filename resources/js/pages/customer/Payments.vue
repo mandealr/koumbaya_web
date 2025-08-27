@@ -153,14 +153,29 @@
                 </div>
                 
                 <div class="text-sm text-gray-600 mb-2">
-                  <span v-if="payment.transaction && payment.transaction.product">
-                    {{ payment.transaction.product.name }}
+                  <span v-if="payment.order">
+                    <router-link 
+                      :to="{ name: 'customer.order.detail', params: { id: payment.order.order_number } }"
+                      class="text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      Commande #{{ payment.order.order_number }}
+                    </router-link>
+                    <span class="text-gray-400 mx-2">•</span>
+                    <span v-if="payment.order.product">
+                      {{ payment.order.product.name }}
+                    </span>
+                    <span v-else-if="payment.order.lottery">
+                      Loterie #{{ payment.order.lottery.lottery_number }}
+                    </span>
+                  </span>
+                  <span v-else-if="payment.transaction && payment.transaction.product">
+                    {{ payment.transaction.product.name }} (Legacy)
                   </span>
                   <span v-else-if="payment.transaction && payment.transaction.lottery">
-                    Loterie #{{ payment.transaction.lottery.lottery_number }}
+                    Loterie #{{ payment.transaction.lottery.lottery_number }} (Legacy)
                   </span>
                   <span v-else>
-                    Paiement
+                    Paiement sans commande associée
                   </span>
                 </div>
                 
@@ -170,9 +185,12 @@
                   <span v-if="payment.phone_number">{{ payment.phone_number }}</span>
                 </div>
 
-                <!-- Timeout info pour les paiements en attente -->
+                <!-- Timeout info pour les paiements en attente/expirés -->
                 <div v-if="payment.status === 'pending' && payment.timeout_at" class="mt-2 text-xs text-orange-600">
-                  Expire le {{ formatDate(payment.timeout_at) }}
+                  ⏰ Expire le {{ formatDate(payment.timeout_at) }}
+                </div>
+                <div v-else-if="payment.status === 'expired'" class="mt-2 text-xs text-red-600">
+                  ❌ Expiré le {{ formatDate(payment.timeout_at || payment.updated_at) }}
                 </div>
               </div>
               
@@ -184,14 +202,26 @@
                   Détails
                 </router-link>
                 
-                <!-- Bouton relancer pour les paiements expirés -->
-                <button 
-                  v-if="payment.status === 'expired' && payment.transaction_id"
-                  @click="retryPayment(payment.transaction_id)"
-                  class="bg-orange-600 text-white px-3 py-1 rounded text-sm hover:bg-orange-700"
-                >
-                  Relancer
-                </button>
+                <!-- Actions -->
+                <div class="flex flex-col space-y-1">
+                  <!-- Lien vers la commande si disponible -->
+                  <router-link 
+                    v-if="payment.order"
+                    :to="{ name: 'customer.order.detail', params: { id: payment.order.order_number } }"
+                    class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 text-center"
+                  >
+                    Voir commande
+                  </router-link>
+                  
+                  <!-- Bouton relancer pour les paiements expirés -->
+                  <button 
+                    v-if="payment.status === 'expired' && (payment.order || payment.transaction_id)"
+                    @click="retryPayment(payment)"
+                    class="bg-orange-600 text-white px-3 py-1 rounded text-sm hover:bg-orange-700"
+                  >
+                    🔄 Relancer
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -295,9 +325,48 @@
                 </dl>
               </div>
               
-              <!-- Transaction associée -->
-              <div v-if="selectedPayment.transaction">
-                <h4 class="text-md font-medium text-gray-900 mb-3">Transaction associée</h4>
+              <!-- Commande associée -->
+              <div v-if="selectedPayment.order">
+                <h4 class="text-md font-medium text-gray-900 mb-3">Commande associée</h4>
+                <div class="border rounded-lg p-4 bg-gray-50">
+                  <div class="flex items-center justify-between mb-2">
+                    <p class="font-medium">{{ selectedPayment.order.order_number }}</p>
+                    <router-link 
+                      :to="{ name: 'customer.order.detail', params: { id: selectedPayment.order.order_number } }"
+                      class="text-blue-600 hover:text-blue-800 text-sm"
+                    >
+                      Voir détails →
+                    </router-link>
+                  </div>
+                  <p class="text-sm text-gray-600 mt-1">
+                    {{ selectedPayment.order.product?.name || selectedPayment.order.lottery?.title || 'Commande' }}
+                  </p>
+                  <div class="grid grid-cols-2 gap-4 mt-3 text-xs">
+                    <div>
+                      <span class="text-gray-500">Type:</span>
+                      <span class="ml-1 font-medium">{{ getOrderTypeText(selectedPayment.order.type) }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-500">Statut:</span>
+                      <span class="ml-1">
+                        <span :class="getStatusBadgeClass(selectedPayment.order.status)" class="text-xs">{{ getStatusText(selectedPayment.order.status) }}</span>
+                      </span>
+                    </div>
+                    <div>
+                      <span class="text-gray-500">Total:</span>
+                      <span class="ml-1 font-medium">{{ formatPrice(selectedPayment.order.total_amount) }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-500">Créée le:</span>
+                      <span class="ml-1">{{ formatDate(selectedPayment.order.created_at) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Transaction associée (fallback) -->
+              <div v-else-if="selectedPayment.transaction">
+                <h4 class="text-md font-medium text-gray-900 mb-3">Transaction associée (Legacy)</h4>
                 <div class="border rounded-lg p-4 bg-gray-50">
                   <p class="font-medium">{{ selectedPayment.transaction.reference }}</p>
                   <p class="text-sm text-gray-600 mt-1">
@@ -386,35 +455,42 @@ const loadPayments = async (page = 1) => {
     if (filters.status) params.append('status', filters.status)
     if (filters.method) params.append('method', filters.method)
 
-    // Essayer d'abord l'API des paiements
+    // Essayer d'abord l'API des paiements dédiée
     try {
       const response = await apiRequest(`/api/payments?${params.toString()}`, 'GET')
       if (response.success) {
         payments.value = response.data
         pagination.value = response.pagination
+        return
       }
     } catch (paymentsError) {
-      console.log('API paiements non disponible, utilisation de l\'API commandes:', paymentsError)
+      console.log('API paiements dédiée non disponible:', paymentsError)
+    }
+    
+    // Fallback: extraire les paiements des commandes
+    const ordersResponse = await apiRequest(`/api/orders?${params.toString()}`, 'GET')
+    if (ordersResponse.success) {
+      const allPayments = []
       
-      // Fallback sur l'API des transactions
-      const response = await apiRequest(`/api/orders?${params.toString()}`, 'GET')
-      if (response.success) {
-        // Transformer les données pour ressembler à des paiements
-        payments.value = response.data.map(transaction => ({
-          id: transaction.id,
-          billing_id: transaction.external_transaction_id,
-          amount: transaction.amount,
-          status: transaction.status === 'completed' ? 'paid' : transaction.status,
-          payment_method: transaction.payment_method || 'airtel_money',
-          phone_number: transaction.phone_number,
-          transaction_id: transaction.transaction_id,
-          transaction: transaction,
-          created_at: transaction.created_at,
-          updated_at: transaction.updated_at,
-          timeout_at: transaction.status === 'pending' ? transaction.expires_at : null
-        }))
-        pagination.value = response.pagination
-      }
+      // Extraire tous les paiements de toutes les commandes
+      ordersResponse.data.forEach(order => {
+        if (order.payments && order.payments.length > 0) {
+          order.payments.forEach(payment => {
+            allPayments.push({
+              ...payment,
+              order: order, // Lien vers la commande
+              transaction_id: null, // Plus nécessaire avec les commandes
+              timeout_at: payment.status === 'pending' ? payment.expires_at : null
+            })
+          })
+        }
+      })
+      
+      // Trier par date de création (plus récent en premier)
+      allPayments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      
+      payments.value = allPayments
+      pagination.value = ordersResponse.pagination
     }
   } catch (error) {
     showError('Erreur lors du chargement des paiements')
@@ -431,14 +507,28 @@ const viewPaymentDetails = (payment) => {
 }
 
 // Relancer un paiement
-const retryPayment = (transactionId) => {
-  router.push({
-    name: 'payment.phone',
-    query: {
-      transaction_id: transactionId,
-      retry: 'true'
-    }
-  })
+const retryPayment = (payment) => {
+  if (payment.order && payment.order.order_number) {
+    // Nouveau flow avec order_number
+    router.push({
+      name: 'payment.phone',
+      query: {
+        order_number: payment.order.order_number,
+        retry: 'true'
+      }
+    })
+  } else if (payment.transaction_id) {
+    // Fallback pour l'ancien flow avec transaction_id
+    router.push({
+      name: 'payment.phone',
+      query: {
+        transaction_id: payment.transaction_id,
+        retry: 'true'
+      }
+    })
+  } else {
+    showError('Impossible de relancer ce paiement. Informations manquantes.')
+  }
 }
 
 // Fermer le modal
@@ -472,6 +562,14 @@ const getTransactionTypeText = (type) => {
   const typeMap = {
     'ticket_purchase': 'Achat de billet',
     'direct_purchase': 'Achat direct'
+  }
+  return typeMap[type] || type
+}
+
+const getOrderTypeText = (type) => {
+  const typeMap = {
+    'lottery': 'Loterie',
+    'direct': 'Achat direct'
   }
   return typeMap[type] || type
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Enums\PaymentStatus;
 
 class Payment extends Model
 {
@@ -11,8 +12,8 @@ class Payment extends Model
 
     protected $fillable = [
         'reference',
-        'transaction_id',
         'user_id',
+        'order_id',
         'amount',
         'currency',
         'customer_name',
@@ -27,6 +28,7 @@ class Payment extends Model
         'payment_method',
         'external_transaction_id',
         'gateway_response',
+        'callback_data',
         'status',
         'paid_at',
         'processed_at',
@@ -38,6 +40,7 @@ class Payment extends Model
             'amount' => 'decimal:2',
             'gateway_config' => 'array',
             'gateway_response' => 'array',
+            'callback_data' => 'array',
             'paid_at' => 'datetime',
             'processed_at' => 'datetime',
         ];
@@ -46,9 +49,9 @@ class Payment extends Model
     /**
      * Relations
      */
-    public function transaction()
+    public function order()
     {
-        return $this->belongsTo(Transaction::class, 'transaction_id');
+        return $this->belongsTo(Order::class, 'order_id');
     }
 
     public function user()
@@ -89,17 +92,25 @@ class Payment extends Model
      */
     public function getIsPaidAttribute()
     {
-        return in_array($this->status, ['paid', 'processed']);
+        return $this->status === PaymentStatus::PAID->value;
     }
 
     public function getIsPendingAttribute()
     {
-        return $this->status === 'pending';
+        return $this->status === PaymentStatus::PENDING->value;
     }
 
     public function getIsFailedAttribute()
     {
-        return in_array($this->status, ['failed', 'expired']);
+        return in_array($this->status, [PaymentStatus::FAILED->value, PaymentStatus::EXPIRED->value]);
+    }
+
+    /**
+     * Get payment status as enum
+     */
+    public function getStatusEnumAttribute(): PaymentStatus
+    {
+        return PaymentStatus::from($this->status);
     }
 
     /**

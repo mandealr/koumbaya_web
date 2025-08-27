@@ -13,6 +13,7 @@ class Transaction extends Model
         'reference',
         'transaction_id',
         'user_id',
+        'order_id',
         'type',
         'amount',
         'currency',
@@ -83,7 +84,12 @@ class Transaction extends Model
 
     public function payments()
     {
-        return $this->hasMany(Payment::class, 'transaction_id');
+        return $this->hasManyThrough(Payment::class, Order::class, 'id', 'order_id', 'order_id', 'id');
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'order_id');
     }
 
     /**

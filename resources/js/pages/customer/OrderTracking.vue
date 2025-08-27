@@ -30,8 +30,8 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">Complétées</p>
-            <p class="text-2xl font-semibold text-gray-900">{{ stats.completed_orders }}</p>
+            <p class="text-sm font-medium text-gray-600">Payées</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ stats.paid_orders }}</p>
           </div>
         </div>
       </div>
@@ -86,10 +86,13 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les statuts</option>
-            <option value="completed">Complété</option>
+            <option value="paid">Payé</option>
             <option value="pending">En attente</option>
-            <option value="payment_initiated">Paiement initié</option>
+            <option value="awaiting_payment">En attente de paiement</option>
             <option value="failed">Échoué</option>
+            <option value="cancelled">Annulé</option>
+            <option value="fulfilled">Livré</option>
+            <option value="refunded">Remboursé</option>
           </select>
         </div>
         
@@ -100,8 +103,8 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les types</option>
-            <option value="ticket_purchase">Achat de billet</option>
-            <option value="direct_purchase">Achat direct</option>
+            <option value="lottery">Loterie</option>
+            <option value="direct">Achat direct</option>
           </select>
         </div>
         
@@ -147,7 +150,7 @@
             <div class="flex justify-between items-start">
               <div class="flex-1">
                 <div class="flex items-center space-x-3 mb-2">
-                  <h3 class="text-lg font-medium text-gray-900">#{{ order.transaction_id }}</h3>
+                  <h3 class="text-lg font-medium text-gray-900">#{{ order.order_number }}</h3>
                   <span :class="getStatusBadgeClass(order.status)">{{ getStatusText(order.status) }}</span>
                   <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">{{ getTypeText(order.type) }}</span>
                 </div>
@@ -159,18 +162,25 @@
                 
                 <div class="flex items-center space-x-4 text-sm text-gray-500">
                   <span>{{ formatDate(order.created_at) }}</span>
-                  <span>{{ order.amount }} {{ order.currency }}</span>
-                  <span v-if="order.quantity">{{ order.quantity }} billet(s)</span>
+                  <span>{{ formatPrice(order.total_amount) }}</span>
+                  <span v-if="order.payments_count">{{ order.payments_count }} paiement(s)</span>
                 </div>
               </div>
               
               <div class="flex space-x-2">
                 <router-link 
-                  :to="{ name: 'customer.order.detail', params: { id: order.transaction_id } }"
+                  :to="{ name: 'customer.order.detail', params: { id: order.order_number } }"
                   class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
                 >
                   Détails
                 </router-link>
+                <button 
+                  v-if="['paid', 'fulfilled'].includes(order.status)"
+                  @click="downloadInvoice(order.order_number)"
+                  class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                >
+                  Facture
+                </button>
               </div>
             </div>
           </div>
@@ -240,8 +250,8 @@
                 <h4 class="text-md font-medium text-gray-900 mb-3">Informations de la commande</h4>
                 <dl class="space-y-2">
                   <div class="flex justify-between">
-                    <dt class="text-sm text-gray-600">Référence:</dt>
-                    <dd class="text-sm font-medium">{{ selectedOrder.transaction_id }}</dd>
+                    <dt class="text-sm text-gray-600">Numéro de commande:</dt>
+                    <dd class="text-sm font-medium">{{ selectedOrder.order_number }}</dd>
                   </div>
                   <div class="flex justify-between">
                     <dt class="text-sm text-gray-600">Statut:</dt>
@@ -253,7 +263,7 @@
                   </div>
                   <div class="flex justify-between">
                     <dt class="text-sm text-gray-600">Montant:</dt>
-                    <dd class="text-sm font-medium">{{ selectedOrder.amount }} {{ selectedOrder.currency }}</dd>
+                    <dd class="text-sm font-medium">{{ formatPrice(selectedOrder.total_amount) }}</dd>
                   </div>
                   <div class="flex justify-between">
                     <dt class="text-sm text-gray-600">Méthode de paiement:</dt>
@@ -263,9 +273,13 @@
                     <dt class="text-sm text-gray-600">Date de création:</dt>
                     <dd class="text-sm">{{ formatDate(selectedOrder.created_at) }}</dd>
                   </div>
-                  <div v-if="selectedOrder.completed_at" class="flex justify-between">
-                    <dt class="text-sm text-gray-600">Date de completion:</dt>
-                    <dd class="text-sm">{{ formatDate(selectedOrder.completed_at) }}</dd>
+                  <div v-if="selectedOrder.paid_at" class="flex justify-between">
+                    <dt class="text-sm text-gray-600">Date de paiement:</dt>
+                    <dd class="text-sm">{{ formatDate(selectedOrder.paid_at) }}</dd>
+                  </div>
+                  <div v-if="selectedOrder.fulfilled_at" class="flex justify-between">
+                    <dt class="text-sm text-gray-600">Date de livraison:</dt>
+                    <dd class="text-sm">{{ formatDate(selectedOrder.fulfilled_at) }}</dd>
                   </div>
                 </dl>
               </div>
@@ -309,11 +323,35 @@
                   <div class="flex justify-between items-start">
                     <div>
                       <p class="font-medium">{{ ticket.ticket_number }}</p>
-                      <p class="text-sm text-gray-600">{{ ticket.price_paid }} {{ selectedOrder.currency }}</p>
+                      <p class="text-sm text-gray-600">{{ formatPrice(ticket.price_paid) }}</p>
                     </div>
                     <div class="text-right">
                       <span :class="getStatusBadgeClass(ticket.status)">{{ getStatusText(ticket.status) }}</span>
                       <p v-if="ticket.is_winner" class="text-sm text-green-600 mt-1">🎉 Gagnant!</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Paiements -->
+            <div v-if="selectedOrder.payments && selectedOrder.payments.length > 0" class="mt-6">
+              <h4 class="text-md font-medium text-gray-900 mb-3">Paiements</h4>
+              <div class="space-y-3">
+                <div 
+                  v-for="payment in selectedOrder.payments" 
+                  :key="payment.id"
+                  class="border rounded-lg p-4 bg-gray-50"
+                >
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <p class="font-medium">{{ payment.reference }}</p>
+                      <p class="text-sm text-gray-600">{{ formatPrice(payment.amount) }}</p>
+                      <p class="text-sm text-gray-500">{{ payment.payment_method || 'Non spécifié' }}</p>
+                    </div>
+                    <div class="text-right">
+                      <span :class="getStatusBadgeClass(payment.status)">{{ getStatusText(payment.status) }}</span>
+                      <p v-if="payment.paid_at" class="text-sm text-gray-500 mt-1">{{ formatDate(payment.paid_at) }}</p>
                     </div>
                   </div>
                 </div>
@@ -338,9 +376,15 @@ const { showError } = useToast()
 const orders = ref([])
 const stats = ref({
   total_orders: 0,
-  completed_orders: 0,
+  paid_orders: 0,
   pending_orders: 0,
-  total_tickets_purchased: 0
+  failed_orders: 0,
+  fulfilled_orders: 0,
+  total_amount_spent: 0,
+  lottery_orders: 0,
+  direct_orders: 0,
+  total_tickets_purchased: 0,
+  winning_tickets: 0
 })
 const pagination = ref(null)
 const loading = ref(false)
@@ -390,13 +434,43 @@ const loadOrders = async (page = 1) => {
 }
 
 // Voir les détails d'une commande
-const viewOrderDetails = async (transactionId) => {
+const viewOrderDetails = async (orderNumber) => {
   try {
-    const response = await apiRequest(`/api/orders/${transactionId}`, 'GET')
+    const response = await apiRequest(`/api/orders/${orderNumber}`, 'GET')
     selectedOrder.value = response.data
     showModal.value = true
   } catch (error) {
     showError('Erreur lors du chargement des détails')
+    console.error('Erreur:', error)
+  }
+}
+
+// Télécharger la facture PDF
+const downloadInvoice = async (orderNumber) => {
+  try {
+    const response = await fetch(`/api/orders/${orderNumber}/invoice`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Accept': 'application/pdf'
+      }
+    })
+    
+    if (!response.ok) {
+      throw new Error('Erreur lors du téléchargement')
+    }
+    
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `facture-${orderNumber}.pdf`
+    document.body.appendChild(a)
+    a.click()
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(a)
+  } catch (error) {
+    showError('Erreur lors du téléchargement de la facture')
     console.error('Erreur:', error)
   }
 }
@@ -410,20 +484,26 @@ const closeModal = () => {
 // Fonctions utilitaires
 const getStatusText = (status) => {
   const statusMap = {
-    'completed': 'Complété',
     'pending': 'En attente',
-    'payment_initiated': 'Paiement initié',
-    'failed': 'Échoué',
+    'awaiting_payment': 'En attente de paiement',
     'paid': 'Payé',
-    'refunded': 'Remboursé'
+    'failed': 'Échoué',
+    'cancelled': 'Annulé',
+    'fulfilled': 'Livré',
+    'refunded': 'Remboursé',
+    'completed': 'Complété', // Legacy support
+    'payment_initiated': 'Paiement initié', // Legacy support
+    'active': 'Actif' // For tickets
   }
   return statusMap[status] || status
 }
 
 const getTypeText = (type) => {
   const typeMap = {
-    'ticket_purchase': 'Achat de billet',
-    'direct_purchase': 'Achat direct'
+    'lottery': 'Loterie',
+    'direct': 'Achat direct',
+    'ticket_purchase': 'Achat de billet', // Legacy support
+    'direct_purchase': 'Achat direct' // Legacy support
   }
   return typeMap[type] || type
 }
@@ -431,17 +511,22 @@ const getTypeText = (type) => {
 const getStatusBadgeClass = (status) => {
   const baseClass = 'px-2 py-1 text-xs rounded-full font-medium'
   const statusClasses = {
-    'completed': 'bg-green-100 text-green-800',
     'pending': 'bg-yellow-100 text-yellow-800',
-    'payment_initiated': 'bg-blue-100 text-blue-800',
-    'failed': 'bg-red-100 text-red-800',
+    'awaiting_payment': 'bg-blue-100 text-blue-800',
     'paid': 'bg-green-100 text-green-800',
-    'refunded': 'bg-gray-100 text-gray-800'
+    'failed': 'bg-red-100 text-red-800',
+    'cancelled': 'bg-gray-100 text-gray-800',
+    'fulfilled': 'bg-green-100 text-green-800',
+    'refunded': 'bg-purple-100 text-purple-800',
+    'completed': 'bg-green-100 text-green-800', // Legacy
+    'payment_initiated': 'bg-blue-100 text-blue-800', // Legacy
+    'active': 'bg-blue-100 text-blue-800' // For tickets
   }
   return `${baseClass} ${statusClasses[status] || 'bg-gray-100 text-gray-800'}`
 }
 
 const formatDate = (dateString) => {
+  if (!dateString) return 'Non défini'
   return new Date(dateString).toLocaleDateString('fr-FR', {
     year: 'numeric',
     month: 'short',
@@ -449,6 +534,14 @@ const formatDate = (dateString) => {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'XAF',
+    minimumFractionDigits: 0
+  }).format(price || 0).replace('XAF', 'FCFA')
 }
 
 const getPageNumbers = () => {

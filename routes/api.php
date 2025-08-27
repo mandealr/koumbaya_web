@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\AdminProfileController;
 use App\Http\Controllers\Api\OrderTrackingController;
 use App\Http\Controllers\Api\PaymentTrackingController;
 use App\Http\Controllers\Api\AvatarController;
+use App\Http\Controllers\Api\MerchantOrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -186,7 +187,8 @@ Route::group([
         Route::get('/', [OrderTrackingController::class, 'index']);
         Route::get('/stats', [OrderTrackingController::class, 'stats']);
         Route::get('/search', [OrderTrackingController::class, 'search']);
-        Route::get('/{transactionId}', [OrderTrackingController::class, 'show']);
+        Route::get('/{order_number}', [OrderTrackingController::class, 'show']);
+        Route::get('/{order_number}/invoice', [OrderTrackingController::class, 'invoice']);
     });
     
     // Payment Tracking
@@ -222,6 +224,13 @@ Route::group([
         Route::get('lottery-performance', [MerchantDashboardController::class, 'getLotteryPerformance']);
         Route::get('export-orders', [MerchantDashboardController::class, 'exportOrders']);
         Route::get('lotteries', [MerchantDashboardController::class, 'getLotteries']);
+    });
+    
+    // Merchant Orders Management
+    Route::prefix('merchant/orders')->group(function () {
+        Route::get('/', [MerchantOrderController::class, 'index']);
+        Route::get('/export', [MerchantOrderController::class, 'exportCsv']);
+        Route::get('/top-products', [MerchantOrderController::class, 'getTopProducts']);
     });
     
     // Transaction management

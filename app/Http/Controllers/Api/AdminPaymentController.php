@@ -22,14 +22,14 @@ class AdminPaymentController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Payment::with(['user', 'transaction', 'lottery.product', 'product']);
+        $query = Payment::with(['user', 'order.product', 'order.lottery.product']);
 
         // Search filter
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('reference', 'LIKE', "%{$search}%")
-                  ->orWhere('transaction_id', 'LIKE', "%{$search}%")
+                  ->orWhere('external_transaction_id', 'LIKE', "%{$search}%")
                   ->orWhereHas('user', function ($q) use ($search) {
                       $q->where('first_name', 'LIKE', "%{$search}%")
                         ->orWhere('last_name', 'LIKE', "%{$search}%")
@@ -71,7 +71,7 @@ class AdminPaymentController extends Controller
         $payments->getCollection()->transform(function ($payment) {
             return [
                 'id' => $payment->id,
-                'transaction_id' => $payment->transaction_id ?? $payment->reference,
+                'order_number' => $payment->order->order_number ?? $payment->reference,
                 'reference' => $payment->reference,
                 'user_id' => $payment->user_id,
                 'user_name' => $payment->user ? 
@@ -132,9 +132,8 @@ class AdminPaymentController extends Controller
     {
         $payment = Payment::with([
             'user',
-            'transaction',
-            'lottery.product',
-            'product',
+            'order.product',
+            'order.lottery.product',
             'refunds'
         ])->findOrFail($id);
 
@@ -175,7 +174,7 @@ class AdminPaymentController extends Controller
                 'user_id' => $payment->user_id,
                 'payment_id' => $payment->id,
                 'lottery_id' => $payment->lottery_id,
-                'transaction_id' => $payment->transaction_id,
+                'order_number' => $payment->order->order_number ?? null,
                 'amount' => $payment->amount,
                 'reason' => $request->reason ?? 'admin_initiated',
                 'type' => 'admin',
@@ -209,14 +208,14 @@ class AdminPaymentController extends Controller
      */
     public function export(Request $request)
     {
-        $query = Payment::with(['user', 'transaction', 'lottery.product', 'product']);
+        $query = Payment::with(['user', 'order.product', 'order.lottery.product']);
 
         // Apply same filters as index
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('reference', 'LIKE', "%{$search}%")
-                  ->orWhere('transaction_id', 'LIKE', "%{$search}%")
+                  ->orWhere('external_transaction_id', 'LIKE', "%{$search}%")
                   ->orWhereHas('user', function ($q) use ($search) {
                       $q->where('first_name', 'LIKE', "%{$search}%")
                         ->orWhere('last_name', 'LIKE', "%{$search}%")
@@ -247,7 +246,7 @@ class AdminPaymentController extends Controller
 
         $exportData = $payments->map(function ($payment) {
             return [
-                'transaction_id' => $payment->transaction_id ?? $payment->reference,
+                'order_number' => $payment->order->order_number ?? $payment->reference,
                 'reference' => $payment->reference,
                 'user_name' => $payment->user ? 
                     trim($payment->user->first_name . ' ' . $payment->user->last_name) : 'N/A',
