@@ -64,10 +64,19 @@
                   class="flex items-center max-w-xs bg-white rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0099cc]"
                 >
                   <span class="sr-only">Open user menu</span>
-                  <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                    <span class="text-xs sm:text-sm font-medium text-blue-600">
-                      {{ userInitials }}
-                    </span>
+                  <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full overflow-hidden flex-shrink-0 border border-gray-200">
+                    <img 
+                      v-if="user?.avatar_url"
+                      :src="user.avatar_url"
+                      :alt="`Photo de profil de ${user.first_name} ${user.last_name}`"
+                      class="w-full h-full object-cover"
+                      @error="onAvatarError"
+                    />
+                    <div v-else class="w-full h-full bg-blue-100 flex items-center justify-center">
+                      <span class="text-xs sm:text-sm font-medium text-blue-600">
+                        {{ userInitials }}
+                      </span>
+                    </div>
                   </div>
                   <span class="ml-2 sm:ml-3 text-gray-700 text-xs sm:text-sm font-medium hidden lg:block min-w-0 truncate">
                     {{ user?.first_name }} {{ user?.last_name }}
@@ -232,6 +241,12 @@ const logout = async () => {
 
 const handleImageError = () => {
   logoError.value = true
+}
+
+const onAvatarError = (event) => {
+  console.log('Avatar image failed to load, hiding image element')
+  // Cache l'image et force l'affichage des initiales
+  event.target.style.display = 'none'
 }
 
 const loadQuickStats = async () => {

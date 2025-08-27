@@ -58,8 +58,17 @@
                 @click="userMenuOpen = !userMenuOpen"
                 class="flex items-center space-x-1 sm:space-x-3 p-1 sm:p-2 rounded-lg hover:bg-gray-100"
               >
-                <div class="w-7 h-7 sm:w-8 sm:h-8 bg-[#0099cc] rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-xs sm:text-sm font-medium text-white">{{ userInitials }}</span>
+                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex-shrink-0 border border-gray-200">
+                  <img 
+                    v-if="authStore.user?.avatar_url"
+                    :src="authStore.user.avatar_url"
+                    :alt="`Photo de profil de ${authStore.user.first_name} ${authStore.user.last_name}`"
+                    class="w-full h-full object-cover"
+                    @error="onAvatarError"
+                  />
+                  <div v-else class="w-full h-full bg-[#0099cc] flex items-center justify-center">
+                    <span class="text-xs sm:text-sm font-medium text-white">{{ userInitials }}</span>
+                  </div>
                 </div>
                 <div class="hidden md:block text-left min-w-0">
                   <p class="text-sm font-medium text-gray-700 truncate">{{ authStore.user?.first_name }}</p>
@@ -206,6 +215,12 @@ const shouldShowVerificationBanner = computed(() => {
 const handleLogout = async () => {
   await authStore.logout()
   router.push({ name: 'login' })
+}
+
+const onAvatarError = (event) => {
+  console.log('Avatar image failed to load, hiding image element')
+  // Cache l'image et force l'affichage des initiales
+  event.target.style.display = 'none'
 }
 
 const handleImageError = () => {

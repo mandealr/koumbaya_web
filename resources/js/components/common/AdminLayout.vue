@@ -41,8 +41,19 @@
         <div class="absolute bottom-4 left-0 right-0 px-3">
           <div class="bg-gray-700 rounded-lg p-4">
             <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center">
-                <UserIcon class="w-5 h-5 text-gray-300" />
+              <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-gray-600">
+                <img 
+                  v-if="authStore.user?.avatar_url"
+                  :src="authStore.user.avatar_url"
+                  :alt="`Photo de profil de ${authStore.user.first_name} ${authStore.user.last_name}`"
+                  class="w-full h-full object-cover"
+                  @error="onAvatarError"
+                />
+                <div v-else class="w-full h-full bg-gray-600 flex items-center justify-center">
+                  <span class="text-sm font-medium text-gray-300">
+                    {{ userInitials }}
+                  </span>
+                </div>
               </div>
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-white truncate">{{ authStore.user?.first_name }} {{ authStore.user?.last_name }}</p>
@@ -116,8 +127,17 @@
                 @click="userDropdownOpen = !userDropdownOpen"
                 class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <div class="w-8 h-8 bg-[#0099cc] rounded-lg flex items-center justify-center">
-                  <span class="text-sm font-semibold text-white">{{ userInitials }}</span>
+                <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
+                  <img 
+                    v-if="authStore.user?.avatar_url"
+                    :src="authStore.user.avatar_url"
+                    :alt="`Photo de profil de ${authStore.user.first_name} ${authStore.user.last_name}`"
+                    class="w-full h-full object-cover"
+                    @error="onAvatarError"
+                  />
+                  <div v-else class="w-full h-full bg-[#0099cc] flex items-center justify-center">
+                    <span class="text-sm font-semibold text-white">{{ userInitials }}</span>
+                  </div>
                 </div>
                 <div class="hidden md:block text-left">
                   <p class="text-sm font-semibold text-gray-800">{{ authStore.user?.first_name }} {{ authStore.user?.last_name }}</p>
@@ -306,6 +326,12 @@ const userInitials = computed(() => {
 const handleLogout = async () => {
   await authStore.logout()
   router.push({ name: 'login' })
+}
+
+const onAvatarError = (event) => {
+  console.log('Avatar image failed to load, hiding image element')
+  // Cache l'image et force l'affichage des initiales
+  event.target.style.display = 'none'
 }
 
 // Close dropdowns when clicking outside
