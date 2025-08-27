@@ -27,13 +27,11 @@ if [[ "$1" == "--fresh" ]]; then
 fi
 
 echo "📋 Étape 1: Vérification de la structure de base"
-# Vérifier que les tables principales existent
-php -r "
-\$pdo = new PDO('mysql:host=' . \$_ENV['DB_HOST'] . ';dbname=' . \$_ENV['DB_DATABASE'], \$_ENV['DB_USERNAME'], \$_ENV['DB_PASSWORD']);
+# Vérifier que les tables principales existent avec Laravel
+php artisan tinker --execute="
 \$tables = ['user_types', 'roles', 'privileges', 'users', 'orders', 'payments'];
 foreach (\$tables as \$table) {
-    \$result = \$pdo->query(\"SHOW TABLES LIKE '\$table'\");
-    if (\$result->rowCount() === 0) {
+    if (!DB::getSchemaBuilder()->hasTable(\$table)) {
         echo \"❌ Table \$table manquante\n\";
         exit(1);
     }
