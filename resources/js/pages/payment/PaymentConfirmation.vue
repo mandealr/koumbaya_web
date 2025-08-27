@@ -4,6 +4,9 @@
       
       <!-- Status Header -->
       <div class="text-center mb-8">
+        <div class="mb-6">
+          <img :src="logoUrl" alt="Koumbaya" class="h-12 mx-auto" />
+        </div>
         <div class="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center"
              :class="getStatusClasses().bg">
           <component :is="getStatusIcon()" 
@@ -199,6 +202,7 @@ import {
   ArrowPathIcon,
   UserIcon
 } from '@heroicons/vue/24/outline'
+import logoUrl from '@/assets/logo.png'
 
 const route = useRoute()
 const router = useRouter()

@@ -3,6 +3,9 @@
     <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="text-center mb-8">
+        <div class="mb-6">
+          <img :src="logoUrl" alt="Koumbaya" class="h-12 mx-auto" />
+        </div>
         <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
              :class="paymentMethod === 'airtel_money' ? 'bg-red-100' : 'bg-blue-100'">
           <PhoneIcon :class="[
@@ -90,30 +93,25 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Numéro de téléphone
             </label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 flex items-center pl-3">
-                <span class="text-gray-500 text-sm">+241</span>
-              </div>
-              <input
-                v-model="phoneNumber"
-                type="tel"
-                placeholder="07 XX XX XX XX"
-                maxlength="10"
-                :class="[
-                  'w-full pl-16 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent',
-                  selectedOperator === 'airtel' 
-                    ? 'focus:ring-red-500' 
-                    : 'focus:ring-blue-500',
-                  errors.phone ? 'border-red-300' : ''
-                ]"
-                @input="formatPhoneNumber"
-              />
-            </div>
+            <input
+              v-model="phoneNumber"
+              type="tel"
+              :placeholder="selectedOperator === 'airtel' ? '74010203' : '65010203'"
+              maxlength="9"
+              :class="[
+                'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent',
+                selectedOperator === 'airtel' 
+                  ? 'focus:ring-red-500' 
+                  : 'focus:ring-blue-500',
+                errors.phone ? 'border-red-300' : ''
+              ]"
+              @input="formatPhoneNumber"
+            />
             <div v-if="errors.phone" class="mt-1 text-sm text-red-600">
               {{ errors.phone }}
             </div>
             <div class="mt-2 text-xs text-gray-500">
-              Format: 07 XX XX XX XX pour {{ selectedOperator === 'airtel' ? 'Airtel' : 'Moov' }}
+              Format: {{ selectedOperator === 'airtel' ? '74010203 (74, 77, 76 pour Airtel)' : '65010203 (65, 62, 66, 60 pour Moov)' }}
             </div>
           </div>
 
@@ -178,6 +176,7 @@ import {
   ArrowRightIcon,
   InformationCircleIcon
 } from '@heroicons/vue/24/outline'
+import logoUrl from '@/assets/logo.png'
 
 const route = useRoute()
 const router = useRouter()
@@ -197,7 +196,7 @@ const orderId = ref(null)
 // Computed
 const isFormValid = computed(() => {
   return selectedOperator.value && 
-         phoneNumber.value.replace(/\s/g, '').length === 10 &&
+         phoneNumber.value.length === 9 &&
          validatePhonePrefix()
 })
 
@@ -205,10 +204,8 @@ const isFormValid = computed(() => {
 const formatPhoneNumber = (event) => {
   let value = event.target.value.replace(/\D/g, '')
   
-  if (value.length <= 10) {
-    // Format: XX XX XX XX XX
-    value = value.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5')
-    phoneNumber.value = value.trim()
+  if (value.length <= 9) {
+    phoneNumber.value = value
   }
   
   // Validation en temps réel
@@ -216,12 +213,12 @@ const formatPhoneNumber = (event) => {
 }
 
 const validatePhonePrefix = () => {
-  const cleanPhone = phoneNumber.value.replace(/\s/g, '')
+  const cleanPhone = phoneNumber.value
   
   if (selectedOperator.value === 'airtel') {
-    return cleanPhone.startsWith('07') || cleanPhone.startsWith('06')
+    return cleanPhone.startsWith('74') || cleanPhone.startsWith('77') || cleanPhone.startsWith('76')
   } else if (selectedOperator.value === 'moov') {
-    return cleanPhone.startsWith('05') || cleanPhone.startsWith('04')
+    return cleanPhone.startsWith('65') || cleanPhone.startsWith('62') || cleanPhone.startsWith('66') || cleanPhone.startsWith('60')
   }
   return false
 }
@@ -229,20 +226,20 @@ const validatePhonePrefix = () => {
 const validatePhone = () => {
   errors.value = {}
   
-  const cleanPhone = phoneNumber.value.replace(/\s/g, '')
+  const cleanPhone = phoneNumber.value
   
   if (!cleanPhone) {
     errors.value.phone = 'Le numéro de téléphone est requis'
     return false
   }
   
-  if (cleanPhone.length !== 10) {
-    errors.value.phone = 'Le numéro doit contenir 10 chiffres'
+  if (cleanPhone.length !== 9) {
+    errors.value.phone = 'Le numéro doit contenir 9 chiffres'
     return false
   }
   
   if (!validatePhonePrefix()) {
-    const prefix = selectedOperator.value === 'airtel' ? '06 ou 07' : '04 ou 05'
+    const prefix = selectedOperator.value === 'airtel' ? '74, 77 ou 76' : '65, 62, 66 ou 60'
     errors.value.phone = `Le numéro doit commencer par ${prefix} pour ${selectedOperator.value === 'airtel' ? 'Airtel' : 'Moov'}`
     return false
   }
@@ -259,7 +256,7 @@ const processPayment = async () => {
     // Utiliser le nouvel endpoint pour créer le paiement depuis une transaction existante
     const response = await post('/payments/initiate-from-transaction', {
       transaction_id: route.query.transaction_id,
-      phone: phoneNumber.value.replace(/\s/g, ''),
+      phone: phoneNumber.value,
       operator: selectedOperator.value
     })
     

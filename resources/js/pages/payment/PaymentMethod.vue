@@ -3,6 +3,9 @@
     <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="text-center mb-8">
+        <div class="mb-6">
+          <img :src="logoUrl" alt="Koumbaya" class="h-12 mx-auto" />
+        </div>
         <h1 class="text-3xl font-bold text-gray-900">Méthode de paiement</h1>
         <p class="mt-2 text-gray-600">Choisissez votre mode de paiement préféré</p>
       </div>
@@ -61,10 +64,14 @@
                 ]"
               >
                 <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
-                    <PhoneIcon class="h-6 w-6 text-white" />
+                  <div class="w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center bg-white border border-gray-200">
+                    <img 
+                      :src="airtelLogo" 
+                      alt="Airtel Money" 
+                      class="w-10 h-10 object-contain"
+                    />
                   </div>
-                  <div>
+                  <div class="flex-1">
                     <div class="font-medium text-gray-900">Airtel Money</div>
                     <div class="text-sm text-gray-500">Paiement mobile</div>
                   </div>
@@ -94,10 +101,14 @@
                 ]"
               >
                 <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <PhoneIcon class="h-6 w-6 text-white" />
+                  <div class="w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center bg-white border border-gray-200">
+                    <img 
+                      :src="moovLogo" 
+                      alt="Moov Money" 
+                      class="w-10 h-10 object-contain"
+                    />
                   </div>
-                  <div>
+                  <div class="flex-1">
                     <div class="font-medium text-gray-900">Moov Money</div>
                     <div class="text-sm text-gray-500">Paiement mobile</div>
                   </div>
@@ -195,6 +206,9 @@ import {
   ArrowRightIcon,
   ShieldCheckIcon
 } from '@heroicons/vue/24/outline'
+import logoUrl from '@/assets/logo.png'
+import airtelLogo from '@/assets/am.png'
+import moovLogo from '@/assets/mm.png'
 
 const route = useRoute()
 const router = useRouter()
