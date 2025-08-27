@@ -31,6 +31,9 @@ import Profile from '@/pages/customer/Profile.vue'
 import MyTickets from '@/pages/customer/MyTickets.vue'
 import Refunds from '@/pages/customer/Refunds.vue'
 import OrderTracking from '@/pages/customer/OrderTracking.vue'
+import Payments from '@/pages/customer/Payments.vue'
+import OrderDetail from '@/pages/customer/OrderDetail.vue'
+import PaymentDetail from '@/pages/customer/PaymentDetail.vue'
 
 // Payment Pages
 import PaymentMethod from '@/pages/payment/PaymentMethod.vue'
@@ -174,6 +177,23 @@ const routes = [
         path: 'orders',
         name: 'customer.orders',
         component: OrderTracking
+      },
+      {
+        path: 'payments',
+        name: 'customer.payments',
+        component: Payments
+      },
+      {
+        path: 'orders/:id',
+        name: 'customer.order.detail',
+        component: OrderDetail,
+        props: true
+      },
+      {
+        path: 'payments/:id',
+        name: 'customer.payment.detail',
+        component: PaymentDetail,
+        props: true
       }
     ]
   },

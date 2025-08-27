@@ -165,12 +165,12 @@
               </div>
               
               <div class="flex space-x-2">
-                <button 
-                  @click="viewOrderDetails(order.transaction_id)"
+                <router-link 
+                  :to="{ name: 'customer.order.detail', params: { id: order.transaction_id } }"
                   class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
                 >
                   Détails
-                </button>
+                </router-link>
               </div>
             </div>
           </div>

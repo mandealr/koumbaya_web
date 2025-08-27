@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\AdminPaymentController;
 use App\Http\Controllers\Api\AdminSettingsController;
 use App\Http\Controllers\Api\AdminProfileController;
 use App\Http\Controllers\Api\OrderTrackingController;
+use App\Http\Controllers\Api\PaymentTrackingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -181,6 +182,14 @@ Route::group([
         Route::get('/stats', [OrderTrackingController::class, 'stats']);
         Route::get('/search', [OrderTrackingController::class, 'search']);
         Route::get('/{transactionId}', [OrderTrackingController::class, 'show']);
+    });
+    
+    // Payment Tracking
+    Route::prefix('payments')->group(function () {
+        Route::get('/', [PaymentTrackingController::class, 'index']);
+        Route::get('/stats', [PaymentTrackingController::class, 'stats']);
+        Route::get('/search', [PaymentTrackingController::class, 'search']);
+        Route::get('/{paymentId}', [PaymentTrackingController::class, 'show']);
     });
 });
 

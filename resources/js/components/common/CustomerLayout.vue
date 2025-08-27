@@ -90,6 +90,14 @@
                   <TicketIcon class="w-4 h-4 inline mr-2" />
                   Mes Tickets
                 </router-link>
+                <router-link
+                  to="/customer/payments"
+                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  @click="userMenuOpen = false"
+                >
+                  <CreditCardIcon class="w-4 h-4 inline mr-2" />
+                  Mes Paiements
+                </router-link>
                 <div class="border-t border-gray-100 my-1"></div>
                 <button
                   @click="handleLogout"
@@ -160,6 +168,7 @@ import {
   BellIcon,
   UserIcon,
   TicketIcon,
+  CreditCardIcon,
   ArrowRightOnRectangleIcon,
   Bars3Icon,
   ChevronDownIcon
