@@ -19,6 +19,30 @@ class ProductSeeder extends Seeder
         // Récupérer les IDs des catégories
         $categories = DB::table('categories')->pluck('id', 'slug');
         
+        // Fonction helper pour récupérer une catégorie avec fallback
+        $getCategory = function($slug) use ($categories) {
+            // Mapping des anciens vers nouveaux slugs
+            $mapping = [
+                'electronique' => 'smartphones-tablettes',
+                'informatique' => 'ordinateurs-informatique', 
+                'automobile' => 'voitures',
+                'maison' => 'electromenager'
+            ];
+            
+            // Si le slug existe directement
+            if (isset($categories[$slug])) {
+                return $categories[$slug];
+            }
+            
+            // Si c'est un ancien slug, utiliser le mapping
+            if (isset($mapping[$slug]) && isset($categories[$mapping[$slug]])) {
+                return $categories[$mapping[$slug]];
+            }
+            
+            // Fallback vers la première catégorie disponible
+            return $categories->first();
+        };
+        
         $products = [
             [
                 'name' => 'iPhone 15 Pro Max 256GB',
@@ -27,7 +51,7 @@ class ProductSeeder extends Seeder
                 'price' => 1299000,
                 'stock_quantity' => 1,
                 'sale_mode' => 'lottery',
-                'category_id' => $categories['smartphones-tablettes'],
+                'category_id' => $getCategory('smartphones-tablettes'),
                 'merchant_id' => $sellerId,
                 'is_featured' => true,
                 'created_at' => now(),
@@ -40,7 +64,7 @@ class ProductSeeder extends Seeder
                 'price' => 2500000,
                 'stock_quantity' => 1,
                 'sale_mode' => 'lottery',
-                'category_id' => $categories['ordinateurs-informatique'],
+                'category_id' => $getCategory('ordinateurs-informatique'),
                 'merchant_id' => $sellerId,
                 'is_featured' => true,
                 'created_at' => now(),
@@ -53,7 +77,7 @@ class ProductSeeder extends Seeder
                 'price' => 750000,
                 'stock_quantity' => 1,
                 'sale_mode' => 'lottery',
-                'category_id' => $categories['gaming'],
+                'category_id' => $getCategory('gaming'),
                 'merchant_id' => $sellerId,
                 'is_featured' => true,
                 'created_at' => now(),
@@ -61,8 +85,13 @@ class ProductSeeder extends Seeder
             ],
         ];
 
-        // Insérer les produits
-        DB::table('products')->insert($products);
+        // Insérer les produits avec updateOrInsert pour éviter les doublons
+        foreach ($products as $product) {
+            DB::table('products')->updateOrInsert(
+                ['name' => $product['name'], 'merchant_id' => $product['merchant_id']],
+                $product
+            );
+        }
 
         echo "✅ " . count($products) . " produits de démonstration créés.\n";
     }

@@ -217,7 +217,10 @@ class CountrySeeder extends Seeder
         ];
 
         foreach ($countries as $country) {
-            Country::create($country);
+            Country::updateOrCreate(
+                ['iso_code_2' => $country['iso_code_2']],
+                $country
+            );
         }
     }
 }
