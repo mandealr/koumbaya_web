@@ -222,8 +222,8 @@ class PaymentController extends Controller
             'lottery_id' => 'required_if:type,lottery_ticket|exists:lotteries,id',
             'product_id' => 'required_if:type,product_purchase|exists:products,id',
             'quantity' => 'nullable|integer|min:1|max:10',
-            'phone' => 'required|string|max:20',
-            'operator' => 'required|string|in:airtel,moov'
+            'phone' => 'nullable|string|max:20',
+            'operator' => 'nullable|string|in:airtel,moov'
         ]);
 
         if ($validator->fails()) {
@@ -235,6 +235,11 @@ class PaymentController extends Controller
         }
 
         try {
+            // Si phone et operator ne sont pas fournis, créer une transaction et rediriger
+            if (!$request->phone || !$request->operator) {
+                return $this->createTransactionForPayment($request, $user);
+            }
+
             $data = (object) [
                 'user' => $user,
                 'reference' => 'KMB_' . strtoupper(Str::random(10))
@@ -585,5 +590,95 @@ class PaymentController extends Controller
 
         $result = EBillingService::getKyc($request->operator, $request->phone);
         return response()->json($result);
+    }
+
+    /**
+     * Créer une transaction pour un paiement (utilisé quand phone/operator non fournis)
+     */
+    private function createTransactionForPayment(Request $request, $user)
+    {
+        try {
+            $reference = 'KMB_' . strtoupper(Str::random(10));
+            
+            if ($request->type === 'lottery_ticket') {
+                $lottery = Lottery::findOrFail($request->lottery_id);
+
+                if ($lottery->status !== 'active') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cette tombola n\'est pas active'
+                    ], 422);
+                }
+
+                $quantity = $request->quantity ?? 1;
+                $amount = $lottery->ticket_price * $quantity;
+
+                // Créer la transaction
+                $transaction = Transaction::create([
+                    'transaction_id' => 'TXN_' . strtoupper(Str::random(12)),
+                    'user_id' => $user->id,
+                    'type' => 'ticket_purchase',
+                    'reference' => $reference,
+                    'amount' => $amount,
+                    'currency' => 'XAF',
+                    'status' => 'pending',
+                    'lottery_id' => $lottery->id,
+                    'quantity' => $quantity,
+                    'description' => "Achat de {$quantity} billet(s) pour la loterie {$lottery->title}"
+                ]);
+
+                // Créer les billets de loterie
+                for ($i = 0; $i < $quantity; $i++) {
+                    LotteryTicket::create([
+                        'lottery_id' => $lottery->id,
+                        'user_id' => $user->id,
+                        'transaction_id' => $transaction->id,
+                        'price_paid' => $lottery->ticket_price,
+                        'status' => 'pending',
+                        'ticket_number' => $lottery->lottery_number . '-T' . str_pad(($lottery->sold_tickets + $i + 1), 4, '0', STR_PAD_LEFT)
+                    ]);
+                }
+
+            } elseif ($request->type === 'product_purchase') {
+                $product = Product::findOrFail($request->product_id);
+
+                // Créer la transaction
+                $transaction = Transaction::create([
+                    'transaction_id' => 'TXN_' . strtoupper(Str::random(12)),
+                    'user_id' => $user->id,
+                    'type' => 'direct_purchase',
+                    'reference' => $reference,
+                    'amount' => $product->price,
+                    'currency' => 'XAF',
+                    'status' => 'pending',
+                    'product_id' => $product->id,
+                    'quantity' => 1,
+                    'description' => "Achat direct du produit {$product->name}"
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaction créée avec succès',
+                'redirect_to_payment' => true,
+                'data' => [
+                    'transaction_id' => $transaction->transaction_id,
+                    'amount' => $transaction->amount,
+                    'reference' => $transaction->reference,
+                    'type' => $transaction->type
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            Log::error('Transaction creation failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la création de la transaction'
+            ], 500);
+        }
     }
 }

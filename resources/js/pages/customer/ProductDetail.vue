@@ -455,12 +455,26 @@ const purchaseDirectly = async () => {
     })
 
     if (response && response.success) {
-      if (window.$toast) {
-        window.$toast.success('🎉 Produit acheté avec succès ! Vous recevrez une confirmation par SMS.', '✅ Achat confirmé')
-      }
+      // Si une redirection vers le paiement est nécessaire
+      if (response.redirect_to_payment) {
+        // Rediriger vers la sélection de méthode de paiement
+        router.push({
+          name: 'payment.method',
+          query: {
+            transaction_id: response.data.transaction_id,
+            amount: response.data.amount,
+            type: 'product'
+          }
+        })
+      } else {
+        // Achat direct réussi
+        if (window.$toast) {
+          window.$toast.success('🎉 Produit acheté avec succès ! Vous recevrez une confirmation par SMS.', '✅ Achat confirmé')
+        }
 
-      // Refresh product data
-      await loadProduct()
+        // Refresh product data
+        await loadProduct()
+      }
     } else {
       throw new Error(response?.message || 'Erreur lors de l\'achat')
     }
