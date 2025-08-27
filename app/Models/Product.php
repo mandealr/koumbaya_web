@@ -12,9 +12,8 @@ class Product extends Model
 
     protected $fillable = [
         'name',
-        'slug',
         'description',
-        'images',
+        'image',
         'price',
         'ticket_price',
         'min_participants',
@@ -22,8 +21,9 @@ class Product extends Model
         'category_id',
         'merchant_id',
         'sale_mode',
-        'status',
         'is_featured',
+        'is_active',
+        'views_count',
     ];
 
     /**
@@ -48,16 +48,16 @@ class Product extends Model
      */
     protected $attributes = [
         'sale_mode' => 'direct',
-        'status' => 'draft',
+        'is_active' => true,
     ];
 
     protected function casts(): array
     {
         return [
-            'images' => 'array',
             'price' => 'decimal:2',
             'ticket_price' => 'decimal:2',
             'is_featured' => 'boolean',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -114,7 +114,7 @@ class Product extends Model
      */
     public function scopeActive($query)
     {
-        return $query->where('status', 'active');
+        return $query->where('is_active', true);
     }
 
     public function scopeFeatured($query)
@@ -132,7 +132,7 @@ class Product extends Model
      */
     public function getMainImageAttribute()
     {
-        return $this->images && is_array($this->images) && count($this->images) > 0 ? $this->images[0] : null;
+        return $this->image;
     }
 
     /**
@@ -170,7 +170,7 @@ class Product extends Model
 
     public function getIsAvailableAttribute()
     {
-        return $this->status === 'active' && $this->stock_quantity > 0;
+        return $this->is_active === true && $this->stock_quantity > 0;
     }
 
     /**
@@ -178,7 +178,7 @@ class Product extends Model
      */
     public function canCreateLottery()
     {
-        return $this->status === 'active' && 
+        return $this->is_active === true && 
                $this->stock_quantity > 0 && 
                $this->sale_mode === 'lottery' &&
                $this->ticket_price >= 100 &&
@@ -331,12 +331,12 @@ class Product extends Model
             'price' => (float) $this->price,
             'ticket_price' => (float) $this->ticket_price,
             'min_participants' => $this->min_participants,
-            'images' => $this->images && is_array($this->images) ? $this->images : [],
+            'image' => $this->image,
             'image_url' => $this->image_url,
             'main_image' => $this->main_image,
             'category_id' => $this->category_id,
             'merchant_id' => $this->merchant_id,
-            'status' => $this->status,
+            'is_active' => $this->is_active,
             'is_featured' => $this->is_featured,
             'is_available' => $this->is_available,
             'has_active_lottery' => $this->has_active_lottery,
