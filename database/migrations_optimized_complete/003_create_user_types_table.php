@@ -16,39 +16,11 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            
+
             // Index pour performance
             $table->index('code');
             $table->index('is_active');
         });
-        
-        // Données par défaut
-        DB::table('user_types')->insert([
-            [
-                'name' => 'Marchand',
-                'code' => 'merchant',
-                'description' => 'Utilisateur marchand qui peut vendre des produits',
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Client',
-                'code' => 'customer',
-                'description' => 'Client qui achète des produits et participe aux loteries',
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Administrateur',
-                'code' => 'admin',
-                'description' => 'Administrateur du système',
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        ]);
     }
 
     public function down(): void

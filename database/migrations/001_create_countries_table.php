@@ -18,24 +18,12 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->integer('sort_order')->default(0);
             $table->timestamps();
-            
+
             // Index pour performance
             $table->index('code');
             $table->index('is_active');
             $table->index('sort_order');
         });
-        
-        // Données par défaut - Gabon
-        DB::table('countries')->insert([
-            'name' => 'Gabon',
-            'code' => 'GA',
-            'phone_code' => '+241',
-            'flag' => '🇬🇦',
-            'is_active' => true,
-            'sort_order' => 1,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
     }
 
     public function down(): void

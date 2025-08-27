@@ -16,32 +16,12 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->boolean('is_default')->default(false);
             $table->timestamps();
-            
+
             // Index pour performance
             $table->index('code');
             $table->index('is_active');
             $table->index('is_default');
         });
-        
-        // Données par défaut
-        DB::table('languages')->insert([
-            [
-                'name' => 'Français',
-                'code' => 'fr',
-                'is_active' => true,
-                'is_default' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'English',
-                'code' => 'en',
-                'is_active' => true,
-                'is_default' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        ]);
     }
 
     public function down(): void
