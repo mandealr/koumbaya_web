@@ -4,7 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Lottery;
+use App\Models\Product;
 
 class LotterySeeder extends Seeder
 {
@@ -14,7 +15,7 @@ class LotterySeeder extends Seeder
     public function run(): void
     {
         // Récupérer les produits
-        $products = DB::table('products')->get();
+        $products = Product::all();
         
         foreach ($products as $product) {
             // Prix de ticket fixe de 1000 FCFA
@@ -23,8 +24,8 @@ class LotterySeeder extends Seeder
             
             $lotteryNumber = 'LOT-' . strtoupper(uniqid());
             
-            // Créer une tombola pour chaque produit avec updateOrInsert
-            DB::table('lotteries')->updateOrInsert(
+            // Créer une tombola pour chaque produit avec firstOrCreate
+            Lottery::firstOrCreate(
                 ['product_id' => $product->id],
                 [
                     'lottery_number' => $lotteryNumber,

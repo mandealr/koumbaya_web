@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Role;
+use App\Models\Privilege;
+use App\Models\RolePrivilege;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -89,7 +91,7 @@ class RolePermissionSeeder extends Seeder
 
         // Traiter les associations
         foreach ($rolePrivileges as $roleName => $privileges) {
-            $role = DB::table('roles')->where('name', $roleName)->first();
+            $role = Role::where('name', $roleName)->first();
             
             if (!$role) {
                 echo "⚠️  Rôle '$roleName' non trouvé, ignoré.\n";
@@ -98,17 +100,14 @@ class RolePermissionSeeder extends Seeder
 
             // Super Admin = tous les privilèges
             if ($privileges === '*') {
-                $allPrivileges = DB::table('privileges')->pluck('id')->toArray();
+                $allPrivileges = Privilege::pluck('id')->toArray();
                 $this->assignPrivilegesToRole($role->id, $allPrivileges);
                 echo "✅ {$roleName} : TOUS les privilèges assignés (" . count($allPrivileges) . ")\n";
                 continue;
             }
 
             // Récupérer les IDs des privilèges
-            $privilegeIds = DB::table('privileges')
-                ->whereIn('name', $privileges)
-                ->pluck('id')
-                ->toArray();
+            $privilegeIds = Privilege::whereIn('name', $privileges)->pluck('id')->toArray();
 
             if (!empty($privilegeIds)) {
                 $this->assignPrivilegesToRole($role->id, $privilegeIds);
@@ -120,12 +119,12 @@ class RolePermissionSeeder extends Seeder
     }
 
     /**
-     * Assigner les privilèges à un rôle (évite les doublons)
+     * Assigner les privilèges à un rôle avec firstOrCreate (évite les doublons)
      */
     private function assignPrivilegesToRole($roleId, $privilegeIds)
     {
         foreach ($privilegeIds as $privilegeId) {
-            DB::table('role_privileges')->updateOrInsert(
+            RolePrivilege::firstOrCreate(
                 [
                     'role_id' => $roleId,
                     'privilege_id' => $privilegeId,

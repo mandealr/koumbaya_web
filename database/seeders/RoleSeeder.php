@@ -4,7 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Role;
+use App\Models\UserType;
 
 class RoleSeeder extends Seeder
 {
@@ -19,9 +20,9 @@ class RoleSeeder extends Seeder
     public function run(): void
     {
         // Récupérer les user_type_id créés
-        $customerTypeId = DB::table('user_types')->where('code', 'customer')->first()->id;
-        $merchantTypeId = DB::table('user_types')->where('code', 'merchant')->first()->id;
-        $adminTypeId = DB::table('user_types')->where('code', 'admin')->first()->id;
+        $customerTypeId = UserType::where('code', 'customer')->first()->id;
+        $merchantTypeId = UserType::where('code', 'merchant')->first()->id;
+        $adminTypeId = UserType::where('code', 'admin')->first()->id;
 
         $roles = [
             // === RÔLES CLIENT ===
@@ -76,11 +77,11 @@ class RoleSeeder extends Seeder
             ],
         ];
 
-        // Insérer les rôles dans la table 'roles' existante (évite les doublons)
-        foreach ($roles as $role) {
-            DB::table('roles')->updateOrInsert(
-                ['name' => $role['name'], 'user_type_id' => $role['user_type_id']],
-                $role
+        // Créer les rôles avec firstOrCreate (évite les doublons)
+        foreach ($roles as $roleData) {
+            Role::firstOrCreate(
+                ['name' => $roleData['name'], 'user_type_id' => $roleData['user_type_id']],
+                $roleData
             );
         }
 

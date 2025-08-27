@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Product;
+use App\Models\User;
+use App\Models\Category;
 
 class ProductSeeder extends Seeder
 {
@@ -14,10 +16,10 @@ class ProductSeeder extends Seeder
     public function run(): void
     {
         // Récupérer l'ID d'un marchand pour créer des produits
-        $sellerId = DB::table('users')->where('email', 'merchant1@koumbaya.ga')->first()->id;
+        $sellerId = User::where('email', 'merchant1@koumbaya.ga')->first()->id;
         
         // Récupérer les IDs des catégories
-        $categories = DB::table('categories')->pluck('id', 'slug');
+        $categories = Category::pluck('id', 'slug');
         
         // Fonction helper pour récupérer une catégorie avec fallback
         $getCategory = function($slug) use ($categories) {
@@ -85,11 +87,11 @@ class ProductSeeder extends Seeder
             ],
         ];
 
-        // Insérer les produits avec updateOrInsert pour éviter les doublons
-        foreach ($products as $product) {
-            DB::table('products')->updateOrInsert(
-                ['name' => $product['name'], 'merchant_id' => $product['merchant_id']],
-                $product
+        // Créer les produits avec firstOrCreate pour éviter les doublons
+        foreach ($products as $productData) {
+            Product::firstOrCreate(
+                ['name' => $productData['name'], 'merchant_id' => $productData['merchant_id']],
+                $productData
             );
         }
 

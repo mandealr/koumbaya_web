@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\UserType;
 
 class UserTypeSeeder extends Seeder
 {
@@ -42,11 +42,11 @@ class UserTypeSeeder extends Seeder
             ],
         ];
 
-        // Insérer les types d'utilisateurs (évite les doublons)
-        foreach ($userTypes as $userType) {
-            DB::table('user_types')->updateOrInsert(
-                ['code' => $userType['code']],
-                $userType
+        // Créer les types d'utilisateurs avec firstOrCreate (évite les doublons)
+        foreach ($userTypes as $userTypeData) {
+            UserType::firstOrCreate(
+                ['code' => $userTypeData['code']],
+                $userTypeData
             );
         }
 

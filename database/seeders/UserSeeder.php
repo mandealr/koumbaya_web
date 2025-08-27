@@ -4,8 +4,14 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use App\Models\UserType;
+use App\Models\Role;
+use App\Models\UserRole;
+use App\Models\UserWallet;
+use App\Models\Country;
+use App\Models\Language;
 
 class UserSeeder extends Seeder
 {
@@ -17,15 +23,15 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Récupérer les IDs des user_types
-        $customerTypeId = DB::table('user_types')->where('code', 'customer')->first()->id;
-        $merchantTypeId = DB::table('user_types')->where('code', 'merchant')->first()->id;
-        $adminTypeId = DB::table('user_types')->where('code', 'admin')->first()->id;
+        $customerTypeId = UserType::where('code', 'customer')->first()->id;
+        $merchantTypeId = UserType::where('code', 'merchant')->first()->id;
+        $adminTypeId = UserType::where('code', 'admin')->first()->id;
 
         // Récupérer l'ID du Gabon
-        $gabonId = DB::table('countries')->where('code', 'GA')->first()->id ?? 1;
+        $gabonId = Country::where('iso_code_2', 'GA')->first()->id ?? 1;
 
         // Récupérer l'ID de la langue française
-        $frenchId = DB::table('languages')->where('code', 'fr')->first()->id ?? 1;
+        $frenchId = Language::where('code', 'fr')->first()->id ?? 1;
 
         $users = [
             // === SUPER ADMINISTRATEUR ===
@@ -176,28 +182,29 @@ class UserSeeder extends Seeder
             ],
         ];
 
-        // Insérer les utilisateurs et assigner les rôles
+        // Créer les utilisateurs avec firstOrCreate et assigner les rôles
         foreach ($users as $userData) {
             $roleAssignment = $userData['role_assignment'];
             unset($userData['role_assignment']); // Retirer ce champ pour l'insertion
 
-            // Vérifier si l'utilisateur existe déjà
-            $existingUser = DB::table('users')->where('email', $userData['email'])->first();
-            
-            if ($existingUser) {
-                $userId = $existingUser->id;
-                echo "⚠️  Utilisateur existe déjà : " . $userData['email'] . " (ignoré)\n";
+            // Créer l'utilisateur avec firstOrCreate
+            $user = User::firstOrCreate(
+                ['email' => $userData['email']],
+                $userData
+            );
+
+            if ($user->wasRecentlyCreated) {
+                echo "✅ Utilisateur créé : " . $user->email . " (" . $roleAssignment . ")\n";
             } else {
-                $userId = DB::table('users')->insertGetId($userData);
-                echo "✅ Utilisateur créé : " . $userData['email'] . " (" . $roleAssignment . ")\n";
+                echo "⚠️  Utilisateur existe déjà : " . $user->email . " (mis à jour)\n";
             }
 
             // Attribution des rôles
-            $this->assignUserRole($userId, $roleAssignment);
+            $this->assignUserRole($user->id, $roleAssignment);
 
             // Créer un portefeuille pour les customers et merchants
             if ($userData['user_type_id'] === $customerTypeId || $userData['user_type_id'] === $merchantTypeId) {
-                $this->createUserWallet($userId, $userData['user_type_id'], $customerTypeId, $merchantTypeId);
+                $this->createUserWallet($user->id, $userData['user_type_id'], $customerTypeId, $merchantTypeId);
             }
         }
 
@@ -209,10 +216,10 @@ class UserSeeder extends Seeder
      */
     private function assignUserRole($userId, $roleName)
     {
-        $role = DB::table('roles')->where('name', $roleName)->first();
+        $role = Role::where('name', $roleName)->first();
 
         if ($role) {
-            DB::table('user_roles')->updateOrInsert(
+            UserRole::firstOrCreate(
                 [
                     'user_id' => $userId,
                     'role_id' => $role->id,
@@ -239,7 +246,7 @@ class UserSeeder extends Seeder
             default => 0
         };
 
-        DB::table('user_wallets')->updateOrInsert(
+        UserWallet::firstOrCreate(
             ['user_id' => $userId],
             [
                 'user_id' => $userId,

@@ -4,7 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Privilege;
+use App\Models\UserType;
 
 class PermissionSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         // Récupérer les user_type_id
-        $customerTypeId = DB::table('user_types')->where('code', 'customer')->first()->id;
-        $merchantTypeId = DB::table('user_types')->where('code', 'merchant')->first()->id;
-        $adminTypeId = DB::table('user_types')->where('code', 'admin')->first()->id;
+        $customerTypeId = UserType::where('code', 'customer')->first()->id;
+        $merchantTypeId = UserType::where('code', 'merchant')->first()->id;
+        $adminTypeId = UserType::where('code', 'admin')->first()->id;
 
         // Permissions organisées par type d'utilisateur
         $permissions = [
@@ -240,11 +241,11 @@ class PermissionSeeder extends Seeder
             ],
         ];
 
-        // Insérer dans la table 'privileges' (évite les doublons)
-        foreach ($permissions as $permission) {
-            DB::table('privileges')->updateOrInsert(
-                ['name' => $permission['name'], 'user_type_id' => $permission['user_type_id']],
-                $permission
+        // Créer les privilèges avec firstOrCreate (évite les doublons)
+        foreach ($permissions as $privilegeData) {
+            Privilege::firstOrCreate(
+                ['name' => $privilegeData['name'], 'user_type_id' => $privilegeData['user_type_id']],
+                $privilegeData
             );
         }
 
