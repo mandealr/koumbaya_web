@@ -147,12 +147,6 @@
               <h3 class="text-lg font-semibold text-gray-900 mb-4">Informations business</h3>
               
               <div class="space-y-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Type de compte</label>
-                  <div class="text-sm text-gray-600 bg-gray-100 rounded-lg p-3">
-                    {{ user?.account_type === 'business' ? 'Compte Business' : 'Compte Personnel' }}
-                  </div>
-                </div>
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Rôle</label>
@@ -228,28 +222,10 @@ const userInitials = computed(() => {
 const displayUserRoles = computed(() => {
   if (!user.value) return 'Non défini'
   
-  // Vérifier s'il y a des rôles dans la relation roles
+  // Utiliser uniquement les rôles
   if (user.value.roles && Array.isArray(user.value.roles) && user.value.roles.length > 0) {
     const roleNames = user.value.roles.map(role => role.name)
     return roleNames.join(', ')
-  }
-  
-  // Fallback sur account_type
-  if (user.value.account_type) {
-    const accountTypeMapping = {
-      'business': 'Marchand',
-      'personal': 'Particulier'
-    }
-    return accountTypeMapping[user.value.account_type] || user.value.account_type
-  }
-  
-  // Fallback sur user_type si disponible
-  if (user.value.userType?.name) {
-    const userTypeMapping = {
-      'MANAGER': 'Manager',
-      'CUSTOMER': 'Client'
-    }
-    return userTypeMapping[user.value.userType.name] || user.value.userType.name
   }
   
   return 'Non défini'

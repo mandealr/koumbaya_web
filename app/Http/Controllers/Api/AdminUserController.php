@@ -248,10 +248,9 @@ class AdminUserController extends Controller
         $labels = [
             'Super Admin' => 'Super Administrateur',
             'Admin' => 'Administrateur',
-            'Agent' => 'Agent',
-            'Agent Back Office' => 'Agent Back Office',
-            'Marchand' => 'Marchand',
-            'Client' => 'Client'
+            'Agent' => 'Agent de Support',
+            'Business' => 'Marchand',
+            'Particulier' => 'Client'
         ];
 
         return $labels[$roleName] ?? $roleName;

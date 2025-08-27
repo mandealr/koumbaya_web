@@ -11,58 +11,60 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      * 
-     * Ordre de seeding pour le système hybride Koumbaya :
+     * Ordre de seeding pour la structure BD optimisée Koumbaya :
      * 1. Données de base (pays, langues, catégories)
-     * 2. Système de rôles et permissions
+     * 2. Système de rôles et privilèges 
      * 3. Utilisateurs avec attribution de rôles
-     * 4. Données métier (produits, tombolas)
+     * 4. Configuration et données métier
      */
     public function run(): void
     {
-        $this->command->info('🚀 Démarrage du seeding Koumbaya...');
+        $this->command->info('🚀 Démarrage du seeding Koumbaya BD optimisée...');
         
         $this->call([
             // === ÉTAPE 1: Données de référence ===
-            CountrySeeder::class,
-            LanguageSeeder::class,
+            // CountrySeeder::class,     // Déjà dans migration
+            // LanguageSeeder::class,    // Déjà dans migration  
             CategorySeeder::class,
-            UserTypeSeeder::class,       // Types d'utilisateurs (MANAGER, CUSTOMER)
+            UserTypeSeeder::class,       // Types : customer, merchant, admin
             
             // === ÉTAPE 2: Système de sécurité ===
-            RoleSeeder::class,           // Rôles hybrides (particulier, business, managers)
-            PermissionSeeder::class,     // Permissions atomiques par ressource
-            RolePermissionSeeder::class, // Associations rôles-permissions avec héritage
+            RoleSeeder::class,           // Rôles optimisés pour chaque user_type
+            PermissionSeeder::class,     // Privilèges dans table privileges  
+            RolePermissionSeeder::class, // Associations roles ↔ privileges
             
             // === ÉTAPE 3: Utilisateurs et profils ===
-            UserSeeder::class,           // Utilisateurs de test avec rôles hybrides
-            // AuthenticationSeeder::class, // Désactivé - tables non disponibles
+            UserSeeder::class,           // Utilisateurs avec nouvelle structure
             
-            // === ÉTAPE 4: Données métier ===
+            // === ÉTAPE 4: Configuration système ===
+            SettingsSeeder::class,       // Paramètres application
+            PaymentMethodsSeeder::class, // Méthodes de paiement E-Billing
+            
+            // === ÉTAPE 5: Données métier ===
             ProductSeeder::class,        // Produits pour démonstration
             LotterySeeder::class,        // Tombolas de test
             UserRatingSeeder::class,     // Évaluations utilisateurs
         ]);
 
-        $this->command->info('✅ Seeding Koumbaya terminé avec succès !');
+        $this->command->info('✅ Seeding Koumbaya BD optimisée terminé avec succès !');
         $this->command->info('');
         $this->command->info('📋 COMPTES DE TEST CRÉÉS :');
         $this->command->info('');
-        $this->command->info('🛡️  MANAGERS:');
+        $this->command->info('🛡️  ADMINISTRATEURS:');
         $this->command->info('   👑 Super Admin: superadmin@koumbaya.ga (SuperAdmin2024!)');
-        $this->command->info('   🔧 Admin: admin@koumbaya.ga (Admin2024!)');
-        $this->command->info('   👨‍💼 Agent: agent@koumbaya.ga (Agent2024!)');
-        $this->command->info('   🏢 Back Office: backoffice@koumbaya.ga (BackOffice2024!)');
+        $this->command->info('   🔧 Admin Plateforme: admin@koumbaya.ga (Admin2024!)');
+        $this->command->info('   👨‍💼 Agent Support: agent@koumbaya.ga (Agent2024!)');
         $this->command->info('');
-        $this->command->info('💼 COMPTES BUSINESS (Particulier + Vendeur):');
-        $this->command->info('   🏪 Business 1: business@koumbaya.ga (Business2024!)');
-        $this->command->info('   🏪 Business 2: business2@koumbaya.ga (Business2024!)');
+        $this->command->info('🏪 COMPTES MARCHANDS:');
+        $this->command->info('   🏢 Marchand 1: merchant1@koumbaya.ga (Merchant2024!)');
+        $this->command->info('   🏢 Marchand 2: merchant2@koumbaya.ga (Merchant2024!)');
         $this->command->info('');
-        $this->command->info('👤 COMPTES PARTICULIER (Acheteur uniquement):');
-        $this->command->info('   🛒 Particulier 1: particulier1@koumbaya.ga (Particulier2024!)');
-        $this->command->info('   🛒 Particulier 2: particulier2@koumbaya.ga (Particulier2024!)');
+        $this->command->info('👤 COMPTES CLIENTS:');
+        $this->command->info('   🛒 Client 1: client1@koumbaya.ga (Client2024!)');
+        $this->command->info('   🛒 Client 2: client2@koumbaya.ga (Client2024!)');
         $this->command->info('');
-        $this->command->info('🔄 Les comptes BUSINESS peuvent basculer entre mode acheteur/vendeur');
-        $this->command->info('🔐 2FA requis pour tous les customers (particulier/business)');
-        $this->command->info('📄 PI obligatoire pour customers, optionnel pour managers');
+        $this->command->info('💰 Portefeuilles initialisés avec soldes de test');
+        $this->command->info('🔐 Système de rôles et privilèges complet');
+        $this->command->info('📊 Architecture order-centric prête pour E-Billing');
     }
 }

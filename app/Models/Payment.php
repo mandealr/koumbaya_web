@@ -12,37 +12,24 @@ class Payment extends Model
 
     protected $fillable = [
         'reference',
-        'user_id',
         'order_id',
-        'amount',
-        'currency',
-        'customer_name',
-        'customer_phone',
-        'customer_email',
-        'description',
-        'payment_gateway',
-        'gateway_config',
         'ebilling_id',
-        'success_url',
-        'callback_url',
-        'payment_method',
         'external_transaction_id',
-        'gateway_response',
-        'callback_data',
+        'payment_method',
+        'amount',
         'status',
+        'callback_data',
         'paid_at',
-        'processed_at',
+        'meta',
     ];
 
     protected function casts(): array
     {
         return [
             'amount' => 'decimal:2',
-            'gateway_config' => 'array',
-            'gateway_response' => 'array',
             'callback_data' => 'array',
+            'meta' => 'array',
             'paid_at' => 'datetime',
-            'processed_at' => 'datetime',
         ];
     }
 
@@ -56,12 +43,8 @@ class Payment extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
-    public function gateway()
-    {
-        return $this->belongsTo(PaymentGateway::class, 'payment_gateway', 'name');
+        // La relation user se fait maintenant via order
+        return $this->hasOneThrough(User::class, Order::class, 'id', 'id', 'order_id', 'user_id');
     }
 
     /**
@@ -79,7 +62,8 @@ class Payment extends Model
 
     public function scopeByGateway($query, $gateway)
     {
-        return $query->where('payment_gateway', $gateway);
+        // payment_gateway est maintenant dans meta
+        return $query->whereJsonContains('meta->payment_gateway', $gateway);
     }
 
     public function scopeExpired($query)
@@ -114,6 +98,69 @@ class Payment extends Model
     }
 
     /**
+     * Accesseurs pour les champs migrés vers meta
+     */
+    public function getUserIdAttribute()
+    {
+        return $this->meta['user_id'] ?? $this->order?->user_id;
+    }
+
+    public function getCurrencyAttribute()
+    {
+        return $this->meta['currency'] ?? 'XAF';
+    }
+
+    public function getCustomerNameAttribute()
+    {
+        return $this->meta['customer_name'] ?? $this->order?->user?->name;
+    }
+
+    public function getCustomerPhoneAttribute()
+    {
+        return $this->meta['customer_phone'] ?? $this->order?->user?->phone;
+    }
+
+    public function getCustomerEmailAttribute()
+    {
+        return $this->meta['customer_email'] ?? $this->order?->user?->email;
+    }
+
+    public function getDescriptionAttribute()
+    {
+        return $this->meta['description'] ?? "Paiement pour commande {$this->order?->order_number}";
+    }
+
+    public function getPaymentGatewayAttribute()
+    {
+        return $this->meta['payment_gateway'] ?? 'ebilling';
+    }
+
+    public function getGatewayConfigAttribute()
+    {
+        return $this->meta['gateway_config'] ?? [];
+    }
+
+    public function getSuccessUrlAttribute()
+    {
+        return $this->meta['success_url'] ?? null;
+    }
+
+    public function getCallbackUrlAttribute()
+    {
+        return $this->meta['callback_url'] ?? null;
+    }
+
+    public function getGatewayResponseAttribute()
+    {
+        return $this->meta['gateway_response'] ?? [];
+    }
+
+    public function getProcessedAtAttribute()
+    {
+        return $this->meta['processed_at'] ?? null;
+    }
+
+    /**
      * Business Logic pour E-Billing
      */
     public function generateReference()
@@ -134,20 +181,24 @@ class Payment extends Model
 
     public function markAsProcessed()
     {
+        $meta = $this->meta ?? [];
+        $meta['processed_at'] = now()->toISOString();
+        
         $this->update([
             'status' => 'processed',
-            'processed_at' => now(),
+            'meta' => $meta,
         ]);
     }
 
     public function markAsFailed($reason = null)
     {
-        $gatewayResponse = $this->gateway_response ?: [];
-        $gatewayResponse['failure_reason'] = $reason;
+        $meta = $this->meta ?? [];
+        $meta['gateway_response'] = $meta['gateway_response'] ?? [];
+        $meta['gateway_response']['failure_reason'] = $reason;
         
         $this->update([
             'status' => 'failed',
-            'gateway_response' => $gatewayResponse,
+            'meta' => $meta,
         ]);
     }
 

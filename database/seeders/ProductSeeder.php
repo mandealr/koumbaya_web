@@ -14,8 +14,8 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        // Récupérer l'ID d'un business user pour créer des produits
-        $sellerId = DB::table('users')->where('email', 'business@koumbaya.ga')->first()->id;
+        // Récupérer l'ID d'un marchand pour créer des produits
+        $sellerId = DB::table('users')->where('email', 'merchant1@koumbaya.ga')->first()->id;
         
         // Récupérer les IDs des catégories
         $categories = DB::table('categories')->pluck('id', 'slug');

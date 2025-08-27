@@ -69,7 +69,7 @@ class AuthController extends Controller
             'phone' => 'required|string|max:20|unique:users',
             'password' => 'required|string|min:6',
             'password_confirmation' => 'required|string|same:password',
-            'role' => 'nullable|in:CUSTOMER,MERCHANT,RESELLER,PARTNER',
+            'role' => 'nullable|in:customer,merchant,admin',
             'account_type' => 'nullable|in:personal,business',
             'can_sell' => 'nullable|boolean',
             'can_buy' => 'nullable|boolean',

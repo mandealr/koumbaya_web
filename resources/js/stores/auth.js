@@ -12,124 +12,35 @@ export const useAuthStore = defineStore('auth', () => {
   // Getters
   const isAuthenticated = computed(() => !!token.value && !!user.value)
   
-  // Détection des managers selon le système hybride
+  // Role helper function
+  const hasRole = (roleName) => {
+    return user.value?.roles && Array.isArray(user.value.roles) &&
+           user.value.roles.some(role => role.name === roleName)
+  }
+  
   const isManager = computed(() => {
-    // 1. PRIORITÉ PRINCIPALE : vérification par user_type_id
-    if (user.value?.userType?.name === 'MANAGER') {
-      return true
-    }
-    
-    // 2. Vérification par user_type_id direct
-    if (user.value?.user_type_id === 1) {
-      return true // MANAGER
-    }
-    
-    // 3. Vérification par les rôles hybrides
-    if (user.value?.roles && Array.isArray(user.value.roles)) {
-      const managerRoles = ['Super Admin', 'Admin', 'Agent', 'Agent Back Office']
-      return user.value.roles.some(role => managerRoles.includes(role.name))
-    }
-    
-    // 4. Fallback : vérification par email (pour les comptes existants)
-    if (user.value?.email) {
-      const managerEmails = [
-        'superadmin@koumbaya.ga',
-        'admin@koumbaya.ga', 
-        'agent@koumbaya.ga',
-        'backoffice@koumbaya.ga'
-      ]
-      return managerEmails.includes(user.value.email)
-    }
-    
-    return false
+    return hasRole('Super Admin') || hasRole('Admin') || hasRole('Agent')
   })
   
   const isAdmin = computed(() => {
-    // Vérification par les rôles hybrides
-    if (user.value?.roles && Array.isArray(user.value.roles)) {
-      const adminRoles = ['Super Admin', 'Admin']
-      return user.value.roles.some(role => adminRoles.includes(role.name))
-    }
-    
-    // Fallback : vérification classique par email
-    if (user.value?.email?.includes('superadmin')) {
-      return true
-    }
-    
-    // Fallback : vérification par email
-    if (user.value?.email) {
-      const adminEmails = ['superadmin@koumbaya.ga', 'admin@koumbaya.ga']
-      return adminEmails.includes(user.value.email)
-    }
-    
-    return false
+    return hasRole('Super Admin') || hasRole('Admin')
   })
   
   const isAgent = computed(() => {
-    // Vérification par les rôles hybrides
-    if (user.value?.roles && Array.isArray(user.value.roles)) {
-      const agentRoles = ['Agent', 'Agent Back Office']
-      return user.value.roles.some(role => agentRoles.includes(role.name))
-    }
-    
-    // Fallback : vérification par email
-    if (user.value?.email) {
-      const agentEmails = ['agent@koumbaya.ga', 'backoffice@koumbaya.ga']
-      return agentEmails.includes(user.value.email)
-    }
-    
-    return false
+    return hasRole('Agent')
   })
   
   const isMerchant = computed(() => {
-    // Système de rôles simplifié : Business = marchand uniquement
-    if (user.value?.roles && Array.isArray(user.value.roles)) {
-      return user.value.roles.some(role => role.name === 'Business')
-    }
-    
-    // Fallback : vérifications classiques (pour compatibilité transitoire)
-    if (user.value?.can_sell && user.value?.account_type === 'business') return true
-    
-    // Fallback : vérification par email (pour comptes existants)
-    if (user.value?.email) {
-      const businessEmails = ['business@koumbaya.ga', 'business2@koumbaya.ga']
-      return businessEmails.includes(user.value.email)
-    }
-    
-    return false
+    return hasRole('Business')
   })
   
   const isCustomer = computed(() => {
-    // Les managers ne sont pas des customers
-    if (isManager.value) return false
-    
-    // Système de rôles simplifié : Particulier = client uniquement
-    if (user.value?.roles && Array.isArray(user.value.roles)) {
-      return user.value.roles.some(role => role.name === 'Particulier')
-    }
-    
-    // Fallback : vérifications classiques (pour compatibilité transitoire)
-    if (user.value?.account_type === 'personal') return true
-    
-    // Par défaut, si ce n'est ni un manager ni un business, c'est un customer
-    return !isManager.value && !isMerchant.value
+    return hasRole('Particulier')
   })
   
-  const isBusiness = computed(() => 
-    user.value?.account_type === 'business' ||
-    user.value?.roles?.some(role => role.name === 'Business')
-  )
-  
-  const isPersonal = computed(() => 
-    user.value?.account_type === 'personal' ||
-    user.value?.roles?.some(role => role.name === 'Particulier')
-  )
-  
-  const canSell = computed(() => 
-    user.value?.can_sell === true ||
-    isBusiness.value ||
-    user.value?.roles?.some(role => role.name === 'Business')
-  )
+  const canSell = computed(() => {
+    return hasRole('Business')
+  })
 
   // Actions
   async function login(credentials) {
@@ -260,14 +171,11 @@ export const useAuthStore = defineStore('auth', () => {
     
     console.log('🔄 Logique de redirection:', {
       email: user.value?.email,
-      user: user.value,
-      roles: user.value?.roles,
       isManager: isManager.value,
       isAdmin: isAdmin.value,
       isAgent: isAgent.value,
       isMerchant: isMerchant.value,
       isCustomer: isCustomer.value,
-      account_type: user.value?.account_type,
       roles: user.value?.roles?.map(r => r.name)
     })
     
@@ -278,13 +186,9 @@ export const useAuthStore = defineStore('auth', () => {
     }
     
     // 2. BUSINESS (rôle Business uniquement) → Merchant Dashboard  
-    if (user.value?.roles && Array.isArray(user.value.roles)) {
-      const hasBusiness = user.value.roles.some(role => role.name === 'Business')
-      
-      if (hasBusiness) {
-        console.log('✅ Redirection vers merchant.dashboard (Business)')
-        return 'merchant.dashboard'
-      }
+    if (isMerchant.value) {
+      console.log('✅ Redirection vers merchant.dashboard (Business)')
+      return 'merchant.dashboard'
     }
     
     // 3. CUSTOMERS (rôle Particulier ou par défaut) → Customer Dashboard
@@ -306,9 +210,8 @@ export const useAuthStore = defineStore('auth', () => {
     isAgent,
     isMerchant,
     isCustomer,
-    isBusiness,
-    isPersonal,
     canSell,
+    hasRole,
     
     // Actions
     login,

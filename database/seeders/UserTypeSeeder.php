@@ -17,16 +17,26 @@ class UserTypeSeeder extends Seeder
     {
         $userTypes = [
             [
-                'id' => 1,
-                'name' => 'MANAGER',
-                'description' => 'Utilisateurs de gestion (Super Admin, Admin, Agent, Agent Back Office)',
+                'name' => 'Marchand',
+                'code' => 'merchant',
+                'description' => 'Utilisateur marchand qui peut vendre des produits',
+                'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'id' => 2, 
-                'name' => 'CUSTOMER',
-                'description' => 'Utilisateurs clients (Particulier, Business/Marchands)',
+                'name' => 'Client',
+                'code' => 'customer',
+                'description' => 'Client qui achète des produits et participe aux loteries',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Administrateur',
+                'code' => 'admin',
+                'description' => 'Administrateur du système',
+                'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -36,7 +46,8 @@ class UserTypeSeeder extends Seeder
         DB::table('user_types')->insert($userTypes);
 
         echo "✅ Types d'utilisateurs créés :\n";
-        echo "   - MANAGER (ID: 1) : Super Admin, Admin, Agent, Agent BO\n";
-        echo "   - CUSTOMER (ID: 2) : Particulier, Business\n";
+        echo "   - Marchand (merchant) : Utilisateurs vendeurs\n";
+        echo "   - Client (customer) : Utilisateurs acheteurs\n";
+        echo "   - Administrateur (admin) : Administrateurs système\n";
     }
 }

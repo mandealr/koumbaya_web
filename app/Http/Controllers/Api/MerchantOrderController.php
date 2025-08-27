@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
 use App\Enums\OrderStatus;
+use App\Services\MetricsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -21,8 +22,11 @@ use Carbon\Carbon;
  */
 class MerchantOrderController extends Controller
 {
-    public function __construct()
+    protected MetricsService $metricsService;
+
+    public function __construct(MetricsService $metricsService)
     {
+        $this->metricsService = $metricsService;
         $this->middleware(['auth:sanctum', 'merchant']);
     }
 
@@ -597,5 +601,96 @@ class MerchantOrderController extends Controller
         ];
 
         return $labels[$status] ?? $status;
+    }
+
+    /**
+     * Récupérer les métriques de l'application
+     * 
+     * @OA\Get(
+     *     path="/api/merchant/orders/metrics",
+     *     tags={"Merchant Orders"},
+     *     summary="Récupérer les métriques applicatives",
+     *     description="Récupère les compteurs applicatifs et métriques de performance",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="date_from",
+     *         in="query",
+     *         description="Date de début pour les métriques (YYYY-MM-DD)",
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="date_to",
+     *         in="query",
+     *         description="Date de fin pour les métriques (YYYY-MM-DD)",
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Métriques récupérées avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="counters", type="object",
+     *                     @OA\Property(property="orders_created", type="integer", example=150),
+     *                     @OA\Property(property="orders_paid", type="integer", example=120),
+     *                     @OA\Property(property="payments_callback_received", type="integer", example=145),
+     *                     @OA\Property(property="payments_failed", type="integer", example=25),
+     *                     @OA\Property(property="invoice_generated", type="integer", example=100)
+     *                 ),
+     *                 @OA\Property(property="daily_metrics", type="array", @OA\Items(type="object")),
+     *                 @OA\Property(property="performance_metrics", type="object"),
+     *                 @OA\Property(property="conversion_metrics", type="object"),
+     *                 @OA\Property(property="period", type="object")
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function metrics(Request $request): JsonResponse
+    {
+        $dateFrom = $request->date_from ? Carbon::parse($request->date_from) : null;
+        $dateTo = $request->date_to ? Carbon::parse($request->date_to) : null;
+
+        $metrics = $this->metricsService->getMetrics($dateFrom, $dateTo);
+
+        return response()->json([
+            'success' => true,
+            'data' => $metrics
+        ]);
+    }
+
+    /**
+     * Vérifier l'état de santé du système de métriques
+     * 
+     * @OA\Get(
+     *     path="/api/merchant/orders/metrics/health",
+     *     tags={"Merchant Orders"},
+     *     summary="Vérifier l'état de santé du système de métriques",
+     *     description="Vérifie que le système de métriques fonctionne correctement",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="État de santé du système de métriques",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="status", type="string", example="healthy"),
+     *                 @OA\Property(property="cache_connectivity", type="boolean", example=true),
+     *                 @OA\Property(property="counter_functionality", type="boolean", example=true),
+     *                 @OA\Property(property="current_counters", type="integer", example=5),
+     *                 @OA\Property(property="checked_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function metricsHealth(): JsonResponse
+    {
+        $healthCheck = $this->metricsService->healthCheck();
+
+        return response()->json([
+            'success' => true,
+            'data' => $healthCheck
+        ]);
     }
 }

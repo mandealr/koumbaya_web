@@ -109,36 +109,36 @@
                 </div>
               </div>
 
-              <!-- Account Type Selection -->
+              <!-- Role Selection -->
               <div class="mb-6">
                 <label class="block text-sm font-semibold text-gray-900 mb-3">Type de compte</label>
                 <div class="grid grid-cols-2 gap-3">
                   <div
-                    @click="form.account_type = 'personal'"
+                    @click="form.role = 'Particulier'"
                     class="relative cursor-pointer p-4 border-2 rounded-xl transition-all duration-200 hover:border-[#0099cc]/50"
-                    :class="form.account_type === 'personal' ? 'border-[#0099cc] bg-[#0099cc]/5' : 'border-gray-200'"
+                    :class="form.role === 'Particulier' ? 'border-[#0099cc] bg-[#0099cc]/5' : 'border-gray-200'"
                   >
                     <div class="flex items-center">
                       <div class="w-4 h-4 rounded-full border-2 mr-3 transition-colors"
-                           :class="form.account_type === 'personal' ? 'border-[#0099cc] bg-[#0099cc]' : 'border-gray-300'">
-                        <div v-if="form.account_type === 'personal'" class="w-full h-full rounded-full bg-white scale-50"></div>
+                           :class="form.role === 'Particulier' ? 'border-[#0099cc] bg-[#0099cc]' : 'border-gray-300'">
+                        <div v-if="form.role === 'Particulier'" class="w-full h-full rounded-full bg-white scale-50"></div>
                       </div>
                       <div>
-                        <h4 class="font-semibold text-gray-900">Personnel</h4>
+                        <h4 class="font-semibold text-gray-900">Particulier</h4>
                         <p class="text-xs text-gray-600">Acheteur particulier</p>
                       </div>
                     </div>
                   </div>
 
                   <div
-                    @click="form.account_type = 'business'"
+                    @click="form.role = 'Business'"
                     class="relative cursor-pointer p-4 border-2 rounded-xl transition-all duration-200 hover:border-[#0099cc]/50"
-                    :class="form.account_type === 'business' ? 'border-[#0099cc] bg-[#0099cc]/5' : 'border-gray-200'"
+                    :class="form.role === 'Business' ? 'border-[#0099cc] bg-[#0099cc]/5' : 'border-gray-200'"
                   >
                     <div class="flex items-center">
                       <div class="w-4 h-4 rounded-full border-2 mr-3 transition-colors"
-                           :class="form.account_type === 'business' ? 'border-[#0099cc] bg-[#0099cc]' : 'border-gray-300'">
-                        <div v-if="form.account_type === 'business'" class="w-full h-full rounded-full bg-white scale-50"></div>
+                           :class="form.role === 'Business' ? 'border-[#0099cc] bg-[#0099cc]' : 'border-gray-300'">
+                        <div v-if="form.role === 'Business'" class="w-full h-full rounded-full bg-white scale-50"></div>
                       </div>
                       <div>
                         <h4 class="font-semibold text-gray-900">Business</h4>
@@ -152,7 +152,7 @@
               <!-- Registration Form -->
               <form @submit.prevent="handleSubmit" class="space-y-5">
                 <!-- Business Name (shown only for business accounts) -->
-                <div v-if="form.account_type === 'business'" class="transition-all duration-300">
+                <div v-if="form.role === 'Business'" class="transition-all duration-300">
                   <label for="business_name" class="block text-sm font-semibold text-gray-900 mb-2">
                     Nom de l'entreprise *
                   </label>
@@ -269,7 +269,7 @@
                 </div>
 
                 <!-- Location Fields - only for business accounts -->
-                <div v-if="form.account_type == 'business'" class="grid grid-cols-2 gap-4 transition-all duration-300">
+                <div v-if="form.role === 'Business'" class="grid grid-cols-2 gap-4 transition-all duration-300">
                   <div>
                     <label for="city" class="block text-sm font-semibold text-gray-900 mb-2">
                       Ville *
@@ -278,7 +278,7 @@
                       id="city"
                       v-model="form.city"
                       type="text"
-                      :required="form.account_type === 'business'"
+                      :required="form.role === 'Business'"
                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
                       :class="{ 'border-red-300 bg-red-50': errors.city }"
                       placeholder="Libreville"
@@ -436,7 +436,7 @@ const phoneValid = ref(false)
 const selectedCountryCode = ref('GA') // Gabon par défaut
 
 const form = reactive({
-  account_type: 'personal',
+  role: 'Particulier',
   business_name: '',
   first_name: '',
   last_name: '',
@@ -451,7 +451,7 @@ const form = reactive({
 })
 
 const errors = reactive({
-  account_type: '',
+  role: '',
   business_name: '',
   first_name: '',
   last_name: '',
@@ -472,7 +472,7 @@ const validateForm = () => {
 
   let isValid = true
 
-  if (form.account_type === 'business' && !form.business_name.trim()) {
+  if (form.role === 'Business' && !form.business_name.trim()) {
     errors.business_name = 'Le nom de l\'entreprise est requis pour un compte business'
     isValid = false
   }
@@ -504,7 +504,7 @@ const validateForm = () => {
     isValid = false
   }
 
-  if (form.account_type === 'business' && !form.city.trim()) {
+  if (form.role === 'Business' && !form.city.trim()) {
     errors.city = 'La ville est requise pour un compte business'
     isValid = false
   }
@@ -574,26 +574,23 @@ const handleSubmit = async () => {
   authStore.clearError()
 
   const registrationData = {
-    account_type: form.account_type,
+    role: form.role,
     first_name: form.first_name.trim(),
     last_name: form.last_name.trim(),
     email: form.email.trim(),
     phone: form.phone.trim(),
     country_id: parseInt(form.country_id),
     password: form.password,
-    password_confirmation: form.password_confirmation,
-    // Logique correcte selon le type de compte
-    can_sell: form.account_type === 'business',
-    can_buy: true // Tous les comptes peuvent acheter
+    password_confirmation: form.password_confirmation
   }
 
   // Ajouter ville et adresse uniquement pour les comptes business
-  if (form.account_type === 'business') {
+  if (form.role === 'Business') {
     registrationData.city = form.city.trim()
     registrationData.address = form.address.trim() || null
   }
 
-  if (form.account_type === 'business' && form.business_name.trim()) {
+  if (form.role === 'Business' && form.business_name.trim()) {
     registrationData.business_name = form.business_name.trim()
   }
 
@@ -606,7 +603,7 @@ const handleSubmit = async () => {
     authStore.logout()
 
     // Préparer les données pour la page de connexion
-    const accountType = form.account_type === 'business' ? 'marchand' : 'client'
+    const accountType = form.role === 'Business' ? 'marchand' : 'client'
     const verificationMessage = result.verification_type === 'email_link'
       ? `Un email de vérification a été envoyé à ${result.verification_sent_to}. Veuillez cliquer sur le lien dans votre email, puis vous connecter ci-dessous.`
       : `Un code de vérification a été envoyé à ${result.verification_sent_to}. Veuillez vérifier votre compte, puis vous connecter ci-dessous.`
@@ -615,7 +612,7 @@ const handleSubmit = async () => {
     sessionStorage.setItem('registration_success', JSON.stringify({
       email: form.email.trim(),
       first_name: result.user?.first_name || form.first_name,
-      account_type: accountType,
+      role_type: accountType,
       verification_message: verificationMessage,
       requires_verification: result.requires_verification || false
     }))

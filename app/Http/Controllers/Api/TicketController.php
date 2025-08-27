@@ -8,6 +8,7 @@ use App\Models\LotteryTicket;
 use App\Models\Transaction;
 use App\Models\Order;
 use App\Services\EBillingService;
+use App\Services\MetricsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -22,11 +23,13 @@ use Illuminate\Support\Str;
 class TicketController extends Controller
 {
     protected $eBillingService;
+    protected MetricsService $metricsService;
 
-    public function __construct(EBillingService $eBillingService)
+    public function __construct(EBillingService $eBillingService, MetricsService $metricsService)
     {
         $this->middleware('auth:sanctum');
         $this->eBillingService = $eBillingService;
+        $this->metricsService = $metricsService;
     }
 
     /**
@@ -102,6 +105,9 @@ class TicketController extends Controller
                 'currency' => 'XAF',
                 'status' => Order::STATUS_PENDING,
             ]);
+
+            // Track order creation metrics
+            $this->metricsService->orderCreated($order);
 
             // Créer la transaction/commande liée à l'ordre
             $transactionId = 'TXN-' . time() . '-' . Str::random(6);

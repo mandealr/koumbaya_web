@@ -313,10 +313,9 @@ const getRoleLabel = (role) => {
   const roleMap = {
     'Super Admin': 'Super Admin',
     'Admin': 'Administrateur',
-    'Agent': 'Agent',
-    'Agent Back Office': 'Agent BO',
-    'Marchand': 'Marchand',
-    'Client': 'Client'
+    'Agent': 'Agent de Support',
+    'Business': 'Marchand',
+    'Particulier': 'Client'
   }
   return roleMap[role] || role
 }
@@ -326,9 +325,8 @@ const getRoleClass = (role) => {
     'Super Admin': 'bg-purple-100 text-purple-800',
     'Admin': 'bg-red-100 text-red-800',
     'Agent': 'bg-yellow-100 text-yellow-800',
-    'Agent Back Office': 'bg-orange-100 text-orange-800',
-    'Marchand': 'bg-blue-100 text-blue-800',
-    'Client': 'bg-green-100 text-green-800'
+    'Business': 'bg-blue-100 text-blue-800',
+    'Particulier': 'bg-green-100 text-green-800'
   }
   return classMap[role] || 'bg-gray-100 text-gray-800'
 }

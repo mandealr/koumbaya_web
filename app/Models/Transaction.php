@@ -11,41 +11,26 @@ class Transaction extends Model
 
     protected $fillable = [
         'reference',
-        'transaction_id',
         'user_id',
         'order_id',
-        'type',
+        'transaction_id',
         'amount',
-        'currency',
         'status',
         'payment_method',
         'external_transaction_id',
-        'product_id',
-        'lottery_id',
-        'lottery_ticket_id',
-        'phone_number',
-        'quantity',
-        'payment_provider',
-        'payment_provider_id',
+        'ebilling_id',
         'callback_data',
-        'description',
-        'metadata',
         'paid_at',
-        'completed_at',
-        'failed_at',
-        'failure_reason',
+        'meta',
     ];
 
     protected function casts(): array
     {
         return [
             'amount' => 'decimal:2',
-            'quantity' => 'integer',
-            'metadata' => 'array',
-            'callback_data' => 'json',
+            'callback_data' => 'array',
+            'meta' => 'array',
             'paid_at' => 'datetime',
-            'completed_at' => 'datetime',
-            'failed_at' => 'datetime',
         ];
     }
 
@@ -59,17 +44,23 @@ class Transaction extends Model
 
     public function product()
     {
-        return $this->belongsTo(Product::class, 'product_id');
+        // product_id est maintenant dans meta
+        $productId = $this->meta['product_id'] ?? null;
+        return $productId ? Product::find($productId) : null;
     }
 
     public function lottery()
     {
-        return $this->belongsTo(Lottery::class, 'lottery_id');
+        // lottery_id est maintenant dans meta
+        $lotteryId = $this->meta['lottery_id'] ?? null;
+        return $lotteryId ? Lottery::find($lotteryId) : null;
     }
 
     public function lotteryTicket()
     {
-        return $this->belongsTo(LotteryTicket::class, 'lottery_ticket_id');
+        // lottery_ticket_id est maintenant dans meta
+        $ticketId = $this->meta['lottery_ticket_id'] ?? null;
+        return $ticketId ? LotteryTicket::find($ticketId) : null;
     }
 
     public function tickets()
@@ -117,17 +108,18 @@ class Transaction extends Model
 
     public function scopeByType($query, $type)
     {
-        return $query->where('type', $type);
+        // type est maintenant dans meta
+        return $query->whereJsonContains('meta->type', $type);
     }
 
     public function scopeTicketPurchases($query)
     {
-        return $query->where('type', 'ticket_purchase');
+        return $query->whereJsonContains('meta->type', 'ticket_purchase');
     }
 
     public function scopeDirectPurchases($query)
     {
-        return $query->where('type', 'direct_purchase');
+        return $query->whereJsonContains('meta->type', 'direct_purchase');
     }
 
     public function scopeExpired($query)
@@ -154,6 +146,69 @@ class Transaction extends Model
         return in_array($this->status, ['pending', 'payment_initiated']);
     }
 
+    /**
+     * Accesseurs pour les champs migrés vers meta
+     */
+    public function getTypeAttribute()
+    {
+        return $this->meta['type'] ?? null;
+    }
+
+    public function getCurrencyAttribute()
+    {
+        return $this->meta['currency'] ?? 'XAF';
+    }
+
+    public function getProductIdAttribute()
+    {
+        return $this->meta['product_id'] ?? null;
+    }
+
+    public function getLotteryIdAttribute()
+    {
+        return $this->meta['lottery_id'] ?? null;
+    }
+
+    public function getLotteryTicketIdAttribute()
+    {
+        return $this->meta['lottery_ticket_id'] ?? null;
+    }
+
+    public function getDescriptionAttribute()
+    {
+        return $this->meta['description'] ?? '';
+    }
+
+    public function getMetadataAttribute()
+    {
+        return $this->meta['metadata'] ?? [];
+    }
+
+    public function getQuantityAttribute()
+    {
+        return $this->meta['quantity'] ?? 1;
+    }
+
+    public function getPhoneNumberAttribute()
+    {
+        return $this->meta['phone_number'] ?? null;
+    }
+
+    public function getCompletedAtAttribute()
+    {
+        return $this->meta['completed_at'] ?? null;
+    }
+
+    public function getFailedAtAttribute()
+    {
+        return $this->meta['failed_at'] ?? null;
+    }
+
+    public function getFailureReasonAttribute()
+    {
+        return $this->meta['failure_reason'] ?? null;
+    }
+
     public function getExpiresAtAttribute()
     {
         if (!$this->is_pending) return null;
@@ -171,10 +226,14 @@ class Transaction extends Model
      */
     public function markAsCompleted(array $callbackData = [])
     {
+        $meta = $this->meta ?? [];
+        $meta['completed_at'] = now()->toISOString();
+        
         $this->update([
             'status' => 'completed',
-            'completed_at' => now(),
+            'paid_at' => now(),
             'callback_data' => $callbackData,
+            'meta' => $meta,
         ]);
 
         $this->tickets()->update(['status' => 'paid']);
@@ -186,11 +245,14 @@ class Transaction extends Model
 
     public function markAsFailed($reason = null, array $callbackData = [])
     {
+        $meta = $this->meta ?? [];
+        $meta['failed_at'] = now()->toISOString();
+        $meta['failure_reason'] = $reason;
+        
         $this->update([
             'status' => 'failed',
-            'failed_at' => now(),
-            'failure_reason' => $reason,
             'callback_data' => $callbackData,
+            'meta' => $meta,
         ]);
 
         $this->tickets()->update(['status' => 'refunded']);

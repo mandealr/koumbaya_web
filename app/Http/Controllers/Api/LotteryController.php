@@ -386,6 +386,9 @@ class LotteryController extends Controller
                 'status' => Order::STATUS_PENDING,
             ]);
 
+            // Track order creation metrics
+            $this->metricsService->orderCreated($order);
+
             // Créer la transaction liée à l'ordre
             $transaction = Transaction::create([
                 'reference' => 'TKT-' . time() . '-' . $user->id,
@@ -488,7 +491,7 @@ class LotteryController extends Controller
         $lottery = Lottery::with('product.merchant')->findOrFail($id);
 
         // Vérifier les permissions (propriétaire du produit ou admin)
-        if ($lottery->product->merchant_id !== $user->id && $user->role !== 'MANAGER') {
+        if ($lottery->product->merchant_id !== $user->id && !$user->isAdmin()) {
             return response()->json(['error' => 'Non autorisé'], 403);
         }
 

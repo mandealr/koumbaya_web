@@ -231,6 +231,8 @@ Route::group([
         Route::get('/', [MerchantOrderController::class, 'index']);
         Route::get('/export', [MerchantOrderController::class, 'exportCsv']);
         Route::get('/top-products', [MerchantOrderController::class, 'getTopProducts']);
+        Route::get('/metrics', [MerchantOrderController::class, 'metrics']);
+        Route::get('/metrics/health', [MerchantOrderController::class, 'metricsHealth']);
     });
     
     // Transaction management

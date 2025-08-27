@@ -58,7 +58,7 @@ class UserRatingSeeder extends Seeder
                 $ratings[] = [
                     'rated_user_id' => $ratedUser->id,
                     'rater_user_id' => $rater->id,
-                    'transaction_id' => null, // Pas de transaction spécifique pour l'instant
+                    'payment_id' => null, // Pas de paiement spécifique pour l'instant
                     'product_id' => null,
                     'rating' => $rating,
                     'comment' => $comments[array_rand($comments)],
