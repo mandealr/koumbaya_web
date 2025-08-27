@@ -252,32 +252,53 @@ class EBillingService
     /**
      * Push USSD to user's phone
      */
-    public static function pushUssd($billId, $paymentSystemName, $payerMsisdn)
+    public static function pushUssd($billId, $paymentSystemName, $payerMsisdn, $type = 'payment')
     {
-        $username = config('services.ebilling.username');
-        $sharedKey = config('services.ebilling.shared_key');
-        $ebillingUrl = config('services.ebilling.url');
+        if ($type == "transfert") {
+            $auth = env('USER_NAME_TR') . ':' . env('SHARED_KEY_TR');
+        } else {
+            $auth = env('USER_NAME') . ':' . env('SHARED_KEY');
+        }
+        $base64 = base64_encode($auth);
 
         try {
-            $response = Http::withBasicAuth($username, $sharedKey)
-                ->post($ebillingUrl . 'e_bills/' . $billId . '/ussd_push', [
-                    'payment_system_name' => $paymentSystemName,
-                    'payer_msisdn' => $payerMsisdn,
-                ]);
+            $response = Http::withHeaders([
+                "Authorization" => "Basic " . $base64
+            ])->post(env('URL_EB') . 'e_bills/' . $billId . '/ussd_push', [
+                "payment_system_name" => $paymentSystemName,
+                "payer_msisdn" => $payerMsisdn,
+            ]);
 
-            $responseData = $response->json();
+            $responseData = json_decode($response->body());
 
-            if ($responseData && $responseData['message'] === 'Accepted') {
-                return ['success' => true, 'message' => 'USSD push sent successfully'];
+            if ($responseData) {
+                if ($responseData->message == "Accepted") {
+                    return [
+                        'success' => true, 
+                        'message' => 'Push USSD envoyé avec succès. Gardez votre téléphone à portée de main pour valider la transaction avec votre code PIN secret.',
+                        'data' => $responseData
+                    ];
+                } else {
+                    return [
+                        'success' => false, 
+                        'message' => $responseData->message ?? 'Push USSD échoué'
+                    ];
+                }
+            } else {
+                return [
+                    'success' => false, 
+                    'message' => 'Échec du Push USSD.'
+                ];
             }
-
-            return ['success' => false, 'message' => $responseData['message'] ?? 'USSD push failed'];
         } catch (\Exception $e) {
             Log::error('E-BILLING :: USSD push failed', [
                 'error' => $e->getMessage(),
                 'bill_id' => $billId
             ]);
-            return ['success' => false, 'message' => 'USSD push failed'];
+            return [
+                'success' => false, 
+                'message' => 'Push USSD échoué'
+            ];
         }
     }
 

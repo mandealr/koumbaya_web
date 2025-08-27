@@ -85,12 +85,17 @@
         <div class="flex items-start">
           <InformationCircleIcon class="h-5 w-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" />
           <div class="text-sm text-blue-700">
-            <p class="font-medium mb-2">Instructions :</p>
+            <p class="font-medium mb-2">Instructions importantes :</p>
+            <div class="bg-white rounded-lg p-3 mb-3 border border-blue-200">
+              <p class="font-semibold text-blue-800 text-sm">📱 Gardez votre téléphone à portée de main</p>
+              <p class="text-xs text-blue-600 mt-1">Vous devez valider la transaction avec votre code PIN secret</p>
+            </div>
             <ol class="space-y-1 text-xs">
-              <li>1. Composez le code USSD sur votre téléphone</li>
-              <li>2. Suivez les instructions de votre opérateur</li>
-              <li>3. Confirmez le paiement avec votre code PIN</li>
-              <li>4. Le paiement sera confirmé automatiquement</li>
+              <li>1. Vous allez recevoir un code USSD sur votre téléphone</li>
+              <li>2. Composez le code reçu sur votre clavier</li>
+              <li>3. Suivez les instructions de {{ operator === 'airtel' ? 'Airtel Money' : 'Moov Money' }}</li>
+              <li>4. Confirmez le paiement avec votre code PIN secret</li>
+              <li>5. Le paiement sera confirmé automatiquement</li>
             </ol>
           </div>
         </div>

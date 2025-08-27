@@ -30,6 +30,7 @@ import ProductDetail from '@/pages/customer/ProductDetail.vue'
 import Profile from '@/pages/customer/Profile.vue'
 import MyTickets from '@/pages/customer/MyTickets.vue'
 import Refunds from '@/pages/customer/Refunds.vue'
+import OrderTracking from '@/pages/customer/OrderTracking.vue'
 
 // Payment Pages
 import PaymentMethod from '@/pages/payment/PaymentMethod.vue'
@@ -168,6 +169,11 @@ const routes = [
         path: 'refunds',
         name: 'customer.refunds',
         component: Refunds
+      },
+      {
+        path: 'orders',
+        name: 'customer.orders',
+        component: OrderTracking
       }
     ]
   },

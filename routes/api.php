@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\AdminProductController;
 use App\Http\Controllers\Api\AdminPaymentController;
 use App\Http\Controllers\Api\AdminSettingsController;
 use App\Http\Controllers\Api\AdminProfileController;
+use App\Http\Controllers\Api\OrderTrackingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -172,6 +173,14 @@ Route::group([
         Route::get('/stats', [RefundController::class, 'stats']);
         Route::get('/{id}', [RefundController::class, 'show']);
         Route::post('/{id}/cancel', [RefundController::class, 'cancel']);
+    });
+    
+    // Order Tracking
+    Route::prefix('orders')->group(function () {
+        Route::get('/', [OrderTrackingController::class, 'index']);
+        Route::get('/stats', [OrderTrackingController::class, 'stats']);
+        Route::get('/search', [OrderTrackingController::class, 'search']);
+        Route::get('/{transactionId}', [OrderTrackingController::class, 'show']);
     });
 });
 
