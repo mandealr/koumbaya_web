@@ -279,7 +279,8 @@ class Product extends Model
      */
     public function getTicketPriceSuggestions(): array
     {
-        return TicketPriceCalculator::getSuggestions($this->price, $this->ticket_price);
+        $ticketPrice = $this->meta['ticket_price'] ?? 0;
+        return TicketPriceCalculator::getSuggestions($this->price, $ticketPrice);
     }
 
     /**
@@ -288,8 +289,10 @@ class Product extends Model
     public function updateTicketPrice(int $numberOfTickets = null): void
     {
         $numberOfTickets = $numberOfTickets ?? config('koumbaya.ticket_calculation.default_tickets', 1000);
-        $this->ticket_price = $this->calculateTicketPrice($numberOfTickets);
-        $this->min_participants = $numberOfTickets;
+        $meta = $this->meta ?? [];
+        $meta['ticket_price'] = $this->calculateTicketPrice($numberOfTickets);
+        $meta['min_participants'] = $numberOfTickets;
+        $this->meta = $meta;
         $this->save();
     }
 
@@ -301,12 +304,16 @@ class Product extends Model
         // Calcul automatique lors de la création
         static::creating(function ($product) {
             if (config('koumbaya.features.auto_calculate_ticket_price', true)) {
-                if ($product->price && (!$product->ticket_price || $product->ticket_price == 0)) {
-                    $product->ticket_price = $product->calculateTicketPrice();
+                $meta = $product->meta ?? [];
+                
+                if ($product->price && (!isset($meta['ticket_price']) || $meta['ticket_price'] == 0)) {
+                    $meta['ticket_price'] = $product->calculateTicketPrice();
                 }
-                if (!$product->min_participants) {
-                    $product->min_participants = config('koumbaya.ticket_calculation.default_tickets', 1000);
+                if (!isset($meta['min_participants'])) {
+                    $meta['min_participants'] = config('koumbaya.ticket_calculation.default_tickets', 1000);
                 }
+                
+                $product->meta = $meta;
             }
         });
 
@@ -314,7 +321,10 @@ class Product extends Model
         static::updating(function ($product) {
             if (config('koumbaya.features.auto_calculate_ticket_price', true)) {
                 if ($product->isDirty('price') && $product->price) {
-                    $product->ticket_price = $product->calculateTicketPrice($product->min_participants);
+                    $meta = $product->meta ?? [];
+                    $minParticipants = $meta['min_participants'] ?? 1000;
+                    $meta['ticket_price'] = $product->calculateTicketPrice($minParticipants);
+                    $product->meta = $meta;
                 }
             }
         });
