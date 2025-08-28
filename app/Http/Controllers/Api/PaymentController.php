@@ -240,12 +240,12 @@ class PaymentController extends Controller
             // Créer un enregistrement de paiement
             $payment = Payment::create([
                 'reference' => $order->order_number,
+                'user_id' => $user->id,
                 'order_id' => $order->id,
                 'amount' => $order->total_amount,
                 'ebilling_id' => $billId,
                 'status' => 'pending',
                 'meta' => [
-                    'user_id' => $user->id,
                     'currency' => 'XAF',
                     'customer_phone' => $request->phone,
                     'payment_gateway' => 'ebilling',
