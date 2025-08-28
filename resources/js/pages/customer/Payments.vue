@@ -392,7 +392,7 @@ import { useApi } from '@/composables/api'
 import { useToast } from '@/composables/useToast'
 
 const router = useRouter()
-const { apiRequest } = useApi()
+const { get: apiGet } = useApi()
 const { showError, showSuccess } = useToast()
 
 // État réactif
@@ -418,7 +418,7 @@ const filters = reactive({
 // Charger les statistiques
 const loadStats = async () => {
   try {
-    const response = await apiRequest('/api/payments/stats', 'GET')
+    const response = await apiGet('/payments/stats')
     if (response.success) {
       stats.value = response.data
     }
@@ -426,7 +426,7 @@ const loadStats = async () => {
     console.error('Erreur lors du chargement des statistiques:', error)
     // Fallback sur les stats des commandes
     try {
-      const fallbackResponse = await apiRequest('/api/orders/stats', 'GET')
+      const fallbackResponse = await apiGet('/orders/stats')
       if (fallbackResponse.success) {
         stats.value = {
           successful_payments: fallbackResponse.data.completed_orders,
@@ -457,7 +457,7 @@ const loadPayments = async (page = 1) => {
 
     // Essayer d'abord l'API des paiements dédiée
     try {
-      const response = await apiRequest(`/api/payments?${params.toString()}`, 'GET')
+      const response = await apiGet(`/payments?${params.toString()}`)
       if (response.success) {
         payments.value = response.data
         pagination.value = response.pagination
@@ -468,7 +468,7 @@ const loadPayments = async (page = 1) => {
     }
     
     // Fallback: extraire les paiements des commandes
-    const ordersResponse = await apiRequest(`/api/orders?${params.toString()}`, 'GET')
+    const ordersResponse = await apiGet(`/orders?${params.toString()}`)
     if (ordersResponse.success) {
       const allPayments = []
       

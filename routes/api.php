@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\AdminProductController;
 use App\Http\Controllers\Api\AdminPaymentController;
 use App\Http\Controllers\Api\AdminSettingsController;
 use App\Http\Controllers\Api\AdminProfileController;
+use App\Http\Controllers\Api\AdminOrderController;
 use App\Http\Controllers\Api\OrderTrackingController;
 use App\Http\Controllers\Api\PaymentTrackingController;
 use App\Http\Controllers\Api\AvatarController;
@@ -301,6 +302,14 @@ Route::group([
         Route::get('/{id}', 'show');
         Route::post('/{id}/refund', 'refund');
         Route::get('/export', 'export');
+    });
+
+    // Admin Orders Management
+    Route::prefix('orders')->controller(AdminOrderController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::get('/stats', 'stats');
+        Route::get('/{orderNumber}', 'show');
+        Route::put('/{orderNumber}/status', 'updateStatus');
     });
     
     // Admin Settings

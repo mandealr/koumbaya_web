@@ -490,7 +490,7 @@ import {
 
 const route = useRoute()
 const router = useRouter()
-const { apiRequest } = useApi()
+const { get: apiGet } = useApi()
 const { showError, showSuccess } = useToast()
 
 // État
@@ -512,7 +512,7 @@ const loadOrder = async () => {
       return
     }
     
-    const response = await apiRequest(`/api/orders/${orderNumber}`, 'GET')
+    const response = await apiGet(`/orders/${orderNumber}`)
     if (response.success) {
       order.value = response.data
     } else {

@@ -214,7 +214,8 @@ import {
   Bars3Icon,
   ChevronRightIcon,
   ChevronDownIcon,
-  CurrencyDollarIcon
+  CurrencyDollarIcon,
+  ClipboardDocumentListIcon
 } from '@heroicons/vue/24/outline'
 
 const authStore = useAuthStore()
@@ -256,6 +257,12 @@ const menuItems = computed(() => [
     label: 'Tombolas',
     icon: GiftIcon,
     badge: badgeCounts.value.lotteries > 0 ? badgeCounts.value.lotteries.toString() : null
+  },
+  {
+    name: 'admin.orders',
+    to: { name: 'admin.orders' },
+    label: 'Commandes',
+    icon: ClipboardDocumentListIcon
   },
   {
     name: 'admin.refunds',

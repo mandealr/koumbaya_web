@@ -335,7 +335,7 @@ import moovLogo from '@/assets/mm.png'
 
 const route = useRoute()
 const router = useRouter()
-const { apiRequest } = useApi()
+const { get: apiGet } = useApi()
 const { showError, showSuccess } = useToast()
 
 // État
@@ -349,7 +349,7 @@ const loadPayment = async () => {
     loading.value = true
     const paymentId = route.params.id
     
-    const response = await apiRequest(`/api/payments/${paymentId}`, 'GET')
+    const response = await apiGet(`/payments/${paymentId}`)
     if (response.success) {
       payment.value = response.data
     } else {

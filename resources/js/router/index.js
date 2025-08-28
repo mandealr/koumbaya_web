@@ -48,6 +48,7 @@ import LotteryManagement from '@/pages/admin/LotteryManagement.vue'
 import AdminSettings from '@/pages/admin/Settings.vue'
 import AdminProfile from '@/pages/admin/Profile.vue'
 import RefundManagement from '@/pages/admin/RefundManagement.vue'
+import OrderManagement from '@/pages/admin/OrderManagement.vue'
 import PaymentManagement from '@/pages/admin/PaymentManagement.vue'
 
 const routes = [
@@ -253,6 +254,11 @@ const routes = [
         path: 'profile',
         name: 'admin.profile',
         component: AdminProfile
+      },
+      {
+        path: 'orders',
+        name: 'admin.orders',
+        component: OrderManagement
       },
       {
         path: 'refunds',

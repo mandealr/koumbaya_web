@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
-use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -68,8 +67,7 @@ class PaymentTrackingController extends Controller
             ->with([
                 'order.product',
                 'order.lottery.product',
-                'order.lottery.lotteryTickets',
-                'gateway'
+                'order.lottery.lotteryTickets'
             ])
             ->first();
 
@@ -229,14 +227,11 @@ class PaymentTrackingController extends Controller
             }
         }
 
-        // Ajouter les informations de la passerelle de paiement
-        if ($payment->gateway) {
-            $details['gateway'] = [
-                'name' => $payment->gateway->name,
-                'display_name' => $payment->gateway->display_name,
-                'logo' => $payment->gateway->logo,
-            ];
-        }
+        // Informations de la passerelle de paiement depuis les meta
+        $details['gateway'] = [
+            'name' => $payment->payment_gateway,
+            'display_name' => $payment->payment_method ? ucfirst($payment->payment_method) : 'E-Billing',
+        ];
 
         return $details;
     }

@@ -43,7 +43,7 @@ class AuthController extends Controller
      *             @OA\Property(property="email", type="string", format="email", example="jean@example.com"),
      *             @OA\Property(property="phone", type="string", example="+24177123456"),
      *             @OA\Property(property="password", type="string", format="password", example="password123"),
-     *             @OA\Property(property="role", type="string", enum={"MERCHANT","RESELLER","PARTNER"}, example="MERCHANT")
+     *             @OA\Property(property="role", type="string", enum={"Particulier","Business"}, example="Particulier")
      *         )
      *     ),
      *     @OA\Response(
@@ -69,7 +69,7 @@ class AuthController extends Controller
             'phone' => 'required|string|max:20|unique:users',
             'password' => 'required|string|min:6',
             'password_confirmation' => 'required|string|same:password',
-            'role' => 'nullable|in:customer,merchant,admin',
+            'role' => 'nullable|in:Particulier,Business,customer,merchant,admin',
             'account_type' => 'nullable|in:personal,business',
             'can_sell' => 'nullable|boolean',
             'can_buy' => 'nullable|boolean',
@@ -89,7 +89,11 @@ class AuthController extends Controller
         // TODO: Réimplémenter la vérification OTP si nécessaire
         // Pour le moment, on skip l'OTP pour permettre l'inscription directe
 
-        // Le système de rôles est géré via les relations et seeders, pas d'assignation manuelle ici
+        // Mapper le rôle frontend vers account_type backend
+        $accountType = 'personal';
+        if ($request->role === 'Business') {
+            $accountType = 'business';
+        }
 
         $user = User::create([
             'first_name' => $request->first_name,
@@ -97,8 +101,8 @@ class AuthController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
-            'account_type' => $request->account_type ?? 'personal',
-            'can_sell' => $request->can_sell ?? false,
+            'account_type' => $request->account_type ?? $accountType,
+            'can_sell' => $request->can_sell ?? ($accountType === 'business'),
             'can_buy' => $request->can_buy ?? true,
             'business_name' => $request->business_name,
             'city' => $request->city,
@@ -675,7 +679,7 @@ class AuthController extends Controller
         // - account_type = 'personal' → rôle 'Particulier' (achats, participation aux tombolas)
         // - account_type = 'business' → rôle 'Business' (vente, gestion des produits/tombolas)
         
-        if ($request->account_type === 'business') {
+        if ($user->account_type === 'business') {
             // Compte business = rôle Business uniquement
             $roleName = 'Business';
         } else {
@@ -687,10 +691,11 @@ class AuthController extends Controller
         \Log::info('Attribution de rôle lors de l\'inscription', [
             'user_id' => $user->id,
             'email' => $user->email,
-            'account_type' => $request->account_type,
+            'user_account_type' => $user->account_type,
+            'request_role' => $request->role,
             'role_name' => $roleName,
-            'can_sell' => $request->can_sell,
-            'can_buy' => $request->can_buy
+            'can_sell' => $user->can_sell,
+            'can_buy' => $user->can_buy
         ]);
 
         // Assigner le rôle approprié

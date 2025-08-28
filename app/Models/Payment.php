@@ -119,10 +119,6 @@ class Payment extends Model
     /**
      * Accesseurs pour les champs migrés vers meta
      */
-    public function getUserIdAttribute()
-    {
-        return $this->meta['user_id'] ?? $this->order?->user_id;
-    }
 
     public function getCurrencyAttribute()
     {

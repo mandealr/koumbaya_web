@@ -369,7 +369,7 @@ import { ref, reactive, onMounted, watch } from 'vue'
 import { useApi } from '@/composables/api'
 import { useToast } from '@/composables/useToast'
 
-const { apiRequest } = useApi()
+const { get: apiGet } = useApi()
 const { showError } = useToast()
 
 // État réactif
@@ -401,7 +401,7 @@ const filters = reactive({
 // Charger les statistiques
 const loadStats = async () => {
   try {
-    const response = await apiRequest('/api/orders/stats', 'GET')
+    const response = await apiGet('/orders/stats')
     stats.value = response.data
   } catch (error) {
     console.error('Erreur lors du chargement des statistiques:', error)
@@ -422,7 +422,7 @@ const loadOrders = async (page = 1) => {
     if (filters.status) params.append('status', filters.status)
     if (filters.type) params.append('type', filters.type)
 
-    const response = await apiRequest(`/api/orders?${params.toString()}`, 'GET')
+    const response = await apiGet(`/orders?${params.toString()}`)
     orders.value = response.data
     pagination.value = response.pagination
   } catch (error) {
@@ -436,7 +436,7 @@ const loadOrders = async (page = 1) => {
 // Voir les détails d'une commande
 const viewOrderDetails = async (orderNumber) => {
   try {
-    const response = await apiRequest(`/api/orders/${orderNumber}`, 'GET')
+    const response = await apiGet(`/orders/${orderNumber}`)
     selectedOrder.value = response.data
     showModal.value = true
   } catch (error) {
