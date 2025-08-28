@@ -327,7 +327,10 @@
                     </div>
                     <div class="text-right">
                       <span :class="getStatusBadgeClass(ticket.status)">{{ getStatusText(ticket.status) }}</span>
-                      <p v-if="ticket.is_winner" class="text-sm text-green-600 mt-1">🎉 Gagnant!</p>
+                      <p v-if="ticket.is_winner" class="text-sm text-green-600 mt-1 flex items-center">
+                        <TrophyIcon class="w-4 h-4 mr-1" />
+                        Gagnant!
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -368,6 +371,7 @@
 import { ref, reactive, onMounted, watch } from 'vue'
 import { useApi } from '@/composables/api'
 import { useToast } from '@/composables/useToast'
+import { TrophyIcon } from '@heroicons/vue/24/outline'
 
 const { get: apiGet } = useApi()
 const { showError } = useToast()

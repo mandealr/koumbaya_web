@@ -236,6 +236,15 @@ Route::group([
         Route::get('/metrics/health', [MerchantOrderController::class, 'metricsHealth']);
     });
     
+    // Merchant Profile Management
+    Route::prefix('merchant/profile')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\MerchantProfileController::class, 'show']);
+        Route::put('/', [App\Http\Controllers\Api\MerchantProfileController::class, 'update']);
+        Route::post('/avatar', [App\Http\Controllers\Api\MerchantProfileController::class, 'updateAvatar']);
+        Route::put('/password', [App\Http\Controllers\Api\MerchantProfileController::class, 'updatePassword']);
+        Route::get('/business-stats', [App\Http\Controllers\Api\MerchantProfileController::class, 'businessStats']);
+    });
+    
     // Transaction management
     Route::put('transactions/{id}/status', [MerchantDashboardController::class, 'updateTransactionStatus']);
 });

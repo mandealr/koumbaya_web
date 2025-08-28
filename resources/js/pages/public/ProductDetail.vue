@@ -193,8 +193,9 @@
                 @click="buyDirectly"
                 class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
               >
+                <ShoppingCartIcon class="w-5 h-5 mr-2" />
                 {{ authStore.isAuthenticated ? 
-                   `🛒 Acheter maintenant - ${formatPrice(product.value)}` : 
+                   `Acheter maintenant - ${formatPrice(product.value)}` : 
                    `Se connecter pour acheter - ${formatPrice(product.value)}` 
                 }}
               </button>
@@ -405,6 +406,7 @@ import {
   StarIcon,
   HeartIcon,
   ShareIcon,
+  ShoppingCartIcon,
   ShieldCheckIcon,
   TruckIcon,
   CheckBadgeIcon,
@@ -628,7 +630,7 @@ const loadProduct = async () => {
       lotteries: productData.lotteries || []
     }
     
-    console.log('✅ Product loaded successfully:', product.value.name)
+    console.log('Product loaded successfully:', product.value.name)
   } catch (err) {
     console.error('Erreur lors du chargement du produit:', err)
     error.value = err.response?.data?.message || 'Erreur lors du chargement du produit'

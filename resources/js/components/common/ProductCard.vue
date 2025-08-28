@@ -44,7 +44,9 @@
           <TagIcon class="w-4 h-4 mr-2" />
           {{ product.category?.name || product.category || 'Électronique' }}
         </div>
-        <div :class="getSaleModeClass(product.sale_mode)">
+        <div :class="getSaleModeClass(product.sale_mode)" class="flex items-center">
+          <TicketIcon v-if="product.sale_mode === 'lottery'" class="w-3.5 h-3.5 mr-1" />
+          <ShoppingBagIcon v-else class="w-3.5 h-3.5 mr-1" />
           {{ getSaleModeLabel(product.sale_mode) }}
         </div>
       </div>
@@ -136,7 +138,9 @@ import {
   TagIcon, 
   CalendarIcon,
   EyeIcon,
-  ShoppingCartIcon
+  ShoppingCartIcon,
+  TicketIcon,
+  ShoppingBagIcon
 } from '@heroicons/vue/24/outline'
 import ProductImage from './ProductImage.vue'
 

@@ -49,7 +49,10 @@
           <!-- Calcul automatique du prix du ticket -->
           <div v-if="calculation" class="bg-[#0099cc]/5 border border-[#0099cc]/20 rounded-xl p-4 space-y-3">
             <div class="flex items-center justify-between">
-              <h4 class="font-semibold text-[#0099cc]">💰 Calcul automatique du ticket</h4>
+              <h4 class="font-semibold text-[#0099cc] flex items-center">
+                <CurrencyDollarIcon class="w-4 h-4 mr-2" />
+                Calcul automatique du ticket
+              </h4>
               <span class="text-xs text-gray-500">
                 {{ form.numberOfTickets || 1000 }} tickets
               </span>
@@ -181,6 +184,7 @@
 <script setup>
 import { reactive, watch, ref, computed, onMounted } from 'vue'
 import { useApi } from '@/composables/api'
+import { CurrencyDollarIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
   show: {

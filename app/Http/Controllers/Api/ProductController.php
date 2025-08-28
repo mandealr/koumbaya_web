@@ -648,7 +648,40 @@ class ProductController extends Controller
         }
 
         if (!$product->canCreateLottery()) {
-            return response()->json(['error' => 'Impossible de créer une tombola pour ce produit'], 422);
+            $reasons = [];
+            
+            if (!$product->is_active) {
+                $reasons[] = 'Le produit doit être actif';
+            }
+            
+            if ($product->stock_quantity <= 0) {
+                $reasons[] = 'Le produit doit avoir du stock disponible';
+            }
+            
+            if ($product->sale_mode !== 'lottery') {
+                $reasons[] = 'Le mode de vente doit être défini sur "Tombola"';
+            }
+            
+            $ticketPrice = $product->meta['ticket_price'] ?? 100;
+            if ($ticketPrice < 100) {
+                $reasons[] = 'Le prix du ticket doit être d\'au moins 100 FCFA';
+            }
+            
+            if ($product->activeLottery()->exists()) {
+                $reasons[] = 'Une tombola est déjà active pour ce produit';
+            }
+            
+            return response()->json([
+                'error' => 'Impossible de créer une tombola pour ce produit',
+                'details' => $reasons,
+                'debug' => [
+                    'is_active' => $product->is_active,
+                    'stock_quantity' => $product->stock_quantity,
+                    'sale_mode' => $product->sale_mode,
+                    'ticket_price' => $ticketPrice,
+                    'has_active_lottery' => $product->activeLottery()->exists()
+                ]
+            ], 422);
         }
 
         $validator = Validator::make($request->all(), [

@@ -234,7 +234,10 @@ class Product extends Model
      */
     public function canCreateLottery()
     {
-        $ticketPrice = $this->meta['ticket_price'] ?? 100;
+        // Le ticket_price est stocké dans le champ meta JSON
+        $meta = is_string($this->meta) ? json_decode($this->meta, true) : ($this->meta ?? []);
+        $ticketPrice = $meta['ticket_price'] ?? 100;
+        
         return $this->is_active === true && 
                $this->stock_quantity > 0 && 
                $this->sale_mode === 'lottery' &&

@@ -179,7 +179,7 @@
             >
               <span v-if="purchasing">Achat en cours...</span>
               <template v-else>
-                <span>🛒</span>
+                <ShoppingCartIcon class="w-5 h-5 mr-2" />
                 <span>Acheter maintenant</span>
               </template>
             </button>
@@ -281,6 +281,7 @@ import {
   StarIcon,
   CalendarIcon,
   ClockIcon,
+  ShoppingCartIcon,
   MinusIcon,
   PlusIcon,
   CheckCircleIcon,
@@ -401,7 +402,7 @@ const purchaseTickets = async () => {
     // Vérifier que l'utilisateur a un numéro de téléphone
     if (!phoneNumber) {
       if (window.$toast) {
-        window.$toast.error('Veuillez ajouter un numéro de téléphone à votre profil avant d\'effectuer un achat.', '📱 Téléphone requis')
+        window.$toast.error('Veuillez ajouter un numéro de téléphone à votre profil avant d\'effectuer un achat.', 'Téléphone requis')
       }
       return
     }
@@ -415,7 +416,7 @@ const purchaseTickets = async () => {
 
     if (response && response.success) {
       if (window.$toast) {
-        window.$toast.success(response.message || 'Commande créée avec succès !', '✅ Commande créée')
+        window.$toast.success(response.message || 'Commande créée avec succès !', 'Commande créée')
       }
 
       // Rediriger vers la page de sélection du moyen de paiement
@@ -469,7 +470,7 @@ const purchaseDirectly = async () => {
       } else {
         // Achat direct réussi
         if (window.$toast) {
-          window.$toast.success('🎉 Produit acheté avec succès ! Vous recevrez une confirmation par SMS.', '✅ Achat confirmé')
+          window.$toast.success('Produit acheté avec succès ! Vous recevrez une confirmation par SMS.', 'Achat confirmé')
         }
 
         // Refresh product data
