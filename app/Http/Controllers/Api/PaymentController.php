@@ -71,7 +71,7 @@ class PaymentController extends Controller
         $user = auth('sanctum')->user();
 
         $validator = Validator::make($request->all(), [
-            'order_number' => 'required|string',
+            'order_number' => 'nullable|string',
             'phone' => 'required|string|max:20',
             'operator' => 'required|string|in:airtel,moov'
         ]);
@@ -85,17 +85,21 @@ class PaymentController extends Controller
         }
 
         try {
-            // Récupérer l'ordre
-            $order = Order::where('order_number', $request->order_number)
-                ->where('user_id', $user->id)
-                ->where('status', 'pending')
-                ->with(['product', 'lottery'])
-                ->first();
+            $order = null;
+            
+            // Si order_number est fourni, récupérer l'ordre existant
+            if ($request->filled('order_number')) {
+                $order = Order::where('order_number', $request->order_number)
+                    ->where('user_id', $user->id)
+                    ->where('status', 'pending')
+                    ->with(['product', 'lottery'])
+                    ->first();
+            }
 
             if (!$order) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Commande introuvable ou déjà traitée'
+                    'message' => 'Commande introuvable. Veuillez d\'abord créer une commande via l\'achat de ticket.'
                 ], 404);
             }
 
