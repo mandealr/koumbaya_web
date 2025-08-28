@@ -72,6 +72,8 @@ class PaymentController extends Controller
 
         $validator = Validator::make($request->all(), [
             'order_number' => 'nullable|string',
+            'lottery_id' => 'required_without:order_number|exists:lotteries,id',
+            'quantity' => 'nullable|integer|min:1|max:10',
             'phone' => 'required|string|max:20',
             'operator' => 'required|string|in:airtel,moov'
         ]);
@@ -96,10 +98,41 @@ class PaymentController extends Controller
                     ->first();
             }
 
+            // Si pas de commande trouvée, créer une nouvelle commande pour la tombola
+            if (!$order && $request->filled('lottery_id')) {
+                $lottery = Lottery::findOrFail($request->lottery_id);
+                $quantity = $request->get('quantity', 1);
+                $totalAmount = $lottery->ticket_price * $quantity;
+
+                if (!$lottery->canPurchaseTicket()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cette tombola n\'accepte plus de tickets'
+                    ], 422);
+                }
+
+                if (($lottery->sold_tickets + $quantity) > $lottery->max_tickets) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Pas assez de tickets disponibles'
+                    ], 422);
+                }
+
+                $order = Order::create([
+                    'order_number' => Order::generateOrderNumber(),
+                    'user_id' => $user->id,
+                    'type' => Order::TYPE_LOTTERY,
+                    'lottery_id' => $lottery->id,
+                    'total_amount' => $totalAmount,
+                    'currency' => 'XAF',
+                    'status' => Order::STATUS_PENDING,
+                ]);
+            }
+
             if (!$order) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Commande introuvable. Veuillez d\'abord créer une commande via l\'achat de ticket.'
+                    'message' => 'Commande introuvable. Veuillez fournir un order_number ou un lottery_id.'
                 ], 404);
             }
 
