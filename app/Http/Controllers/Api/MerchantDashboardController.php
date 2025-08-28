@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Lottery;
 use App\Models\LotteryTicket;
-use App\Models\Transaction;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -69,7 +69,7 @@ class MerchantDashboardController extends Controller
             : 0;
 
         // Compter les commandes en attente
-        $pendingOrders = Transaction::whereHas('lottery.product', function ($query) use ($merchantId) {
+        $pendingOrders = Payment::whereHas('lottery.product', function ($query) use ($merchantId) {
             $query->where('merchant_id', $merchantId);
         })->where('status', 'pending')->count();
 
@@ -115,7 +115,7 @@ class MerchantDashboardController extends Controller
             default => Carbon::now()->subDays(30)
         };
 
-        $salesData = Transaction::select(
+        $salesData = Payment::select(
             DB::raw('DATE(completed_at) as date'),
             DB::raw('SUM(amount) as revenue'),
             DB::raw('COUNT(*) as transactions'),
@@ -246,7 +246,7 @@ class MerchantDashboardController extends Controller
             $merchantId = auth()->id();
             $limit = $request->get('limit', 20);
             
-            $query = Transaction::with(['user', 'lottery.product', 'lottery_tickets'])
+            $query = Payment::with(['user', 'lottery.product', 'lottery_tickets'])
                 ->whereHas('lottery.product', function ($query) use ($merchantId) {
                     $query->where('merchant_id', $merchantId);
                 });
@@ -393,7 +393,7 @@ class MerchantDashboardController extends Controller
      */
     private function getTotalSales($merchantId)
     {
-        return Transaction::whereHas('lottery.product', function ($query) use ($merchantId) {
+        return Payment::whereHas('lottery.product', function ($query) use ($merchantId) {
             $query->where('merchant_id', $merchantId);
         })
         ->where('status', 'completed')
@@ -402,7 +402,7 @@ class MerchantDashboardController extends Controller
 
     private function getTicketsSold($merchantId)
     {
-        return Transaction::whereHas('lottery.product', function ($query) use ($merchantId) {
+        return Payment::whereHas('lottery.product', function ($query) use ($merchantId) {
             $query->where('merchant_id', $merchantId);
         })
         ->where('status', 'completed')
@@ -411,7 +411,7 @@ class MerchantDashboardController extends Controller
 
     private function getRevenueThisMonth($merchantId)
     {
-        return Transaction::whereHas('lottery.product', function ($query) use ($merchantId) {
+        return Payment::whereHas('lottery.product', function ($query) use ($merchantId) {
             $query->where('merchant_id', $merchantId);
         })
         ->where('status', 'completed')
@@ -424,7 +424,7 @@ class MerchantDashboardController extends Controller
 
     private function getRevenueLastMonth($merchantId)
     {
-        return Transaction::whereHas('lottery.product', function ($query) use ($merchantId) {
+        return Payment::whereHas('lottery.product', function ($query) use ($merchantId) {
             $query->where('merchant_id', $merchantId);
         })
         ->where('status', 'completed')
@@ -460,7 +460,7 @@ class MerchantDashboardController extends Controller
         // Simplified conversion rate calculation
         $product = Product::find($productId);
         $views = $product->views_count ?? 1;
-        $sales = Transaction::whereHas('lottery', function ($query) use ($productId) {
+        $sales = Payment::whereHas('lottery', function ($query) use ($productId) {
             $query->where('product_id', $productId);
         })
         ->where('status', 'completed')
@@ -482,7 +482,7 @@ class MerchantDashboardController extends Controller
         ]);
         
         // Vérifier que la transaction appartient au marchand
-        $transaction = Transaction::whereHas('lottery.product', function ($query) use ($merchantId) {
+        $transaction = Payment::whereHas('lottery.product', function ($query) use ($merchantId) {
             $query->where('merchant_id', $merchantId);
         })->find($id);
         

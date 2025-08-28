@@ -87,7 +87,9 @@ class AdminProductController extends Controller
                     'status' => $lottery->status,
                     'total_tickets' => $lottery->total_tickets,
                     'sold_tickets' => $lottery->sold_tickets,
-                    'progress' => round(($lottery->sold_tickets / $lottery->total_tickets) * 100),
+                    'progress' => $lottery->total_tickets > 0 
+                        ? round(($lottery->sold_tickets / $lottery->total_tickets) * 100)
+                        : 0,
                     'end_date' => $lottery->end_date,
                     'draw_date' => $lottery->draw_date
                 ] : null

@@ -108,7 +108,16 @@ class AdminLotteryController extends Controller
         }
 
         if ($request->is_drawn !== null) {
-            $query->where('is_drawn', $request->boolean('is_drawn'));
+            $isDrawn = $request->boolean('is_drawn');
+            if ($isDrawn) {
+                $query->where('status', 'completed')
+                      ->whereNotNull('winner_user_id');
+            } else {
+                $query->where(function($q) {
+                    $q->where('status', '!=', 'completed')
+                      ->orWhereNull('winner_user_id');
+                });
+            }
         }
 
         if ($request->search) {
@@ -190,8 +199,8 @@ class AdminLotteryController extends Controller
             'active_lotteries' => Lottery::where('status', 'active')->count(),
             'completed_lotteries' => Lottery::where('status', 'completed')->count(),
             'pending_draws' => Lottery::where('status', 'active')
-                ->where('is_drawn', false)
-                ->where('end_date', '<=', now())
+                ->whereNull('winner_user_id')
+                ->where('draw_date', '<=', now())
                 ->count(),
             'total_revenue' => DB::table('lottery_tickets')
                 ->where('status', 'paid')
@@ -200,7 +209,8 @@ class AdminLotteryController extends Controller
                 ->where('status', 'paid')
                 ->distinct('user_id')
                 ->count('user_id'),
-            'average_participation_rate' => Lottery::where('is_drawn', true)
+            'average_participation_rate' => Lottery::where('status', 'completed')
+                ->whereNotNull('winner_user_id')
                 ->selectRaw('AVG(sold_tickets / total_tickets * 100) as rate')
                 ->value('rate') ?? 0,
             'recent_draws' => DrawHistory::with(['lottery.product', 'winner'])

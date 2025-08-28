@@ -35,7 +35,7 @@ class RefundService
             DB::beginTransaction();
 
             // Récupérer toutes les transactions payées pour cette tombola
-            $paidTransactions = Transaction::where('lottery_id', $lottery->id)
+            $paidTransactions = Payment::where('lottery_id', $lottery->id)
                 ->where('status', 'completed')
                 ->with('user')
                 ->get();
@@ -111,7 +111,7 @@ class RefundService
         ];
 
         // 1. Tombolas expirées avec participants insuffisants
-        $expiredLotteries = Lottery::where('end_date', '<=', now())
+        $expiredLotteries = Lottery::where('draw_date', '<=', now())
             ->where('status', 'active')
             ->with('product')
             ->get();

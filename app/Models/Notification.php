@@ -178,7 +178,7 @@ class Notification extends Model
             ],
             'channel' => 'app,sms',
             'status' => 'pending',
-            'related_type' => Transaction::class,
+            'related_type' => Payment::class,
             'related_id' => $transaction->id,
         ]);
     }

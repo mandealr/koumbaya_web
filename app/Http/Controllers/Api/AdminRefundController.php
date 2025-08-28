@@ -336,7 +336,7 @@ class AdminRefundController extends Controller
     public function eligibleLotteries()
     {
         // Tombolas expirées avec participants insuffisants
-        $expiredLotteries = Lottery::where('end_date', '<=', now())
+        $expiredLotteries = Lottery::where('draw_date', '<=', now())
             ->where('status', 'active')
             ->with('product')
             ->get()

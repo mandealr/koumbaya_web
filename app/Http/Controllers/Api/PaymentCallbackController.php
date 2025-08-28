@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Transaction;
+use App\Models\Payment;
 use App\Services\EBillingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -53,7 +53,7 @@ class PaymentCallbackController extends Controller
             $transactionId = $request->input('transaction_id');
             
             // Trouver la transaction
-            $transaction = Transaction::where('transaction_id', $reference)->first();
+            $transaction = Payment::where('transaction_id', $reference)->first();
             
             if (!$transaction) {
                 Log::error('Transaction not found:', ['reference' => $reference]);
@@ -147,7 +147,7 @@ class PaymentCallbackController extends Controller
     {
         $user = auth()->user();
         
-        $transaction = Transaction::where('transaction_id', $transactionId)
+        $transaction = Payment::where('transaction_id', $transactionId)
             ->where('user_id', $user->id)
             ->first();
 

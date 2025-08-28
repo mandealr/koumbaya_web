@@ -503,7 +503,7 @@ class EBillingService
                 $userWallet->save();
 
                 // Create refund transaction
-                Transaction::create([
+                Payment::create([
                     'user_id' => $ticket->user_id,
                     'type' => 'refund',
                     'amount' => $lottery->ticket_price,
@@ -533,7 +533,7 @@ class EBillingService
      */
     private static function addTransaction(Payment $payment)
     {
-        Transaction::create([
+        Payment::create([
             'user_id' => $payment->user_id,
             'payment_id' => $payment->id,
             'type' => $payment->type,

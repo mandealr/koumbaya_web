@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Refund;
-use App\Models\Transaction;
+use App\Models\Payment;
 use App\Services\RefundService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -141,7 +141,7 @@ class RefundController extends Controller
         }
 
         $user = auth()->user();
-        $transaction = Transaction::where('id', $request->transaction_id)
+        $transaction = Payment::where('id', $request->transaction_id)
             ->where('user_id', $user->id)
             ->first();
 

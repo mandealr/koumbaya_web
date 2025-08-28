@@ -45,7 +45,7 @@ class LotteryTicket extends Model
 
     public function transaction()
     {
-        return $this->belongsTo(Transaction::class, 'transaction_id');
+        return $this->belongsTo(Payment::class, 'transaction_id');
     }
 
     /**

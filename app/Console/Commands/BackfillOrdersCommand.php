@@ -42,7 +42,7 @@ class BackfillOrdersCommand extends Command
             ->pluck('meta->transaction_id')
             ->toArray();
 
-        $transactions = Transaction::whereNotIn('id', $existingOrderTransactionIds)
+        $transactions = Payment::whereNotIn('id', $existingOrderTransactionIds)
             ->with(['lotteryTickets'])
             ->orderBy('created_at')
             ->get();

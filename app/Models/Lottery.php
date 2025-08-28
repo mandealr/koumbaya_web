@@ -71,7 +71,7 @@ class Lottery extends Model
 
     public function transactions()
     {
-        return $this->hasMany(Transaction::class, 'lottery_id');
+        return $this->hasMany(Payment::class, 'lottery_id');
     }
 
     public function refunds()

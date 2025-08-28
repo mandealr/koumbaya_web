@@ -278,7 +278,7 @@ class LotteryDrawService
         return Lottery::with(['product', 'paidTickets'])
             ->where('status', 'active')
             ->where('is_drawn', false)
-            ->where('end_date', '<=', now())
+            ->where('draw_date', '<=', now())
             ->get()
             ->filter(function ($lottery) {
                 $validation = $this->validateDrawEligibility($lottery);

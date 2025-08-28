@@ -154,8 +154,8 @@ class ProductController extends Controller
         // Filtre tombolas se terminant bientôt
         if ($request->boolean('lottery_ending_soon')) {
             $query->whereHas('activeLottery', function ($lotteryQuery) {
-                $lotteryQuery->where('end_date', '<=', now()->addHours(24))
-                            ->where('end_date', '>', now());
+                $lotteryQuery->where('draw_date', '<=', now()->addHours(24))
+                            ->where('draw_date', '>', now());
             });
         }
 
@@ -756,7 +756,7 @@ class ProductController extends Controller
             ->where('sale_mode', 'lottery')
             ->whereHas('activeLottery', function ($query) {
                 $query->where('status', 'active')
-                      ->where('end_date', '>', now());
+                      ->where('draw_date', '>', now());
             })
             ->orderBy('created_at', 'desc')
             ->first();
@@ -876,7 +876,7 @@ class ProductController extends Controller
         if ($activeOnly) {
             $query->whereHas('activeLottery', function ($lotteryQuery) {
                 $lotteryQuery->where('status', 'active')
-                              ->where('end_date', '>', now());
+                              ->where('draw_date', '>', now());
             });
         }
 
@@ -964,7 +964,7 @@ class ProductController extends Controller
         if ($mode === 'lottery' && $request->boolean('active_lottery_only')) {
             $query->whereHas('activeLottery', function ($lotteryQuery) {
                 $lotteryQuery->where('status', 'active')
-                              ->where('end_date', '>', now());
+                              ->where('draw_date', '>', now());
             });
         }
 

@@ -59,7 +59,7 @@ class ProcessLotteryDraws extends Command
         $query = Lottery::with(['product', 'paidTickets'])
             ->where('status', 'active')
             ->where('is_drawn', false)
-            ->where('end_date', '<=', now());
+            ->where('draw_date', '<=', now());
 
         // If specific lotteries are requested
         if (!empty($specificLotteries)) {

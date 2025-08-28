@@ -180,7 +180,7 @@ class AdminDashboardController extends Controller
                 });
             
             // Recent transactions
-            $recentTransactions = Transaction::where('status', 'completed')
+            $recentTransactions = Payment::where('status', 'completed')
                 ->latest()
                 ->limit($limit / 3)
                 ->get()

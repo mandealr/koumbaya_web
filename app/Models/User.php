@@ -160,7 +160,7 @@ class User extends Authenticatable
 
     public function transactions()
     {
-        return $this->hasMany(Transaction::class, 'user_id');
+        return $this->hasMany(Payment::class, 'user_id');
     }
 
     public function payments()

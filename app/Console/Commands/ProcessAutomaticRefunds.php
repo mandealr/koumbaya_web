@@ -182,7 +182,7 @@ class ProcessAutomaticRefunds extends Command
     protected function checkEligibleLotteries()
     {
         // Tombolas expirées avec participants insuffisants
-        $expiredLotteries = \App\Models\Lottery::where('end_date', '<=', now())
+        $expiredLotteries = \App\Models\Lottery::where('draw_date', '<=', now())
             ->where('status', 'active')
             ->with('product')
             ->get();

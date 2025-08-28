@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Lottery;
 use App\Models\LotteryTicket;
-use App\Models\Transaction;
+use App\Models\Payment;
 use App\Models\Order;
 use App\Services\EBillingService;
 use App\Services\MetricsService;
@@ -111,7 +111,7 @@ class TicketController extends Controller
 
             // Créer la transaction/commande liée à l'ordre
             $transactionId = 'TXN-' . time() . '-' . Str::random(6);
-            $transaction = Transaction::create([
+            $transaction = Payment::create([
                 'transaction_id' => $transactionId,
                 'reference' => $transactionId,
                 'user_id' => $user->id,

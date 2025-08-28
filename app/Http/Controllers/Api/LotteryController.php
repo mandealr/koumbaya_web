@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Lottery;
 use App\Models\LotteryTicket;
-use App\Models\Transaction;
+use App\Models\Payment;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\EBillingService;
@@ -115,8 +115,8 @@ class LotteryController extends Controller
 
         // Tombolas se terminant bientôt
         if ($request->boolean('ending_soon')) {
-            $query->where('end_date', '<=', now()->addHours(24))
-                  ->where('end_date', '>', now())
+            $query->where('draw_date', '<=', now()->addHours(24))
+                  ->where('draw_date', '>', now())
                   ->where('status', 'active');
         }
 
@@ -288,7 +288,7 @@ class LotteryController extends Controller
                 'stats' => [
                     'total_active' => Lottery::active()->count(),
                     'ending_soon' => Lottery::active()
-                        ->where('end_date', '<=', now()->addHours(24))
+                        ->where('draw_date', '<=', now()->addHours(24))
                         ->count()
                 ]
             ]
@@ -390,7 +390,7 @@ class LotteryController extends Controller
             $this->metricsService->orderCreated($order);
 
             // Créer la transaction liée à l'ordre
-            $transaction = Transaction::create([
+            $transaction = Payment::create([
                 'reference' => 'TKT-' . time() . '-' . $user->id,
                 'user_id' => $user->id,
                 'order_id' => $order->id,

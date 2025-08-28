@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
-use App\Models\Transaction;
+use App\Models\Payment;
 use App\Models\Order;
 use App\Models\LotteryTicket;
 use App\Models\Lottery;
@@ -1160,7 +1160,7 @@ class PaymentController extends Controller
                 ]);
 
                 // Créer la transaction liée à l'ordre
-                $transaction = Transaction::create([
+                $transaction = Payment::create([
                     'transaction_id' => 'TXN_' . strtoupper(Str::random(12)),
                     'user_id' => $user->id,
                     'order_id' => $order->id,
@@ -1201,7 +1201,7 @@ class PaymentController extends Controller
                 ]);
 
                 // Créer la transaction liée à l'ordre
-                $transaction = Transaction::create([
+                $transaction = Payment::create([
                     'transaction_id' => 'TXN_' . strtoupper(Str::random(12)),
                     'user_id' => $user->id,
                     'order_id' => $order->id,
