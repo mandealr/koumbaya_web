@@ -355,8 +355,8 @@ class MerchantDashboardController extends Controller
             ->select([
                 'lotteries.*',
                 DB::raw('COALESCE(lotteries.sold_tickets, 0) as tickets_sold'),
-                DB::raw('(lotteries.sold_tickets / lotteries.total_tickets * 100) as completion_rate'),
-                DB::raw('DATEDIFF(lotteries.end_date, NOW()) as days_remaining')
+                DB::raw('(lotteries.sold_tickets / lotteries.max_tickets * 100) as completion_rate'),
+                DB::raw('DATEDIFF(lotteries.draw_date, NOW()) as days_remaining')
             ])
             ->orderBy('completion_rate', 'desc')
             ->get();
@@ -368,14 +368,14 @@ class MerchantDashboardController extends Controller
                     'lottery_number' => $lottery->lottery_number,
                     'product_title' => $lottery->product->title,
                     'status' => $lottery->status,
-                    'total_tickets' => $lottery->total_tickets,
+                    'total_tickets' => $lottery->max_tickets,
                     'sold_tickets' => $lottery->sold_tickets,
                     'completion_rate' => round($lottery->completion_rate, 2),
                     'days_remaining' => max(0, $lottery->days_remaining),
                     'ticket_price' => $lottery->ticket_price,
                     'total_revenue' => $lottery->sold_tickets * $lottery->ticket_price,
                     'start_date' => $lottery->start_date,
-                    'end_date' => $lottery->end_date,
+                    'end_date' => $lottery->draw_date,
                     'is_ending_soon' => $lottery->is_ending_soon,
                 ];
             }),
@@ -406,7 +406,7 @@ class MerchantDashboardController extends Controller
             $query->where('merchant_id', $merchantId);
         })
         ->where('status', 'completed')
-        ->sum('quantity') ?: 0;
+        ->count() ?: 0;
     }
 
     private function getRevenueThisMonth($merchantId)
@@ -464,7 +464,7 @@ class MerchantDashboardController extends Controller
             $query->where('product_id', $productId);
         })
         ->where('status', 'completed')
-        ->sum('quantity');
+        ->count();
         
         return round(($sales / $views) * 100, 2);
     }
@@ -564,12 +564,14 @@ class MerchantDashboardController extends Controller
         }
 
         // Tri des résultats
-        $sortBy = $request->get('sort_by', 'end_date_asc');
+        $sortBy = $request->get('sort_by', 'draw_date_asc');
         switch ($sortBy) {
             case 'end_date_asc':
+            case 'draw_date_asc':
                 $query->orderBy('draw_date', 'asc');
                 break;
             case 'end_date_desc':
+            case 'draw_date_desc':
                 $query->orderBy('draw_date', 'desc');
                 break;
             case 'ticket_price_asc':
@@ -642,12 +644,14 @@ class MerchantDashboardController extends Controller
         }
 
         // Tri des résultats
-        $sortBy = $request->get('sort_by', 'end_date_asc');
+        $sortBy = $request->get('sort_by', 'draw_date_asc');
         switch ($sortBy) {
             case 'end_date_asc':
+            case 'draw_date_asc':
                 $query->orderBy('draw_date', 'asc');
                 break;
             case 'end_date_desc':
+            case 'draw_date_desc':
                 $query->orderBy('draw_date', 'desc');
                 break;
             case 'ticket_price_asc':
