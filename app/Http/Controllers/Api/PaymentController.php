@@ -93,15 +93,26 @@ class PaymentController extends Controller
             
             // Si transaction_id est fourni, récupérer l'ordre via la transaction
             if ($request->filled('transaction_id')) {
-                // Convertir en integer si c'est une string numérique
-                $transactionId = is_numeric($request->transaction_id) 
-                    ? (int)$request->transaction_id 
-                    : $request->transaction_id;
-                    
-                $transaction = Payment::where('id', $transactionId)
+                $transactionId = $request->transaction_id;
+                
+                // Essayer d'abord de trouver par ID si c'est numérique
+                if (is_numeric($transactionId)) {
+                    $transaction = Payment::where('id', (int)$transactionId)
+                        ->where('user_id', $user->id)
+                        ->with(['order.lottery', 'order.product'])
+                        ->first();
+                }
+                
+                // Si pas trouvé ou si c'est une référence (TXN-xxx), chercher par reference ou transaction_id
+                if (!isset($transaction) || !$transaction) {
+                    $transaction = Payment::where(function($query) use ($transactionId) {
+                        $query->where('reference', $transactionId)
+                              ->orWhere('transaction_id', $transactionId);
+                    })
                     ->where('user_id', $user->id)
                     ->with(['order.lottery', 'order.product'])
                     ->first();
+                }
                     
                 if ($transaction && $transaction->order) {
                     $order = $transaction->order;
@@ -151,17 +162,22 @@ class PaymentController extends Controller
             // avec les informations disponibles
             if (!$order) {
                 // Pour l'instant, retourner une erreur claire avec des instructions
+                // Essayer de trouver des paiements récents de l'utilisateur pour debug
+                $recentPayments = Payment::where('user_id', $user->id)
+                    ->orderBy('created_at', 'desc')
+                    ->limit(3)
+                    ->get(['id', 'reference', 'transaction_id', 'created_at']);
+                    
                 return response()->json([
                     'success' => false,
                     'message' => 'Aucune commande trouvée. Le transaction_id fourni n\'existe pas ou n\'appartient pas à cet utilisateur.',
                     'debug_info' => [
                         'transaction_id_received' => $request->transaction_id,
-                        'transaction_id_type' => gettype($request->transaction_id),
-                        'transaction_id_converted' => $request->filled('transaction_id') ? 
-                            (is_numeric($request->transaction_id) ? (int)$request->transaction_id : $request->transaction_id) : null,
+                        'search_fields' => 'Recherche dans: id, reference, transaction_id',
                         'user_id' => $user->id,
                         'total_payments' => Payment::count(),
-                        'user_payments' => Payment::where('user_id', $user->id)->count()
+                        'user_payments' => Payment::where('user_id', $user->id)->count(),
+                        'recent_user_payments' => $recentPayments
                     ]
                 ], 404);
             }
