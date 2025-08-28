@@ -70,10 +70,10 @@ class PaymentController extends Controller
     {
         $user = auth('sanctum')->user();
 
-        // Validation moins stricte pour permettre plus de flexibilité
+        // Validation très permissive pour gérer tous les cas
         $validator = Validator::make($request->all(), [
             'order_number' => 'nullable|string',
-            'transaction_id' => 'nullable|integer',
+            'transaction_id' => 'nullable',  // Accepter n'importe quel type
             'lottery_id' => 'nullable|integer',
             'quantity' => 'nullable|integer|min:1|max:10',
             'phone' => 'required|string|max:20',
@@ -93,7 +93,12 @@ class PaymentController extends Controller
             
             // Si transaction_id est fourni, récupérer l'ordre via la transaction
             if ($request->filled('transaction_id')) {
-                $transaction = Payment::where('id', $request->transaction_id)
+                // Convertir en integer si c'est une string numérique
+                $transactionId = is_numeric($request->transaction_id) 
+                    ? (int)$request->transaction_id 
+                    : $request->transaction_id;
+                    
+                $transaction = Payment::where('id', $transactionId)
                     ->where('user_id', $user->id)
                     ->with(['order.lottery', 'order.product'])
                     ->first();
@@ -150,7 +155,10 @@ class PaymentController extends Controller
                     'success' => false,
                     'message' => 'Aucune commande trouvée. Le transaction_id fourni n\'existe pas ou n\'appartient pas à cet utilisateur.',
                     'debug_info' => [
-                        'transaction_id' => $request->transaction_id,
+                        'transaction_id_received' => $request->transaction_id,
+                        'transaction_id_type' => gettype($request->transaction_id),
+                        'transaction_id_converted' => $request->filled('transaction_id') ? 
+                            (is_numeric($request->transaction_id) ? (int)$request->transaction_id : $request->transaction_id) : null,
                         'user_id' => $user->id,
                         'total_payments' => Payment::count(),
                         'user_payments' => Payment::where('user_id', $user->id)->count()
