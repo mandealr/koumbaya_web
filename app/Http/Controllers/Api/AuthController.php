@@ -70,10 +70,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:6',
             'password_confirmation' => 'required|string|same:password',
             'role' => 'nullable|in:Particulier,Business,customer,merchant,admin',
-            'account_type' => 'nullable|in:personal,business',
-            'can_sell' => 'nullable|boolean',
-            'can_buy' => 'nullable|boolean',
-            'business_name' => 'nullable|string|max:255',
+            'company_name' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:500',
             'country_id' => 'nullable|integer|exists:countries,id',
@@ -89,11 +86,9 @@ class AuthController extends Controller
         // TODO: Réimplémenter la vérification OTP si nécessaire
         // Pour le moment, on skip l'OTP pour permettre l'inscription directe
 
-        // Mapper le rôle frontend vers account_type backend et user_type_id
-        $accountType = 'personal';
+        // Mapper le rôle frontend vers user_type_id
         $userTypeId = 2; // Client par défaut
         if ($request->role === 'Business') {
-            $accountType = 'business';
             $userTypeId = 1; // Marchand
         }
 
@@ -103,11 +98,8 @@ class AuthController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
-            'account_type' => $request->account_type ?? $accountType,
             'user_type_id' => $userTypeId,
-            'can_sell' => $request->can_sell ?? ($accountType === 'business'),
-            'can_buy' => $request->can_buy ?? true,
-            'business_name' => $request->business_name,
+            'company_name' => $request->company_name,
             'city' => $request->city,
             'address' => $request->address,
             'country_id' => $request->country_id,
@@ -439,13 +431,10 @@ class AuthController extends Controller
                         'first_name' => $names['first_name'],
                         'last_name' => $names['last_name'],
                         'email' => $socialUser->getEmail(),
-                        'email_verified_at' => now(),
+                        'verified_at' => now(),
                         $provider . '_id' => $socialUser->getId(),
                         'avatar_url' => $socialUser->getAvatar(),
-                        'account_type' => 'personal',
                         'user_type_id' => 2, // Client par défaut
-                        'can_sell' => false,
-                        'can_buy' => true,
                         'is_active' => true,
                         'source_ip_address' => $request->ip(),
                         'source_server_info' => $request->userAgent(),
@@ -679,15 +668,15 @@ class AuthController extends Controller
      */
     private function assignUserRoles(User $user, Request $request): void
     {
-        // Système de rôles simplifié basé UNIQUEMENT sur account_type :
-        // - account_type = 'personal' → rôle 'Particulier' (achats, participation aux tombolas)
-        // - account_type = 'business' → rôle 'Business' (vente, gestion des produits/tombolas)
+        // Système de rôles simplifié basé UNIQUEMENT sur user_type_id :
+        // - user_type_id = 2 (Client) → rôle 'Particulier' (achats, participation aux tombolas)
+        // - user_type_id = 1 (Marchand) → rôle 'Business' (vente, gestion des produits/tombolas)
         
-        if ($user->account_type === 'business') {
-            // Compte business = rôle Business uniquement
+        if ($user->user_type_id === 1) {
+            // Marchand = rôle Business uniquement
             $roleName = 'Business';
         } else {
-            // Compte particulier (par défaut) = rôle Particulier uniquement
+            // Client (par défaut) = rôle Particulier uniquement
             $roleName = 'Particulier';
         }
 
@@ -695,11 +684,9 @@ class AuthController extends Controller
         \Log::info('Attribution de rôle lors de l\'inscription', [
             'user_id' => $user->id,
             'email' => $user->email,
-            'user_account_type' => $user->account_type,
+            'user_type_id' => $user->user_type_id,
             'request_role' => $request->role,
-            'role_name' => $roleName,
-            'can_sell' => $user->can_sell,
-            'can_buy' => $user->can_buy
+            'role_name' => $roleName
         ]);
 
         // Assigner le rôle approprié
