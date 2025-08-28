@@ -116,7 +116,7 @@ class MerchantDashboardController extends Controller
         };
 
         $salesData = Payment::select(
-            DB::raw('DATE(completed_at) as date'),
+            DB::raw('DATE(paid_at) as date'),
             DB::raw('SUM(amount) as revenue'),
             DB::raw('COUNT(*) as transactions'),
             DB::raw('SUM(quantity) as tickets')
@@ -125,7 +125,7 @@ class MerchantDashboardController extends Controller
             $query->where('merchant_id', $merchantId);
         })
         ->where('status', 'completed')
-        ->where('completed_at', '>=', $startDate)
+        ->where('paid_at', '>=', $startDate)
         ->groupBy('date')
         ->orderBy('date')
         ->get();
@@ -306,7 +306,7 @@ class MerchantDashboardController extends Controller
                     'quantity' => intval($transaction->quantity ?? 0),
                     'ticket_numbers' => $ticketNumbers,
                     'status' => $transaction->status ?? 'unknown',
-                    'completed_at' => $transaction->completed_at ?? $transaction->created_at,
+                    'completed_at' => $transaction->paid_at ?? $transaction->created_at,
                     'user' => [
                         'name' => ($transaction->user ? 
                             ($transaction->user->first_name . ' ' . $transaction->user->last_name) : 
@@ -415,7 +415,7 @@ class MerchantDashboardController extends Controller
             $query->where('merchant_id', $merchantId);
         })
         ->where('status', 'completed')
-        ->whereBetween('completed_at', [
+        ->whereBetween('paid_at', [
             Carbon::now()->startOfMonth(),
             Carbon::now()->endOfMonth()
         ])
@@ -428,7 +428,7 @@ class MerchantDashboardController extends Controller
             $query->where('merchant_id', $merchantId);
         })
         ->where('status', 'completed')
-        ->whereBetween('completed_at', [
+        ->whereBetween('paid_at', [
             Carbon::now()->subMonth()->startOfMonth(),
             Carbon::now()->subMonth()->endOfMonth()
         ])
@@ -505,8 +505,8 @@ class MerchantDashboardController extends Controller
         // Mettre à jour le statut
         $transaction->status = $request->status;
         
-        if ($request->status === 'completed' && !$transaction->completed_at) {
-            $transaction->completed_at = now();
+        if ($request->status === 'completed' && !$transaction->paid_at) {
+            $transaction->paid_at = now();
         }
         
         $transaction->save();
