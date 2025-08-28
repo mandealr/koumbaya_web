@@ -13,20 +13,23 @@ class LotteryTicket extends Model
         'ticket_number',
         'lottery_id',
         'user_id',
-        'transaction_id',
-        'price_paid',
-        'payment_reference',
+        'order_id',
+        'payment_id',
+        'price',
+        'currency',
         'status',
         'is_winner',
         'purchased_at',
+        'meta',
     ];
 
     protected function casts(): array
     {
         return [
-            'price_paid' => 'decimal:2',
+            'price' => 'decimal:2',
             'is_winner' => 'boolean',
             'purchased_at' => 'datetime',
+            'meta' => 'array',
         ];
     }
 
@@ -43,9 +46,14 @@ class LotteryTicket extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function transaction()
+    public function payment()
     {
-        return $this->belongsTo(Payment::class, 'transaction_id');
+        return $this->belongsTo(Payment::class, 'payment_id');
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'order_id');
     }
 
     /**

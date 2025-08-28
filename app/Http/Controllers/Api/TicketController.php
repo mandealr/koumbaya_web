@@ -132,10 +132,11 @@ class TicketController extends Controller
                 $ticket = LotteryTicket::create([
                     'lottery_id' => $lottery->id,
                     'user_id' => $user->id,
-                    'transaction_id' => $transaction->id,
+                    'payment_id' => $transaction->id,
                     'ticket_number' => $ticketNumber,
                     'status' => 'pending', // En attente de paiement
-                    'price_paid' => $lottery->ticket_price,
+                    'price' => $lottery->ticket_price,
+                    'currency' => 'XAF',
                     'purchased_at' => now(),
                 ]);
 

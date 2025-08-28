@@ -574,7 +574,7 @@ class OrderTrackingController extends Controller
                     'ticket_number' => $ticket->ticket_number,
                     'status' => $ticket->status,
                     'is_winner' => $ticket->is_winner,
-                    'price_paid' => $ticket->price_paid,
+                    'price_paid' => $ticket->price,
                     'purchased_at' => $ticket->purchased_at,
                     'lottery' => $ticket->lottery ? [
                         'id' => $ticket->lottery->id,
@@ -680,7 +680,7 @@ class OrderTrackingController extends Controller
                         'ticket_number' => $ticket->ticket_number,
                         'status' => $ticket->status,
                         'is_winner' => $ticket->is_winner,
-                        'price_paid' => $ticket->price_paid,
+                        'price_paid' => $ticket->price,
                         'purchased_at' => $ticket->purchased_at,
                     ];
                 });

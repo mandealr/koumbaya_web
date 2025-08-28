@@ -410,8 +410,10 @@ class LotteryController extends Controller
                     'ticket_number' => $lottery->lottery_number . '-T' . str_pad(($lottery->sold_tickets + $i + 1), 4, '0', STR_PAD_LEFT),
                     'lottery_id' => $lottery->id,
                     'user_id' => $user->id,
-                    'price_paid' => $lottery->ticket_price,
-                    'payment_reference' => $transaction->reference,
+                    'order_id' => $order->id,
+                    'payment_id' => $transaction->id,
+                    'price' => $lottery->ticket_price,
+                    'currency' => 'XAF',
                     'status' => 'pending',
                     'purchased_at' => now(),
                 ]);

@@ -1179,10 +1179,12 @@ class PaymentController extends Controller
                     LotteryTicket::create([
                         'lottery_id' => $lottery->id,
                         'user_id' => $user->id,
-                        'transaction_id' => $transaction->id,
-                        'price_paid' => $lottery->ticket_price,
+                        'payment_id' => $transaction->id,
+                        'price' => $lottery->ticket_price,
+                        'currency' => 'XAF',
                         'status' => 'pending',
-                        'ticket_number' => $lottery->lottery_number . '-T' . str_pad(($lottery->sold_tickets + $i + 1), 4, '0', STR_PAD_LEFT)
+                        'ticket_number' => $lottery->lottery_number . '-T' . str_pad(($lottery->sold_tickets + $i + 1), 4, '0', STR_PAD_LEFT),
+                        'purchased_at' => now(),
                     ]);
                 }
 

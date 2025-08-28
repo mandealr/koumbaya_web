@@ -221,7 +221,7 @@ class PaymentTrackingController extends Controller
                             'ticket_number' => $ticket->ticket_number,
                             'status' => $ticket->status,
                             'is_winner' => $ticket->is_winner ?? false,
-                            'price_paid' => $ticket->price_paid,
+                            'price_paid' => $ticket->price,
                             'purchased_at' => $ticket->purchased_at,
                         ];
                     });
