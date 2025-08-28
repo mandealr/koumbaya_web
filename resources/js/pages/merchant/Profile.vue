@@ -12,11 +12,16 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div class="text-center">
             <!-- Avatar -->
-            <div class="mx-auto h-24 w-24 rounded-full bg-blue-100 flex items-center justify-center mb-4">
-              <span class="text-2xl font-bold text-blue-600">
-                {{ userInitials }}
-              </span>
-            </div>
+            <AvatarUpload
+              :currentAvatarUrl="user?.avatar_url || getDefaultAvatar()"
+              uploadEndpoint="/user/avatar"
+              fieldName="avatar"
+              :altText="`Photo de profil de ${user?.first_name} ${user?.last_name}`"
+              helpText="Cliquez pour modifier votre photo de profil"
+              :maxSizeMB="5"
+              @success="handleAvatarSuccess"
+              @error="handleAvatarError"
+            />
             
             <h3 class="text-lg font-semibold text-gray-900">
               {{ user?.first_name }} {{ user?.last_name }}
@@ -196,6 +201,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/api'
 import PhoneInput from '@/components/PhoneInput.vue'
+import AvatarUpload from '@/components/common/AvatarUpload.vue'
 
 const authStore = useAuthStore()
 const { get, put } = useApi()
@@ -293,6 +299,28 @@ const updateProfile = async () => {
 
 const resetForm = () => {
   loadUserData()
+}
+
+const getDefaultAvatar = () => {
+  if (!user.value) return '/default-avatar.png'
+  const initials = userInitials.value
+  return `https://ui-avatars.com/api/?name=${initials}&background=3b82f6&color=fff&size=128`
+}
+
+const handleAvatarSuccess = (response) => {
+  if (response.data && response.data.avatar_url) {
+    authStore.refreshUser()
+    if (window.$toast) {
+      window.$toast.success('Photo de profil mise à jour avec succès', '✅ Photo')
+    }
+  }
+}
+
+const handleAvatarError = (error) => {
+  console.error('Erreur upload avatar:', error)
+  if (window.$toast) {
+    window.$toast.error('Erreur lors de la mise à jour de la photo', '❌ Erreur')
+  }
 }
 
 
