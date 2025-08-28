@@ -124,7 +124,7 @@ class OrderTrackingController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $orders->items()->map(function ($order) {
+            'data' => $orders->getCollection()->map(function ($order) {
                 return $this->formatOrderSummary($order);
             }),
             'pagination' => [
@@ -418,10 +418,8 @@ class OrderTrackingController extends Controller
                 ->where('type', 'direct')
                 ->count(),
             'total_tickets_purchased' => LotteryTicket::where('user_id', $user->id)
-                ->whereHas('transaction', function($query) {
-                    $query->whereHas('order', function($subQuery) {
-                        $subQuery->whereIn('status', [OrderStatus::PAID->value, OrderStatus::FULFILLED->value]);
-                    });
+                ->whereHas('order', function($query) {
+                    $query->whereIn('status', [OrderStatus::PAID->value, OrderStatus::FULFILLED->value]);
                 })
                 ->count(),
             'winning_tickets' => LotteryTicket::where('user_id', $user->id)
@@ -509,6 +507,7 @@ class OrderTrackingController extends Controller
      *         )
      *     )
      * )
+     */
     public function search(Request $request): JsonResponse
     {
         $user = Auth::user();
@@ -564,7 +563,7 @@ class OrderTrackingController extends Controller
         // Recherche par numéro de ticket
         $tickets = LotteryTicket::where('user_id', $user->id)
             ->where('ticket_number', 'like', "%{$search}%")
-            ->with(['lottery.product', 'transaction.order'])
+            ->with(['lottery.product', 'order'])
             ->get();
 
         if ($tickets->count() > 0) {
@@ -581,8 +580,8 @@ class OrderTrackingController extends Controller
                         'lottery_number' => $ticket->lottery->lottery_number,
                         'title' => $ticket->lottery->title
                     ] : null,
-                    'order' => $ticket->transaction && $ticket->transaction->order ? 
-                        $this->formatOrderSummary($ticket->transaction->order) : null
+                    'order' => $ticket->order ? 
+                        $this->formatOrderSummary($ticket->order) : null
                 ];
             });
         }
