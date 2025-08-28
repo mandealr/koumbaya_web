@@ -369,7 +369,7 @@ class LotteryController extends Controller
         $totalAmount = $lottery->ticket_price * $quantity;
 
         // Vérifier que suffisamment de tickets sont disponibles
-        if (($lottery->sold_tickets + $quantity) > $lottery->total_tickets) {
+        if (($lottery->sold_tickets + $quantity) > $lottery->max_tickets) {
             return response()->json(['error' => 'Pas assez de tickets disponibles'], 422);
         }
 

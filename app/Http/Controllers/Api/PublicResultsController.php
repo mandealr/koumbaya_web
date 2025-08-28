@@ -91,9 +91,9 @@ class PublicResultsController extends Controller
                         'city' => $lottery->winner->city ?? 'Non spécifiée',
                     ],
                     'winning_ticket' => $lottery->tickets->where('is_winner', true)->first()?->ticket_number,
-                    'total_tickets' => $lottery->total_tickets,
+                    'total_tickets' => $lottery->total_tickets, // Uses accessor for API compatibility
                     'sold_tickets' => $lottery->sold_tickets,
-                    'participation_rate' => $lottery->sold_tickets > 0 ? round(($lottery->sold_tickets / $lottery->total_tickets) * 100, 2) : 0,
+                    'participation_rate' => $lottery->sold_tickets > 0 ? round(($lottery->sold_tickets / $lottery->max_tickets) * 100, 2) : 0,
                     'draw_date' => $lottery->draw_date,
                     'total_revenue' => $lottery->sold_tickets * $lottery->ticket_price,
                     'verification_code' => $this->generateVerificationCode($lottery),
@@ -161,9 +161,9 @@ class PublicResultsController extends Controller
                 'purchase_date' => $winningTicket?->created_at,
             ],
             'statistics' => [
-                'total_tickets' => $lotteryRecord->total_tickets,
+                'total_tickets' => $lotteryRecord->total_tickets, // Uses accessor for API compatibility
                 'sold_tickets' => $lotteryRecord->sold_tickets,
-                'participation_rate' => round(($lotteryRecord->sold_tickets / $lotteryRecord->total_tickets) * 100, 2),
+                'participation_rate' => round(($lotteryRecord->sold_tickets / $lotteryRecord->max_tickets) * 100, 2),
                 'total_revenue' => $lotteryRecord->sold_tickets * $lotteryRecord->ticket_price,
                 'ticket_price' => $lotteryRecord->ticket_price,
             ],
@@ -296,7 +296,7 @@ class PublicResultsController extends Controller
             }),
             'total_tickets_sold' => $completedLotteries->sum('sold_tickets'),
             'average_participation_rate' => $completedLotteries->avg(function($lottery) {
-                return $lottery->total_tickets > 0 ? ($lottery->sold_tickets / $lottery->total_tickets) * 100 : 0;
+                return $lottery->max_tickets > 0 ? ($lottery->sold_tickets / $lottery->max_tickets) * 100 : 0;
             }),
             'biggest_prize' => [
                 'value' => $completedLotteries->max(function($lottery) {

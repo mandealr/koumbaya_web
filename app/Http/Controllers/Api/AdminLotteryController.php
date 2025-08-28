@@ -211,7 +211,7 @@ class AdminLotteryController extends Controller
                 ->count('user_id'),
             'average_participation_rate' => Lottery::where('status', 'completed')
                 ->whereNotNull('winner_user_id')
-                ->selectRaw('AVG(sold_tickets / total_tickets * 100) as rate')
+                ->selectRaw('AVG(sold_tickets / max_tickets * 100) as rate')
                 ->value('rate') ?? 0,
             'recent_draws' => DrawHistory::with(['lottery.product', 'winner'])
                 ->orderBy('drawn_at', 'desc')

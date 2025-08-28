@@ -144,13 +144,24 @@
     </div>
 
     <!-- Filters -->
-    <div class="admin-card">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div class="flex flex-wrap items-center space-x-4">
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Rechercher</label>
+          <input 
+            v-model="filters.search"
+            @input="loadRefunds"
+            type="text" 
+            placeholder="N° remboursement, utilisateur..."
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
           <select
             v-model="filters.status"
             @change="loadRefunds"
-            class="admin-input"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les statuts</option>
             <option value="pending">En attente</option>
@@ -159,22 +170,38 @@
             <option value="completed">Terminé</option>
             <option value="rejected">Rejeté</option>
           </select>
-
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
           <select
             v-model="filters.type"
             @change="loadRefunds"
-            class="admin-input"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les types</option>
             <option value="automatic">Automatique</option>
             <option value="manual">Manuel</option>
             <option value="admin">Admin</option>
           </select>
-
+        </div>
+        <div class="flex items-end">
+          <button
+            @click="resetFilters"
+            class="w-full px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+          >
+            Réinitialiser
+          </button>
+        </div>
+      </div>
+      <div class="mt-4 flex justify-between items-center">
+        <div class="text-sm text-gray-500">
+          {{ refunds.length }} remboursement(s) trouvé(s)
+        </div>
+        <div>
           <select
             v-model="filters.reason"
             @change="loadRefunds"
-            class="admin-input"
+            class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           >
             <option value="">Toutes les raisons</option>
             <option value="insufficient_participants">Participants insuffisants</option>
@@ -182,17 +209,6 @@
             <option value="accidental_purchase">Achat accidentel</option>
             <option value="technical_issue">Problème technique</option>
           </select>
-
-          <button
-            @click="resetFilters"
-            class="admin-btn-secondary text-sm"
-          >
-            Réinitialiser
-          </button>
-        </div>
-
-        <div class="text-sm text-gray-500">
-          {{ refunds.length }} remboursement(s)
         </div>
       </div>
     </div>

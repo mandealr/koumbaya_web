@@ -12,7 +12,7 @@ class Lottery extends Model
     protected $fillable = [
         'lottery_number',
         'product_id',
-        'total_tickets',
+        'max_tickets',
         'sold_tickets',
         'ticket_price',
         'draw_date',
@@ -108,6 +108,14 @@ class Lottery extends Model
     }
 
     /**
+     * Accesseur pour total_tickets (compatibilité backward - maps to max_tickets)
+     */
+    public function getTotalTicketsAttribute()
+    {
+        return $this->max_tickets;
+    }
+
+    /**
      * Mutateur pour is_drawn (compatibilité)
      */
     public function setIsDrawnAttribute($value)
@@ -141,13 +149,13 @@ class Lottery extends Model
      */
     public function getRemainingTicketsAttribute()
     {
-        return $this->total_tickets - $this->sold_tickets;
+        return $this->max_tickets - $this->sold_tickets;
     }
 
     public function getProgressPercentageAttribute()
     {
-        if ($this->total_tickets == 0) return 0;
-        return round(($this->sold_tickets / $this->total_tickets) * 100, 2);
+        if ($this->max_tickets == 0) return 0;
+        return round(($this->sold_tickets / $this->max_tickets) * 100, 2);
     }
 
     public function getIsExpiredAttribute()
@@ -176,7 +184,7 @@ class Lottery extends Model
     public function canPurchaseTicket()
     {
         return $this->status === 'active' && 
-               $this->sold_tickets < $this->total_tickets && 
+               $this->sold_tickets < $this->max_tickets && 
                !$this->is_expired;
     }
 
@@ -194,7 +202,7 @@ class Lottery extends Model
     {
         return $this->status === 'active' && 
                $this->end_date > now() &&
-               $this->sold_tickets < $this->total_tickets;
+               $this->sold_tickets < $this->max_tickets;
     }
 
     /**
@@ -223,8 +231,8 @@ class Lottery extends Model
      */
     public function getParticipationRateAttribute()
     {
-        if ($this->total_tickets == 0) return 0;
-        return round(($this->sold_tickets / $this->total_tickets) * 100, 2);
+        if ($this->max_tickets == 0) return 0;
+        return round(($this->sold_tickets / $this->max_tickets) * 100, 2);
     }
 
     /**
@@ -247,7 +255,7 @@ class Lottery extends Model
             'id' => $this->id,
             'lottery_number' => $this->lottery_number,
             'product_id' => $this->product_id,
-            'total_tickets' => $this->total_tickets,
+            'total_tickets' => $this->max_tickets,
             'sold_tickets' => $this->sold_tickets,
             'remaining_tickets' => $this->remaining_tickets,
             'ticket_price' => (float) $this->ticket_price,

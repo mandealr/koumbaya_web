@@ -186,7 +186,7 @@ class LotteryDrawService
             'winning_ticket_id' => $winningTicket->id,
             'winner_user_id' => $winningTicket->user_id,
             'total_participants' => $paidTickets->count(),
-            'total_tickets' => $paidTickets->count(),
+            'total_tickets' => $paidTickets->count(), // This refers to tickets sold, not max_tickets
             'draw_method' => $options['method'] ?? 'automatic',
             'initiated_by' => $options['initiated_by'] ?? 'system',
             'draw_seed' => $seed,

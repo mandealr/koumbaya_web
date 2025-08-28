@@ -90,7 +90,7 @@ class ProcessAutomaticRefunds extends Command
         $isExpired = $lottery->end_date <= now();
         $isCancelled = $lottery->status === 'cancelled';
 
-        $this->line("   📊 Participants: {$lottery->sold_tickets}/{$lottery->total_tickets}");
+        $this->line("   📊 Participants: {$lottery->sold_tickets}/{$lottery->max_tickets}");
         $this->line("   📅 End date: {$lottery->end_date->format('Y-m-d H:i')}");
         $this->line("   📈 Status: {$lottery->status}");
         $this->line("   🎯 Min participants: {$minParticipants}");

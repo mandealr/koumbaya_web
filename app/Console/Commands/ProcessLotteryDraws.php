@@ -205,7 +205,7 @@ class ProcessLotteryDraws extends Command
             'draw_method' => 'automatic_system_draw',
             'draw_algorithm' => 'secure_random_with_entropy',
             'total_participants' => $paidTickets->count(),
-            'total_tickets' => $paidTickets->count(),
+            'total_tickets' => $paidTickets->count(), // This refers to tickets sold, not max_tickets
             'winning_ticket' => $winningTicket->ticket_number,
             'timestamp' => now()->toISOString(),
             'system_time' => microtime(true),
