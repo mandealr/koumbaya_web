@@ -19,8 +19,7 @@ class Lottery extends Model
         'winner_user_id',
         'winner_ticket_number',
         'status',
-        'is_drawn',
-        'draw_proof',
+        'draw_process_info',
     ];
 
     protected function casts(): array
@@ -28,8 +27,7 @@ class Lottery extends Model
         return [
             'ticket_price' => 'decimal:2',
             'draw_date' => 'datetime',
-            'is_drawn' => 'boolean',
-            'draw_proof' => 'json',
+            'completed_at' => 'datetime',
         ];
     }
 
@@ -38,6 +36,7 @@ class Lottery extends Model
      */
     protected $appends = [
         'end_date', // Compatibilité backward
+        'is_drawn', // Compatibilité backward
         'remaining_tickets',
         'progress_percentage',
         'is_expired',
@@ -91,6 +90,24 @@ class Lottery extends Model
     public function setEndDateAttribute($value)
     {
         $this->attributes['draw_date'] = $value;
+    }
+
+    /**
+     * Accesseur pour is_drawn (compatibilité)
+     */
+    public function getIsDrawnAttribute()
+    {
+        return $this->status === 'completed' && !empty($this->winning_ticket_number);
+    }
+
+    /**
+     * Mutateur pour is_drawn (compatibilité)
+     */
+    public function setIsDrawnAttribute($value)
+    {
+        if ($value) {
+            $this->attributes['status'] = 'completed';
+        }
     }
 
     /**

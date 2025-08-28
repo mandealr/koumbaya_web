@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Lottery;
-use App\Models\Transaction;
+use App\Models\Payment;
 use App\Models\LotteryTicket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,15 +51,12 @@ class AdminDashboardController extends Controller
             );
             
             // Revenue statistics
-            $totalRevenue = Transaction::where('status', 'completed')
-                ->where('type', 'lottery_ticket')
+            $totalRevenue = Payment::where('status', 'paid')
                 ->sum('amount');
-            $monthlyRevenue = Transaction::where('status', 'completed')
-                ->where('type', 'lottery_ticket')
+            $monthlyRevenue = Payment::where('status', 'paid')
                 ->where('created_at', '>=', $now->copy()->startOfMonth())
                 ->sum('amount');
-            $lastMonthRevenue = Transaction::where('status', 'completed')
-                ->where('type', 'lottery_ticket')
+            $lastMonthRevenue = Payment::where('status', 'paid')
                 ->where('created_at', '>=', $lastMonth->copy()->startOfMonth())
                 ->where('created_at', '<', $now->copy()->startOfMonth())
                 ->sum('amount');

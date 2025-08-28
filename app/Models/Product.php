@@ -109,7 +109,8 @@ class Product extends Model
 
     public function transactions()
     {
-        return $this->hasMany(Transaction::class, 'product_id');
+        // Les transactions sont maintenant dans la table payments via les orders
+        return $this->hasManyThrough(Payment::class, Order::class, 'product_id', 'order_id', 'id', 'id');
     }
 
     /**
@@ -297,7 +298,7 @@ class Product extends Model
             'total_lotteries' => $this->lotteries()->count(),
             'completed_lotteries' => $this->completedLotteries()->count(),
             'total_tickets_sold' => $this->lotteryTickets()->where('status', 'paid')->count(),
-            'total_revenue' => $this->transactions()->where('status', 'completed')->sum('amount'),
+            'total_revenue' => $this->transactions()->where('status', 'paid')->sum('amount'),
             'has_active_lottery' => $this->has_active_lottery,
             'popularity_score' => $this->popularity_score
         ];

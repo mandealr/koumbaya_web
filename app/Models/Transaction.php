@@ -9,6 +9,8 @@ class Transaction extends Model
 {
     use HasFactory;
 
+    protected $table = 'payments';
+
     protected $fillable = [
         'reference',
         'user_id',
@@ -76,6 +78,20 @@ class Transaction extends Model
     public function payments()
     {
         return $this->hasManyThrough(Payment::class, Order::class, 'id', 'order_id', 'order_id', 'id');
+    }
+
+    /**
+     * Accesseur pour type (compatibilité)
+     */
+    public function getTypeAttribute()
+    {
+        // Déterminer le type basé sur les relations
+        if (isset($this->meta['lottery_id'])) {
+            return 'lottery_ticket';
+        } elseif (isset($this->meta['product_id'])) {
+            return 'product_purchase';
+        }
+        return 'unknown';
     }
 
     public function order()
