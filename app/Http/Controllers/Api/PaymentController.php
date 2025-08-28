@@ -1182,7 +1182,7 @@ class PaymentController extends Controller
                         'payment_id' => $transaction->id,
                         'price' => $lottery->ticket_price,
                         'currency' => 'XAF',
-                        'status' => 'pending',
+                        'status' => 'reserved',
                         'ticket_number' => $lottery->lottery_number . '-T' . str_pad(($lottery->sold_tickets + $i + 1), 4, '0', STR_PAD_LEFT),
                         'purchased_at' => now(),
                     ]);

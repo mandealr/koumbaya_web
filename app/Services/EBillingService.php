@@ -461,7 +461,7 @@ class EBillingService
                 'ticket_number' => self::generateTicketNumber(),
                 'price' => $lottery->ticket_price,
                 'currency' => 'XAF',
-                'status' => 'pending',
+                'status' => 'reserved',
                 'purchased_at' => now(),
                 'payment_id' => $payment->id
             ]);

@@ -414,7 +414,7 @@ class LotteryController extends Controller
                     'payment_id' => $transaction->id,
                     'price' => $lottery->ticket_price,
                     'currency' => 'XAF',
-                    'status' => 'pending',
+                    'status' => 'reserved',
                     'purchased_at' => now(),
                 ]);
                 $tickets[] = $ticket;
