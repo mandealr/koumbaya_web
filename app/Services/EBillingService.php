@@ -214,12 +214,12 @@ class EBillingService
     {
         $paymentToSave = [
             'reference' => $paymentDataFromSetup['external_reference'],
+            'user_id' => $data->user->id,
             'order_id' => $data->order_id ?? null,
             'amount' => $paymentDataFromSetup['amount'],
             'status' => self::STATUS_PENDING,
             'meta' => [
                 'ebilling_id' => $billId,
-                'user_id' => $data->user->id,
                 'description' => $paymentDataFromSetup['short_description'],
                 'customer_name' => $paymentDataFromSetup['payer_name'],
                 'customer_phone' => $paymentDataFromSetup['payer_msisdn'],
