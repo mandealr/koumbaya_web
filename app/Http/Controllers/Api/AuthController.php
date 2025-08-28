@@ -89,10 +89,12 @@ class AuthController extends Controller
         // TODO: Réimplémenter la vérification OTP si nécessaire
         // Pour le moment, on skip l'OTP pour permettre l'inscription directe
 
-        // Mapper le rôle frontend vers account_type backend
+        // Mapper le rôle frontend vers account_type backend et user_type_id
         $accountType = 'personal';
+        $userTypeId = 2; // Client par défaut
         if ($request->role === 'Business') {
             $accountType = 'business';
+            $userTypeId = 1; // Marchand
         }
 
         $user = User::create([
@@ -102,6 +104,7 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
             'account_type' => $request->account_type ?? $accountType,
+            'user_type_id' => $userTypeId,
             'can_sell' => $request->can_sell ?? ($accountType === 'business'),
             'can_buy' => $request->can_buy ?? true,
             'business_name' => $request->business_name,
@@ -440,6 +443,7 @@ class AuthController extends Controller
                         $provider . '_id' => $socialUser->getId(),
                         'avatar_url' => $socialUser->getAvatar(),
                         'account_type' => 'personal',
+                        'user_type_id' => 2, // Client par défaut
                         'can_sell' => false,
                         'can_buy' => true,
                         'is_active' => true,
