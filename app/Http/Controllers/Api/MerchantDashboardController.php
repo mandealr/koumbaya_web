@@ -567,10 +567,10 @@ class MerchantDashboardController extends Controller
         $sortBy = $request->get('sort_by', 'end_date_asc');
         switch ($sortBy) {
             case 'end_date_asc':
-                $query->orderBy('end_date', 'asc');
+                $query->orderBy('draw_date', 'asc');
                 break;
             case 'end_date_desc':
-                $query->orderBy('end_date', 'desc');
+                $query->orderBy('draw_date', 'desc');
                 break;
             case 'ticket_price_asc':
                 $query->orderBy('ticket_price', 'asc');
@@ -583,7 +583,7 @@ class MerchantDashboardController extends Controller
                       ->orderBy('tickets_count', 'desc');
                 break;
             default:
-                $query->orderBy('end_date', 'asc');
+                $query->orderBy('draw_date', 'asc');
         }
 
         $perPage = min($request->get('per_page', 15), 50);
@@ -645,10 +645,10 @@ class MerchantDashboardController extends Controller
         $sortBy = $request->get('sort_by', 'end_date_asc');
         switch ($sortBy) {
             case 'end_date_asc':
-                $query->orderBy('end_date', 'asc');
+                $query->orderBy('draw_date', 'asc');
                 break;
             case 'end_date_desc':
-                $query->orderBy('end_date', 'desc');
+                $query->orderBy('draw_date', 'desc');
                 break;
             case 'ticket_price_asc':
                 $query->orderBy('ticket_price', 'asc');
@@ -661,7 +661,7 @@ class MerchantDashboardController extends Controller
                       ->orderBy('tickets_count', 'desc');
                 break;
             default:
-                $query->orderBy('end_date', 'asc');
+                $query->orderBy('draw_date', 'asc');
         }
 
         $perPage = min($request->get('per_page', 15), 50);
