@@ -119,7 +119,7 @@ class MerchantDashboardController extends Controller
             DB::raw('DATE(paid_at) as date'),
             DB::raw('SUM(amount) as revenue'),
             DB::raw('COUNT(*) as transactions'),
-            DB::raw('SUM(quantity) as tickets')
+            DB::raw('COUNT(*) as tickets')
         )
         ->whereHas('lottery.product', function ($query) use ($merchantId) {
             $query->where('merchant_id', $merchantId);
@@ -171,14 +171,14 @@ class MerchantDashboardController extends Controller
 
             $topProducts = Product::select([
                 'products.*',
-                DB::raw('COALESCE(SUM(transactions.amount), 0) as total_revenue'),
-                DB::raw('COALESCE(SUM(transactions.quantity), 0) as tickets_sold'),
-                DB::raw('COUNT(DISTINCT transactions.id) as total_transactions')
+                DB::raw('COALESCE(SUM(payments.amount), 0) as total_revenue'),
+                DB::raw('COALESCE(COUNT(DISTINCT payments.id), 0) as tickets_sold'),
+                DB::raw('COUNT(DISTINCT payments.id) as total_transactions')
             ])
             ->leftJoin('lotteries', 'products.id', '=', 'lotteries.product_id')
-            ->leftJoin('transactions', function ($join) {
-                $join->on('lotteries.id', '=', 'transactions.lottery_id')
-                     ->where('transactions.status', '=', 'completed');
+            ->leftJoin('payments', function ($join) {
+                $join->on('lotteries.id', '=', 'payments.lottery_id')
+                     ->where('payments.status', '=', 'completed');
             })
             ->where('products.merchant_id', $merchantId)
             ->groupBy('products.id', 'products.title', 'products.price', 'products.ticket_price', 
