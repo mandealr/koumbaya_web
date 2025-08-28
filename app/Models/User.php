@@ -72,6 +72,7 @@ class User extends Authenticatable
             'last_login_date' => 'datetime',
             'verified_at' => 'datetime',
             'last_otp_request' => 'datetime',
+            'birth_date' => 'date',
             'is_active' => 'boolean',
             'mfa_is_active' => 'boolean',
             'can_sell' => 'boolean',
