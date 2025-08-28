@@ -72,7 +72,8 @@ class PaymentController extends Controller
 
         $validator = Validator::make($request->all(), [
             'order_number' => 'nullable|string',
-            'lottery_id' => 'required_without:order_number|exists:lotteries,id',
+            'transaction_id' => 'nullable|exists:payments,id',
+            'lottery_id' => 'nullable|exists:lotteries,id',
             'quantity' => 'nullable|integer|min:1|max:10',
             'phone' => 'required|string|max:20',
             'operator' => 'required|string|in:airtel,moov'
@@ -89,8 +90,19 @@ class PaymentController extends Controller
         try {
             $order = null;
             
+            // Si transaction_id est fourni, récupérer l'ordre via la transaction
+            if ($request->filled('transaction_id')) {
+                $transaction = Payment::where('id', $request->transaction_id)
+                    ->where('user_id', $user->id)
+                    ->with(['order.lottery', 'order.product'])
+                    ->first();
+                    
+                if ($transaction && $transaction->order) {
+                    $order = $transaction->order;
+                }
+            }
             // Si order_number est fourni, récupérer l'ordre existant
-            if ($request->filled('order_number')) {
+            elseif ($request->filled('order_number')) {
                 $order = Order::where('order_number', $request->order_number)
                     ->where('user_id', $user->id)
                     ->where('status', 'pending')
@@ -132,7 +144,7 @@ class PaymentController extends Controller
             if (!$order) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Commande introuvable. Veuillez fournir un order_number ou un lottery_id.'
+                    'message' => 'Commande introuvable. Veuillez fournir un transaction_id, order_number ou lottery_id valide.'
                 ], 404);
             }
 
