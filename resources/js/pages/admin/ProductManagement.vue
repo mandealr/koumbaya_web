@@ -138,7 +138,6 @@
                     </div>
                     <div class="ml-4">
                       <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
-                      <div class="text-sm text-gray-500 line-clamp-2">{{ product.description }}</div>
                     </div>
                   </div>
                 </td>

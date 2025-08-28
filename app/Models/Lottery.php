@@ -76,7 +76,14 @@ class Lottery extends Model
 
     public function refunds()
     {
-        return $this->hasMany(Refund::class, 'lottery_id');
+        return $this->hasManyThrough(
+            Refund::class,
+            Payment::class,
+            'lottery_id', // clé étrangère sur payments
+            'payment_id', // clé étrangère sur refunds
+            'id', // clé locale sur lotteries
+            'id' // clé locale sur payments
+        );
     }
 
     /**

@@ -204,7 +204,7 @@ class AdminLotteryController extends Controller
                 ->count(),
             'total_revenue' => DB::table('lottery_tickets')
                 ->where('status', 'paid')
-                ->sum('price_paid'),
+                ->sum('price'),
             'total_participants' => DB::table('lottery_tickets')
                 ->where('status', 'paid')
                 ->distinct('user_id')
@@ -221,7 +221,7 @@ class AdminLotteryController extends Controller
 
         // Monthly revenue chart data
         $stats['monthly_revenue'] = DB::table('lottery_tickets')
-            ->selectRaw('DATE_FORMAT(purchased_at, "%Y-%m") as month, SUM(price_paid) as revenue')
+            ->selectRaw('DATE_FORMAT(purchased_at, "%Y-%m") as month, SUM(price) as revenue')
             ->where('status', 'paid')
             ->where('purchased_at', '>=', now()->subMonths(12))
             ->groupBy('month')
@@ -275,7 +275,7 @@ class AdminLotteryController extends Controller
                     'user' => $user,
                     'tickets_count' => $tickets->count(),
                     'tickets' => $tickets->pluck('ticket_number'),
-                    'total_spent' => $tickets->sum('price_paid')
+                    'total_spent' => $tickets->sum('price')
                 ];
             })->values();
 
@@ -555,7 +555,7 @@ class AdminLotteryController extends Controller
                     'user_id' => $ticket->user_id,
                     'lottery_id' => $lottery->id,
                     'ticket_id' => $ticket->id,
-                    'amount' => $ticket->price_paid,
+                    'amount' => $ticket->price,
                     'reason' => 'lottery_cancelled',
                     'status' => 'pending',
                     'metadata' => json_encode([
