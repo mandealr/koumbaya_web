@@ -214,37 +214,37 @@ class EBillingService
     {
         $paymentToSave = [
             'reference' => $paymentDataFromSetup['external_reference'],
-            'transaction_id' => 0, // Valeur temporaire, sera mis à jour lors du callback
-            'ebilling_id' => $billId,
+            'order_id' => $data->order_id ?? null,
             'amount' => $paymentDataFromSetup['amount'],
-            'description' => $paymentDataFromSetup['short_description'],
             'status' => self::STATUS_PENDING,
-            'user_id' => $data->user->id,
-            'customer_name' => $paymentDataFromSetup['payer_name'],
-            'customer_phone' => $paymentDataFromSetup['payer_msisdn'],
-            'customer_email' => $paymentDataFromSetup['payer_email'],
-            'payment_gateway' => 'ebilling',
-            'callback_url' => $paymentDataFromSetup['callback_url'] ?? null
+            'meta' => [
+                'ebilling_id' => $billId,
+                'user_id' => $data->user->id,
+                'description' => $paymentDataFromSetup['short_description'],
+                'customer_name' => $paymentDataFromSetup['payer_name'],
+                'customer_phone' => $paymentDataFromSetup['payer_msisdn'],
+                'customer_email' => $paymentDataFromSetup['payer_email'],
+                'payment_gateway' => 'ebilling',
+                'callback_url' => $paymentDataFromSetup['callback_url'] ?? null
+            ]
         ];
 
         // Ajouter les données spécifiques selon le type
-        $gatewayConfig = [
-            'type' => $type,
-            'expiry_period' => $paymentDataFromSetup['expiry_period']
-        ];
+        $paymentToSave['meta']['type'] = $type;
+        $paymentToSave['meta']['expiry_period'] = $paymentDataFromSetup['expiry_period'];
 
         switch ($type) {
             case 'lottery_ticket':
-                $gatewayConfig['lottery_id'] = $data->lottery_id;
-                $gatewayConfig['quantity'] = $data->quantity;
+                $paymentToSave['meta']['lottery_id'] = $data->lottery_id;
+                $paymentToSave['meta']['quantity'] = $data->quantity;
+                $paymentToSave['lottery_id'] = $data->lottery_id;
                 break;
 
             case 'product_purchase':
-                $gatewayConfig['product_id'] = $data->product->id;
+                $paymentToSave['meta']['product_id'] = $data->product->id;
+                $paymentToSave['product_id'] = $data->product->id;
                 break;
         }
-
-        $paymentToSave['gateway_config'] = $gatewayConfig;
 
         Payment::create($paymentToSave);
     }

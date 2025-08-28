@@ -193,6 +193,7 @@ class PaymentController extends Controller
 
                 $data = (object) [
                     'user' => $user,
+                    'order_id' => $order->id,
                     'lottery_id' => $order->lottery->id,
                     'quantity' => 1, // Quantity from lottery tickets count
                     'amount' => $order->total_amount,
@@ -211,6 +212,7 @@ class PaymentController extends Controller
 
                 $data = (object) [
                     'user' => $user,
+                    'order_id' => $order->id,
                     'product' => $order->product,
                     'amount' => $order->total_amount,
                     'reference' => $order->order_number,
