@@ -70,10 +70,11 @@ class PaymentController extends Controller
     {
         $user = auth('sanctum')->user();
 
+        // Validation moins stricte pour permettre plus de flexibilité
         $validator = Validator::make($request->all(), [
             'order_number' => 'nullable|string',
-            'transaction_id' => 'nullable|exists:payments,id',
-            'lottery_id' => 'nullable|exists:lotteries,id',
+            'transaction_id' => 'nullable|integer',
+            'lottery_id' => 'nullable|integer',
             'quantity' => 'nullable|integer|min:1|max:10',
             'phone' => 'required|string|max:20',
             'operator' => 'required|string|in:airtel,moov'
@@ -141,10 +142,19 @@ class PaymentController extends Controller
                 ]);
             }
 
+            // Si aucune commande trouvée, essayer de créer une commande basique 
+            // avec les informations disponibles
             if (!$order) {
+                // Pour l'instant, retourner une erreur claire avec des instructions
                 return response()->json([
                     'success' => false,
-                    'message' => 'Commande introuvable. Veuillez fournir un transaction_id, order_number ou lottery_id valide.'
+                    'message' => 'Aucune commande trouvée. Le transaction_id fourni n\'existe pas ou n\'appartient pas à cet utilisateur.',
+                    'debug_info' => [
+                        'transaction_id' => $request->transaction_id,
+                        'user_id' => $user->id,
+                        'total_payments' => Payment::count(),
+                        'user_payments' => Payment::where('user_id', $user->id)->count()
+                    ]
                 ], 404);
             }
 
@@ -1266,12 +1276,16 @@ class PaymentController extends Controller
                 ]);
             }
 
+            // Récupérer la transaction créée pour cette commande
+            $transaction = Payment::where('order_id', $order->id)->first();
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Commande créée avec succès',
                 'redirect_to_payment' => true,
                 'data' => [
                     'order_number' => $order->order_number,
+                    'transaction_id' => $transaction ? $transaction->id : null,
                     'amount' => $order->total_amount,
                     'reference' => $order->order_number,
                     'type' => $order->type
