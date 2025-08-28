@@ -103,10 +103,15 @@
             >
               <option value="">Sélectionner une catégorie</option>
               <option v-if="apiLoading" disabled>Chargement des catégories...</option>
+              <option v-if="categories.length === 0 && !apiLoading" disabled>Aucune catégorie disponible</option>
               <option v-for="category in categories" :key="category.id" :value="category.id">
                 {{ category.name }}
               </option>
             </select>
+            <!-- Debug info -->
+            <p class="text-xs text-gray-500 mt-1">
+              Debug: {{ categories.length }} catégories chargées
+            </p>
             <p v-if="errors.category_id" class="mt-1 text-sm text-red-600">{{ errors.category_id }}</p>
           </div>
 
@@ -974,9 +979,19 @@ const validateTotalTickets = () => {
 // Load categories on mount
 const loadCategories = async () => {
   try {
+    console.log('Loading categories...')
     const response = await get('/categories')
-    if (response.categories) {
+    console.log('Categories response:', response)
+    console.log('Response keys:', Object.keys(response))
+    if (response && response.categories) {
       categories.value = response.categories
+      console.log('Categories loaded:', categories.value.length, 'items')
+    } else if (response && response.data) {
+      // Fallback si categories n'existe pas mais data existe
+      categories.value = response.data
+      console.log('Categories loaded from data:', categories.value.length, 'items')
+    } else {
+      console.log('No categories in response or response is null')
     }
   } catch (error) {
     console.error('Error loading categories:', error)

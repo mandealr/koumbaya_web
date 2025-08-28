@@ -148,11 +148,11 @@
             <label class="koumbaya-label">Catégorie</label>
             <select v-model="form.category" required class="koumbaya-input">
               <option value="">Sélectionner une catégorie</option>
-              <option value="electronics">Électronique</option>
-              <option value="fashion">Mode</option>
-              <option value="automotive">Automobile</option>
-              <option value="home">Maison</option>
+              <option v-for="category in categories" :key="category.id" :value="category.id">
+                {{ category.name }}
+              </option>
             </select>
+            <p class="text-xs text-gray-500 mt-1">Debug Modal: {{ categories.length }} catégories</p>
           </div>
 
           <div class="koumbaya-card-footer">
@@ -179,7 +179,7 @@
 </template>
 
 <script setup>
-import { reactive, watch, ref, computed } from 'vue'
+import { reactive, watch, ref, computed, onMounted } from 'vue'
 import { useApi } from '@/composables/api'
 
 const props = defineProps({
@@ -195,8 +195,9 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'submit'])
 
-const api = useApi()
+const { get, post } = useApi()
 const calculation = ref(null)
+const categories = ref([])
 const showAdvanced = ref(false)
 
 const form = reactive({
@@ -228,7 +229,7 @@ const calculateTicketPrice = async () => {
   }
 
   try {
-    const response = await api.post('/calculate-ticket-price', {
+    const response = await post('/calculate-ticket-price', {
       product_price: form.value,
       number_of_tickets: form.numberOfTickets || 1000
     })
@@ -275,10 +276,32 @@ const submit = () => {
   emit('submit', submitData)
 }
 
+// Load categories
+const loadCategories = async () => {
+  try {
+    console.log('Loading categories in modal...')
+    const response = await get('/categories')
+    console.log('Modal categories response:', response)
+    if (response && response.categories) {
+      categories.value = response.categories
+      console.log('Modal categories loaded:', categories.value.length, 'items')
+    } else if (response && response.data) {
+      categories.value = response.data
+      console.log('Modal categories loaded from data:', categories.value.length, 'items')
+    }
+  } catch (error) {
+    console.error('Error loading categories:', error)
+  }
+}
+
 // Calcul initial si le produit a déjà un prix
 watch(() => form.value, () => {
   if (form.value && form.value > 0) {
     calculateTicketPrice()
   }
 }, { immediate: true })
+
+onMounted(() => {
+  loadCategories()
+})
 </script>

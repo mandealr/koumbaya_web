@@ -11,9 +11,10 @@ class CategorySeeder extends Seeder
     /**
      * Run the database seeds.
      * 
-     * Créer des catégories de produits complètes pour le marketplace Koumbaya.
-     * Inclut 25 catégories couvrant tous les types de produits susceptibles
-     * d'être vendus dans des tombolas : tech, maison, mode, automobile, luxe, etc.
+     * Créer des catégories de produits physiques pour le marketplace Koumbaya.
+     * Inclut 22 catégories couvrant uniquement les produits physiques
+     * susceptibles d'être vendus dans des tombolas : tech, maison, mode, automobile, luxe, etc.
+     * Exclut les services, expériences et bons d'achat.
      */
     public function run(): void
     {
@@ -192,14 +193,6 @@ class CategorySeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            [
-                'name' => 'Santé & Bien-être',
-                'slug' => 'sante-bien-etre',
-                'description' => 'Compléments alimentaires, matériel médical, spa',
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
 
             // === PREMIUM & LUXE ===
             [
@@ -214,24 +207,6 @@ class CategorySeeder extends Seeder
                 'name' => 'Art & Collection',
                 'slug' => 'art-collection',
                 'description' => 'Œuvres d\'art, objets de collection, antiquités',
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-
-            // === BONS & SERVICES ===
-            [
-                'name' => 'Bons d\'Achat',
-                'slug' => 'bons-achat',
-                'description' => 'Cartes cadeaux, bons d\'achat magasins, e-commerce',
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Expériences & Loisirs',
-                'slug' => 'experiences-loisirs',
-                'description' => 'Week-ends, restaurants, activités, spectacles',
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
