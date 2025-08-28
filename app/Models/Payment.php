@@ -13,6 +13,8 @@ class Payment extends Model
     protected $fillable = [
         'reference',
         'order_id',
+        'lottery_id',
+        'product_id',
         'ebilling_id',
         'external_transaction_id',
         'payment_method',
@@ -20,6 +22,9 @@ class Payment extends Model
         'status',
         'callback_data',
         'paid_at',
+        'user_id',
+        'transaction_id',
+        'currency',
         'meta',
     ];
 
@@ -41,10 +46,24 @@ class Payment extends Model
         return $this->belongsTo(Order::class, 'order_id');
     }
 
+    public function lottery()
+    {
+        return $this->belongsTo(Lottery::class, 'lottery_id');
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
     public function user()
     {
-        // La relation user se fait maintenant via order
-        return $this->hasOneThrough(User::class, Order::class, 'id', 'id', 'order_id', 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function refunds()
+    {
+        return $this->hasMany(Refund::class, 'payment_id');
     }
 
     /**

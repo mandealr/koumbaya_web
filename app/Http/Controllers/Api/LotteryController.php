@@ -239,10 +239,10 @@ class LotteryController extends Controller
     {
         switch ($sortBy) {
             case 'end_date_asc':
-                $query->orderBy('end_date', 'asc');
+                $query->orderBy('draw_date', 'asc');
                 break;
             case 'end_date_desc':
-                $query->orderBy('end_date', 'desc');
+                $query->orderBy('draw_date', 'desc');
                 break;
             case 'ticket_price_asc':
                 $query->orderBy('ticket_price', 'asc');
@@ -255,7 +255,7 @@ class LotteryController extends Controller
                       ->orderBy('tickets_count', 'desc');
                 break;
             default:
-                $query->orderBy('end_date', 'asc');
+                $query->orderBy('draw_date', 'asc');
         }
     }
 
@@ -271,7 +271,7 @@ class LotteryController extends Controller
     {
         $lotteries = Lottery::active()
             ->with(['product.category', 'product.merchant', 'tickets'])
-            ->orderBy('end_date', 'asc')
+            ->orderBy('draw_date', 'asc')
             ->limit(20)
             ->get();
 
