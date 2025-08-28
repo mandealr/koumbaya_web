@@ -808,22 +808,38 @@ body {
   overflow: hidden;
 }
 
-/* Mode sombre */
+/* Force le thème clair pour toutes les pages */
+html {
+  color-scheme: light;
+}
+
+/* Forcer le mode clair même si le système préfère le dark */
+:root {
+  color-scheme: light only !important;
+}
+
+/* S'assurer que toutes les couleurs restent en mode clair */
+*, *::before, *::after {
+  color-scheme: light !important;
+}
+
+/* Forcer les éléments système en mode clair */
+input, textarea, select, button {
+  color-scheme: light !important;
+}
+
+/* Forcer les barres de défilement en mode clair */
+::-webkit-scrollbar {
+  color-scheme: light !important;
+}
+
+/* Désactiver explicitement toute détection de thème sombre */
 @media (prefers-color-scheme: dark) {
   :root {
-    --koumbaya-gray-50: #1a1a1a;
-    --koumbaya-gray-100: #2a2a2a;
-    --koumbaya-gray-800: #e0e0e0;
-    --koumbaya-gray-900: #ffffff;
+    color-scheme: light !important;
   }
   
-  body {
-    background-color: var(--koumbaya-gray-100);
-    color: var(--koumbaya-gray-800);
-  }
-  
-  .koumbaya-modal-content {
-    background-color: var(--koumbaya-gray-100);
-    color: var(--koumbaya-gray-800);
+  *, *::before, *::after {
+    color-scheme: light !important;
   }
 }

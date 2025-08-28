@@ -308,7 +308,7 @@ class MetricsService
         $key = self::METRICS_CACHE_PREFIX . "daily:{$metric}:{$dateKey}";
         
         Cache::increment($key, $value);
-        Cache::expire($key, self::COUNTER_CACHE_TTL * 24); // 24 hours
+        Cache::put($key, Cache::get($key, 0), self::COUNTER_CACHE_TTL * 24 * 60); // 24 hours in minutes
     }
 
     /**
