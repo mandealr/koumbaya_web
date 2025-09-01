@@ -132,7 +132,7 @@ class BackfillOrdersCommand extends Command
             'total_amount' => $transaction->amount,
             'currency' => $transaction->currency ?? 'XAF',
             'status' => $orderStatus,
-            'payment_reference' => $transaction->reference ?? $transaction->external_transaction_id,
+            'payment_reference' => $transaction->reference ?? $transaction->transaction_id,
             'paid_at' => $this->getPaidAtDate($transaction, $orderStatus),
             'fulfilled_at' => $this->getFulfilledAtDate($transaction, $orderStatus),
             'meta' => $meta,

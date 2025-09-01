@@ -16,7 +16,6 @@ class Payment extends Model
         'lottery_id',
         'product_id',
         'ebilling_id',
-        'external_transaction_id',
         'payment_method',
         'amount',
         'status',
@@ -183,12 +182,12 @@ class Payment extends Model
         return 'KMB-PAY-' . date('YmdHis') . '-' . str_pad($this->id ?? rand(1000, 9999), 4, '0', STR_PAD_LEFT);
     }
 
-    public function markAsPaid($paymentMethod = null, $externalTransactionId = null, $gatewayResponse = null)
+    public function markAsPaid($paymentMethod = null, $transactionId = null, $gatewayResponse = null)
     {
         $this->update([
             'status' => 'paid',
             'payment_method' => $paymentMethod,
-            'external_transaction_id' => $externalTransactionId,
+            'transaction_id' => $transactionId,
             'gateway_response' => $gatewayResponse,
             'paid_at' => now(),
         ]);

@@ -208,7 +208,7 @@ class OrderTrackingController extends Controller
      *                         @OA\Property(property="amount", type="number", format="float", example=5000),
      *                         @OA\Property(property="status", type="string", example="paid"),
      *                         @OA\Property(property="payment_method", type="string", example="airtel_money"),
-     *                         @OA\Property(property="external_transaction_id", type="string", example="AM-789123456"),
+     *                         @OA\Property(property="transaction_id", type="string", example="AM-789123456"),
      *                         @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-15T10:30:00Z"),
      *                         @OA\Property(property="paid_at", type="string", format="date-time", example="2024-01-15T10:35:00Z")
      *                     )
@@ -540,7 +540,7 @@ class OrderTrackingController extends Controller
             ->where(function ($query) use ($search) {
                 $query->where('reference', 'like', "%{$search}%")
                     ->orWhere('ebilling_id', 'like', "%{$search}%")
-                    ->orWhere('external_transaction_id', 'like', "%{$search}%");
+                    ->orWhere('transaction_id', 'like', "%{$search}%");
             })
             ->with(['order.product', 'order.lottery'])
             ->orderBy('created_at', 'desc')
@@ -696,7 +696,7 @@ class OrderTrackingController extends Controller
                     'amount' => $payment->amount,
                     'status' => $payment->status,
                     'payment_method' => $payment->payment_method,
-                    'external_transaction_id' => $payment->external_transaction_id,
+                    'transaction_id' => $payment->transaction_id,
                     'created_at' => $payment->created_at,
                     'paid_at' => $payment->paid_at,
                 ];

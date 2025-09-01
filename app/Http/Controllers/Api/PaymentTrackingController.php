@@ -37,7 +37,7 @@ class PaymentTrackingController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('reference', 'like', "%{$search}%")
                   ->orWhere('ebilling_id', 'like', "%{$search}%")
-                  ->orWhere('external_transaction_id', 'like', "%{$search}%");
+                  ->orWhere('transaction_id', 'like', "%{$search}%");
             });
         }
 
@@ -133,7 +133,7 @@ class PaymentTrackingController extends Controller
             ->where(function ($query) use ($search) {
                 $query->where('reference', 'like', "%{$search}%")
                     ->orWhere('ebilling_id', 'like', "%{$search}%")
-                    ->orWhere('external_transaction_id', 'like', "%{$search}%");
+                    ->orWhere('transaction_id', 'like', "%{$search}%");
             })
             ->with(['order.product', 'order.lottery'])
             ->orderBy('created_at', 'desc')
@@ -155,7 +155,7 @@ class PaymentTrackingController extends Controller
             'id' => $payment->id,
             'reference' => $payment->reference,
             'ebilling_id' => $payment->ebilling_id,
-            'external_transaction_id' => $payment->external_transaction_id,
+            'transaction_id' => $payment->transaction_id,
             'amount' => $payment->amount,
             'currency' => $payment->currency,
             'status' => $payment->status,

@@ -155,7 +155,7 @@ class MetricsService
             'payment_method' => $payment->payment_method,
             'payment_gateway' => $payment->payment_gateway,
             'ebilling_id' => $payment->ebilling_id,
-            'external_transaction_id' => $payment->external_transaction_id,
+            'transaction_id' => $payment->transaction_id,
             'failure_reason' => $reason,
             'gateway_response' => $payment->gateway_response,
             'failed_at' => now()->toISOString(),

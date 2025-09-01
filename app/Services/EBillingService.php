@@ -368,7 +368,6 @@ class EBillingService
         // Update payment status
         $payment->status = self::STATUS_PAID;
         $payment->transaction_id = $notificationData['transactionid'] ?? $payment->transaction_id;
-        $payment->external_transaction_id = $notificationData['transactionid'] ?? null;
         $payment->payment_method = $notificationData['paymentsystem'] ?? null;
         $payment->amount = $notificationData['amount'] ?? $payment->amount;
         $payment->paid_at = now();

@@ -28,7 +28,7 @@ class AdminPaymentController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('reference', 'LIKE', "%{$search}%")
-                  ->orWhere('external_transaction_id', 'LIKE', "%{$search}%")
+                  ->orWhere('transaction_id', 'LIKE', "%{$search}%")
                   ->orWhereHas('user', function ($q) use ($search) {
                       $q->where('first_name', 'LIKE', "%{$search}%")
                         ->orWhere('last_name', 'LIKE', "%{$search}%")
@@ -214,7 +214,7 @@ class AdminPaymentController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('reference', 'LIKE', "%{$search}%")
-                  ->orWhere('external_transaction_id', 'LIKE', "%{$search}%")
+                  ->orWhere('transaction_id', 'LIKE', "%{$search}%")
                   ->orWhereHas('user', function ($q) use ($search) {
                       $q->where('first_name', 'LIKE', "%{$search}%")
                         ->orWhere('last_name', 'LIKE', "%{$search}%")

@@ -227,7 +227,7 @@ class PaymentController extends Controller
                 ], 422);
             }
 
-            // Créer le paiement eBilling
+            // Créer le paiement eBilling (qui crée aussi l'enregistrement dans la table payments)
             $billId = EBillingService::initiate($type, $data);
 
             if (!$billId) {
@@ -236,22 +236,6 @@ class PaymentController extends Controller
                     'message' => 'Erreur lors de la création du paiement eBilling'
                 ], 500);
             }
-
-            // Créer un enregistrement de paiement
-            $payment = Payment::create([
-                'reference' => $order->order_number,
-                'user_id' => $user->id,
-                'order_id' => $order->id,
-                'amount' => $order->total_amount,
-                'ebilling_id' => $billId,
-                'status' => 'pending',
-                'meta' => [
-                    'currency' => 'XAF',
-                    'customer_phone' => $request->phone,
-                    'payment_gateway' => 'ebilling',
-                    'description' => "Paiement pour commande {$order->order_number}",
-                ],
-            ]);
 
             // Déclencher automatiquement le push USSD
             $paymentSystemName = $request->operator === 'airtel' ? 'airtelmoney' : 'moovmoney4';
@@ -775,7 +759,7 @@ class PaymentController extends Controller
                         'status' => $paymentStatus->value,
                         'paid_at' => now(),
                         'payment_method' => $paymentSystem,
-                        'external_transaction_id' => $transactionId,
+                        'transaction_id' => $transactionId,
                         'callback_data' => $callbackData
                     ]);
 

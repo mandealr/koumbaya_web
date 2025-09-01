@@ -19,7 +19,6 @@ class Transaction extends Model
         'amount',
         'status',
         'payment_method',
-        'external_transaction_id',
         'ebilling_id',
         'callback_data',
         'paid_at',
