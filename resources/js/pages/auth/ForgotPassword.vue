@@ -2,7 +2,9 @@
   <div class="min-h-screen bg-white flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <div class="flex justify-center mb-8">
-        <img class="h-20 w-auto" :src="logoUrl" alt="Koumbaya" />
+        <router-link to="/">
+          <img class="h-20 w-auto hover:opacity-80 transition-opacity" :src="logoUrl" alt="Koumbaya" />
+        </router-link>
       </div>
       <h2 class="text-center text-4xl font-bold text-gray-900 mb-3">
         Mot de passe oublié ?

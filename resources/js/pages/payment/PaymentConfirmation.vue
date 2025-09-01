@@ -5,7 +5,9 @@
       <!-- Status Header -->
       <div class="text-center mb-8">
         <div class="mb-6">
-          <img :src="logoUrl" alt="Koumbaya" class="h-12 mx-auto" />
+          <router-link to="/">
+            <img :src="logoUrl" alt="Koumbaya" class="h-12 mx-auto hover:opacity-80 transition-opacity" />
+          </router-link>
         </div>
         <div class="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center"
              :class="getStatusClasses().bg">

@@ -3,11 +3,13 @@
     <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl border border-gray-100 p-8">
       <!-- Logo -->
       <div class="text-center mb-8">
-        <img
-          :src="logoUrl"
-          alt="Logo Koumbaya"
-          class="h-16 w-auto mx-auto mb-4"
-        />
+        <router-link to="/">
+          <img
+            :src="logoUrl"
+            alt="Logo Koumbaya"
+            class="h-16 w-auto mx-auto mb-4 hover:opacity-80 transition-opacity"
+          />
+        </router-link>
       </div>
 
       <!-- Loading state -->

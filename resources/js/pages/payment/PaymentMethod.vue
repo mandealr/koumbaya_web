@@ -4,7 +4,9 @@
       <!-- Header -->
       <div class="text-center mb-8">
         <div class="mb-6">
-          <img :src="logoUrl" alt="Koumbaya" class="h-12 mx-auto" />
+          <router-link to="/">
+            <img :src="logoUrl" alt="Koumbaya" class="h-12 mx-auto hover:opacity-80 transition-opacity" />
+          </router-link>
         </div>
         <h1 class="text-3xl font-bold text-gray-900">Méthode de paiement</h1>
         <p class="mt-2 text-gray-600">Choisissez votre mode de paiement préféré</p>

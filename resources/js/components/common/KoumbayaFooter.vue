@@ -6,7 +6,9 @@
         <!-- Logo et description -->
         <div class="col-span-1 md:col-span-2 lg:col-span-1">
           <div class="flex items-center">
-            <img :src="logoUrl" alt="Koumbaya" class="h-15 w-auto">
+            <router-link to="/" class="inline-block">
+              <img :src="logoUrl" alt="Koumbaya" class="h-15 w-auto hover:opacity-80 transition-opacity">
+            </router-link>
           </div>
           <p class="mt-4 text-gray-600 text-sm leading-relaxed">
             La marketplace innovante qui vous permet d'acquérir des produits premium à prix imbattables grâce aux tombolas équitables.

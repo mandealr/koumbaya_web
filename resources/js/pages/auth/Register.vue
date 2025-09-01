@@ -12,11 +12,13 @@
 
             <div class="relative z-10">
               <div class="flex items-center mb-8">
-                <img
-                  :src="logoWhiteUrl"
-                  alt="Logo Koumbaya"
-                  class="h-16 w-auto mr-4"
-                />
+                <router-link to="/">
+                  <img
+                    :src="logoWhiteUrl"
+                    alt="Logo Koumbaya"
+                    class="h-16 w-auto mr-4 hover:opacity-80 transition-opacity"
+                  />
+                </router-link>
               </div>
 
               <h2 class="text-4xl lg:text-5xl font-bold text-white mb-6">
