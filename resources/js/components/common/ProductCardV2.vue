@@ -18,11 +18,11 @@
       <!-- Mode de vente - Badge principal -->
       <div class="absolute top-3 left-3">
         <div v-if="product.sale_mode === 'lottery'" class="flex items-center bg-purple-600 text-white px-3 py-1.5 rounded-full shadow-lg">
-          <TicketIcon class="w-4 h-4 mr-1.5" />
+          <TicketIcon class="w-4 h-4 mr-1.5 flex-shrink-0" />
           <span class="text-sm font-semibold">Tombola</span>
         </div>
         <div v-else class="flex items-center bg-[#0099cc] text-white px-3 py-1.5 rounded-full shadow-lg">
-          <ShoppingBagIcon class="w-4 h-4 mr-1.5" />
+          <ShoppingBagIcon class="w-4 h-4 mr-1.5 flex-shrink-0" />
           <span class="text-sm font-semibold">Achat direct</span>
         </div>
       </div>
@@ -30,7 +30,7 @@
       <!-- Status -->
       <div class="absolute top-3 right-3">
         <span v-if="product.featured" class="bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-medium shadow-sm flex items-center">
-          <StarIcon class="w-3.5 h-3.5 mr-1" />
+          <StarIcon class="w-3.5 h-3.5 mr-1 flex-shrink-0" />
           Vedette
         </span>
       </div>
@@ -89,7 +89,7 @@
 
         <!-- Date de tirage -->
         <div v-if="product.active_lottery?.draw_date" class="flex items-center text-sm text-gray-600">
-          <CalendarIcon class="w-4 h-4 mr-2 text-purple-600" />
+          <CalendarIcon class="w-4 h-4 mr-2 text-purple-600 flex-shrink-0" />
           <span>Tirage le {{ formatDate(product.active_lottery.draw_date) }}</span>
         </div>
       </div>
@@ -113,12 +113,12 @@
       <!-- Bouton d'action -->
       <button 
         @click="$emit('view-product', product)"
-        class="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center group-hover:shadow-md"
+        class="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 btn-responsive btn-wrap-mobile group-hover:shadow-md"
         :class="product.sale_mode === 'lottery' 
           ? 'bg-purple-600 hover:bg-purple-700 text-white' 
           : 'bg-[#0099cc] hover:bg-[#0088bb] text-white'"
       >
-        <ShoppingBagIcon class="w-5 h-5 mr-2" />
+        <ShoppingBagIcon class="w-5 h-5 mr-2 flex-shrink-0" />
         {{ product.sale_mode === 'lottery' ? 'Participer à la tombola' : 'Acheter maintenant' }}
       </button>
     </div>

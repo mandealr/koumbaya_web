@@ -21,7 +21,7 @@
             <component 
               :is="changeIcon" 
               :class="changeColorClass"
-              class="w-4 h-4"
+              class="w-4 h-4 flex-shrink-0"
             />
             <span 
               :class="changeColorClass"

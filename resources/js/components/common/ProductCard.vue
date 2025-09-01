@@ -14,15 +14,15 @@
       <!-- Badge de statut -->
       <div class="absolute top-4 right-4">
         <span class="koumbaya-badge koumbaya-badge-success" v-if="product.status === 'active'">
-          <CheckCircleIcon class="w-3 h-3 mr-1" />
+          <CheckCircleIcon class="w-3 h-3 mr-1 flex-shrink-0" />
           Actif
         </span>
         <span class="koumbaya-badge koumbaya-badge-warning" v-else-if="product.status === 'pending'">
-          <ClockIcon class="w-3 h-3 mr-1" />
+          <ClockIcon class="w-3 h-3 mr-1 flex-shrink-0" />
           En attente
         </span>
         <span class="koumbaya-badge koumbaya-badge-error" v-else>
-          <XCircleIcon class="w-3 h-3 mr-1" />
+          <XCircleIcon class="w-3 h-3 mr-1 flex-shrink-0" />
           Inactif
         </span>
       </div>
@@ -30,7 +30,7 @@
       <!-- Badge de popularité -->
       <div class="absolute top-4 left-4" v-if="product.isPopular">
         <span class="koumbaya-badge bg-gradient-to-r from-amber-400 to-orange-500 text-white border-0">
-          <StarIcon class="w-3 h-3 mr-1 fill-current" />
+          <StarIcon class="w-3 h-3 mr-1 fill-current flex-shrink-0" />
           Populaire
         </span>
       </div>
@@ -41,12 +41,12 @@
       <!-- Catégorie et Mode de vente -->
       <div class="flex items-center justify-between">
         <div class="flex items-center text-koumbaya-primary text-sm font-medium">
-          <TagIcon class="w-4 h-4 mr-2" />
+          <TagIcon class="w-4 h-4 mr-2 flex-shrink-0" />
           {{ product.category?.name || product.category || 'Électronique' }}
         </div>
         <div :class="getSaleModeClass(product.sale_mode)" class="flex items-center">
-          <TicketIcon v-if="product.sale_mode === 'lottery'" class="w-3.5 h-3.5 mr-1" />
-          <ShoppingBagIcon v-else class="w-3.5 h-3.5 mr-1" />
+          <TicketIcon v-if="product.sale_mode === 'lottery'" class="w-3.5 h-3.5 mr-1 flex-shrink-0" />
+          <ShoppingBagIcon v-else class="w-3.5 h-3.5 mr-1 flex-shrink-0" />
           {{ getSaleModeLabel(product.sale_mode) }}
         </div>
       </div>
@@ -100,7 +100,7 @@
 
       <!-- Date de tirage -->
       <div class="flex items-center text-sm text-gray-600">
-        <CalendarIcon class="w-4 h-4 mr-2" />
+        <CalendarIcon class="w-4 h-4 mr-2 flex-shrink-0" />
         Tirage le {{ formatDate(product.drawDate || new Date()) }}
       </div>
     </div>

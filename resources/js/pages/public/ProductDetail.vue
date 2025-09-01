@@ -179,25 +179,26 @@
               <button
                 v-if="hasActiveLottery"
                 @click="participateNow"
-                class="w-full bg-[#0099cc] hover:bg-[#0088bb] text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                class="w-full bg-[#0099cc] hover:bg-[#0088bb] text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center"
               >
-                {{ authStore.isAuthenticated ? 
-                   `🍀 Participer maintenant - ${formatPrice(product.ticketPrice)}` : 
-                   `Se connecter pour participer - ${formatPrice(product.ticketPrice)}` 
-                }}
+                <TicketIcon class="w-5 h-5 mr-2 flex-shrink-0" />
+                <div class="flex flex-col items-center">
+                  <span>{{ authStore.isAuthenticated ? 'Participer maintenant' : 'Se connecter pour participer' }}</span>
+                  <span class="text-sm font-medium opacity-90">{{ formatPrice(product.ticketPrice) }}</span>
+                </div>
               </button>
               
               <!-- Direct Purchase Button -->
               <button
                 v-else
                 @click="buyDirectly"
-                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center"
               >
-                <ShoppingCartIcon class="w-5 h-5 mr-2" />
-                {{ authStore.isAuthenticated ? 
-                   `Acheter maintenant - ${formatPrice(product.value)}` : 
-                   `Se connecter pour acheter - ${formatPrice(product.value)}` 
-                }}
+                <ShoppingCartIcon class="w-5 h-5 mr-2 flex-shrink-0" />
+                <div class="flex flex-col items-center">
+                  <span>{{ authStore.isAuthenticated ? 'Acheter maintenant' : 'Se connecter pour acheter' }}</span>
+                  <span class="text-sm font-medium opacity-90">{{ formatPrice(product.value) }}</span>
+                </div>
               </button>
               
               <div class="grid grid-cols-2 gap-4">
@@ -407,6 +408,7 @@ import {
   HeartIcon,
   ShareIcon,
   ShoppingCartIcon,
+  TicketIcon,
   ShieldCheckIcon,
   TruckIcon,
   CheckBadgeIcon,

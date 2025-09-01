@@ -413,14 +413,14 @@
                 @click="downloadInvoice"
                 :disabled="downloadingInvoice"
                 :class="[
-                  'w-full px-4 py-2 rounded-md transition-colors flex items-center justify-center',
+                  'w-full px-4 py-2 rounded-md transition-colors flex items-center justify-center whitespace-nowrap',
                   downloadingInvoice 
                     ? 'bg-green-400 text-white cursor-not-allowed' 
                     : 'bg-green-600 text-white hover:bg-green-700'
                 ]"
               >
-                <div v-if="downloadingInvoice" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                <DocumentArrowDownIcon v-else class="w-4 h-4 mr-2" />
+                <div v-if="downloadingInvoice" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 flex-shrink-0"></div>
+                <DocumentArrowDownIcon v-else class="w-4 h-4 mr-2 flex-shrink-0" />
                 {{ downloadingInvoice ? 'Téléchargement...' : 'Télécharger la facture' }}
               </button>
               

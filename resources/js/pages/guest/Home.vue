@@ -91,8 +91,8 @@
                       {{ latestLotteryProduct?.soldTickets || 750 }}/{{ latestLotteryProduct?.totalTickets || 1000 }} tickets
                     </div>
                   </div>
-                  <button class="w-full bg-purple-600 text-white font-semibold py-3 rounded-xl hover:bg-purple-700 transition-colors flex items-center justify-center gap-2">
-                    <TicketIcon class="h-5 w-5" />
+                  <button class="w-full bg-purple-600 text-white font-semibold py-3 rounded-xl hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
+                    <TicketIcon class="h-5 w-5 flex-shrink-0" />
                     Participer maintenant
                   </button>
                 </div>
@@ -364,13 +364,13 @@
               </div>
 
               <button 
-                class="w-full font-semibold py-3 rounded-xl transition-all duration-200 group-hover:scale-105 group-hover:shadow-lg flex items-center justify-center gap-2"
+                class="w-full font-semibold py-3 rounded-xl transition-all duration-200 group-hover:scale-105 group-hover:shadow-lg flex items-center justify-center gap-2 whitespace-nowrap"
                 :class="product.sale_mode === 'lottery' 
                   ? 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white' 
                   : 'bg-gradient-to-r from-[#0099cc] to-cyan-500 hover:from-[#0088bb] hover:to-cyan-600 text-white'"
               >
-                <TicketIcon v-if="product.sale_mode === 'lottery'" class="h-5 w-5" />
-                <CreditCardIcon v-else class="h-5 w-5" />
+                <TicketIcon v-if="product.sale_mode === 'lottery'" class="h-5 w-5 flex-shrink-0" />
+                <CreditCardIcon v-else class="h-5 w-5 flex-shrink-0" />
                 {{ product.sale_mode === 'lottery' ? 'Participer maintenant' : 'Acheter maintenant' }}
               </button>
             </div>

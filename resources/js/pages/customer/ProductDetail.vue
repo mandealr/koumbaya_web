@@ -175,11 +175,11 @@
             <button
               @click="purchaseDirectly"
               :disabled="purchasing"
-              class="w-full bg-[#0099cc] text-white py-3 rounded-lg font-medium hover:bg-[#0088bb] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              class="w-full bg-[#0099cc] text-white py-3 rounded-lg font-medium hover:bg-[#0088bb] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2 whitespace-nowrap"
             >
               <span v-if="purchasing">Achat en cours...</span>
               <template v-else>
-                <ShoppingCartIcon class="w-5 h-5 mr-2" />
+                <ShoppingCartIcon class="w-5 h-5 mr-2 flex-shrink-0" />
                 <span>Acheter maintenant</span>
               </template>
             </button>

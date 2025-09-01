@@ -28,24 +28,24 @@
         <button
           v-if="lottery.status === 'active'"
           @click="showExtendModal = true"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center whitespace-nowrap"
         >
-          <ClockIcon class="w-4 h-4 mr-2" />
+          <ClockIcon class="w-4 h-4 mr-2 flex-shrink-0" />
           Prolonger
         </button>
         <button
           v-if="lottery.status === 'active' && canDraw"
           @click="showDrawModal = true"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center whitespace-nowrap"
         >
-          <GiftIcon class="w-4 h-4 mr-2" />
+          <GiftIcon class="w-4 h-4 mr-2 flex-shrink-0" />
           Effectuer le tirage
         </button>
         <button
           @click="showEditModal = true"
-          class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center"
+          class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center whitespace-nowrap"
         >
-          <PencilIcon class="w-4 h-4 mr-2" />
+          <PencilIcon class="w-4 h-4 mr-2 flex-shrink-0" />
           Modifier
         </button>
       </div>

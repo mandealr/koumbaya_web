@@ -148,14 +148,14 @@
           v-if="paymentStatus === 'expired'"
           @click="retryUssdPush"
           :disabled="loading"
-          class="w-full py-3 px-4 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-300 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center"
+          class="w-full py-3 px-4 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-300 text-white font-semibold rounded-lg transition-all duration-200 btn-responsive btn-wrap-mobile"
         >
-          <span v-if="loading">
-            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+          <span v-if="loading" class="flex items-center">
+            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2 flex-shrink-0"></div>
             Relance...
           </span>
-          <span v-else>
-            <ArrowPathIcon class="h-5 w-5 mr-2" />
+          <span v-else class="flex items-center">
+            <ArrowPathIcon class="h-5 w-5 mr-2 flex-shrink-0" />
             Relancer le push USSD
           </span>
         </button>

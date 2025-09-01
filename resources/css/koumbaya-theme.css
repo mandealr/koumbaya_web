@@ -430,6 +430,53 @@ body {
   white-space: nowrap;
 }
 
+/* S'assurer que les icônes dans les boutons ne se rétrécissent pas */
+.koumbaya-btn svg,
+.koumbaya-btn .icon {
+  flex-shrink: 0;
+}
+
+/* Règles globales pour améliorer l'alignement des boutons avec icônes */
+button.flex.items-center svg {
+  flex-shrink: 0;
+}
+
+/* Classe utilitaire pour l'alignement des boutons */
+.btn-icon-text {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.btn-icon-text svg,
+.btn-icon-text .icon {
+  flex-shrink: 0;
+}
+
+/* Classes responsives pour les boutons avec texte long */
+.btn-responsive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-responsive svg {
+  flex-shrink: 0;
+}
+
+/* Pour les petits écrans, permettre le text wrapping mais garder l'icône alignée */
+@media (max-width: 640px) {
+  .btn-responsive.btn-wrap-mobile {
+    white-space: normal;
+    min-height: 2.5rem;
+  }
+  
+  .btn-responsive.btn-wrap-mobile svg {
+    align-self: flex-start;
+    margin-top: 0.125rem;
+  }
+}
+
 .koumbaya-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
