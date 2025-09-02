@@ -219,8 +219,9 @@ class EBillingService
             'order_id' => $data->order_id ?? null,
             'amount' => $paymentDataFromSetup['amount'],
             'status' => self::STATUS_PENDING,
+            'ebilling_id' => $billId, // Stocker ebilling_id dans la colonne directe
             'meta' => [
-                'ebilling_id' => $billId,
+                'ebilling_id' => $billId, // Garder aussi dans meta pour compatibilité
                 'description' => $paymentDataFromSetup['short_description'],
                 'customer_name' => $paymentDataFromSetup['payer_name'],
                 'customer_phone' => $paymentDataFromSetup['payer_msisdn'],
@@ -350,8 +351,9 @@ class EBillingService
             return ['status' => 401, 'message' => 'Missing reference'];
         }
 
-        // Try to find payment by reference first, then by ebilling_id
+        // Try to find payment by reference first, then by ebilling_id (both column and meta)
         $payment = Payment::where('reference', $notificationData['reference'])
+            ->orWhere('ebilling_id', $notificationData['billingid'])
             ->orWhereJsonContains('meta->ebilling_id', $notificationData['billingid'])
             ->first();
 
@@ -567,17 +569,18 @@ class EBillingService
     private static function sendPaymentNotifications(Payment $payment)
     {
         try {
+            // TODO: Temporarily disabled to avoid template issues
             // Send notification to customer
-            Mail::to($payment->user->email)->send(new \App\Mail\PaymentConfirmation($payment));
+            // Mail::to($payment->user->email)->send(new \App\Mail\PaymentConfirmation($payment));
 
             // Send notification to merchant (admin for now)
-            if (config('mail.admin_email')) {
-                Mail::to(config('mail.admin_email'))->send(new \App\Mail\MerchantPaymentNotification($payment));
-            }
+            // if (config('mail.admin_email')) {
+            //     Mail::to(config('mail.admin_email'))->send(new \App\Mail\MerchantPaymentNotification($payment));
+            // }
 
-            Log::info('E-BILLING :: Email notifications sent', [
+            Log::info('E-BILLING :: Email notifications ready (currently disabled)', [
                 'payment_id' => $payment->id,
-                'customer_email' => $payment->user->email
+                'customer_email' => $payment->user->email ?? 'N/A'
             ]);
         } catch (\Exception $e) {
             Log::error('E-BILLING :: Failed to send email notifications', [

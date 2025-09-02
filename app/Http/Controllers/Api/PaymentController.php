@@ -1227,20 +1227,8 @@ class PaymentController extends Controller
                     'status' => Order::STATUS_PENDING,
                 ]);
 
-                // Créer la transaction liée à l'ordre
-                $transaction = Payment::create([
-                    'transaction_id' => 'TXN_' . strtoupper(Str::random(12)),
-                    'user_id' => $user->id,
-                    'order_id' => $order->id,
-                    'type' => 'ticket_purchase',
-                    'reference' => $reference,
-                    'amount' => $amount,
-                    'currency' => 'XAF',
-                    'status' => 'pending',
-                    'lottery_id' => $lottery->id,
-                    'quantity' => $quantity,
-                    'description' => "Achat de {$quantity} billet(s) pour la loterie {$lottery->title}"
-                ]);
+                // Ne pas créer le paiement ici, il sera créé par E-Billing lors de l'initiation
+                // La transaction sera créée quand l'utilisateur confirmera avec phone/operator
 
                 // Créer les billets de loterie
                 for ($i = 0; $i < $quantity; $i++) {
@@ -1270,24 +1258,11 @@ class PaymentController extends Controller
                     'status' => Order::STATUS_PENDING,
                 ]);
 
-                // Créer la transaction liée à l'ordre
-                $transaction = Payment::create([
-                    'transaction_id' => 'TXN_' . strtoupper(Str::random(12)),
-                    'user_id' => $user->id,
-                    'order_id' => $order->id,
-                    'type' => 'direct_purchase',
-                    'reference' => $reference,
-                    'amount' => $product->price,
-                    'currency' => 'XAF',
-                    'status' => 'pending',
-                    'product_id' => $product->id,
-                    'quantity' => 1,
-                    'description' => "Achat direct du produit {$product->name}"
-                ]);
+                // Ne pas créer le paiement ici, il sera créé par E-Billing lors de l'initiation
+                // La transaction sera créée quand l'utilisateur confirmera avec phone/operator
             }
 
-            // Récupérer la transaction créée pour cette commande
-            $transaction = Payment::where('order_id', $order->id)->first();
+            // Pas de transaction créée à ce stade, sera créée lors de l'initiation du paiement
             
             return response()->json([
                 'success' => true,
@@ -1295,7 +1270,7 @@ class PaymentController extends Controller
                 'redirect_to_payment' => true,
                 'data' => [
                     'order_number' => $order->order_number,
-                    'transaction_id' => $transaction ? $transaction->id : null,
+                    'transaction_id' => null, // Sera créé lors du paiement
                     'amount' => $order->total_amount,
                     'reference' => $order->order_number,
                     'type' => $order->type

@@ -6,7 +6,7 @@
       
       <!-- Logo Header -->
       <div class="flex items-center justify-between h-16 px-6 border-b border-gray-700">
-        <router-link to="/" class="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+        <router-link to="/admin/dashboard" class="flex items-center space-x-3 hover:opacity-80 transition-opacity">
           <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center p-1">
             <img :src="logoIcon" alt="Koumbaya" class="w-full h-full object-contain" />
           </div>
