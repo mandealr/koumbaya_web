@@ -194,15 +194,35 @@ const validatePhone = () => {
 const processPayment = async () => {
   if (!validatePhone() || !isFormValid.value) return
   
+  // Vérifier qu'on a bien un orderId valide
+  if (!orderId.value) {
+    if (window.$toast) {
+      window.$toast.error('Aucun numéro de commande fourni', '❌ Erreur')
+    }
+    return
+  }
+  
   loading.value = true
   
   try {
-    // Utiliser le nouvel endpoint pour créer le paiement depuis une commande existante
-    const response = await post('/payments/initiate-from-transaction', {
-      order_number: orderId.value, // Utiliser orderId qui contient soit order_number soit transaction_id
+    // Préparer les données de la requête
+    const requestData = {
       phone: phoneNumber.value,
       operator: selectedOperator.value
-    })
+    }
+    
+    // Ajouter le bon paramètre selon ce qu'on a reçu
+    if (route.query.order_number) {
+      requestData.order_number = orderId.value
+    } else if (route.query.transaction_id) {
+      requestData.transaction_id = orderId.value
+    } else {
+      // Par défaut, traiter comme order_number
+      requestData.order_number = orderId.value
+    }
+    
+    // Utiliser le nouvel endpoint pour créer le paiement depuis une commande existante
+    const response = await post('/payments/initiate-from-transaction', requestData)
     
     if (response.success) {
       // Rediriger vers la page de confirmation avec timer
@@ -249,6 +269,7 @@ const formatPrice = (price) => {
 onMounted(() => {
   paymentMethod.value = route.query.method || 'airtel_money'
   amount.value = parseFloat(route.query.amount) || 0
+  
   // Accepter soit order_number soit transaction_id
   orderId.value = route.query.order_number || route.query.transaction_id
   
@@ -259,8 +280,21 @@ onMounted(() => {
     selectedOperator.value = 'moov'
   }
   
+  // Vérifications des paramètres requis
   if (!orderId.value) {
+    if (window.$toast) {
+      window.$toast.error('Paramètres de paiement manquants', '❌ Erreur')
+    }
     router.push('/')
+    return
+  }
+  
+  if (!amount.value || amount.value <= 0) {
+    if (window.$toast) {
+      window.$toast.error('Montant invalide', '❌ Erreur')
+    }
+    router.push('/')
+    return
   }
 })
 </script>

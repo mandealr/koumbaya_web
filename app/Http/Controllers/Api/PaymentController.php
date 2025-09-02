@@ -70,6 +70,18 @@ class PaymentController extends Controller
     {
         $user = auth('sanctum')->user();
 
+        // Vérifier qu'au moins order_number ou transaction_id est fourni
+        if (!$request->filled('order_number') && !$request->filled('transaction_id') && !$request->filled('lottery_id')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Paramètres requis manquants. Vous devez fournir soit order_number, soit transaction_id, soit lottery_id.',
+                'debug_info' => [
+                    'received_params' => array_keys($request->all()),
+                    'required_one_of' => ['order_number', 'transaction_id', 'lottery_id']
+                ]
+            ], 422);
+        }
+
         // Validation très permissive pour gérer tous les cas
         $validator = Validator::make($request->all(), [
             'order_number' => 'nullable|string',
@@ -161,23 +173,33 @@ class PaymentController extends Controller
             // Si aucune commande trouvée, essayer de créer une commande basique 
             // avec les informations disponibles
             if (!$order) {
-                // Pour l'instant, retourner une erreur claire avec des instructions
+                // Déterminer quel paramètre a été utilisé pour la recherche
+                $searchParam = '';
+                $searchValue = '';
+                if ($request->filled('order_number')) {
+                    $searchParam = 'order_number';
+                    $searchValue = $request->order_number;
+                } elseif ($request->filled('transaction_id')) {
+                    $searchParam = 'transaction_id';
+                    $searchValue = $request->transaction_id;
+                }
+                
                 // Essayer de trouver des paiements récents de l'utilisateur pour debug
-                $recentPayments = Payment::where('user_id', $user->id)
+                $recentOrders = Order::where('user_id', $user->id)
                     ->orderBy('created_at', 'desc')
                     ->limit(3)
-                    ->get(['id', 'reference', 'transaction_id', 'created_at']);
+                    ->get(['id', 'order_number', 'status', 'created_at']);
                     
                 return response()->json([
                     'success' => false,
-                    'message' => 'Aucune commande trouvée. Le transaction_id fourni n\'existe pas ou n\'appartient pas à cet utilisateur.',
+                    'message' => $searchParam === 'order_number' 
+                        ? 'Aucune commande trouvée avec ce numéro de commande.' 
+                        : 'Aucune commande trouvée. Le transaction_id fourni n\'existe pas ou n\'appartient pas à cet utilisateur.',
                     'debug_info' => [
-                        'transaction_id_received' => $request->transaction_id,
-                        'search_fields' => 'Recherche dans: id, reference, transaction_id',
+                        'search_param' => $searchParam,
+                        'search_value' => $searchValue,
                         'user_id' => $user->id,
-                        'total_payments' => Payment::count(),
-                        'user_payments' => Payment::where('user_id', $user->id)->count(),
-                        'recent_user_payments' => $recentPayments
+                        'recent_user_orders' => $recentOrders
                     ]
                 ], 404);
             }

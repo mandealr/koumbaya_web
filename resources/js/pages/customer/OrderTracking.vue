@@ -103,7 +103,7 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les types</option>
-            <option value="lottery">Loterie</option>
+            <option value="lottery">Tombola</option>
             <option value="direct">Achat direct</option>
           </select>
         </div>
@@ -156,8 +156,8 @@
                 </div>
                 
                 <div class="text-sm text-gray-600 mb-2">
-                  {{ order.product ? order.product.name : 'Produit supprimé' }}
-                  <span v-if="order.lottery"> - Loterie #{{ order.lottery.lottery_number }}</span>
+                  {{ order.lottery?.product?.name || order.product?.name || 'Produit non disponible' }}
+                  <span v-if="order.lottery"> - Tombola #{{ order.lottery.lottery_number }}</span>
                 </div>
                 
                 <div class="flex items-center space-x-4 text-sm text-gray-500">
@@ -294,7 +294,7 @@
                 </div>
                 
                 <div v-if="selectedOrder.lottery" class="mt-6">
-                  <h4 class="text-md font-medium text-gray-900 mb-3">Loterie</h4>
+                  <h4 class="text-md font-medium text-gray-900 mb-3">Tombola</h4>
                   <div class="border rounded-lg p-4">
                     <h5 class="font-medium">{{ selectedOrder.lottery.title }}</h5>
                     <div class="text-sm text-gray-600 mt-2">
@@ -310,7 +310,7 @@
             
             <!-- Billets -->
             <div v-if="selectedOrder.tickets && selectedOrder.tickets.length > 0" class="mt-6">
-              <h4 class="text-md font-medium text-gray-900 mb-3">Billets de loterie</h4>
+              <h4 class="text-md font-medium text-gray-900 mb-3">Billets de tombola</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div 
                   v-for="ticket in selectedOrder.tickets" 
@@ -504,7 +504,7 @@ const getStatusText = (status) => {
 
 const getTypeText = (type) => {
   const typeMap = {
-    'lottery': 'Loterie',
+    'lottery': 'Tombola',
     'direct': 'Achat direct',
     'ticket_purchase': 'Achat de billet', // Legacy support
     'direct_purchase': 'Achat direct' // Legacy support

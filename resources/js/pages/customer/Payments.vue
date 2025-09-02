@@ -165,14 +165,14 @@
                       {{ payment.order.product.name }}
                     </span>
                     <span v-else-if="payment.order.lottery">
-                      Loterie #{{ payment.order.lottery.lottery_number }}
+                      Tombola #{{ payment.order.lottery.lottery_number }}
                     </span>
                   </span>
                   <span v-else-if="payment.transaction && payment.transaction.product">
                     {{ payment.transaction.product.name }} (Legacy)
                   </span>
                   <span v-else-if="payment.transaction && payment.transaction.lottery">
-                    Loterie #{{ payment.transaction.lottery.lottery_number }} (Legacy)
+                    Tombola #{{ payment.transaction.lottery.lottery_number }} (Legacy)
                   </span>
                   <span v-else>
                     Paiement sans commande associée
@@ -568,7 +568,7 @@ const getTransactionTypeText = (type) => {
 
 const getOrderTypeText = (type) => {
   const typeMap = {
-    'lottery': 'Loterie',
+    'lottery': 'Tombola',
     'direct': 'Achat direct'
   }
   return typeMap[type] || type

@@ -107,7 +107,7 @@ class OrderTrackingController extends Controller
         $type = $request->get('type');
 
         $query = Order::where('user_id', $user->id)
-            ->with(['product', 'lottery', 'payments'])
+            ->with(['product', 'lottery.product', 'payments'])
             ->orderBy('created_at', 'desc');
 
         // Filter by status
@@ -618,6 +618,11 @@ class OrderTrackingController extends Controller
                 'lottery_number' => $order->lottery->lottery_number,
                 'title' => $order->lottery->title,
                 'draw_date' => $order->lottery->draw_date,
+                'product' => $order->lottery->product ? [
+                    'id' => $order->lottery->product->id,
+                    'name' => $order->lottery->product->name,
+                    'image' => $order->lottery->product->image,
+                ] : null,
             ] : null,
             'payments_count' => $order->payments ? $order->payments->count() : 0,
             'latest_payment_status' => $order->payments && $order->payments->count() > 0 ? 

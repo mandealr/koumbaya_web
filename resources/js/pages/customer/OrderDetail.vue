@@ -658,7 +658,7 @@ const getStatusText = (status) => {
 
 const getTypeText = (type) => {
   const typeMap = {
-    'lottery': 'Loterie',
+    'lottery': 'Tombola',
     'direct': 'Achat direct',
     'ticket_purchase': 'Achat de billet', // Legacy support
     'direct_purchase': 'Achat direct' // Legacy support
@@ -668,7 +668,7 @@ const getTypeText = (type) => {
 
 const getSaleModeText = (mode) => {
   const modeMap = {
-    'lottery': 'Loterie',
+    'lottery': 'Tombola',
     'direct': 'Achat direct'
   }
   return modeMap[mode] || mode
