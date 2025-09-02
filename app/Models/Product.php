@@ -107,6 +107,11 @@ class Product extends Model
             ->where('status', 'completed');
     }
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'product_id');
+    }
+
     public function transactions()
     {
         // Les transactions sont maintenant dans la table payments via les orders
