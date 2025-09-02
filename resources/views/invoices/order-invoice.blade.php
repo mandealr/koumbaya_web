@@ -225,7 +225,7 @@
             <div class="order-left">
                 <div><strong>Type de commande:</strong> {{ ucfirst($order->type) }}</div>
                 @if($order->lottery)
-                <div><strong>Loterie:</strong> {{ $order->lottery->title }}</div>
+                <div><strong>Tombola:</strong> {{ $order->lottery->title }}</div>
                 @endif
                 @if($order->product)
                 <div><strong>Produit:</strong> {{ $order->product->name }}</div>

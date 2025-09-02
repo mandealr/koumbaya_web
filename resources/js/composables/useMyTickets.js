@@ -325,7 +325,9 @@ export function useMyTickets() {
       'active': 'En cours',
       'won': 'Gagné',
       'lost': 'Perdu',
-      'pending': 'Tirage imminent'
+      'pending': 'Tirage imminent',
+      'reserved': 'Réservé',
+      'paid': 'Payé'
     }
     return labels[status] || status
   }

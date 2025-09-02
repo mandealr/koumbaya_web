@@ -48,6 +48,8 @@
             <option value="won">Gagné</option>
             <option value="lost">Perdu</option>
             <option value="pending">En attente</option>
+            <option value="reserved">Réservé</option>
+            <option value="paid">Payé</option>
           </select>
         </div>
         <div>
@@ -151,6 +153,8 @@
                   ticket.status === 'won' ? 'bg-blue-100 text-blue-800' :
                   ticket.status === 'lost' ? 'bg-red-100 text-red-800' :
                   ticket.status === 'active' ? 'bg-blue-100 text-blue-800' :
+                  ticket.status === 'reserved' ? 'bg-orange-100 text-orange-800' :
+                  ticket.status === 'paid' ? 'bg-green-100 text-green-800' :
                   'bg-yellow-100 text-yellow-800'
                 ]">
                   {{ getStatusLabel(ticket.status) }}

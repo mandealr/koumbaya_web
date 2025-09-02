@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-8">
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Suivi de mes commandes</h1>
-        <p class="text-gray-600">Suivez l'état de vos commandes et billets de loterie</p>
+        <p class="text-gray-600">Suivez l'état de vos commandes et billets de tombola</p>
     </div>
 
     <!-- Statistiques -->
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             
                             <div class="text-sm text-gray-600 mb-2">
                                 ${order.product ? order.product.name : 'Produit supprimé'}
-                                ${order.lottery ? `- Loterie #${order.lottery.lottery_number}` : ''}
+                                ${order.lottery ? `- Tombola #${order.lottery.lottery_number}` : ''}
                             </div>
                             
                             <div class="flex items-center space-x-4 text-sm text-gray-500">
@@ -313,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (order.tickets && order.tickets.length > 0) {
             ticketsHtml = `
                 <div class="mt-6">
-                    <h4 class="text-md font-medium text-gray-900 mb-3">Billets de loterie</h4>
+                    <h4 class="text-md font-medium text-gray-900 mb-3">Billets de tombola</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         ${order.tickets.map(ticket => `
                             <div class="border rounded-lg p-4 ${ticket.is_winner ? 'bg-green-50 border-green-200' : 'bg-gray-50'}">
@@ -382,7 +382,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     ` : ''}
                     
                     ${order.lottery ? `
-                    <h4 class="text-md font-medium text-gray-900 mb-3 mt-6">Loterie</h4>
+                    <h4 class="text-md font-medium text-gray-900 mb-3 mt-6">Tombola</h4>
                     <div class="border rounded-lg p-4">
                         <h5 class="font-medium">${order.lottery.title}</h5>
                         <div class="text-sm text-gray-600 mt-2">

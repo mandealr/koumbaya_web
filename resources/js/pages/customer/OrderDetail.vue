@@ -207,7 +207,7 @@
               </div>
               <div class="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span class="text-gray-600">Numéro de loterie:</span>
+                  <span class="text-gray-600">Numéro de tombola:</span>
                   <span class="font-medium ml-2">{{ order.lottery.lottery_number }}</span>
                 </div>
                 <div>
@@ -260,7 +260,7 @@
             
             <!-- Tickets Details -->
             <div v-if="order.tickets && order.tickets.length > 0">
-              <h3 class="font-medium text-gray-900 mb-3">Billets de loterie ({{ order.tickets.length }})</h3>
+              <h3 class="font-medium text-gray-900 mb-3">Billets de tombola ({{ order.tickets.length }})</h3>
               <div class="space-y-3 max-h-64 overflow-y-auto">
                 <div 
                   v-for="ticket in order.tickets" 

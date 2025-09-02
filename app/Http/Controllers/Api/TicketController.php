@@ -204,8 +204,13 @@ class TicketController extends Controller
     public function myTickets(Request $request)
     {
         $query = LotteryTicket::where('user_id', auth()->id())
-            ->with(['lottery.product', 'transaction'])
-            ->where('status', 'paid'); // Seulement les tickets payés
+            ->with(['lottery.product', 'payment'])
+            ->whereIn('status', ['paid', 'reserved']); // Inclure les tickets payés et réservés
+
+        // Filtrer par statut si spécifié
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
 
         if ($request->has('lottery_id')) {
             $query->where('lottery_id', $request->lottery_id);

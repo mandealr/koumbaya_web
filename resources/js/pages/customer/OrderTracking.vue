@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">Suivi de mes commandes</h1>
-      <p class="text-gray-600">Suivez l'état de vos commandes et billets de loterie</p>
+      <p class="text-gray-600">Suivez l'état de vos commandes et billets de tombola</p>
     </div>
 
     <!-- Statistiques -->

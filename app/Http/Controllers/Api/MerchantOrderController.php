@@ -526,7 +526,7 @@ class MerchantOrderController extends Controller
             'Client Email',
             'Client Téléphone',
             'Produit',
-            'Loterie',
+            'Tombola',
             'Nb Paiements',
             'Nb Billets',
             'Statut Dernier Paiement',
@@ -539,7 +539,7 @@ class MerchantOrderController extends Controller
         foreach ($orders as $order) {
             $row = [
                 $order->order_number,
-                $order->type === 'lottery' ? 'Loterie' : 'Achat Direct',
+                $order->type === 'lottery' ? 'Tombola' : 'Achat Direct',
                 $this->getStatusLabel($order->status),
                 number_format($order->total_amount, 0, ',', ' '),
                 $order->currency,

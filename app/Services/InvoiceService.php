@@ -117,7 +117,7 @@ class InvoiceService
 
             if ($ticketCount > 0) {
                 $lineItems[] = [
-                    'description' => "Billets de loterie - {$order->lottery->title}",
+                    'description' => "Billets de tombola - {$order->lottery->title}",
                     'quantity' => $ticketCount,
                     'unit_price' => $unitPrice,
                     'total' => $order->total_amount,
@@ -126,7 +126,7 @@ class InvoiceService
             } else {
                 // Fallback if no tickets loaded
                 $lineItems[] = [
-                    'description' => "Achat loterie - {$order->lottery->title}",
+                    'description' => "Achat tombola - {$order->lottery->title}",
                     'quantity' => 1,
                     'unit_price' => $order->total_amount,
                     'total' => $order->total_amount,

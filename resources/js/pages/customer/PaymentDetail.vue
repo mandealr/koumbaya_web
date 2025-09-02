@@ -171,7 +171,7 @@
               </div>
               <div class="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span class="text-gray-600">Numéro de loterie:</span>
+                  <span class="text-gray-600">Numéro de tombola:</span>
                   <span class="font-medium ml-2">{{ payment.transaction.lottery.lottery_number }}</span>
                 </div>
                 <div>
