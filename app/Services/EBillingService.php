@@ -85,7 +85,8 @@ class EBillingService
      */
     private static function setupPaymentData($type, $data, $fees)
     {
-        $reference = self::generateReference();
+        // Use existing order reference if available, otherwise generate one
+        $reference = $data->order_reference ?? $data->reference ?? self::generateReference();
         $expiry_period = 60; // 60 minutes timeout
 
         switch ($type) {
@@ -349,11 +350,15 @@ class EBillingService
             return ['status' => 401, 'message' => 'Missing reference'];
         }
 
-        $payment = Payment::where('reference', $notificationData['reference'])->first();
+        // Try to find payment by reference first, then by ebilling_id
+        $payment = Payment::where('reference', $notificationData['reference'])
+            ->orWhereJsonContains('meta->ebilling_id', $notificationData['billingid'])
+            ->first();
 
         if (!$payment) {
             Log::warning('E-BILLING :: Payment not found', [
-                'reference' => $notificationData['reference']
+                'reference' => $notificationData['reference'],
+                'ebilling_id' => $notificationData['billingid'] ?? null
             ]);
             return ['status' => 402, 'message' => 'Payment not found'];
         }
@@ -411,8 +416,7 @@ class EBillingService
                     break;
             }
 
-            // Add transaction to user wallet
-            self::addTransaction($payment);
+            // Transaction record is already created as Payment, no need for duplicate
 
             // Send email notifications
             self::sendPaymentNotifications($payment);
@@ -531,19 +535,14 @@ class EBillingService
     }
 
     /**
-     * Add transaction to user's history
+     * Add transaction to user's history - DEPRECATED
+     * Payment record already serves as transaction record
      */
     private static function addTransaction(Payment $payment)
     {
-        Payment::create([
-            'user_id' => $payment->user_id,
-            'payment_id' => $payment->id,
-            'type' => $payment->type,
-            'amount' => $payment->amount,
-            'description' => $payment->description,
-            'status' => 'completed',
-            'reference' => $payment->reference
-        ]);
+        // No longer needed - Payment table serves as transaction history
+        // This method was creating duplicate records
+        return;
     }
 
     /**
