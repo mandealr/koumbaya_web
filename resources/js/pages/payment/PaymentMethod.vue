@@ -247,8 +247,9 @@ const proceedToPayment = () => {
     name: 'payment.phone',
     query: {
       method: selectedMethod.value,
-      transaction_id: orderSummary.value.transactionId,
-      amount: orderSummary.value.totalAmount
+      order_number: orderSummary.value.orderNumber || orderSummary.value.transactionId,
+      amount: orderSummary.value.totalAmount,
+      type: orderSummary.value.type // Passer le type de transaction
     }
   })
 }
@@ -264,9 +265,12 @@ const formatPrice = (price) => {
 // Lifecycle
 onMounted(() => {
   // Récupérer les données de la commande depuis les query params ou le store
-  const { type, product, quantity, amount, transaction_id } = route.query
+  const { type, product, quantity, amount, transaction_id, order_number } = route.query
   
-  if (!transaction_id) {
+  // Accepter soit transaction_id (ancien système) soit order_number (nouveau système)
+  const orderRef = order_number || transaction_id
+  
+  if (!orderRef) {
     router.push('/') // Rediriger si pas de commande
     return
   }
@@ -278,7 +282,8 @@ onMounted(() => {
     unitPrice: parseFloat(amount) / (parseInt(quantity) || 1),
     totalAmount: parseFloat(amount) || 0,
     image: '', // À récupérer via API
-    transactionId: transaction_id
+    transactionId: transaction_id, // Garde pour compatibilité
+    orderNumber: order_number // Nouveau champ
   }
 })
 </script>

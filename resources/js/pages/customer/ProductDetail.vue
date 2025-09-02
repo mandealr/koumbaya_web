@@ -458,13 +458,13 @@ const purchaseDirectly = async () => {
     if (response && response.success) {
       // Si une redirection vers le paiement est nécessaire
       if (response.redirect_to_payment) {
-        // Rediriger vers la sélection de méthode de paiement
+        // Rediriger vers la sélection de méthode de paiement avec le numéro de commande
         router.push({
           name: 'payment.method',
           query: {
-            transaction_id: response.data.transaction_id,
+            order_number: response.data.order_number,
             amount: response.data.amount,
-            type: 'product'
+            type: response.data.type || 'product'
           }
         })
       } else {

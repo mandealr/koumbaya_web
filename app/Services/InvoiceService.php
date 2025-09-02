@@ -112,7 +112,7 @@ class InvoiceService
 
         if ($order->type === Order::TYPE_LOTTERY && $order->lottery) {
             // Lottery tickets
-            $ticketCount = $order->lottery->lotteryTickets ? $order->lottery->lotteryTickets->count() : 0;
+            $ticketCount = $order->lottery->tickets ? $order->lottery->tickets->count() : 0;
             $unitPrice = $order->lottery->ticket_price ?? ($ticketCount > 0 ? $order->total_amount / $ticketCount : 0);
 
             if ($ticketCount > 0) {

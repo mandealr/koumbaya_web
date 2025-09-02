@@ -197,9 +197,9 @@ const processPayment = async () => {
   loading.value = true
   
   try {
-    // Utiliser le nouvel endpoint pour créer le paiement depuis une transaction existante
+    // Utiliser le nouvel endpoint pour créer le paiement depuis une commande existante
     const response = await post('/payments/initiate-from-transaction', {
-      transaction_id: route.query.transaction_id,
+      order_number: orderId.value, // Utiliser orderId qui contient soit order_number soit transaction_id
       phone: phoneNumber.value,
       operator: selectedOperator.value
     })
@@ -214,7 +214,8 @@ const processPayment = async () => {
           amount: response.data.amount,
           phone: phoneNumber.value,
           operator: selectedOperator.value,
-          transaction_id: response.data.transaction_id
+          transaction_id: response.data.transaction_id,
+          type: route.query.type // Passer le type de transaction
         }
       })
     } else {
@@ -248,7 +249,8 @@ const formatPrice = (price) => {
 onMounted(() => {
   paymentMethod.value = route.query.method || 'airtel_money'
   amount.value = parseFloat(route.query.amount) || 0
-  orderId.value = route.query.transaction_id
+  // Accepter soit order_number soit transaction_id
+  orderId.value = route.query.order_number || route.query.transaction_id
   
   // Définir automatiquement l'opérateur basé sur la méthode sélectionnée
   if (paymentMethod.value === 'airtel_money') {
@@ -257,7 +259,7 @@ onMounted(() => {
     selectedOperator.value = 'moov'
   }
   
-  if (!route.query.transaction_id) {
+  if (!orderId.value) {
     router.push('/')
   }
 })

@@ -120,6 +120,54 @@ class EBillingService
     }
 
     /**
+     * Initiate E-Billing with existing payment (update existing payment instead of creating new one)
+     */
+    public static function initiateWithExistingPayment($type, $data, $existingPayment)
+    {
+        // Use existing payment's reference instead of generating new one
+        $data->reference = $existingPayment->reference;
+        $fees = 0; // No additional fees for existing payment
+        $paymentDataFromSetup = self::setupPaymentData($type, $data, $fees);
+        
+        if (!$paymentDataFromSetup) {
+            Log::error('E-BILLING :: Error setting up payment data for existing payment', [
+                'type' => $type,
+                'payment_id' => $existingPayment->id
+            ]);
+            return false;
+        }
+
+        // Create E-Billing invoice via API
+        $bill_id = self::createEBillingInvoice($paymentDataFromSetup);
+        
+        if ($bill_id) {
+            // Update existing payment with eBilling information but keep the original reference
+            $existingPayment->update([
+                'ebilling_id' => $bill_id,
+                'meta' => array_merge($existingPayment->meta ?? [], [
+                    'ebilling_id' => $bill_id,
+                    'description' => $paymentDataFromSetup['short_description'],
+                    'customer_name' => $paymentDataFromSetup['payer_name'],
+                    'customer_phone' => $paymentDataFromSetup['payer_msisdn'],
+                    'customer_email' => $paymentDataFromSetup['payer_email'],
+                    'payment_gateway' => 'ebilling',
+                    'callback_url' => $paymentDataFromSetup['callback_url'] ?? null,
+                    'type' => $type,
+                    'expiry_period' => $paymentDataFromSetup['expiry_period']
+                ])
+            ]);
+            
+            Log::info('E-BILLING :: Payment updated successfully', [
+                'payment_id' => $existingPayment->id,
+                'ebilling_id' => $bill_id,
+                'reference' => $existingPayment->reference
+            ]);
+        }
+
+        return $bill_id;
+    }
+
+    /**
      * Create e-billing invoice via API
      */
     private static function createEBillingInvoice($paymentData)
@@ -552,7 +600,7 @@ class EBillingService
      */
     private static function generateReference($length = 10)
     {
-        return strtoupper(Str::random($length));
+        return 'TXN-' . time() . '-' . strtoupper(Str::random(6));
     }
 
     /**

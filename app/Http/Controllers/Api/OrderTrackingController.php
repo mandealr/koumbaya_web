@@ -672,8 +672,8 @@ class OrderTrackingController extends Controller
             ];
 
             // Lottery tickets for this order
-            if ($order->lottery->lotteryTickets && $order->lottery->lotteryTickets->count() > 0) {
-                $details['tickets'] = $order->lottery->lotteryTickets->map(function ($ticket) {
+            if ($order->lottery->tickets && $order->lottery->tickets->count() > 0) {
+                $details['tickets'] = $order->lottery->tickets->map(function ($ticket) {
                     return [
                         'id' => $ticket->id,
                         'ticket_number' => $ticket->ticket_number,

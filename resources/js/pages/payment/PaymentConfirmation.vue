@@ -142,7 +142,7 @@
           class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center"
         >
           <UserIcon class="h-5 w-5 mr-2" />
-          Voir mes achats
+          {{ getSuccessButtonText() }}
         </button>
 
         <!-- Bouton relancer push USSD (seulement quand le timer est expiré) -->
@@ -216,6 +216,7 @@ const reference = ref('')
 const amount = ref(0)
 const phoneNumber = ref('')
 const operator = ref('')
+const transactionType = ref('') // 'ticket', 'product', 'lottery', etc.
 
 // Methods
 const getStatusClasses = () => {
@@ -377,11 +378,31 @@ const retryPayment = () => {
 }
 
 const goToProfile = () => {
-  router.push('/profile')
+  // Rediriger selon le type de transaction
+  if (transactionType.value === 'ticket' || transactionType.value === 'lottery') {
+    // Rediriger vers la liste des tickets
+    router.push({ name: 'customer.tickets' })
+  } else if (transactionType.value === 'product') {
+    // Rediriger vers la liste des commandes
+    router.push({ name: 'customer.orders' })
+  } else {
+    // Par défaut, aller vers le dashboard client
+    router.push({ name: 'customer.dashboard' })
+  }
 }
 
 const goHome = () => {
   router.push('/')
+}
+
+const getSuccessButtonText = () => {
+  if (transactionType.value === 'ticket' || transactionType.value === 'lottery') {
+    return 'Voir mes tickets'
+  } else if (transactionType.value === 'product') {
+    return 'Voir mes commandes'
+  } else {
+    return 'Voir mes achats'
+  }
 }
 
 // Lifecycle
@@ -392,6 +413,7 @@ onMounted(() => {
   amount.value = parseFloat(route.query.amount) || 0
   phoneNumber.value = route.query.phone || ''
   operator.value = route.query.operator || ''
+  transactionType.value = route.query.type || ''
   
   if (!billId.value || !amount.value) {
     router.push('/')

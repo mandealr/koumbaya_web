@@ -227,8 +227,16 @@ class PaymentController extends Controller
                 ], 422);
             }
 
-            // Créer le paiement eBilling (qui crée aussi l'enregistrement dans la table payments)
-            $billId = EBillingService::initiate($type, $data);
+            // Trouver le paiement existant pour cette commande
+            $existingPayment = Payment::where('order_id', $order->id)->first();
+            
+            if ($existingPayment) {
+                // Utiliser le paiement existant et mettre à jour l'ebilling_id
+                $billId = EBillingService::initiateWithExistingPayment($type, $data, $existingPayment);
+            } else {
+                // Créer un nouveau paiement eBilling si aucun n'existe
+                $billId = EBillingService::initiate($type, $data);
+            }
 
             if (!$billId) {
                 return response()->json([
@@ -775,6 +783,28 @@ class PaymentController extends Controller
                         'order_id' => $lockedPayment->order->id,
                         'order_number' => $lockedPayment->order->order_number
                     ]);
+
+                    // Update lottery tickets to paid status if this is a lottery order
+                    if ($lockedPayment->order->type === 'lottery' && $lockedPayment->order->lottery_id) {
+                        LotteryTicket::where('payment_id', $lockedPayment->id)
+                            ->where('status', 'reserved')
+                            ->update([
+                                'status' => 'paid',
+                                'confirmed_at' => now()
+                            ]);
+
+                        // Update lottery sold tickets count
+                        $ticketCount = LotteryTicket::where('payment_id', $lockedPayment->id)->count();
+                        if ($ticketCount > 0) {
+                            $lockedPayment->order->lottery->increment('sold_tickets', $ticketCount);
+                        }
+
+                        Log::info('Lottery tickets marked as paid', [
+                            'payment_id' => $lockedPayment->id,
+                            'lottery_id' => $lockedPayment->order->lottery_id,
+                            'tickets_count' => $ticketCount
+                        ]);
+                    }
 
                     // Track order paid metrics
                     $this->metricsService->orderPaid($lockedPayment->order);
