@@ -22,7 +22,7 @@ class PaymentTrackingController extends Controller
         $search = $request->get('search');
 
         $query = Payment::where('user_id', $user->id)
-            ->with(['order.product', 'order.lottery', 'order.lottery.tickets'])
+            ->with(['order.user', 'order.product', 'order.lottery', 'order.lottery.tickets'])
             ->orderBy('created_at', 'desc');
 
         if ($status) {
@@ -65,6 +65,7 @@ class PaymentTrackingController extends Controller
         $payment = Payment::where('user_id', $user->id)
             ->where('id', $paymentId)
             ->with([
+                'order.user', // Charger les informations du client
                 'order.product',
                 'order.lottery.product',
                 'order.lottery.tickets'
@@ -225,6 +226,19 @@ class PaymentTrackingController extends Controller
                     });
                 }
             }
+        }
+
+        // Informations du client (depuis order.user ou meta)
+        if ($payment->order && $payment->order->user) {
+            $details['client'] = [
+                'id' => $payment->order->user->id,
+                'first_name' => $payment->order->user->first_name,
+                'last_name' => $payment->order->user->last_name,
+                'full_name' => trim(($payment->order->user->first_name ?? '') . ' ' . ($payment->order->user->last_name ?? '')),
+                'email' => $payment->order->user->email,
+                'phone' => $payment->order->user->phone,
+                'created_at' => $payment->order->user->created_at
+            ];
         }
 
         // Informations de la passerelle de paiement depuis les meta

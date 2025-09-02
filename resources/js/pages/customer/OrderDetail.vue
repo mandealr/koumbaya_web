@@ -88,11 +88,11 @@
             <dl class="space-y-3">
               <div>
                 <dt class="text-sm font-medium text-gray-600">Nom complet</dt>
-                <dd class="text-sm text-gray-900">{{ order.user?.name || 'Non renseigné' }}</dd>
+                <dd class="text-sm text-gray-900">{{ order.client?.full_name || 'Non renseigné' }}</dd>
               </div>
               <div>
                 <dt class="text-sm font-medium text-gray-600">Email</dt>
-                <dd class="text-sm text-gray-900">{{ order.user?.email || 'Non renseigné' }}</dd>
+                <dd class="text-sm text-gray-900">{{ order.client?.email || 'Non renseigné' }}</dd>
               </div>
             </dl>
           </div>
@@ -100,11 +100,11 @@
             <dl class="space-y-3">
               <div>
                 <dt class="text-sm font-medium text-gray-600">Téléphone</dt>
-                <dd class="text-sm text-gray-900">{{ order.user?.phone || 'Non renseigné' }}</dd>
+                <dd class="text-sm text-gray-900">{{ order.client?.phone || 'Non renseigné' }}</dd>
               </div>
               <div>
                 <dt class="text-sm font-medium text-gray-600">Date d'inscription</dt>
-                <dd class="text-sm text-gray-900">{{ order.user?.created_at ? formatDate(order.user.created_at) : 'Non disponible' }}</dd>
+                <dd class="text-sm text-gray-900">{{ order.client?.created_at ? formatDate(order.client.created_at) : 'Non disponible' }}</dd>
               </div>
             </dl>
           </div>

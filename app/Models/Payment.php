@@ -126,7 +126,17 @@ class Payment extends Model
 
     public function getCustomerNameAttribute()
     {
-        return $this->meta['customer_name'] ?? $this->order?->user?->name;
+        if (isset($this->meta['customer_name'])) {
+            return $this->meta['customer_name'];
+        }
+        
+        if ($this->order && $this->order->user) {
+            $firstName = $this->order->user->first_name ?? '';
+            $lastName = $this->order->user->last_name ?? '';
+            return trim($firstName . ' ' . $lastName) ?: null;
+        }
+        
+        return null;
     }
 
     public function getCustomerPhoneAttribute()

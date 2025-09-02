@@ -336,7 +336,7 @@ import moovLogo from '@/assets/mm.png'
 const route = useRoute()
 const router = useRouter()
 const { get: apiGet } = useApi()
-const { showError, showSuccess } = useToast()
+const { error: showError, success: showSuccess } = useToast()
 
 // État
 const payment = ref(null)
