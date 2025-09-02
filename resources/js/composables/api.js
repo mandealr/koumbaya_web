@@ -26,22 +26,26 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Ne rediriger vers login que si :
-    // 1. C'est une erreur 401 
+    // Rediriger vers login si :
+    // 1. C'est une erreur 401 (non authentifié)
     // 2. Ce n'est pas une tentative de login
-    // 3. ET l'utilisateur avait un token (donc était connecté)
-    const hadToken = localStorage.getItem('auth_token')
-    
     if (error.response?.status === 401 && 
-        !error.config?.url?.includes('/auth/login') && 
-        hadToken) {
-      // Token expiré ou invalide - mais seulement pour les utilisateurs connectés
-      localStorage.removeItem('auth_token')
-      // Éviter le rafraîchissement forcé, utiliser le router Vue à la place
+        !error.config?.url?.includes('/auth/login')) {
+      
+      // Nettoyer le token s'il existe
+      const hadToken = localStorage.getItem('auth_token')
+      if (hadToken) {
+        localStorage.removeItem('auth_token')
+      }
+      
+      // Rediriger vers login avec l'URL actuelle comme redirection
+      const currentPath = window.location.pathname
+      const redirectUrl = currentPath !== '/' && currentPath !== '/login' ? `?redirect=${encodeURIComponent(currentPath)}` : ''
+      
       if (window.router) {
-        window.router.push('/login')
+        window.router.push(`/login${redirectUrl}`)
       } else {
-        window.location.href = '/login'
+        window.location.href = `/login${redirectUrl}`
       }
     }
     return Promise.reject(error)

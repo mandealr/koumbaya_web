@@ -350,7 +350,12 @@ router.beforeEach((to, from, next) => {
   
   // Check if route requires authentication
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'login' })
+    // Préserver l'URL de destination pour rediriger après connexion
+    const redirectPath = to.fullPath
+    next({ 
+      name: 'login',
+      query: { redirect: encodeURIComponent(redirectPath) }
+    })
     return
   }
   
