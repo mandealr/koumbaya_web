@@ -52,23 +52,26 @@ class PaymentCallbackController extends Controller
             $amount = $request->input('amount');
             $transactionId = $request->input('transaction_id');
             
-            // Trouver la transaction
-            $transaction = Payment::where('transaction_id', $reference)->first();
+            // Trouver le paiement par référence ou transaction_id
+            $payment = Payment::where('reference', $reference)
+                ->orWhere('transaction_id', $reference)
+                ->with(['order'])
+                ->first();
             
-            if (!$transaction) {
-                Log::error('Transaction not found:', ['reference' => $reference]);
-                return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
+            if (!$payment) {
+                Log::error('Payment not found:', ['reference' => $reference]);
+                return response()->json(['status' => 'error', 'message' => 'Payment not found'], 404);
             }
 
             // Vérifier le montant
-            if (abs($amount - $transaction->amount) > 0.01) {
+            if (abs($amount - $payment->amount) > 0.01) {
                 Log::error('Amount mismatch:', [
-                    'expected' => $transaction->amount,
+                    'expected' => $payment->amount,
                     'received' => $amount,
                     'reference' => $reference
                 ]);
                 
-                $transaction->markAsFailed('Montant incorrect', $request->all());
+                $payment->markAsFailed('Montant incorrect', $request->all());
                 return response()->json(['status' => 'error', 'message' => 'Amount mismatch'], 400);
             }
 
@@ -77,22 +80,22 @@ class PaymentCallbackController extends Controller
                 case 'success':
                 case 'completed':
                 case 'paid':
-                    $transaction->markAsCompleted($request->all());
-                    Log::info('Transaction completed:', ['reference' => $reference]);
+                    $payment->markAsCompleted($request->all());
+                    Log::info('Payment completed:', ['reference' => $reference, 'order_id' => $payment->order_id]);
                     
                     // Notification à l'utilisateur (optionnel)
-                    $this->notifyUser($transaction, 'success');
+                    $this->notifyUser($payment, 'success');
                     break;
 
                 case 'failed':
                 case 'cancelled':
                 case 'rejected':
                     $reason = $request->input('message', 'Paiement échoué');
-                    $transaction->markAsFailed($reason, $request->all());
-                    Log::info('Transaction failed:', ['reference' => $reference, 'reason' => $reason]);
+                    $payment->markAsFailed($reason, $request->all());
+                    Log::info('Payment failed:', ['reference' => $reference, 'reason' => $reason]);
                     
                     // Notification à l'utilisateur (optionnel)
-                    $this->notifyUser($transaction, 'failed');
+                    $this->notifyUser($payment, 'failed');
                     break;
 
                 case 'pending':
@@ -147,24 +150,22 @@ class PaymentCallbackController extends Controller
     {
         $user = auth()->user();
         
-        $transaction = Payment::where('transaction_id', $transactionId)
+        $payment = Payment::where('transaction_id', $transactionId)
             ->where('user_id', $user->id)
             ->first();
 
-        if (!$transaction) {
-            return $this->sendError('Transaction non trouvée');
+        if (!$payment) {
+            return $this->sendError('Paiement non trouvé');
         }
 
-        $statusMessage = $this->getStatusMessage($transaction->status);
+        $statusMessage = $this->getStatusMessage($payment->status);
 
         return $this->sendResponse([
-            'status' => $transaction->status,
+            'status' => $payment->status,
             'message' => $statusMessage,
-            'amount' => $transaction->amount,
-            'created_at' => $transaction->created_at,
-            'completed_at' => $transaction->completed_at,
-            'is_expired' => $transaction->is_expired,
-            'expires_at' => $transaction->expires_at,
+            'amount' => $payment->amount,
+            'created_at' => $payment->created_at,
+            'paid_at' => $payment->paid_at,
         ]);
     }
 
@@ -192,7 +193,7 @@ class PaymentCallbackController extends Controller
     /**
      * Notifier l'utilisateur du résultat du paiement
      */
-    private function notifyUser(Transaction $transaction, $result)
+    private function notifyUser(Payment $payment, $result)
     {
         // Ici vous pouvez implémenter:
         // - Notification push mobile
@@ -201,8 +202,10 @@ class PaymentCallbackController extends Controller
         // - Mise à jour temps réel via websockets
         
         Log::info('User notification:', [
-            'user_id' => $transaction->user_id,
-            'transaction_id' => $transaction->transaction_id,
+            'user_id' => $payment->user_id,
+            'payment_id' => $payment->id,
+            'reference' => $payment->reference,
+            'order_id' => $payment->order_id,
             'result' => $result
         ]);
     }
@@ -244,14 +247,26 @@ class PaymentCallbackController extends Controller
 
         // Simuler un callback de succès
         $testData = [
-            'reference' => $request->input('reference', 'TXN-TEST-123'),
+            'reference' => $request->input('reference'),
             'status' => $request->input('status', 'success'),
-            'amount' => $request->input('amount', 5000),
-            'transaction_id' => $request->input('transaction_id', 'EXT-TEST-456'),
+            'amount' => $request->input('amount'),
+            'transaction_id' => $request->input('transaction_id', 'EBT-' . time()),
             'message' => 'Test callback'
         ];
 
+        if (!$testData['reference'] || !$testData['amount']) {
+            return response()->json([
+                'error' => 'reference et amount sont requis',
+                'usage' => 'POST /api/payment/test-callback avec reference et amount'
+            ], 400);
+        }
+
         $testRequest = new Request($testData);
-        return $this->handleCallback($testRequest);
+        $response = $this->handleCallback($testRequest);
+        
+        return response()->json([
+            'test_data' => $testData,
+            'callback_result' => $response->getData()
+        ]);
     }
 }

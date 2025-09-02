@@ -148,7 +148,9 @@ class TicketController extends Controller
             // Retourner la transaction créée pour redirection vers la page de paiement
             return $this->sendResponse([
                 'transaction_id' => $transaction->transaction_id,
+                'order_number' => $order->order_number,
                 'transaction' => $transaction,
+                'order' => $order,
                 'lottery' => $lottery,
                 'tickets' => collect($tickets)->map(function ($ticket) {
                     return [

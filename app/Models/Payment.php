@@ -214,16 +214,63 @@ class Payment extends Model
         ]);
     }
 
-    public function markAsFailed($reason = null)
+    public function markAsCompleted($gatewayResponse = null)
     {
         $meta = $this->meta ?? [];
-        $meta['gateway_response'] = $meta['gateway_response'] ?? [];
-        $meta['gateway_response']['failure_reason'] = $reason;
+        
+        if ($gatewayResponse) {
+            $meta['gateway_response'] = $gatewayResponse;
+        }
+        
+        $this->update([
+            'status' => 'paid',
+            'paid_at' => now(),
+            'meta' => $meta,
+        ]);
+
+        // Mettre à jour la commande associée
+        if ($this->order) {
+            $this->order->markAsPaid($this->reference);
+            
+            // Mettre à jour les tickets de tombola si nécessaire
+            if ($this->order->type === 'lottery' && $this->order->lottery_id) {
+                \App\Models\LotteryTicket::where('payment_id', $this->id)
+                    ->where('status', 'reserved')
+                    ->update([
+                        'status' => 'paid',
+                        'purchased_at' => now()
+                    ]);
+            }
+        }
+    }
+
+    public function markAsFailed($reason = null, $gatewayResponse = null)
+    {
+        $meta = $this->meta ?? [];
+        $meta['gateway_response'] = $gatewayResponse ?? [];
+        if ($reason) {
+            $meta['gateway_response']['failure_reason'] = $reason;
+        }
         
         $this->update([
             'status' => 'failed',
             'meta' => $meta,
         ]);
+
+        // Mettre à jour la commande associée
+        if ($this->order) {
+            $this->order->update([
+                'status' => 'failed',
+                'notes' => $reason ?: 'Paiement échoué'
+            ]);
+
+            // Annuler les tickets réservés si nécessaire
+            if ($this->order->type === 'lottery' && $this->order->lottery_id) {
+                \App\Models\LotteryTicket::where('payment_id', $this->id)
+                    ->where('status', 'reserved')
+                    ->update(['status' => 'cancelled']);
+            }
+        }
     }
 
     /**

@@ -243,14 +243,22 @@ const proceedToPayment = () => {
   loading.value = true
   
   // Rediriger vers la page de saisie du numéro
+  const queryParams = {
+    method: selectedMethod.value,
+    amount: orderSummary.value.totalAmount,
+    type: orderSummary.value.type
+  }
+  
+  // Utiliser order_number de préférence, sinon fallback sur transaction_id
+  if (orderSummary.value.orderNumber) {
+    queryParams.order_number = orderSummary.value.orderNumber
+  } else if (orderSummary.value.transactionId) {
+    queryParams.transaction_id = orderSummary.value.transactionId
+  }
+  
   router.push({
     name: 'payment.phone',
-    query: {
-      method: selectedMethod.value,
-      order_number: orderSummary.value.orderNumber || orderSummary.value.transactionId,
-      amount: orderSummary.value.totalAmount,
-      type: orderSummary.value.type // Passer le type de transaction
-    }
+    query: queryParams
   })
 }
 

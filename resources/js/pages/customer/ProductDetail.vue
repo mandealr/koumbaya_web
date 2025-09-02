@@ -423,10 +423,11 @@ const purchaseTickets = async () => {
       router.push({
         path: '/payment/method',
         query: {
-          transaction_id: response.data.transaction_id,
+          order_number: response.data.order_number,
           amount: totalAmount,
           lottery_id: lottery?.id,
-          quantity: ticketQuantity.value
+          quantity: ticketQuantity.value,
+          type: 'ticket'
         }
       })
     } else {
