@@ -275,7 +275,7 @@ class AdminOrderController extends Controller
                 'user',
                 'product',
                 'lottery.product',
-                'lottery.lotteryTickets.user:id,first_name,last_name,email',
+                'lottery.tickets.user:id,first_name,last_name,email',
                 'payments'
             ])
             ->first();
@@ -288,7 +288,9 @@ class AdminOrderController extends Controller
         }
 
         // Enrichir les données
-        $order->customer_name = trim(($order->user->first_name ?? '') . ' ' . ($order->user->last_name ?? ''));
+        $order->customer_name = $order->user 
+            ? trim(($order->user->first_name ?? '') . ' ' . ($order->user->last_name ?? ''))
+            : 'Client non disponible';
         $order->status_label = $this->getStatusLabel($order->status);
         $order->type_label = $this->getTypeLabel($order->type);
 

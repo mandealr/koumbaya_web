@@ -1,9 +1,9 @@
 <template>
   <div class="min-h-screen admin-layout">
     <!-- Sidebar -->
-    <aside class="fixed inset-y-0 left-0 z-50 w-72 admin-sidebar transform transition-transform duration-300 ease-in-out lg:translate-x-0" 
+    <aside class="fixed inset-y-0 left-0 z-50 w-72 admin-sidebar transform transition-transform duration-300 ease-in-out lg:translate-x-0"
            :class="{ '-translate-x-full lg:translate-x-0': !sidebarOpen, 'translate-x-0': sidebarOpen }">
-      
+
       <!-- Logo Header -->
       <div class="flex items-center justify-between h-16 px-6 border-b border-gray-700">
         <router-link to="/admin/dashboard" class="flex items-center space-x-3 hover:opacity-80 transition-opacity">
@@ -16,7 +16,7 @@
           </div>
         </router-link>
       </div>
-      
+
       <!-- Navigation -->
       <nav class="mt-6 flex-1">
         <div class="px-3 space-y-1">
@@ -42,7 +42,7 @@
           <div class="bg-gray-700 rounded-lg p-4">
             <div class="flex items-center space-x-3">
               <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-gray-600">
-                <img 
+                <img
                   v-if="authStore.user?.avatar_url"
                   :src="authStore.user.avatar_url"
                   :alt="`Photo de profil de ${authStore.user.first_name} ${authStore.user.last_name}`"
@@ -73,7 +73,7 @@
     </aside>
 
     <!-- Mobile sidebar overlay -->
-    <div 
+    <div
       v-if="sidebarOpen"
       class="fixed inset-0 z-40 bg-black/20 lg:hidden"
       @click="sidebarOpen = false"
@@ -92,7 +92,7 @@
             >
               <Bars3Icon class="w-6 h-6" />
             </button>
-            
+
             <!-- Breadcrumb -->
             <nav class="hidden lg:flex items-center space-x-2 text-sm">
               <HomeIcon class="w-4 h-4 text-gray-400" />
@@ -128,7 +128,7 @@
                 class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
-                  <img 
+                  <img
                     v-if="authStore.user?.avatar_url"
                     :src="authStore.user.avatar_url"
                     :alt="`Photo de profil de ${authStore.user.first_name} ${authStore.user.last_name}`"
@@ -156,16 +156,16 @@
                   <p class="text-sm font-medium text-gray-800">{{ authStore.user?.first_name }} {{ authStore.user?.last_name }}</p>
                   <p class="text-xs text-gray-500">{{ authStore.user?.email }}</p>
                 </div>
-                <router-link 
-                  :to="{ name: 'admin.profile' }" 
+                <router-link
+                  :to="{ name: 'admin.profile' }"
                   @click="userDropdownOpen = false"
                   class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                 >
                   <UserIcon class="w-4 h-4 mr-3 text-gray-400" />
                   Mon Profil
                 </router-link>
-                <router-link 
-                  :to="{ name: 'admin.settings' }" 
+                <router-link
+                  :to="{ name: 'admin.settings' }"
                   @click="userDropdownOpen = false"
                   class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                 >
@@ -297,7 +297,7 @@ const loadBadgeCounts = async () => {
     const usersResponse = await get('/admin/dashboard/stats')
     if (usersResponse?.data?.users) {
       // Afficher le badge seulement s'il y a une croissance positive
-      badgeCounts.value.users = usersResponse.data.users.growth > 0 ? 
+      badgeCounts.value.users = usersResponse.data.users.growth > 0 ?
         Math.ceil(usersResponse.data.users.total * (usersResponse.data.users.growth / 100)) : 0
     }
 
@@ -351,10 +351,10 @@ const handleClickOutside = (event) => {
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
   loadBadgeCounts()
-  
+
   // Recharger les compteurs toutes les 5 minutes
   const interval = setInterval(loadBadgeCounts, 5 * 60 * 1000)
-  
+
   onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside)
     clearInterval(interval)

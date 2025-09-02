@@ -159,6 +159,12 @@ class ProductController extends Controller
             });
         }
 
+        // Exclure les produits en achat direct qui ont déjà été vendus
+        // (sauf si on affiche "my_products" - pour que les marchands voient leurs produits vendus)
+        if (!$request->boolean('my_products')) {
+            $query->available();
+        }
+
         // Tri des résultats
         $this->applySorting($query, $request->get('sort_by', 'date_desc'));
 
@@ -290,6 +296,7 @@ class ProductController extends Controller
 
         // Recherche de produits
         $products = Product::with(['category', 'activeLottery'])
+            ->available() // Exclure les produits en achat direct déjà vendus
             ->where(function ($query) use ($searchTerm) {
                 $query->where('name', 'LIKE', "%{$searchTerm}%")
                       ->orWhere('description', 'LIKE', "%{$searchTerm}%");
@@ -371,6 +378,7 @@ class ProductController extends Controller
     {
         $products = Product::active()
             ->featured()
+            ->available() // Exclure les produits en achat direct déjà vendus
             ->with(['category', 'merchant', 'activeLottery'])
             ->limit(10)
             ->get();

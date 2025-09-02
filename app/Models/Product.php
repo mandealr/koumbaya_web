@@ -131,6 +131,17 @@ class Product extends Model
         return $query->where('category_id', $categoryId);
     }
 
+    public function scopeAvailable($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('sale_mode', '!=', 'direct') // Produits avec tombola toujours visibles
+              ->orWhereDoesntHave('orders', function ($orderQuery) {
+                  $orderQuery->where('type', 'direct')
+                             ->where('status', 'paid');
+              });
+        });
+    }
+
     /**
      * Accessors
      */

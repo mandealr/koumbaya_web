@@ -240,9 +240,10 @@ class OrderTrackingController extends Controller
         $order = Order::where('user_id', $user->id)
             ->where('order_number', $orderNumber)
             ->with([
+                'user', // Charger les informations du client
                 'product',
                 'lottery.product',
-                'lottery.lotteryTickets' => function($query) use ($user) {
+                'lottery.tickets' => function($query) use ($user) {
                     $query->where('user_id', $user->id);
                 },
                 'payments'
@@ -643,6 +644,18 @@ class OrderTrackingController extends Controller
             'refunded_at' => $order->refunded_at,
             'notes' => $order->notes,
         ];
+
+        // Client information
+        if ($order->user) {
+            $details['client'] = [
+                'id' => $order->user->id,
+                'first_name' => $order->user->first_name,
+                'last_name' => $order->user->last_name,
+                'email' => $order->user->email,
+                'phone' => $order->user->phone,
+                'full_name' => trim(($order->user->first_name ?? '') . ' ' . ($order->user->last_name ?? ''))
+            ];
+        }
 
         // Product information
         if ($order->product) {

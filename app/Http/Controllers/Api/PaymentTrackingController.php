@@ -22,7 +22,7 @@ class PaymentTrackingController extends Controller
         $search = $request->get('search');
 
         $query = Payment::where('user_id', $user->id)
-            ->with(['order.product', 'order.lottery', 'order.lottery.lotteryTickets'])
+            ->with(['order.product', 'order.lottery', 'order.lottery.tickets'])
             ->orderBy('created_at', 'desc');
 
         if ($status) {
@@ -67,7 +67,7 @@ class PaymentTrackingController extends Controller
             ->with([
                 'order.product',
                 'order.lottery.product',
-                'order.lottery.lotteryTickets'
+                'order.lottery.tickets'
             ])
             ->first();
 
@@ -212,8 +212,8 @@ class PaymentTrackingController extends Controller
                 ];
 
                 // Ajouter les billets de loterie
-                if ($payment->order->lottery->lotteryTickets->count() > 0) {
-                    $details['order']['tickets'] = $payment->order->lottery->lotteryTickets->map(function ($ticket) {
+                if ($payment->order->lottery->tickets->count() > 0) {
+                    $details['order']['tickets'] = $payment->order->lottery->tickets->map(function ($ticket) {
                         return [
                             'id' => $ticket->id,
                             'ticket_number' => $ticket->ticket_number,

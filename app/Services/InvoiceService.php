@@ -38,7 +38,7 @@ class InvoiceService
             'user',
             'product', 
             'lottery.product',
-            'lottery.lotteryTickets' => function($query) use ($order) {
+            'lottery.tickets' => function($query) use ($order) {
                 $query->where('user_id', $order->user_id);
             },
             'payments' => function($query) {
@@ -121,7 +121,7 @@ class InvoiceService
                     'quantity' => $ticketCount,
                     'unit_price' => $unitPrice,
                     'total' => $order->total_amount,
-                    'details' => $order->lottery->lotteryTickets->pluck('ticket_number')->toArray()
+                    'details' => $order->lottery->tickets->pluck('ticket_number')->toArray()
                 ];
             } else {
                 // Fallback if no tickets loaded

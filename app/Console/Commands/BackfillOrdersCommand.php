@@ -119,8 +119,8 @@ class BackfillOrdersCommand extends Command
         ];
 
         // Add lottery ticket IDs if this is a lottery transaction
-        if ($orderType === 'lottery' && $transaction->lotteryTickets->isNotEmpty()) {
-            $meta['lottery_ticket_ids'] = $transaction->lotteryTickets->pluck('id')->toArray();
+        if ($orderType === 'lottery' && $transaction->lottery_tickets->isNotEmpty()) {
+            $meta['lottery_ticket_ids'] = $transaction->lottery_tickets->pluck('id')->toArray();
         }
 
         return [

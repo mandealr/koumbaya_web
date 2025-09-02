@@ -64,6 +64,12 @@ class Lottery extends Model
         return $this->hasMany(LotteryTicket::class, 'lottery_id');
     }
 
+    // Alias pour compatibilité (certaines parties du code appellent lotteryTickets)
+    public function lotteryTickets()
+    {
+        return $this->tickets();
+    }
+
     public function paidTickets()
     {
         return $this->hasMany(LotteryTicket::class, 'lottery_id')->where('status', 'paid');
