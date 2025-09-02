@@ -218,7 +218,66 @@ class TicketController extends Controller
 
         $tickets = $query->orderBy('created_at', 'desc')->paginate(20);
 
-        return $this->sendResponse($tickets);
+        // Transformer les données pour inclure les informations nécessaires
+        $transformedTickets = $tickets->getCollection()->map(function ($ticket) {
+            return [
+                'id' => $ticket->id,
+                'ticket_number' => $ticket->ticket_number,
+                'lottery_id' => $ticket->lottery_id,
+                'user_id' => $ticket->user_id,
+                'order_id' => $ticket->order_id,
+                'payment_id' => $ticket->payment_id,
+                'price' => $ticket->price,
+                'currency' => $ticket->currency,
+                'status' => $ticket->status,
+                'is_winner' => $ticket->is_winner,
+                'purchased_at' => $ticket->purchased_at,
+                'created_at' => $ticket->created_at,
+                'updated_at' => $ticket->updated_at,
+                'lottery' => $ticket->lottery ? [
+                    'id' => $ticket->lottery->id,
+                    'lottery_number' => $ticket->lottery->lottery_number,
+                    'title' => $ticket->lottery->title,
+                    'description' => $ticket->lottery->description,
+                    'ticket_price' => $ticket->lottery->ticket_price,
+                    'max_tickets' => $ticket->lottery->max_tickets,
+                    'sold_tickets' => $ticket->lottery->sold_tickets,
+                    'status' => $ticket->lottery->status,
+                    'draw_date' => $ticket->lottery->draw_date,
+                    'end_date' => $ticket->lottery->end_date,
+                    'winner_ticket_number' => $ticket->lottery->winner_ticket_number,
+                    'product' => $ticket->lottery->product ? [
+                        'id' => $ticket->lottery->product->id,
+                        'name' => $ticket->lottery->product->name,
+                        'description' => $ticket->lottery->product->description,
+                        'image' => $ticket->lottery->product->image,
+                        'image_url' => $ticket->lottery->product->image_url,
+                        'price' => $ticket->lottery->product->price,
+                    ] : null
+                ] : null,
+                'payment' => $ticket->payment ? [
+                    'id' => $ticket->payment->id,
+                    'reference' => $ticket->payment->reference,
+                    'amount' => $ticket->payment->amount,
+                    'status' => $ticket->payment->status,
+                    'payment_method' => $ticket->payment->payment_method,
+                ] : null
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Success',
+            'data' => $transformedTickets,
+            'pagination' => [
+                'current_page' => $tickets->currentPage(),
+                'last_page' => $tickets->lastPage(),
+                'per_page' => $tickets->perPage(),
+                'total' => $tickets->total(),
+                'from' => $tickets->firstItem(),
+                'to' => $tickets->lastItem(),
+            ]
+        ]);
     }
 
     /**

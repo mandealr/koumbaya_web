@@ -93,6 +93,7 @@
             <option value="cancelled">Annulé</option>
             <option value="fulfilled">Livré</option>
             <option value="refunded">Remboursé</option>
+            <option value="expired">Expiré</option>
           </select>
         </div>
         
@@ -495,6 +496,7 @@ const getStatusText = (status) => {
     'cancelled': 'Annulé',
     'fulfilled': 'Livré',
     'refunded': 'Remboursé',
+    'expired': 'Expiré',
     'completed': 'Complété', // Legacy support
     'payment_initiated': 'Paiement initié', // Legacy support
     'active': 'Actif' // For tickets
@@ -522,6 +524,7 @@ const getStatusBadgeClass = (status) => {
     'cancelled': 'bg-gray-100 text-gray-800',
     'fulfilled': 'bg-green-100 text-green-800',
     'refunded': 'bg-purple-100 text-purple-800',
+    'expired': 'bg-orange-100 text-orange-800',
     'completed': 'bg-green-100 text-green-800', // Legacy
     'payment_initiated': 'bg-blue-100 text-blue-800', // Legacy
     'active': 'bg-blue-100 text-blue-800' // For tickets

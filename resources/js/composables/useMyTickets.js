@@ -123,23 +123,26 @@ export function useMyTickets() {
         const transformedTickets = ticketsData.map(ticket => ({
           id: ticket.id,
           product: {
-            id: ticket.product?.id || ticket.lottery?.product?.id,
-            title: ticket.product?.name || ticket.lottery?.product?.name || 'Produit inconnu',
-            description: ticket.product?.description || ticket.lottery?.product?.description || '',
-            image: ticket.product?.image_url || ticket.lottery?.product?.image_url || '/images/products/placeholder.jpg'
+            id: ticket.lottery?.product?.id,
+            title: ticket.lottery?.product?.name || 'Produit inconnu',
+            description: ticket.lottery?.product?.description || '',
+            image_url: ticket.lottery?.product?.image_url || ticket.lottery?.product?.image,
+            image: ticket.lottery?.product?.image_url || ticket.lottery?.product?.image || '/images/products/placeholder.jpg'
           },
           lottery: {
             id: ticket.lottery?.id,
-            draw_date: new Date(ticket.lottery?.end_date || ticket.lottery?.draw_date),
-            progress: Math.round((ticket.lottery?.sold_tickets / ticket.lottery?.total_tickets) * 100) || 0,
-            winning_number: ticket.lottery?.winning_number || null
+            title: ticket.lottery?.title,
+            draw_date: ticket.lottery?.draw_date ? new Date(ticket.lottery.draw_date) : null,
+            end_date: ticket.lottery?.end_date ? new Date(ticket.lottery.end_date) : null,
+            progress: ticket.lottery ? Math.round((ticket.lottery.sold_tickets / ticket.lottery.max_tickets) * 100) : 0,
+            winning_number: ticket.lottery?.winner_ticket_number || null
           },
-          quantity: ticket.quantity || 1,
-          total_price: ticket.amount || 0,
+          quantity: 1, // Un ticket = 1 quantité
+          total_price: ticket.price || 0,
           status: ticket.status || 'active',
-          purchased_at: new Date(ticket.created_at),
-          ticket_numbers: ticket.ticket_numbers || [],
-          winning_number: ticket.winning_number || null,
+          purchased_at: ticket.purchased_at ? new Date(ticket.purchased_at) : new Date(ticket.created_at),
+          ticket_numbers: [ticket.ticket_number], // Numéro du ticket individuel
+          winning_number: ticket.is_winner ? ticket.ticket_number : null,
           prize_claimed: ticket.prize_claimed || false
         }))
         

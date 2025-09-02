@@ -239,8 +239,19 @@ const processPayment = async () => {
         }
       })
     } else {
-      if (window.$toast) {
-        window.$toast.error(response.message || 'Erreur lors de l\'initiation du paiement', '❌ Erreur')
+      // Gestion spéciale pour les commandes expirées
+      if (response.error_code === 'ORDER_EXPIRED') {
+        if (window.$toast) {
+          window.$toast.error('Cette commande a expiré. Veuillez créer une nouvelle commande.', '⏰ Commande expirée')
+        }
+        // Rediriger vers la page d'accueil après 2 secondes
+        setTimeout(() => {
+          router.push('/')
+        }, 2000)
+      } else {
+        if (window.$toast) {
+          window.$toast.error(response.message || 'Erreur lors de l\'initiation du paiement', '❌ Erreur')
+        }
       }
     }
   } catch (error) {

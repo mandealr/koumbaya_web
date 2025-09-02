@@ -134,9 +134,23 @@ class PaymentController extends Controller
             elseif ($request->filled('order_number')) {
                 $order = Order::where('order_number', $request->order_number)
                     ->where('user_id', $user->id)
-                    ->where('status', 'pending')
+                    ->whereIn('status', ['pending', 'awaiting_payment', 'failed'])
                     ->with(['product', 'lottery'])
                     ->first();
+
+                // Vérifier si la commande a expiré
+                if ($order && $order->hasExpired()) {
+                    // Marquer automatiquement comme expirée
+                    $order->markAsExpired();
+                    
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cette commande a expiré. Vous pouvez créer une nouvelle commande.',
+                        'error_code' => 'ORDER_EXPIRED',
+                        'expired_at' => $order->created_at->addHour(),
+                        'can_reorder' => true
+                    ], 410); // 410 Gone - ressource expirée
+                }
             }
 
             // Si pas de commande trouvée, créer une nouvelle commande pour la tombola

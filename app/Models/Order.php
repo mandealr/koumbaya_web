@@ -61,6 +61,7 @@ class Order extends Model
     const STATUS_CANCELLED = 'cancelled';
     const STATUS_FULFILLED = 'fulfilled';
     const STATUS_REFUNDED = 'refunded';
+    const STATUS_EXPIRED = 'expired';
 
     /**
      * Relations
@@ -186,5 +187,64 @@ class Order extends Model
     public function canBeFulfilled(): bool
     {
         return $this->status_enum->canBeFulfilled();
+    }
+
+    /**
+     * Check if order has expired (1 hour after creation)
+     */
+    public function hasExpired(): bool
+    {
+        if ($this->status === self::STATUS_PAID || $this->status === self::STATUS_FULFILLED) {
+            return false; // Les commandes payées/livrées ne peuvent pas expirer
+        }
+
+        return $this->created_at->addHour()->isPast();
+    }
+
+    /**
+     * Check if payment can be retried
+     */
+    public function canRetryPayment(): bool
+    {
+        return !$this->hasExpired() && 
+               in_array($this->status, [self::STATUS_PENDING, self::STATUS_AWAITING_PAYMENT, self::STATUS_FAILED]);
+    }
+
+    /**
+     * Mark order as expired
+     */
+    public function markAsExpired(): bool
+    {
+        if (!$this->hasExpired()) {
+            return false;
+        }
+
+        $updated = $this->update([
+            'status' => self::STATUS_EXPIRED,
+            'cancelled_at' => now(),
+            'notes' => 'Commande expirée après 1 heure sans paiement'
+        ]);
+
+        if ($updated) {
+            // Annuler les tickets réservés si c'est une commande tombola
+            if ($this->type === self::TYPE_LOTTERY && $this->lottery_id) {
+                \App\Models\LotteryTicket::where('payment_id', $this->payments()->first()?->id)
+                    ->where('status', 'reserved')
+                    ->update(['status' => 'cancelled']);
+            }
+        }
+
+        return $updated;
+    }
+
+    /**
+     * Scope pour les commandes expirées
+     */
+    public function scopeExpired($query)
+    {
+        return $query->where('status', '!=', self::STATUS_PAID)
+                     ->where('status', '!=', self::STATUS_FULFILLED)
+                     ->where('status', '!=', self::STATUS_EXPIRED)
+                     ->where('created_at', '<', now()->subHour());
     }
 }

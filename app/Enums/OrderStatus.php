@@ -11,6 +11,7 @@ enum OrderStatus: string
     case CANCELLED = 'cancelled';
     case FULFILLED = 'fulfilled';
     case REFUNDED = 'refunded';
+    case EXPIRED = 'expired';
 
     /**
      * Get human-readable label for the status
@@ -25,6 +26,7 @@ enum OrderStatus: string
             self::CANCELLED => 'Annulé',
             self::FULFILLED => 'Livré',
             self::REFUNDED => 'Remboursé',
+            self::EXPIRED => 'Expiré',
         };
     }
 
@@ -41,6 +43,7 @@ enum OrderStatus: string
             self::CANCELLED => 'Commande annulée',
             self::FULFILLED => 'Commande livrée avec succès',
             self::REFUNDED => 'Commande remboursée',
+            self::EXPIRED => 'Commande expirée après 1 heure sans paiement',
         };
     }
 
@@ -54,7 +57,8 @@ enum OrderStatus: string
             self::FAILED,
             self::CANCELLED,
             self::FULFILLED,
-            self::REFUNDED
+            self::REFUNDED,
+            self::EXPIRED
         ]);
     }
 

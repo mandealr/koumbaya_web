@@ -32,6 +32,13 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/refunds.log'));
+
+        // Expire old orders every 15 minutes
+        $schedule->command('orders:expire-old')
+            ->everyFifteenMinutes()
+            ->withoutOverlapping()
+            ->runInBackground()
+            ->appendOutputTo(storage_path('logs/expired-orders.log'));
     }
 
     /**
