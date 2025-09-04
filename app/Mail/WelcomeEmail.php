@@ -4,26 +4,23 @@ namespace App\Mail;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class VerificationEmail extends Mailable
+class WelcomeEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $user;
-    public $verificationUrl;
+    public User $user;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(User $user, string $verificationUrl)
+    public function __construct(User $user)
     {
         $this->user = $user;
-        $this->verificationUrl = $verificationUrl;
     }
 
     /**
@@ -32,7 +29,9 @@ class VerificationEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Vérification de votre compte Koumbaya MarketPlace',
+            subject: '🎉 Bienvenue sur Koumbaya MarketPlace !',
+            from: config('mail.from.address', 'noreply@koumbaya.cm'),
+            replyTo: 'support@koumbaya.cm'
         );
     }
 
@@ -42,11 +41,7 @@ class VerificationEmail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.verification',
-            with: [
-                'user' => $this->user,
-                'verificationUrl' => $this->verificationUrl,
-            ],
+            view: 'emails.welcome',
         );
     }
 

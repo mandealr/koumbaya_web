@@ -112,6 +112,9 @@ class AuthController extends Controller
         // Assigner les rôles selon la logique des seeders
         $this->assignUserRoles($user, $request);
 
+        // Déclencher l'événement d'inscription
+        \App\Events\UserRegistered::dispatch($user);
+
         // Créer le portefeuille utilisateur
         UserWallet::create([
             'user_id' => $user->id,

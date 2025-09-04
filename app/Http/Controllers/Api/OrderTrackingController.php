@@ -834,6 +834,7 @@ class OrderTrackingController extends Controller
         }
 
         // Marquer la commande comme fulfilled
+        $previousStatus = $order->status;
         $order->update([
             'status' => OrderStatus::FULFILLED->value,
             'fulfilled_at' => now(),
@@ -841,6 +842,9 @@ class OrderTrackingController extends Controller
                 ($order->notes ? $order->notes . "\n\nConfirmation client: " . $request->input('notes') : "Confirmation client: " . $request->input('notes')) : 
                 $order->notes
         ]);
+
+        // Déclencher l'événement de changement de statut
+        \App\Events\OrderStatusChanged::dispatch($order, $previousStatus, \App\Enums\OrderStatus::FULFILLED->value);
 
         return response()->json([
             'success' => true,
@@ -994,6 +998,7 @@ class OrderTrackingController extends Controller
         }
 
         // Mettre à jour le statut
+        $previousStatus = $order->status;
         $order->update([
             'status' => $newOrderStatus->value,
             'updated_at' => now(),
@@ -1001,6 +1006,9 @@ class OrderTrackingController extends Controller
                 ($order->notes ? $order->notes . "\n\nMarchand: " . $notes : "Marchand: " . $notes) : 
                 $order->notes
         ]);
+
+        // Déclencher l'événement de changement de statut
+        \App\Events\OrderStatusChanged::dispatch($order, $previousStatus, $newOrderStatus->value);
 
         return response()->json([
             'success' => true,

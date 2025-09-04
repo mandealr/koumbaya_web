@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Lottery;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -10,20 +11,22 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class VerificationEmail extends Mailable
+class LotteryReminderEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $user;
-    public $verificationUrl;
+    public User $user;
+    public Lottery $lottery;
+    public string $reminderType; // '24h' ou '1h'
 
     /**
      * Create a new message instance.
      */
-    public function __construct(User $user, string $verificationUrl)
+    public function __construct(User $user, Lottery $lottery, string $reminderType = '24h')
     {
         $this->user = $user;
-        $this->verificationUrl = $verificationUrl;
+        $this->lottery = $lottery;
+        $this->reminderType = $reminderType;
     }
 
     /**
@@ -31,8 +34,13 @@ class VerificationEmail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $subject = $this->reminderType === '1h' 
+            ? '⏰ Dernière heure - Tirage dans 1 heure !'
+            : '⏰ Rappel - Tirage demain sur Koumbaya';
+
         return new Envelope(
-            subject: 'Vérification de votre compte Koumbaya MarketPlace',
+            subject: $subject,
+            from: config('mail.from.address', 'noreply@koumbaya.cm'),
         );
     }
 
@@ -42,11 +50,7 @@ class VerificationEmail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.verification',
-            with: [
-                'user' => $this->user,
-                'verificationUrl' => $this->verificationUrl,
-            ],
+            view: 'emails.lottery-reminder',
         );
     }
 

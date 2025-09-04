@@ -8,9 +8,10 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('auth_token'))
   const loading = ref(false)
   const error = ref('')
+  const initializing = ref(true) // Nouvel état pour gérer l'initialisation
 
   // Getters
-  const isAuthenticated = computed(() => !!token.value && !!user.value)
+  const isAuthenticated = computed(() => !initializing.value && !!token.value && !!user.value)
   
   // Role helper function
   const hasRole = (roleName) => {
@@ -121,7 +122,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function checkAuth() {
-    if (!token.value) return
+    initializing.value = true
+    
+    if (!token.value) {
+      initializing.value = false
+      return
+    }
     
     try {
       const response = await api.get('/auth/me')
@@ -131,6 +137,8 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = null
       token.value = null
       localStorage.removeItem('auth_token')
+    } finally {
+      initializing.value = false
     }
   }
 
@@ -202,6 +210,7 @@ export const useAuthStore = defineStore('auth', () => {
     token,
     loading,
     error,
+    initializing,
     
     // Getters
     isAuthenticated,

@@ -39,6 +39,20 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/expired-orders.log'));
+
+        // Envoyer rappels tombola 24h avant tirage - tous les jours à 8h
+        $schedule->command('lottery:send-reminders 24h')
+            ->dailyAt('08:00')
+            ->withoutOverlapping()
+            ->runInBackground()
+            ->appendOutputTo(storage_path('logs/lottery-reminders.log'));
+
+        // Envoyer rappels tombola 1h avant tirage - toutes les heures
+        $schedule->command('lottery:send-reminders 1h')
+            ->hourly()
+            ->withoutOverlapping()
+            ->runInBackground()
+            ->appendOutputTo(storage_path('logs/lottery-reminders.log'));
     }
 
     /**

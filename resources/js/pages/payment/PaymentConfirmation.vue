@@ -217,6 +217,7 @@ const amount = ref(0)
 const phoneNumber = ref('')
 const operator = ref('')
 const transactionType = ref('') // 'ticket', 'product', 'lottery', etc.
+const orderNumber = ref('') // Numéro de commande pour redirection
 
 // Methods
 const getStatusClasses = () => {
@@ -382,8 +383,11 @@ const goToProfile = () => {
   if (transactionType.value === 'ticket' || transactionType.value === 'lottery') {
     // Rediriger vers la liste des tickets
     router.push({ name: 'customer.tickets' })
+  } else if (transactionType.value === 'product' && orderNumber.value) {
+    // Rediriger vers la commande spécifique
+    router.push({ name: 'customer.order-detail', params: { orderNumber: orderNumber.value } })
   } else if (transactionType.value === 'product') {
-    // Rediriger vers la liste des commandes
+    // Fallback vers la liste des commandes
     router.push({ name: 'customer.orders' })
   } else {
     // Par défaut, aller vers le dashboard client
@@ -399,7 +403,7 @@ const getSuccessButtonText = () => {
   if (transactionType.value === 'ticket' || transactionType.value === 'lottery') {
     return 'Voir mes tickets'
   } else if (transactionType.value === 'product') {
-    return 'Voir mes commandes'
+    return orderNumber.value ? 'Voir ma commande' : 'Voir mes commandes'
   } else {
     return 'Voir mes achats'
   }
@@ -414,6 +418,7 @@ onMounted(() => {
   phoneNumber.value = route.query.phone || ''
   operator.value = route.query.operator || ''
   transactionType.value = route.query.type || ''
+  orderNumber.value = route.query.order_number || ''
   
   if (!billId.value || !amount.value) {
     router.push('/')

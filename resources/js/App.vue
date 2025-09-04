@@ -13,9 +13,9 @@ import Toast from '@/components/common/Toast.vue'
 
 const authStore = useAuthStore()
 
-onMounted(() => {
+onMounted(async () => {
   // Vérifier si l'utilisateur est connecté au démarrage
-  authStore.checkAuth()
+  await authStore.checkAuth()
 })
 </script>
 

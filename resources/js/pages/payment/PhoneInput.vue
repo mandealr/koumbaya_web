@@ -235,7 +235,8 @@ const processPayment = async () => {
           phone: phoneNumber.value,
           operator: selectedOperator.value,
           transaction_id: response.data.transaction_id,
-          type: route.query.type // Passer le type de transaction
+          type: route.query.type, // Passer le type de transaction
+          order_number: response.data.order_number || route.query.order_number // Passer le numéro de commande
         }
       })
     } else {

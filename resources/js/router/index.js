@@ -216,7 +216,7 @@ const routes = [
     path: '/payment/confirmation',
     name: 'payment.confirmation',
     component: PaymentConfirmation,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: false } // Permettre l'accès sans authentification pour éviter la redirection lors de l'actualisation
   },
 
   // Admin Routes  
@@ -345,8 +345,17 @@ const router = createRouter({
 })
 
 // Navigation Guards
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
+  
+  // Attendre la fin de l'initialisation de l'auth si nécessaire
+  if (authStore.initializing) {
+    let attempts = 0
+    while (authStore.initializing && attempts < 100) { // Max 5 secondes (50ms * 100)
+      await new Promise(resolve => setTimeout(resolve, 50))
+      attempts++
+    }
+  }
   
   // Check if route requires authentication
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
