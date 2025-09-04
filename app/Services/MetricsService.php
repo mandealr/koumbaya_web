@@ -91,7 +91,10 @@ class MetricsService
     {
         // Increment counters
         $this->incrementCounter('payments_callback_received');
-        $this->incrementCounter("payments_callback_{$callbackData['status']}_received");
+        
+        // eBilling uses 'state' instead of 'status' in callback data
+        $status = $callbackData['state'] ?? $callbackData['status'] ?? 'unknown';
+        $this->incrementCounter("payments_callback_{$status}_received");
         
         if (isset($callbackData['paymentsystem'])) {
             $this->incrementCounter("payments_callback_{$callbackData['paymentsystem']}_received");
@@ -101,7 +104,7 @@ class MetricsService
         Log::info('payment.callback.received', [
             'event' => 'payments_callback_received',
             'callback_reference' => $callbackData['reference'] ?? null,
-            'callback_status' => $callbackData['status'] ?? null,
+            'callback_status' => $status,
             'callback_amount' => $callbackData['amount'] ?? null,
             'callback_transaction_id' => $callbackData['transactionid'] ?? null,
             'callback_payment_system' => $callbackData['paymentsystem'] ?? null,
