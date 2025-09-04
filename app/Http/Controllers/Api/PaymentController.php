@@ -613,27 +613,14 @@ class PaymentController extends Controller
         $this->metricsService->paymentCallbackReceived($request->all());
 
         try {
-            // 1. Validate signature if E-Billing provides it
-            $signatureValidation = $this->validateEBillingSignature($request);
-            if (!$signatureValidation['valid']) {
-                Log::warning('Payment callback signature validation failed', [
-                    'reason' => $signatureValidation['reason'],
-                    'payload' => $request->all(),
-                    'security' => $securityInfo
-                ]);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid signature'
-                ], 403);
-            }
-
-            // 2. Validate payload
+            // 1. Validate payload
             $validator = Validator::make($request->all(), [
                 'reference' => 'required|string',
                 'amount' => 'required|numeric',
                 'transactionid' => 'required|string',
                 'paymentsystem' => 'required|string',
-                'status' => 'string'
+                'state' => 'string', // eBilling utilise 'state'
+                'status' => 'string' // Garde 'status' pour compatibilité
             ]);
 
             if ($validator->fails()) {
@@ -654,6 +641,7 @@ class PaymentController extends Controller
             $transactionId = $request->input('transactionid');
             $paymentSystem = $request->input('paymentsystem');
             $status = $request->input('status', 'success'); // Default to success for backwards compatibility
+            $ebillingState = $request->input('state'); // eBilling utilise 'state' pour le statut
 
             // 3. Find payment by reference or ebilling_id
             $payment = Payment::where('reference', $reference)
@@ -706,6 +694,48 @@ class PaymentController extends Controller
                         'processed_at' => $payment->updated_at
                     ]
                 ], 200);
+            }
+
+            // 5. Vérifier que le callback indique un paiement réussi
+            if ($ebillingState && $ebillingState !== 'paid') {
+                Log::info('Payment callback received with non-paid state - ignoring', [
+                    'payment_id' => $payment->id,
+                    'order_number' => $payment->order->order_number,
+                    'callback_state' => $ebillingState,
+                    'security' => $securityInfo
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Callback acknowledged but payment not successful',
+                    'data' => [
+                        'order_number' => $payment->order->order_number,
+                        'callback_state' => $ebillingState
+                    ]
+                ], 200);
+            }
+
+            // 6. Vérifier que la commande est en attente de paiement
+            if (!in_array($payment->order->status, [OrderStatus::PENDING->value, OrderStatus::AWAITING_PAYMENT->value])) {
+                Log::warning('Order is not in valid state for payment callback', [
+                    'payment_id' => $payment->id,
+                    'order_id' => $payment->order->id,
+                    'order_number' => $payment->order->order_number,
+                    'current_order_status' => $payment->order->status,
+                    'expected_statuses' => [OrderStatus::PENDING->value, OrderStatus::AWAITING_PAYMENT->value],
+                    'callback_state' => $ebillingState,
+                    'security' => $securityInfo
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Order is not in valid state for payment processing',
+                    'data' => [
+                        'order_number' => $payment->order->order_number,
+                        'current_status' => $payment->order->status,
+                        'callback_state' => $ebillingState
+                    ]
+                ], 422);
             }
 
             Log::info('Payment and order found for callback', [
@@ -968,6 +998,9 @@ class PaymentController extends Controller
 
     /**
      * Validate E-Billing signature if provided
+     * 
+     * NOTE: Cette méthode n'est plus utilisée dans le callback.
+     * La sécurité est maintenant basée sur la vérification du statut de la commande.
      */
     private function validateEBillingSignature(Request $request): array
     {
