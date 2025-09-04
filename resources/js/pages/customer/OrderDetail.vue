@@ -55,7 +55,7 @@
           <div class="flex items-center space-x-3">
             <span :class="getStatusBadgeClass(order.status)">{{ getStatusText(order.status) }}</span>
             <button
-              v-if="['paid', 'fulfilled'].includes(order.status)"
+              v-if="['paid', 'shipping', 'fulfilled'].includes(order.status)"
               @click="printInvoice"
               :disabled="printingInvoice"
               :class="[
@@ -409,7 +409,7 @@
               
               <!-- Download Invoice -->
               <button
-                v-if="['paid', 'fulfilled'].includes(order.status)"
+                v-if="['paid', 'shipping', 'fulfilled'].includes(order.status)"
                 @click="downloadInvoice"
                 :disabled="downloadingInvoice"
                 :class="[
@@ -426,7 +426,7 @@
               
               <!-- Print Invoice -->
               <button
-                v-if="['paid', 'fulfilled'].includes(order.status)"
+                v-if="['paid', 'shipping', 'fulfilled'].includes(order.status)"
                 @click="printInvoice"
                 :disabled="printingInvoice"
                 :class="[
@@ -470,7 +470,7 @@
               </div>
               
               <!-- Unavailable Actions -->
-              <div v-if="!['paid', 'fulfilled'].includes(order.status)" class="text-center p-3 bg-gray-50 rounded-md">
+              <div v-if="!['paid', 'shipping', 'fulfilled'].includes(order.status)" class="text-center p-3 bg-gray-50 rounded-md">
                 <p class="text-sm text-gray-500 mb-2">Actions disponibles après paiement:</p>
                 <div class="flex items-center justify-center space-x-2 text-xs text-gray-400">
                   <DocumentArrowDownIcon class="w-4 h-4" />
@@ -496,7 +496,7 @@
     </div>
     
     <!-- Delivery Confirmation Modal -->
-    <div v-if="showDeliveryConfirmation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div v-if="showDeliveryConfirmation" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
         <div class="p-6">
           <div class="flex items-center mb-4">
@@ -633,7 +633,7 @@ const retryOrder = () => {
 
 // Télécharger la facture PDF
 const downloadInvoice = async () => {
-  if (!['paid', 'fulfilled'].includes(order.value.status)) {
+  if (!['paid', 'shipping', 'fulfilled'].includes(order.value.status)) {
     showError('La facture n\'est disponible que pour les commandes payées')
     return
   }
@@ -643,7 +643,7 @@ const downloadInvoice = async () => {
     const response = await fetch(`/api/orders/${order.value.order_number}/invoice`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         'Accept': 'application/pdf'
       }
     })
@@ -673,7 +673,7 @@ const downloadInvoice = async () => {
 
 // Imprimer la facture PDF
 const printInvoice = async () => {
-  if (!['paid', 'fulfilled'].includes(order.value.status)) {
+  if (!['paid', 'shipping', 'fulfilled'].includes(order.value.status)) {
     showError('L\'impression n\'est disponible que pour les commandes payées')
     return
   }
@@ -683,7 +683,7 @@ const printInvoice = async () => {
     const response = await fetch(`/api/orders/${order.value.order_number}/invoice`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         'Accept': 'application/pdf'
       }
     })

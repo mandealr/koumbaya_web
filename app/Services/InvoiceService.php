@@ -29,7 +29,7 @@ class InvoiceService
         $startTime = microtime(true);
 
         // Verify order is paid
-        if (!in_array($order->status, [OrderStatus::PAID->value, OrderStatus::FULFILLED->value])) {
+        if (!in_array($order->status, [OrderStatus::PAID->value, OrderStatus::SHIPPING->value, OrderStatus::FULFILLED->value])) {
             throw new \Exception('Invoice can only be generated for paid orders');
         }
 
