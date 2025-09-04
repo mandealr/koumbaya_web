@@ -510,7 +510,26 @@ class ProductController extends Controller
 
         $product = Product::create($productData);
 
-        $product->load(['category', 'merchant']);
+        // Si c'est un produit tombola, créer automatiquement la tombola
+        if ($request->sale_mode === 'lottery') {
+            $totalTickets = (int) ceil($product->price / $product->ticket_price);
+            
+            $product->lotteries()->create([
+                'lottery_number' => 'LOT-' . strtoupper(Str::random(8)),
+                'ticket_price' => $product->ticket_price,
+                'total_tickets' => $totalTickets,
+                'min_participants' => $product->min_participants ?? 50,
+                'start_date' => now(),
+                'end_date' => now()->addDays(30), // 30 jours par défaut
+                'status' => 'active',
+                'meta' => [
+                    'auto_created' => true,
+                    'created_with_product' => true
+                ]
+            ]);
+        }
+
+        $product->load(['category', 'merchant', 'activeLottery']);
 
         return response()->json([
             'message' => 'Produit créé avec succès',
