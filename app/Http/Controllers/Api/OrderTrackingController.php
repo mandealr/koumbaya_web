@@ -723,4 +723,295 @@ class OrderTrackingController extends Controller
 
         return $details;
     }
+
+    /**
+     * Confirmer la réception du produit par le client
+     * 
+     * @OA\Post(
+     *     path="/api/orders/{order_number}/confirm-delivery",
+     *     tags={"Orders"},
+     *     summary="Confirmer la réception du produit par le client",
+     *     description="Permet au client de confirmer qu'il a bien reçu le produit, ce qui marque la commande comme 'fulfilled'",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="order_number",
+     *         in="path",
+     *         description="Numéro unique de la commande",
+     *         required=true,
+     *         @OA\Schema(type="string", example="ORD-67890ABCDE")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="notes", type="string", nullable=true, example="Produit reçu en parfait état, merci!", description="Commentaire optionnel du client")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Réception confirmée avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Réception du produit confirmée avec succès"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="order_number", type="string", example="ORD-67890ABCDE"),
+     *                 @OA\Property(property="status", type="string", example="fulfilled"),
+     *                 @OA\Property(property="fulfilled_at", type="string", format="date-time", example="2024-01-15T14:30:00Z")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Action non autorisée pour cette commande",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Cette commande ne peut pas être marquée comme reçue. Elle doit être payée pour confirmer la réception.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Commande non trouvée",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Commande non trouvée")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Commande déjà marquée comme reçue",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Cette commande est déjà marquée comme reçue")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non authentifié",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     */
+    public function confirmDelivery(Request $request, string $orderNumber): JsonResponse
+    {
+        $user = Auth::user();
+        
+        $order = Order::where('user_id', $user->id)
+            ->where('order_number', $orderNumber)
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Commande non trouvée'
+            ], 404);
+        }
+
+        // Vérifier que la commande est payée
+        if ($order->status !== OrderStatus::PAID->value) {
+            $statusMessages = [
+                OrderStatus::PENDING->value => 'en attente',
+                OrderStatus::AWAITING_PAYMENT->value => 'en attente de paiement',
+                OrderStatus::FAILED->value => 'échouée',
+                OrderStatus::CANCELLED->value => 'annulée',
+                OrderStatus::FULFILLED->value => 'déjà livrée',
+                OrderStatus::REFUNDED->value => 'remboursée'
+            ];
+            
+            $currentStatusText = $statusMessages[$order->status] ?? $order->status;
+            
+            if ($order->status === OrderStatus::FULFILLED->value) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cette commande est déjà marquée comme reçue'
+                ], 409);
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => "Cette commande ne peut pas être marquée comme reçue. Elle est actuellement {$currentStatusText}. Seules les commandes payées peuvent être confirmées comme reçues."
+            ], 400);
+        }
+
+        // Marquer la commande comme fulfilled
+        $order->update([
+            'status' => OrderStatus::FULFILLED->value,
+            'fulfilled_at' => now(),
+            'notes' => $request->input('notes') ? 
+                ($order->notes ? $order->notes . "\n\nConfirmation client: " . $request->input('notes') : "Confirmation client: " . $request->input('notes')) : 
+                $order->notes
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Réception du produit confirmée avec succès',
+            'data' => [
+                'order_number' => $order->order_number,
+                'status' => $order->status,
+                'fulfilled_at' => $order->fulfilled_at
+            ]
+        ]);
+    }
+
+    /**
+     * Changer le statut d'une commande (pour les marchands)
+     * 
+     * @OA\Patch(
+     *     path="/api/orders/{order_number}/status",
+     *     tags={"Orders"},
+     *     summary="Changer le statut d'une commande (marchand uniquement)",
+     *     description="Permet au marchand de changer le statut d'une commande de 'paid' à 'shipping'",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="order_number",
+     *         in="path",
+     *         description="Numéro unique de la commande",
+     *         required=true,
+     *         @OA\Schema(type="string", example="ORD-67890ABCDE")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="shipping", description="Nouveau statut de la commande"),
+     *             @OA\Property(property="notes", type="string", nullable=true, example="Commande préparée et expédiée", description="Notes optionnelles du marchand")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Statut de la commande mis à jour avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Statut de la commande mis à jour avec succès"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="order_number", type="string", example="ORD-67890ABCDE"),
+     *                 @OA\Property(property="status", type="string", example="shipping"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2024-01-15T14:30:00Z")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Transition de statut non autorisée",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Cette commande ne peut pas passer en livraison. Seules les commandes payées peuvent être expédiées.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Accès refusé - utilisateur non autorisé",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Accès refusé. Seuls les marchands peuvent modifier le statut des commandes.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Commande non trouvée",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Commande non trouvée")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non authentifié",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     */
+    public function updateStatus(Request $request, string $orderNumber): JsonResponse
+    {
+        $user = Auth::user();
+        
+        // Vérifier que l'utilisateur est un marchand
+        if (!$user->can_sell) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès refusé. Seuls les marchands peuvent modifier le statut des commandes.'
+            ], 403);
+        }
+
+        // Pour les marchands, récupérer les commandes liées à leurs produits
+        $order = Order::whereHas('product', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->orWhereHas('lottery.product', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->where('order_number', $orderNumber)
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Commande non trouvée ou vous n\'êtes pas autorisé à modifier cette commande'
+            ], 404);
+        }
+
+        $newStatus = $request->input('status');
+        $notes = $request->input('notes');
+
+        // Valider le nouveau statut
+        if (!in_array($newStatus, OrderStatus::values())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Statut invalide'
+            ], 400);
+        }
+
+        $newOrderStatus = OrderStatus::from($newStatus);
+        $currentOrderStatus = OrderStatus::from($order->status);
+
+        // Vérifier les transitions autorisées pour les marchands
+        if ($newOrderStatus === OrderStatus::SHIPPING && !$currentOrderStatus->canBeShipped()) {
+            $statusMessages = [
+                OrderStatus::PENDING->value => 'en attente',
+                OrderStatus::AWAITING_PAYMENT->value => 'en attente de paiement',
+                OrderStatus::FAILED->value => 'échouée',
+                OrderStatus::CANCELLED->value => 'annulée',
+                OrderStatus::FULFILLED->value => 'déjà livrée',
+                OrderStatus::REFUNDED->value => 'remboursée',
+                OrderStatus::SHIPPING->value => 'déjà en livraison'
+            ];
+            
+            $currentStatusText = $statusMessages[$order->status] ?? $order->status;
+            
+            return response()->json([
+                'success' => false,
+                'message' => "Cette commande ne peut pas passer en livraison. Elle est actuellement {$currentStatusText}. Seules les commandes payées peuvent être expédiées."
+            ], 400);
+        }
+
+        // Pour l'instant, seul le passage de "paid" à "shipping" est autorisé
+        if (!($currentOrderStatus === OrderStatus::PAID && $newOrderStatus === OrderStatus::SHIPPING)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transition de statut non autorisée. Seul le passage de "payé" à "en cours de livraison" est permis.'
+            ], 400);
+        }
+
+        // Mettre à jour le statut
+        $order->update([
+            'status' => $newOrderStatus->value,
+            'updated_at' => now(),
+            'notes' => $notes ? 
+                ($order->notes ? $order->notes . "\n\nMarchand: " . $notes : "Marchand: " . $notes) : 
+                $order->notes
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Statut de la commande mis à jour avec succès',
+            'data' => [
+                'order_number' => $order->order_number,
+                'status' => $order->status,
+                'status_label' => $newOrderStatus->label(),
+                'status_message' => $newOrderStatus->message(),
+                'updated_at' => $order->updated_at
+            ]
+        ]);
+    }
 }

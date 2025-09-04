@@ -114,4 +114,13 @@ export function useApi() {
   }
 }
 
+// API functions for order management
+export const updateOrderStatus = async (orderNumber, status, notes = null) => {
+  const response = await api.patch(`/orders/${orderNumber}/status`, {
+    status,
+    notes
+  })
+  return response.data
+}
+
 export default api

@@ -86,8 +86,10 @@
           >
             <option value="">Tous les statuts</option>
             <option value="pending">En attente</option>
-            <option value="confirmed">Confirmé</option>
-            <option value="completed">Terminé</option>
+            <option value="awaiting_payment">En attente de paiement</option>
+            <option value="paid">Payé</option>
+            <option value="shipping">En cours de livraison</option>
+            <option value="fulfilled">Livré</option>
             <option value="cancelled">Annulé</option>
           </select>
         </div>
@@ -234,6 +236,14 @@
                     title="Voir détails"
                   >
                     <EyeIcon class="w-4 h-4" />
+                  </button>
+                  <button
+                    v-if="order.status === 'paid'"
+                    @click="markAsShipping(order)"
+                    class="text-blue-600 hover:text-blue-800 transition-colors"
+                    title="Marquer en cours de livraison"
+                  >
+                    <TruckIcon class="w-4 h-4" />
                   </button>
                   <button
                     v-if="order.status === 'pending'"
@@ -388,10 +398,12 @@ import {
   CurrencyDollarIcon,
   ClockIcon,
   CheckIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  TruckIcon
 } from '@heroicons/vue/24/outline'
 import { useMerchantOrders } from '@/composables/useMerchantOrders'
 import { useToast } from '@/composables/useToast'
+import { updateOrderStatus } from '@/composables/api'
 
 // Composables
 const { 
@@ -501,9 +513,14 @@ const nextPage = () => {
 const getStatusClass = (status) => {
   const classes = {
     'pending': 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800',
+    'awaiting_payment': 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800',
+    'paid': 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800',
+    'shipping': 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800',
+    'fulfilled': 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800',
+    'cancelled': 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800',
+    // Legacy statuses
     'confirmed': 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800',
-    'completed': 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800',
-    'cancelled': 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800'
+    'completed': 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800'
   }
   return classes[status] || 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800'
 }
@@ -511,9 +528,14 @@ const getStatusClass = (status) => {
 const getStatusLabel = (status) => {
   const labels = {
     'pending': 'En attente',
+    'awaiting_payment': 'En attente de paiement',
+    'paid': 'Payé',
+    'shipping': 'En cours de livraison',
+    'fulfilled': 'Livré',
+    'cancelled': 'Annulé',
+    // Legacy statuses
     'confirmed': 'Confirmé',
-    'completed': 'Terminé',
-    'cancelled': 'Annulé'
+    'completed': 'Terminé'
   }
   return labels[status] || status
 }
@@ -567,6 +589,20 @@ const cancelOrder = async (order) => {
       await loadFilteredOrders()
     } catch (error) {
       toast.error('Erreur lors de l\'annulation')
+    }
+  }
+}
+
+const markAsShipping = async (order) => {
+  if (confirm(`Marquer la commande ${order.order_number} comme en cours de livraison ?`)) {
+    try {
+      await updateOrderStatus(order.order_number, 'shipping', 'Commande expédiée par le marchand')
+      toast.success('Commande marquée en cours de livraison')
+      closeOrderModal()
+      // Recharger les commandes
+      await loadFilteredOrders()
+    } catch (error) {
+      toast.error('Erreur lors du changement de statut')
     }
   }
 }

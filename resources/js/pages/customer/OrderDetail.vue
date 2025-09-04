@@ -441,6 +441,34 @@
                 {{ printingInvoice ? 'Génération...' : 'Imprimer la facture' }}
               </button>
               
+              <!-- Confirm Delivery -->
+              <button
+                v-if="order.status === 'paid' || order.status === 'shipping'"
+                @click="showDeliveryConfirmation = true"
+                :disabled="confirmingDelivery"
+                :class="[
+                  'w-full px-4 py-2 rounded-md transition-colors flex items-center justify-center',
+                  confirmingDelivery
+                    ? 'bg-orange-400 text-white cursor-not-allowed' 
+                    : 'bg-orange-600 text-white hover:bg-orange-700'
+                ]"
+              >
+                <div v-if="confirmingDelivery" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                <CheckIcon v-else class="w-4 h-4 mr-2" />
+                {{ confirmingDelivery ? 'Validation...' : 'Confirmer la réception' }}
+              </button>
+              
+              <!-- Already Delivered -->
+              <div v-if="order.status === 'fulfilled'" class="w-full p-3 bg-green-50 border border-green-200 rounded-md">
+                <div class="flex items-center">
+                  <CheckIcon class="w-5 h-5 text-green-600 mr-2 flex-shrink-0" />
+                  <div>
+                    <p class="text-sm font-medium text-green-800">Produit reçu</p>
+                    <p class="text-xs text-green-600">{{ formatDate(order.fulfilled_at) }}</p>
+                  </div>
+                </div>
+              </div>
+              
               <!-- Unavailable Actions -->
               <div v-if="!['paid', 'fulfilled'].includes(order.status)" class="text-center p-3 bg-gray-50 rounded-md">
                 <p class="text-sm text-gray-500 mb-2">Actions disponibles après paiement:</p>
@@ -462,6 +490,58 @@
                 Retour aux commandes
               </router-link>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Delivery Confirmation Modal -->
+    <div v-if="showDeliveryConfirmation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div class="p-6">
+          <div class="flex items-center mb-4">
+            <CheckIcon class="w-8 h-8 text-orange-600 mr-3" />
+            <h3 class="text-lg font-semibold text-gray-900">Confirmer la réception</h3>
+          </div>
+          
+          <p class="text-gray-600 mb-4">
+            Confirmez-vous avoir bien reçu le produit de cette commande ? Cette action ne peut pas être annulée.
+          </p>
+          
+          <div class="mb-4">
+            <label for="delivery-notes" class="block text-sm font-medium text-gray-700 mb-2">
+              Commentaire (optionnel)
+            </label>
+            <textarea
+              id="delivery-notes"
+              v-model="deliveryNotes"
+              rows="3"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+              placeholder="Ajoutez un commentaire sur la réception du produit..."
+            ></textarea>
+          </div>
+          
+          <div class="flex space-x-3">
+            <button
+              @click="showDeliveryConfirmation = false"
+              :disabled="confirmingDelivery"
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              Annuler
+            </button>
+            <button
+              @click="confirmDelivery"
+              :disabled="confirmingDelivery"
+              :class="[
+                'flex-1 px-4 py-2 rounded-md text-white transition-colors flex items-center justify-center',
+                confirmingDelivery
+                  ? 'bg-orange-400 cursor-not-allowed' 
+                  : 'bg-orange-600 hover:bg-orange-700'
+              ]"
+            >
+              <div v-if="confirmingDelivery" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              {{ confirmingDelivery ? 'Validation...' : 'Confirmer' }}
+            </button>
           </div>
         </div>
       </div>
@@ -490,7 +570,7 @@ import {
 
 const route = useRoute()
 const router = useRouter()
-const { get: apiGet } = useApi()
+const { get: apiGet, post: apiPost } = useApi()
 const { showError, showSuccess } = useToast()
 
 // État
@@ -499,6 +579,9 @@ const loading = ref(true)
 const error = ref(null)
 const downloadingInvoice = ref(false)
 const printingInvoice = ref(false)
+const confirmingDelivery = ref(false)
+const showDeliveryConfirmation = ref(false)
+const deliveryNotes = ref('')
 
 // Charger les détails de la commande
 const loadOrder = async () => {
@@ -639,12 +722,57 @@ const printInvoice = async () => {
   }
 }
 
+// Confirmer la réception du produit
+const confirmDelivery = async () => {
+  if (!order.value) return
+  
+  try {
+    confirmingDelivery.value = true
+    
+    const payload = {}
+    if (deliveryNotes.value.trim()) {
+      payload.notes = deliveryNotes.value.trim()
+    }
+    
+    const response = await apiPost(`/orders/${order.value.order_number}/confirm-delivery`, payload)
+    
+    if (response.success) {
+      showSuccess('Réception du produit confirmée avec succès')
+      
+      // Mettre à jour l'ordre localement
+      order.value.status = 'fulfilled'
+      order.value.fulfilled_at = response.data.fulfilled_at
+      
+      // Fermer la modal et réinitialiser
+      showDeliveryConfirmation.value = false
+      deliveryNotes.value = ''
+      
+      // Optionnel: recharger les données pour être sûr
+      // loadOrder()
+    } else {
+      showError(response.message || 'Erreur lors de la confirmation de réception')
+    }
+  } catch (error) {
+    console.error('Erreur lors de la confirmation de réception:', error)
+    if (error.response?.status === 409) {
+      showError('Cette commande est déjà marquée comme reçue')
+    } else if (error.response?.status === 400) {
+      showError(error.response.data?.message || 'Cette commande ne peut pas être marquée comme reçue')
+    } else {
+      showError('Erreur lors de la confirmation de réception. Veuillez réessayer.')
+    }
+  } finally {
+    confirmingDelivery.value = false
+  }
+}
+
 // Fonctions utilitaires
 const getStatusText = (status) => {
   const statusMap = {
     'pending': 'En attente',
     'awaiting_payment': 'En attente de paiement',
     'paid': 'Payé',
+    'shipping': 'En cours de livraison',
     'failed': 'Échoué',
     'cancelled': 'Annulé',
     'fulfilled': 'Livré',
@@ -689,6 +817,7 @@ const getStatusBadgeClass = (status) => {
     'pending': 'bg-yellow-100 text-yellow-800',
     'awaiting_payment': 'bg-blue-100 text-blue-800',
     'paid': 'bg-green-100 text-green-800',
+    'shipping': 'bg-blue-100 text-blue-800',
     'failed': 'bg-red-100 text-red-800',
     'cancelled': 'bg-gray-100 text-gray-800',
     'fulfilled': 'bg-green-100 text-green-800',

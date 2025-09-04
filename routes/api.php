@@ -190,6 +190,8 @@ Route::group([
         Route::get('/search', [OrderTrackingController::class, 'search']);
         Route::get('/{order_number}', [OrderTrackingController::class, 'show']);
         Route::get('/{order_number}/invoice', [OrderTrackingController::class, 'invoice']);
+        Route::post('/{order_number}/confirm-delivery', [OrderTrackingController::class, 'confirmDelivery']);
+        Route::patch('/{order_number}/status', [OrderTrackingController::class, 'updateStatus']);
     });
     
     // Payment Tracking

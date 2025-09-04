@@ -785,8 +785,23 @@ class PaymentController extends Controller
                     'external_status' => $status,
                     'payment_status' => $paymentStatus->value,
                     'order_status' => $orderStatus->value,
-                    'payment_id' => $lockedPayment->id
+                    'payment_id' => $lockedPayment->id,
+                    'current_payment_status' => $lockedPayment->status,
+                    'current_order_status' => $lockedPayment->order->status
                 ]);
+
+                // Validate status transitions
+                $currentPaymentStatus = PaymentStatus::from($lockedPayment->status);
+                $currentOrderStatus = OrderStatus::from($lockedPayment->order->status);
+                
+                if (!PaymentStatusMapper::isValidTransition($currentPaymentStatus, $paymentStatus)) {
+                    Log::warning('Invalid payment status transition attempted but continuing', [
+                        'payment_id' => $lockedPayment->id,
+                        'from_status' => $currentPaymentStatus->value,
+                        'to_status' => $paymentStatus->value,
+                        'external_status' => $status
+                    ]);
+                }
 
                 // 7. Prepare callback data with security information
                 $callbackData = array_merge($request->all(), ['security' => $securityInfo]);
@@ -795,7 +810,9 @@ class PaymentController extends Controller
                 if ($paymentStatus === PaymentStatus::PAID) {
                     Log::info('Processing successful payment', [
                         'payment_id' => $lockedPayment->id,
-                        'order_id' => $lockedPayment->order->id
+                        'order_id' => $lockedPayment->order->id,
+                        'current_order_status' => $lockedPayment->order->status,
+                        'target_order_status' => $orderStatus->value
                     ]);
 
                     // Update payment
@@ -807,9 +824,9 @@ class PaymentController extends Controller
                         'callback_data' => $callbackData
                     ]);
 
-                    // Update order
+                    // Update order - Force update to 'paid' status
                     $lockedPayment->order->update([
-                        'status' => $orderStatus->value,
+                        'status' => OrderStatus::PAID->value,  // Force explicit 'paid' status
                         'paid_at' => now(),
                         'payment_reference' => $transactionId
                     ]);
@@ -817,7 +834,8 @@ class PaymentController extends Controller
                     Log::info('Payment and order marked as paid', [
                         'payment_id' => $lockedPayment->id,
                         'order_id' => $lockedPayment->order->id,
-                        'order_number' => $lockedPayment->order->order_number
+                        'order_number' => $lockedPayment->order->order_number,
+                        'final_order_status' => $lockedPayment->order->fresh()->status
                     ]);
 
                     // Update lottery tickets to paid status if this is a lottery order
@@ -840,6 +858,18 @@ class PaymentController extends Controller
                             'lottery_id' => $lockedPayment->order->lottery_id,
                             'tickets_count' => $ticketCount
                         ]);
+                    }
+
+                    // Handle direct product purchase orders
+                    if ($lockedPayment->order->type === 'direct' && $lockedPayment->order->product_id) {
+                        Log::info('Processing direct product purchase payment', [
+                            'payment_id' => $lockedPayment->id,
+                            'product_id' => $lockedPayment->order->product_id,
+                            'order_id' => $lockedPayment->order->id
+                        ]);
+                        
+                        // Additional logic for direct product purchases can be added here
+                        // For example: marking product as sold, sending notifications, etc.
                     }
 
                     // Track order paid metrics
@@ -1094,14 +1124,15 @@ class PaymentController extends Controller
      * @OA\Post(
      *     path="/api/payments/notify",
      *     tags={"Payments"},
-     *     summary="Notification E-Billing (IPN)",
+     *     summary="Notification E-Billing (IPN) - Deprecated, use /callback instead",
      *     @OA\Response(response=200, description="Notification traitée")
      * )
      */
     public function notify(Request $request)
     {
-        $result = EBillingService::processNotification($request->all());
-        return response('', $result['status']);
+        // Deprecated: Redirect to the main callback handler
+        Log::info('E-BILLING :: Notify endpoint called (deprecated), redirecting to callback handler');
+        return $this->callback($request);
     }
 
     /**

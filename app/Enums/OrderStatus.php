@@ -7,6 +7,7 @@ enum OrderStatus: string
     case PENDING = 'pending';
     case AWAITING_PAYMENT = 'awaiting_payment';
     case PAID = 'paid';
+    case SHIPPING = 'shipping';
     case FAILED = 'failed';
     case CANCELLED = 'cancelled';
     case FULFILLED = 'fulfilled';
@@ -22,6 +23,7 @@ enum OrderStatus: string
             self::PENDING => 'En attente',
             self::AWAITING_PAYMENT => 'En attente de paiement',
             self::PAID => 'Payé',
+            self::SHIPPING => 'En cours de livraison',
             self::FAILED => 'Échec',
             self::CANCELLED => 'Annulé',
             self::FULFILLED => 'Livré',
@@ -39,6 +41,7 @@ enum OrderStatus: string
             self::PENDING => 'Commande créée et en attente de traitement',
             self::AWAITING_PAYMENT => 'Commande en attente du paiement',
             self::PAID => 'Commande payée avec succès',
+            self::SHIPPING => 'Commande en cours de livraison',
             self::FAILED => 'Le paiement de la commande a échoué',
             self::CANCELLED => 'Commande annulée',
             self::FULFILLED => 'Commande livrée avec succès',
@@ -53,7 +56,6 @@ enum OrderStatus: string
     public function isFinal(): bool
     {
         return in_array($this, [
-            self::PAID,
             self::FAILED,
             self::CANCELLED,
             self::FULFILLED,
@@ -69,6 +71,7 @@ enum OrderStatus: string
     {
         return in_array($this, [
             self::PAID,
+            self::SHIPPING,
             self::FULFILLED
         ]);
     }
@@ -88,6 +91,14 @@ enum OrderStatus: string
      * Check if order can be fulfilled
      */
     public function canBeFulfilled(): bool
+    {
+        return in_array($this, [self::PAID, self::SHIPPING]);
+    }
+
+    /**
+     * Check if merchant can change status to shipping
+     */
+    public function canBeShipped(): bool
     {
         return $this === self::PAID;
     }
