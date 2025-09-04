@@ -70,7 +70,7 @@
         </div>
 
         <!-- Progression -->
-        <div v-if="product.active_lottery" class="space-y-1">
+        <div v-if="product.sale_mode === 'lottery' && product.active_lottery" class="space-y-1">
           <div class="flex justify-between text-sm">
             <span class="text-gray-600">Progression</span>
             <span class="font-medium text-purple-700">{{ calculateProgress(product) }}%</span>
@@ -88,7 +88,7 @@
         </div>
 
         <!-- Date de tirage -->
-        <div v-if="product.active_lottery?.draw_date" class="flex items-center text-sm text-gray-600">
+        <div v-if="product.sale_mode === 'lottery' && product.active_lottery?.draw_date" class="flex items-center text-sm text-gray-600">
           <CalendarIcon class="w-4 h-4 mr-2 text-purple-600 flex-shrink-0" />
           <span>Tirage le {{ formatDate(product.active_lottery.draw_date) }}</span>
         </div>
