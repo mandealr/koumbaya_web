@@ -178,6 +178,13 @@ Route::group([
     // User actions
     Route::post('/user/become-seller', [App\Http\Controllers\Api\UserController::class, 'becomeSeller']);
     
+    // Product Images Upload
+    Route::prefix('products/images')->group(function () {
+        Route::post('/', [App\Http\Controllers\Api\ProductImageController::class, 'upload']);
+        Route::post('/multiple', [App\Http\Controllers\Api\ProductImageController::class, 'uploadMultiple']);
+        Route::delete('/', [App\Http\Controllers\Api\ProductImageController::class, 'delete']);
+    });
+    
     // Refunds
     Route::prefix('refunds')->group(function () {
         Route::get('/', [RefundController::class, 'index']);

@@ -210,56 +210,17 @@
         <h2 class="text-xl font-semibold text-gray-900 mb-6">Photos du produit</h2>
 
         <div class="space-y-6">
-          <div class="text-center">
-            <div
-              @click="triggerFileInput"
-              @dragover.prevent
-              @drop.prevent="handleFileDrop"
-              class="border-2 border-dashed border-gray-300 rounded-xl p-8 hover:border-[#0099cc] transition-colors cursor-pointer"
-            >
-              <CameraIcon class="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <p class="text-lg font-medium text-gray-700 mb-2">Ajoutez des photos</p>
-              <p class="text-sm text-gray-700 mb-4">Glissez-déposez ou cliquez pour sélectionner</p>
-              <div class="flex justify-center">
-                <span class="bg-[#0099cc] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#0088bb] transition-colors">
-                  Choisir des fichiers
-                </span>
-              </div>
-            </div>
-            <input
-              ref="fileInput"
-              type="file"
-              multiple
-              accept="image/jpeg,image/jpg,image/png,image/webp"
-              @change="handleFileSelect"
-              class="hidden"
-            />
-          </div>
-
-          <!-- Image Preview -->
-          <div v-if="form.images.length > 0" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div
-              v-for="(image, index) in form.images"
-              :key="index"
-              class="relative group"
-            >
-              <img
-                :src="image.preview"
-                :alt="`Produit ${index + 1}`"
-                class="w-full h-32 object-cover rounded-xl border border-gray-200"
-              />
-              <button
-                @click="removeImage(index)"
-                type="button"
-                class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <XMarkIcon class="w-4 h-4" />
-              </button>
-              <div v-if="index === 0" class="absolute bottom-2 left-2 bg-[#0099cc] text-white text-xs px-2 py-1 rounded-md">
-                Photo principale
-              </div>
-            </div>
-          </div>
+          <!-- Nouveau composant ImageUpload -->
+          <ImageUpload
+            v-model="form.imageUrls"
+            upload-endpoint="/products/images"
+            :max-files="10"
+            :max-size-m-b="5"
+            help-text="JPG, PNG, WebP - Max 5MB chacune - La première image sera la photo principale"
+            @success="handleImageUploadSuccess"
+            @error="handleImageUploadError"
+            @progress="handleImageUploadProgress"
+          />
 
           <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div class="flex items-start space-x-3">
@@ -471,7 +432,7 @@
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-800">Photos :</span>
-                <span class="font-medium">{{ form.images.length }} image(s)</span>
+                <span class="font-medium">{{ (form.imageUrls?.length || form.images?.length || 0) }} image(s)</span>
               </div>
             </div>
           </div>
@@ -603,6 +564,7 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi } from '../../composables/api'
 import { useAuthStore } from '../../stores/auth'
+import ImageUpload from '../../components/common/ImageUpload.vue'
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -639,7 +601,8 @@ const form = reactive({
   sale_mode: 'direct', // 'direct' or 'lottery'
   price: '', // Changed from 'value' to 'price' to match API
   location: '',
-  images: [],
+  images: [], // Ancien système pour compatibilité
+  imageUrls: [], // Nouveau système avec URLs des images uploadées
   ticket_price: '',
   total_tickets: '', // Sera initialisé dans onMounted
   min_tickets: '', // This will be 'min_participants' in the API
@@ -789,6 +752,22 @@ const handleFileDrop = (event) => {
   handleFiles(files)
 }
 
+// Handlers pour le nouveau système ImageUpload
+const handleImageUploadSuccess = ({ index, url, response }) => {
+  console.log('Image uploadée avec succès:', { index, url, response })
+  showSuccessToast(`Image ${index + 1} uploadée avec succès`)
+}
+
+const handleImageUploadError = ({ index, error }) => {
+  console.error('Erreur upload image:', { index, error })
+  showErrorToast(`Erreur lors de l'upload de l'image ${index + 1}: ${error.message}`)
+}
+
+const handleImageUploadProgress = ({ index, progress }) => {
+  console.log(`Upload image ${index + 1}: ${progress}%`)
+}
+
+// Ancien système pour compatibilité (sera supprimé plus tard)
 const handleFiles = (files) => {
   const validFiles = files.filter(file => {
     // Validate file type
@@ -885,7 +864,7 @@ const handleSubmit = async () => {
       category_id: parseInt(form.category_id),
       price: parseFloat(form.price),
       sale_mode: form.sale_mode,
-      images: form.images.map(img => img.preview) // For now, use base64 images
+      images: form.imageUrls.length > 0 ? form.imageUrls : form.images.map(img => img.preview) // Utiliser les URLs uploadées ou fallback vers base64
     }
 
     // Add lottery-specific fields only if lottery mode

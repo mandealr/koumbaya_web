@@ -35,7 +35,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, toRefs, watch } from 'vue'
 
 const props = defineProps({
   src: {
@@ -108,7 +108,6 @@ watch(src, () => {
 </script>
 
 <script>
-import { toRefs, watch } from 'vue'
 export default {
   name: 'ProductImage'
 }
