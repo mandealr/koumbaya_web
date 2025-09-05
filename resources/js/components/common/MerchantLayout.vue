@@ -49,12 +49,7 @@
           <!-- Right side -->
           <div class="flex items-center space-x-2 sm:space-x-4">
             <!-- Notifications -->
-            <button class="relative p-1 sm:p-2 text-gray-400 hover:text-gray-500">
-              <BellIcon class="h-5 w-5 sm:h-6 sm:w-6" />
-              <span v-if="unreadNotifications > 0" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full min-w-[1rem] h-4">
-                {{ unreadNotifications }}
-              </span>
-            </button>
+            <NotificationIcon />
 
             <!-- User menu -->
             <div class="relative ml-1 sm:ml-3">
@@ -176,6 +171,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/api'
 import KoumbayaFooter from './KoumbayaFooter.vue'
+import NotificationIcon from '@/components/common/NotificationIcon.vue'
 import {
   HomeIcon,
   ShoppingBagIcon,
@@ -184,7 +180,6 @@ import {
   ChartBarIcon,
   CogIcon,
   UserIcon,
-  BellIcon,
   ChevronDownIcon,
   ArrowRightOnRectangleIcon,
   Bars3Icon
@@ -198,7 +193,6 @@ const { get } = useApi()
 const userMenuOpen = ref(false)
 const mobileMenuOpen = ref(false)
 const logoError = ref(false)
-const unreadNotifications = ref(0)
 const quickStats = ref({
   products: '0',
   lotteries: '0',

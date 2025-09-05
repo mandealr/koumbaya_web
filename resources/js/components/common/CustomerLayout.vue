@@ -46,11 +46,7 @@
           <!-- User Menu -->
           <div class="flex items-center space-x-2 sm:space-x-4">
             <!-- Notifications -->
-            <button class="p-1 sm:p-2 text-gray-400 hover:text-gray-600 relative">
-              <BellIcon class="w-5 h-5 sm:w-6 sm:h-6" />
-              <span v-if="unreadNotifications > 0" class="absolute top-0 right-0 block h-2 w-2 bg-red-400 rounded-full"></span>
-              <span v-if="unreadNotifications > 9" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">{{ unreadNotifications > 99 ? '99+' : unreadNotifications }}</span>
-            </button>
+            <NotificationIcon />
 
             <!-- User Dropdown -->
             <div class="relative">
@@ -173,8 +169,8 @@ import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/api'
 import KoumbayaFooter from './KoumbayaFooter.vue'
 import VerificationBanner from './VerificationBanner.vue'
+import NotificationIcon from '@/components/common/NotificationIcon.vue'
 import {
-  BellIcon,
   UserIcon,
   TicketIcon,
   CreditCardIcon,
@@ -190,7 +186,6 @@ const { get } = useApi()
 const userMenuOpen = ref(false)
 const mobileMenuOpen = ref(false)
 const logoError = ref(false)
-const unreadNotifications = ref(0)
 
 const navigationItems = [
   { name: 'customer.dashboard', to: { name: 'customer.dashboard' }, label: 'Accueil' },
@@ -233,28 +228,12 @@ const handleClickOutside = (event) => {
   }
 }
 
-const loadNotifications = async () => {
-  try {
-    const response = await get('/notifications/unread-count')
-    if (response && response.data && response.data.unread_count !== undefined) {
-      unreadNotifications.value = response.data.unread_count
-    }
-  } catch (error) {
-    console.error('Erreur lors du chargement des notifications:', error)
-    unreadNotifications.value = 0
-  }
-}
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-  loadNotifications()
-  
-  // Recharger les notifications toutes les 2 minutes
-  const notificationInterval = setInterval(loadNotifications, 2 * 60 * 1000)
   
   onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside)
-    clearInterval(notificationInterval)
   })
 })
 </script>

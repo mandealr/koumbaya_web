@@ -104,10 +104,7 @@
           <!-- Header Actions -->
           <div class="flex items-center space-x-4">
             <!-- Notifications -->
-            <button class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-              <BellIcon class="w-6 h-6" />
-              <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            <NotificationIcon />
 
             <!-- Search -->
             <div class="hidden md:flex items-center">
@@ -201,13 +198,13 @@ import { useAuthStore } from '@/stores/auth'
 import { useRouter, useRoute } from 'vue-router'
 import { useApi } from '@/composables/api'
 import logoIcon from '/icon.png'
+import NotificationIcon from '@/components/common/NotificationIcon.vue'
 import {
   HomeIcon,
   UsersIcon,
   ShoppingBagIcon,
   GiftIcon,
   Cog6ToothIcon,
-  BellIcon,
   MagnifyingGlassIcon,
   UserIcon,
   ArrowRightOnRectangleIcon,

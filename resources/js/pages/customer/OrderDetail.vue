@@ -443,7 +443,7 @@
               
               <!-- Confirm Delivery -->
               <button
-                v-if="order.status === 'paid' || order.status === 'shipping'"
+                v-if="(order.status === 'paid' || order.status === 'shipping') && (order.type !== 'lottery' || order.has_winning_ticket)"
                 @click="showDeliveryConfirmation = true"
                 :disabled="confirmingDelivery"
                 :class="[
@@ -457,6 +457,17 @@
                 <CheckIcon v-else class="w-4 h-4 mr-2" />
                 {{ confirmingDelivery ? 'Validation...' : 'Confirmer la réception' }}
               </button>
+              
+              <!-- Message pour ticket non gagnant -->
+              <div v-if="(order.status === 'paid' || order.status === 'shipping') && order.type === 'lottery' && !order.has_winning_ticket" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-md">
+                <div class="flex items-center">
+                  <ExclamationTriangleIcon class="w-5 h-5 text-gray-500 mr-2 flex-shrink-0" />
+                  <div>
+                    <p class="text-sm font-medium text-gray-700">Ticket de tombola non gagnant</p>
+                    <p class="text-xs text-gray-500">Aucune livraison n'est prévue pour ce ticket</p>
+                  </div>
+                </div>
+              </div>
               
               <!-- Already Delivered -->
               <div v-if="order.status === 'fulfilled'" class="w-full p-3 bg-green-50 border border-green-200 rounded-md">
@@ -565,7 +576,8 @@ import {
   ArrowPathIcon,
   DocumentArrowDownIcon,
   PrinterIcon,
-  CreditCardIcon
+  CreditCardIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
 
 const route = useRoute()

@@ -208,8 +208,20 @@
               </td>
 
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ order.tickets_count }} tickets</div>
-                <div class="text-sm text-gray-500">N° {{ order.ticket_numbers.join(', ') }}</div>
+                <div class="flex items-center space-x-2">
+                  <div>
+                    <div class="text-sm text-gray-900">{{ order.tickets_count }} tickets</div>
+                    <div class="text-sm text-gray-500">N° {{ order.ticket_numbers.join(', ') }}</div>
+                  </div>
+                  <div v-if="order.type === 'lottery'" class="ml-2">
+                    <span v-if="order.has_winning_ticket" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      🏆 Gagnant
+                    </span>
+                    <span v-else class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                      Non gagnant
+                    </span>
+                  </div>
+                </div>
               </td>
 
               <td class="px-6 py-4 whitespace-nowrap">
@@ -238,10 +250,10 @@
                     <EyeIcon class="w-4 h-4" />
                   </button>
                   <button
-                    v-if="order.status === 'paid'"
+                    v-if="order.status === 'paid' && (order.type !== 'lottery' || order.has_winning_ticket)"
                     @click="markAsShipping(order)"
                     class="text-blue-600 hover:text-blue-800 transition-colors"
-                    title="Marquer en cours de livraison"
+                    :title="getDeliveryButtonTitle(order)"
                   >
                     <TruckIcon class="w-4 h-4" />
                   </button>
@@ -630,6 +642,15 @@ const exportOrders = async () => {
   } catch (error) {
     toast.error('Erreur lors de l\'export des commandes')
   }
+}
+
+const getDeliveryButtonTitle = (order) => {
+  if (order.type === 'lottery') {
+    return order.has_winning_ticket 
+      ? 'Marquer en cours de livraison (ticket gagnant)'
+      : 'Ticket non gagnant - pas de livraison'
+  }
+  return 'Marquer en cours de livraison'
 }
 
 // Charger les données au montage

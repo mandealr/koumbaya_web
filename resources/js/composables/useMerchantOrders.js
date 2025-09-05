@@ -49,31 +49,35 @@ export function useMerchantOrders() {
       if (filters.search) params.append('search', filters.search)
       if (filters.status) params.append('status', filters.status)
       if (filters.product) params.append('product_id', filters.product)
-      if (filters.startDate) params.append('start_date', filters.startDate)
-      if (filters.endDate) params.append('end_date', filters.endDate)
-      if (filters.limit) params.append('limit', filters.limit)
+      if (filters.startDate) params.append('date_from', filters.startDate)
+      if (filters.endDate) params.append('date_to', filters.endDate)
+      if (filters.limit) params.append('per_page', filters.limit)
       
       const queryString = params.toString()
-      const url = `/merchant/dashboard/recent-transactions${queryString ? '?' + queryString : ''}`
+      const url = `/merchant/orders${queryString ? '?' + queryString : ''}`
       
       const response = await get(url)
-      if (response && response.data && Array.isArray(response.data)) {
-        // Transformer les transactions en format commandes
-        orders.value = response.data.map(transaction => ({
-          id: transaction.id || Math.random(),
-          order_number: transaction.transaction_id || `ORD-${transaction.id}`,
-          customer_name: transaction.user?.name || 'Client inconnu',
-          customer_email: transaction.user?.email || '',
-          product_name: transaction.product?.title || 'Produit inconnu',
-          product_image: transaction.product?.image_url || '/images/products/placeholder.jpg',
-          tickets_count: parseInt(transaction.quantity || 0),
-          ticket_numbers: transaction.ticket_numbers || [],
-          ticket_price: parseFloat(transaction.amount || 0) / Math.max(parseInt(transaction.quantity || 1), 1),
-          total_amount: parseFloat(transaction.amount || 0),
+      if (response && response.data && response.data.data && Array.isArray(response.data.data)) {
+        // Utiliser les vraies commandes avec has_winning_ticket
+        orders.value = response.data.data.map(order => ({
+          id: order.id,
+          order_number: order.order_number,
+          customer_name: order.customer_name,
+          customer_email: order.customer_email,
+          product_name: order.product_name,
+          product_image: order.product_image,
+          tickets_count: order.tickets_count,
+          ticket_numbers: order.ticket_numbers || [],
+          ticket_price: order.ticket_price,
+          total_amount: order.total_amount,
           currency: 'FCFA',
-          payment_method: transaction.payment_method || 'Mobile Money',
-          status: transaction.status || 'completed',
-          created_at: transaction.completed_at || transaction.created_at
+          payment_method: order.payment_method,
+          status: order.status,
+          type: order.type,
+          has_winning_ticket: order.has_winning_ticket || false,
+          created_at: order.created_at,
+          updated_at: order.updated_at,
+          lottery: order.lottery
         }))
       } else {
         orders.value = []

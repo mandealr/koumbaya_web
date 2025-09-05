@@ -35,6 +35,9 @@ import Payments from '@/pages/customer/Payments.vue'
 import OrderDetail from '@/pages/customer/OrderDetail.vue'
 import PaymentDetail from '@/pages/customer/PaymentDetail.vue'
 
+// Notifications
+import Notifications from '@/pages/common/Notifications.vue'
+
 // Payment Pages
 import PaymentMethod from '@/pages/payment/PaymentMethod.vue'
 import PaymentPhone from '@/pages/payment/PhoneInput.vue'
@@ -195,6 +198,11 @@ const routes = [
         name: 'customer.payment.detail',
         component: PaymentDetail,
         props: true
+      },
+      {
+        path: 'notifications',
+        name: 'customer.notifications',
+        component: Notifications
       }
     ]
   },
@@ -269,6 +277,11 @@ const routes = [
         path: 'payments',
         name: 'admin.payments',
         component: PaymentManagement
+      },
+      {
+        path: 'notifications',
+        name: 'admin.notifications',
+        component: Notifications
       }
     ]
   },
@@ -334,8 +347,38 @@ const routes = [
         path: 'profile',
         name: 'merchant.profile',
         component: () => import('@/pages/merchant/Profile.vue')
+      },
+      {
+        path: 'notifications',
+        name: 'merchant.notifications',
+        component: Notifications
       }
     ]
+  },
+
+  // Generic notifications route - redirects to appropriate profile
+  {
+    path: '/notifications',
+    name: 'notifications',
+    redirect: (to) => {
+      const authStore = useAuthStore()
+      if (!authStore.isAuthenticated) {
+        return { name: 'login' }
+      }
+      
+      const userRole = authStore.user?.role?.name?.toLowerCase()
+      
+      switch (userRole) {
+        case 'admin':
+        case 'super_admin':
+          return { name: 'admin.notifications' }
+        case 'merchant':
+          return { name: 'merchant.notifications' }
+        case 'customer':
+        default:
+          return { name: 'customer.notifications' }
+      }
+    }
   }
 ]
 

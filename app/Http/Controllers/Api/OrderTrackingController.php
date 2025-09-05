@@ -243,9 +243,7 @@ class OrderTrackingController extends Controller
                 'user', // Charger les informations du client
                 'product',
                 'lottery.product',
-                'lottery.tickets' => function($query) use ($user) {
-                    $query->where('user_id', $user->id);
-                },
+                'tickets', // Charger les tickets liés à cette commande spécifique
                 'payments'
             ])
             ->first();
@@ -648,6 +646,7 @@ class OrderTrackingController extends Controller
             'cancelled_at' => $order->cancelled_at,
             'refunded_at' => $order->refunded_at,
             'notes' => $order->notes,
+            'has_winning_ticket' => false, // Valeur par défaut
         ];
 
         // Client information
@@ -689,9 +688,9 @@ class OrderTrackingController extends Controller
                 'winner_ticket_number' => $order->lottery->winner_ticket_number,
             ];
 
-            // Lottery tickets for this order
-            if ($order->lottery->tickets && $order->lottery->tickets->count() > 0) {
-                $details['tickets'] = $order->lottery->tickets->map(function ($ticket) {
+            // Tickets pour cette commande de loterie
+            if ($order->tickets && $order->tickets->count() > 0) {
+                $details['tickets'] = $order->tickets->map(function ($ticket) {
                     return [
                         'id' => $ticket->id,
                         'ticket_number' => $ticket->ticket_number,
@@ -701,7 +700,27 @@ class OrderTrackingController extends Controller
                         'purchased_at' => $ticket->purchased_at,
                     ];
                 });
+                
+                // Vérifier s'il y a au moins un ticket gagnant dans cette commande
+                $details['has_winning_ticket'] = $order->tickets->contains('is_winner', true);
             }
+        }
+
+        // Si ce n'est pas une commande de loterie mais qu'elle a des tickets (pour compatibilité)
+        if (!$order->lottery && $order->tickets && $order->tickets->count() > 0) {
+            $details['tickets'] = $order->tickets->map(function ($ticket) {
+                return [
+                    'id' => $ticket->id,
+                    'ticket_number' => $ticket->ticket_number,
+                    'status' => $ticket->status,
+                    'is_winner' => $ticket->is_winner,
+                    'price_paid' => $ticket->price,
+                    'purchased_at' => $ticket->purchased_at,
+                ];
+            });
+            
+            // Vérifier s'il y a au moins un ticket gagnant
+            $details['has_winning_ticket'] = $order->tickets->contains('is_winner', true);
         }
 
         // Payment information
