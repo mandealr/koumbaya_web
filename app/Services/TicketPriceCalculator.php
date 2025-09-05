@@ -17,9 +17,10 @@ class TicketPriceCalculator
      */
     public static function calculateTicketPrice(
         float $productPrice,
-        int $numberOfTickets = 1000,
+        int $numberOfTickets = 500,  // Changé à 500 par défaut
         float $commissionRate = 0.10, // 10%
-        float $marginRate = 0.15      // 15%
+        float $marginRate = 0.15,     // 15%
+        ?\App\Models\User $seller = null
     ): float {
         // Validation des paramètres
         if ($productPrice <= 0) {
@@ -34,6 +35,21 @@ class TicketPriceCalculator
             throw new \InvalidArgumentException('Les taux ne peuvent pas être négatifs');
         }
 
+        // Application des contraintes selon le rôle vendeur
+        if ($seller) {
+            // Pour les Business Individual : tickets fixes à 500
+            $fixedTickets = $seller->getFixedTicketCount();
+            if ($fixedTickets) {
+                $numberOfTickets = $fixedTickets;
+            }
+
+            // Vérification du prix minimum de produit pour respecter le ticket minimum de 200 FCFA
+            $minProductPrice = $seller->getMinProductPrice();
+            if ($minProductPrice && $productPrice < $minProductPrice) {
+                throw new \InvalidArgumentException("Prix minimum requis: {$minProductPrice} FCFA pour les vendeurs individuels");
+            }
+        }
+
         // Calcul selon la formule
         $commission = $productPrice * $commissionRate;
         $margin = $productPrice * $marginRate;
@@ -42,7 +58,15 @@ class TicketPriceCalculator
         $ticketPrice = $totalAmount / $numberOfTickets;
         
         // Arrondi à l'entier supérieur pour éviter les centimes
-        return ceil($ticketPrice);
+        $finalTicketPrice = ceil($ticketPrice);
+        
+        // Validation du prix minimum de ticket (200 FCFA)
+        $minTicketPrice = config('koumbaya.ticket_calculation.min_ticket_price', 200);
+        if ($finalTicketPrice < $minTicketPrice) {
+            throw new \InvalidArgumentException("Prix de ticket trop bas ({$finalTicketPrice} FCFA). Minimum requis: {$minTicketPrice} FCFA");
+        }
+        
+        return $finalTicketPrice;
     }
 
     /**

@@ -297,7 +297,69 @@ class User extends Authenticatable
 
     public function isMerchant(): bool
     {
-        // Système de rôles simplifié : Business = marchand uniquement
-        return $this->hasRole('Business');
+        return $this->hasRole('Business Enterprise') || $this->hasRole('Business Individual');
+    }
+
+    /**
+     * Vérifie si l'utilisateur est un vendeur particulier/individuel
+     */
+    public function isIndividualSeller(): bool
+    {
+        return $this->hasRole('Business Individual');
+    }
+
+    /**
+     * Vérifie si l'utilisateur est un vendeur business/entreprise
+     */
+    public function isBusinessSeller(): bool
+    {
+        return $this->hasRole('Business Enterprise');
+    }
+
+    /**
+     * Peut personnaliser le nombre de tickets selon son profil
+     */
+    public function canCustomizeTickets(): bool
+    {
+        // Business Individual : tickets fixes à 500
+        if ($this->hasRole('Business Individual')) {
+            return false;
+        }
+        
+        // Business Enterprise : peut personnaliser
+        if ($this->hasRole('Business Enterprise')) {
+            return true;
+        }
+
+        // Autres cas
+        return false;
+    }
+
+    /**
+     * Obtient le nombre de tickets fixe selon le profil
+     */
+    public function getFixedTicketCount(): ?int
+    {
+        // Business Individual : 500 tickets fixes
+        if ($this->hasRole('Business Individual')) {
+            return 500;
+        }
+        
+        // Business Enterprise : pas de limite fixe
+        return null;
+    }
+
+    /**
+     * Obtient le prix minimum de produit selon le profil
+     */
+    public function getMinProductPrice(): ?int
+    {
+        // Business Individual : prix minimum 100 000 FCFA
+        if ($this->hasRole('Business Individual')) {
+            return 100000;
+        }
+        
+        // Business Enterprise : pas de limite
+        return null;
     }
 }

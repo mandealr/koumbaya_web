@@ -27,7 +27,8 @@ class TicketPriceController extends Controller
      *             @OA\Property(property="product_price", type="number", format="float", example=750000, description="Prix du produit en FCFA"),
      *             @OA\Property(property="number_of_tickets", type="integer", example=1000, description="Nombre de tickets (défaut: 1000)"),
      *             @OA\Property(property="commission_rate", type="number", format="float", example=0.10, description="Taux de commission (défaut: 10%)"),
-     *             @OA\Property(property="margin_rate", type="number", format="float", example=0.15, description="Taux de marge (défaut: 15%)")
+     *             @OA\Property(property="margin_rate", type="number", format="float", example=0.15, description="Taux de marge (défaut: 15%)"),
+     *             @OA\Property(property="vendor_profile_id", type="integer", example=1, description="ID du profil vendeur à utiliser (optionnel)")
      *         )
      *     ),
      *     @OA\Response(
@@ -72,6 +73,7 @@ class TicketPriceController extends Controller
             'number_of_tickets' => 'nullable|integer|min:1|max:10000',
             'commission_rate' => 'nullable|numeric|min:0|max:1',
             'margin_rate' => 'nullable|numeric|min:0|max:1',
+            'vendor_profile_id' => 'nullable|exists:vendor_profiles,id',
         ]);
 
         try {
@@ -80,17 +82,46 @@ class TicketPriceController extends Controller
             $numberOfTickets = $validated['number_of_tickets'] ?? config('koumbaya.ticket_calculation.default_tickets', 1000);
             $commissionRate = $validated['commission_rate'] ?? config('koumbaya.ticket_calculation.commission_rate', 0.10);
             $marginRate = $validated['margin_rate'] ?? config('koumbaya.ticket_calculation.margin_rate', 0.15);
+            $vendorProfileId = $validated['vendor_profile_id'] ?? null;
 
-            // Calcul des détails complets
+            // Si un profil vendeur est fourni, l'utilisateur doit être authentifié
+            $vendor = null;
+            if ($vendorProfileId) {
+                $user = auth('sanctum')->user();
+                if (!$user) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Authentification requise pour utiliser un profil vendeur',
+                    ], 401);
+                }
+                
+                // Vérifier que le profil appartient bien à l'utilisateur
+                $vendor = \App\Models\VendorProfile::where('id', $vendorProfileId)
+                    ->where('user_id', $user->id)
+                    ->first();
+                    
+                if (!$vendor) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Profil vendeur non trouvé ou non autorisé',
+                    ], 403);
+                }
+            }
+
+            // Calcul des détails complets avec le vendeur si disponible
             $calculationDetails = TicketPriceCalculator::getCalculationDetails(
                 $productPrice,
                 $numberOfTickets,
                 $commissionRate,
-                $marginRate
+                $marginRate,
+                $vendor
             );
 
-            // Validation du prix calculé
-            $validation = TicketPriceCalculator::validateTicketPrice($calculationDetails['final_ticket_price']);
+            // Validation du prix calculé avec le vendeur
+            $validation = TicketPriceCalculator::validateTicketPrice(
+                $calculationDetails['final_ticket_price'],
+                $vendor
+            );
 
             // Formatage pour l'affichage
             $formatted = $this->formatPricesForDisplay($calculationDetails);
@@ -100,6 +131,11 @@ class TicketPriceController extends Controller
                 'data' => $calculationDetails,
                 'validation' => $validation,
                 'formatted' => $formatted,
+                'vendor_profile' => $vendor ? [
+                    'id' => $vendor->id,
+                    'type' => $vendor->type,
+                    'constraints' => $vendor->getConstraintsAttribute(),
+                ] : null,
             ]);
 
         } catch (\Exception $e) {
@@ -145,13 +181,39 @@ class TicketPriceController extends Controller
     {
         $validated = $request->validate([
             'product_price' => 'required|numeric|min:1',
+            'vendor_profile_id' => 'nullable|exists:vendor_profiles,id',
         ]);
 
         try {
             $productPrice = $validated['product_price'];
-            $currentTicketPrice = TicketPriceCalculator::calculateTicketPrice($productPrice);
+            $vendorProfileId = $validated['vendor_profile_id'] ?? null;
             
-            $suggestions = TicketPriceCalculator::getSuggestions($productPrice, $currentTicketPrice);
+            // Si un profil vendeur est fourni, l'utilisateur doit être authentifié
+            $vendor = null;
+            if ($vendorProfileId) {
+                $user = auth('sanctum')->user();
+                if (!$user) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Authentification requise pour utiliser un profil vendeur',
+                    ], 401);
+                }
+                
+                // Vérifier que le profil appartient bien à l'utilisateur
+                $vendor = \App\Models\VendorProfile::where('id', $vendorProfileId)
+                    ->where('user_id', $user->id)
+                    ->first();
+                    
+                if (!$vendor) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Profil vendeur non trouvé ou non autorisé',
+                    ], 403);
+                }
+            }
+            
+            $currentTicketPrice = TicketPriceCalculator::calculateTicketPrice($productPrice, 1000, null, null, $vendor);
+            $suggestions = TicketPriceCalculator::getSuggestions($productPrice, $currentTicketPrice, $vendor);
 
             // Formater les suggestions
             $formattedSuggestions = array_map(function ($suggestion) {
@@ -164,6 +226,11 @@ class TicketPriceController extends Controller
             return response()->json([
                 'success' => true,
                 'suggestions' => $formattedSuggestions,
+                'vendor_profile' => $vendor ? [
+                    'id' => $vendor->id,
+                    'type' => $vendor->type,
+                    'constraints' => $vendor->getConstraintsAttribute(),
+                ] : null,
             ]);
 
         } catch (\Exception $e) {

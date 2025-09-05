@@ -7,7 +7,7 @@
           <!-- Logo and main nav -->
           <div class="flex">
             <div class="flex-shrink-0 flex items-center min-w-0">
-              <router-link to="/merchant/dashboard" class="flex items-center">
+              <router-link :to="dashboardPath" class="flex items-center">
                 <img 
                   v-if="!logoError"
                   class="h-6 sm:h-8 w-auto object-contain max-w-none" 
@@ -24,7 +24,7 @@
                   </div>
                   <span class="text-sm sm:text-lg font-bold text-[#0099cc] whitespace-nowrap">Koumbaya</span>
                 </div>
-                <span class="ml-1 sm:ml-2 text-xs sm:text-sm text-[#0099cc] font-medium whitespace-nowrap">Marchand</span>
+                <span class="ml-1 sm:ml-2 text-xs sm:text-sm text-[#0099cc] font-medium whitespace-nowrap">{{ merchantLabel }}</span>
               </router-link>
             </div>
 
@@ -199,15 +199,30 @@ const quickStats = ref({
   revenue: '0 FCFA'
 })
 
-// Navigation items
-const navigation = [
-  { name: 'Dashboard', href: '/merchant/dashboard', icon: HomeIcon },
-  { name: 'Produits', href: '/merchant/products', icon: ShoppingBagIcon },
-  { name: 'Commandes', href: '/merchant/orders', icon: ClipboardDocumentListIcon },
-  { name: 'Tombolas', href: '/merchant/lotteries', icon: GiftIcon },
-  { name: 'Statistiques', href: '/merchant/analytics', icon: ChartBarIcon },
-  { name: 'Paramètres', href: '/merchant/settings', icon: CogIcon }
-]
+// Navigation items - conditionnelle selon le rôle
+const navigation = computed(() => {
+  const baseNavigation = [
+    { 
+      name: isIndividualSeller.value ? 'Mon Espace Vendeur' : 'Dashboard', 
+      href: isIndividualSeller.value ? '/merchant/simple-dashboard' : '/merchant/dashboard', 
+      icon: HomeIcon 
+    },
+    { name: 'Produits', href: '/merchant/products', icon: ShoppingBagIcon },
+    { name: 'Commandes', href: '/merchant/orders', icon: ClipboardDocumentListIcon }
+  ]
+  
+  // Ajouter les fonctionnalités avancées seulement pour Business Enterprise
+  if (!isIndividualSeller.value) {
+    baseNavigation.push(
+      { name: 'Tombolas', href: '/merchant/lotteries', icon: GiftIcon },
+      { name: 'Statistiques', href: '/merchant/analytics', icon: ChartBarIcon }
+    )
+  }
+  
+  baseNavigation.push({ name: 'Paramètres', href: '/merchant/settings', icon: CogIcon })
+  
+  return baseNavigation
+})
 
 const userNavigation = [
   { name: 'Profil', href: '/merchant/profile', icon: UserIcon },
@@ -221,6 +236,17 @@ const userInitials = computed(() => {
   const first = user.value.first_name?.[0] || ''
   const last = user.value.last_name?.[0] || ''
   return (first + last).toUpperCase()
+})
+
+const isIndividualSeller = computed(() => authStore.hasRole('Business Individual'))
+const isBusinessSeller = computed(() => authStore.hasRole('Business Enterprise'))
+
+const merchantLabel = computed(() => {
+  return isIndividualSeller.value ? 'Vendeur' : 'Marchand'
+})
+
+const dashboardPath = computed(() => {
+  return isIndividualSeller.value ? '/merchant/simple-dashboard' : '/merchant/dashboard'
 })
 
 const showQuickStats = computed(() => {

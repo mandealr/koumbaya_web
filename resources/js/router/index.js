@@ -302,6 +302,11 @@ const routes = [
         component: () => import('@/pages/merchant/Dashboard.vue')
       },
       {
+        path: 'simple-dashboard',
+        name: 'merchant.simple-dashboard',
+        component: () => import('@/pages/merchant/SimpleMerchantDashboard.vue')
+      },
+      {
         path: 'products',
         name: 'merchant.products',
         component: () => import('@/pages/merchant/Products.vue')

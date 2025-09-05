@@ -254,6 +254,7 @@ const userDashboardPath = computed(() => {
   const routePaths = {
     'admin.dashboard': '/admin',
     'merchant.dashboard': '/merchant/dashboard',
+    'merchant.simple-dashboard': '/merchant/simple-dashboard',
     'customer.dashboard': '/customer'
   }
 

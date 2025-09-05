@@ -38,8 +38,17 @@ class RoleSeeder extends Seeder
 
             // === RÔLES MARCHAND ===
             [
-                'name' => 'Business',
-                'description' => 'Marchand qui peut vendre des produits et créer des loteries',
+                'name' => 'Business Enterprise',
+                'description' => 'Marchand entreprise avec toutes les fonctionnalités (tickets personnalisables)',
+                'active' => true,
+                'mutable' => false,
+                'user_type_id' => $merchantTypeId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Business Individual',
+                'description' => 'Vendeur individuel avec contraintes (500 tickets fixes)',
                 'active' => true,
                 'mutable' => false,
                 'user_type_id' => $merchantTypeId,
@@ -85,9 +94,10 @@ class RoleSeeder extends Seeder
             );
         }
 
-        echo "✅ Rôles Koumbaya créés (compatibles code existant) :\n";
+        echo "✅ Rôles Koumbaya créés (avec nouveaux profils vendeurs) :\n";
         echo "   - Particulier (pour customers)\n";
-        echo "   - Business (pour merchants)\n";
+        echo "   - Business Enterprise (pour merchants - flexibilité complète)\n";
+        echo "   - Business Individual (pour vendeurs - 500 tickets fixes)\n";
         echo "   - Agent (pour admins)\n";
         echo "   - Admin (pour admins)\n";
         echo "   - Super Admin (pour admins)\n";

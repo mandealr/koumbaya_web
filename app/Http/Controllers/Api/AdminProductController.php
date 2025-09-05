@@ -168,7 +168,8 @@ class AdminProductController extends Controller
             'category_id' => 'exists:categories,id',
             'is_active' => 'boolean',
             'image' => 'nullable|string',
-            'is_featured' => 'boolean'
+            'is_featured' => 'boolean',
+            'vendor_profile_id' => 'nullable|exists:vendor_profiles,id'
         ]);
 
         if ($validator->fails()) {
@@ -178,15 +179,36 @@ class AdminProductController extends Controller
             ], 422);
         }
 
+        // Si on modifie le profil vendeur ou le prix du ticket, valider
+        if (($request->has('vendor_profile_id') || $request->has('ticket_price')) && $product->sale_mode === 'lottery') {
+            $vendorProfileId = $request->vendor_profile_id ?? $product->vendor_profile_id;
+            $ticketPrice = $request->ticket_price ?? $product->ticket_price;
+            
+            if ($vendorProfileId && $ticketPrice) {
+                $vendor = \App\Models\VendorProfile::find($vendorProfileId);
+                if ($vendor) {
+                    $validation = \App\Services\TicketPriceCalculator::validateTicketPrice($ticketPrice, $vendor);
+                    if (!$validation['is_valid']) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Prix de ticket invalide selon les contraintes du profil vendeur',
+                            'warnings' => $validation['warnings']
+                        ], 422);
+                    }
+                }
+            }
+        }
+
         $product->update($request->only([
             'name', 'description', 'price', 'ticket_price', 
-            'sale_mode', 'category_id', 'is_active', 'image', 'is_featured'
+            'sale_mode', 'category_id', 'is_active', 'image', 'is_featured',
+            'vendor_profile_id'
         ]));
 
         return response()->json([
             'success' => true,
             'message' => 'Produit mis à jour avec succès',
-            'data' => ['product' => $product->load('category', 'merchant')]
+            'data' => ['product' => $product->load('category', 'merchant', 'vendorProfile')]
         ]);
     }
 

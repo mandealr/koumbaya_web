@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\OrderTrackingController;
 use App\Http\Controllers\Api\PaymentTrackingController;
 use App\Http\Controllers\Api\AvatarController;
 use App\Http\Controllers\Api\MerchantOrderController;
+use App\Http\Controllers\Api\VendorProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -174,6 +175,9 @@ Route::group([
         Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
     });
     
+    // User actions
+    Route::post('/user/become-seller', [App\Http\Controllers\Api\UserController::class, 'becomeSeller']);
+    
     // Refunds
     Route::prefix('refunds')->group(function () {
         Route::get('/', [RefundController::class, 'index']);
@@ -245,6 +249,16 @@ Route::group([
         Route::post('/avatar', [App\Http\Controllers\Api\MerchantProfileController::class, 'updateAvatar']);
         Route::put('/password', [App\Http\Controllers\Api\MerchantProfileController::class, 'updatePassword']);
         Route::get('/business-stats', [App\Http\Controllers\Api\MerchantProfileController::class, 'businessStats']);
+    });
+    
+    // Vendor Profiles Management
+    Route::prefix('vendor-profiles')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\VendorProfileController::class, 'index']);
+        Route::get('/types', [App\Http\Controllers\Api\VendorProfileController::class, 'types']);
+        Route::post('/', [App\Http\Controllers\Api\VendorProfileController::class, 'store']);
+        Route::get('/{id}', [App\Http\Controllers\Api\VendorProfileController::class, 'show']);
+        Route::put('/{id}', [App\Http\Controllers\Api\VendorProfileController::class, 'update']);
+        Route::delete('/{id}', [App\Http\Controllers\Api\VendorProfileController::class, 'destroy']);
     });
     
     // Transaction management

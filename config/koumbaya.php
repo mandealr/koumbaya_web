@@ -43,7 +43,7 @@ return [
         | Nombre de tickets générés par défaut pour chaque tombola
         |
         */
-        'default_tickets' => env('KOUMBAYA_DEFAULT_TICKETS', 1000),
+        'default_tickets' => env('KOUMBAYA_DEFAULT_TICKETS', 500),
 
         /*
         |--------------------------------------------------------------------------
@@ -64,7 +64,7 @@ return [
         | Prix minimum et maximum recommandés pour un ticket (en FCFA)
         |
         */
-        'min_ticket_price' => env('KOUMBAYA_MIN_TICKET_PRICE', 100), // 100 FCFA
+        'min_ticket_price' => env('KOUMBAYA_MIN_TICKET_PRICE', 200), // 200 FCFA
         'max_ticket_price' => env('KOUMBAYA_MAX_TICKET_PRICE', 50000), // 50,000 FCFA
 
         /*
@@ -168,6 +168,24 @@ return [
         |--------------------------------------------------------------------------
         */
         'allow_custom_ticket_count' => env('KOUMBAYA_ALLOW_CUSTOM_TICKET_COUNT', true),
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Configuration des Profils Vendeurs
+        |--------------------------------------------------------------------------
+        */
+        'seller_profiles' => [
+            'individual' => [
+                'fixed_tickets' => 500, // Tickets fixes pour les vendeurs particuliers
+                'can_customize_tickets' => false, // Ne peuvent pas modifier le nombre
+                'min_product_price' => 100000, // Prix minimum produit (pour avoir ticket >= 200 FCFA)
+            ],
+            'business' => [
+                'fixed_tickets' => null, // Peut choisir le nombre de tickets
+                'can_customize_tickets' => true, // Toutes les possibilités
+                'min_product_price' => null, // Pas de limite minimum
+            ]
+        ],
         
         /*
         |--------------------------------------------------------------------------

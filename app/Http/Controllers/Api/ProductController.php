@@ -474,11 +474,12 @@ class ProductController extends Controller
             'sale_mode' => 'required|string|in:direct,lottery',
             'images' => 'nullable|array',
             'images.*' => 'string',
+            'vendor_profile_id' => 'nullable|exists:vendor_profiles,id',
         ];
 
         // Add lottery-specific validation rules only if lottery mode
         if ($request->sale_mode === 'lottery') {
-            $rules['ticket_price'] = 'required|numeric|min:100';
+            $rules['ticket_price'] = 'nullable|numeric|min:100'; // Optionnel, sera calculé si non fourni
             $rules['min_participants'] = 'nullable|integer|min:10|max:10000';
         }
 
@@ -486,6 +487,40 @@ class ProductController extends Controller
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Vérifier le profil vendeur si fourni
+        $vendor = null;
+        if ($request->vendor_profile_id) {
+            $vendor = \App\Models\VendorProfile::where('id', $request->vendor_profile_id)
+                ->where('user_id', $user->id)
+                ->first();
+                
+            if (!$vendor) {
+                return response()->json(['error' => 'Profil vendeur non trouvé ou non autorisé'], 403);
+            }
+        }
+
+        // Si mode tombola et pas de prix de ticket fourni, calculer automatiquement
+        $ticketPrice = $request->ticket_price;
+        if ($request->sale_mode === 'lottery' && !$ticketPrice) {
+            // Utiliser le service de calcul avec le profil vendeur
+            $ticketPrice = \App\Services\TicketPriceCalculator::calculateTicketPrice(
+                $request->price,
+                1000, // Nombre de tickets par défaut
+                null, // Commission par défaut
+                null, // Marge par défaut
+                $vendor
+            );
+            
+            // Valider le prix calculé avec le profil vendeur
+            $validation = \App\Services\TicketPriceCalculator::validateTicketPrice($ticketPrice, $vendor);
+            if (!$validation['is_valid']) {
+                return response()->json([
+                    'error' => 'Prix de ticket invalide selon les contraintes du profil vendeur',
+                    'warnings' => $validation['warnings']
+                ], 422);
+            }
         }
 
         // Prepare product data
@@ -500,11 +535,12 @@ class ProductController extends Controller
             'sale_mode' => $request->sale_mode,
             'stock_quantity' => 1,
             'status' => 'active',
+            'vendor_profile_id' => $vendor ? $vendor->id : null,
         ];
 
         // Add lottery-specific fields only if lottery mode
         if ($request->sale_mode === 'lottery') {
-            $productData['ticket_price'] = $request->ticket_price;
+            $productData['ticket_price'] = $ticketPrice;
             $productData['min_participants'] = $request->min_participants ?? 50;
         }
 
@@ -524,16 +560,18 @@ class ProductController extends Controller
                 'status' => 'active',
                 'meta' => [
                     'auto_created' => true,
-                    'created_with_product' => true
+                    'created_with_product' => true,
+                    'vendor_profile_id' => $vendor ? $vendor->id : null,
                 ]
             ]);
         }
 
-        $product->load(['category', 'merchant', 'activeLottery']);
+        $product->load(['category', 'merchant', 'activeLottery', 'vendorProfile']);
 
         return response()->json([
             'message' => 'Produit créé avec succès',
-            'product' => $product
+            'product' => $product,
+            'ticket_price_calculated' => $request->sale_mode === 'lottery' && !$request->ticket_price,
         ], 201);
     }
 
@@ -627,19 +665,50 @@ class ProductController extends Controller
             'ticket_price' => 'numeric|min:100',
             'images' => 'nullable|array',
             'status' => 'in:draft,active',
+            'vendor_profile_id' => 'nullable|exists:vendor_profiles,id',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $product->update($request->only([
+        // Vérifier le profil vendeur si fourni
+        $vendor = null;
+        if ($request->has('vendor_profile_id') && $request->vendor_profile_id) {
+            $vendor = \App\Models\VendorProfile::where('id', $request->vendor_profile_id)
+                ->where('user_id', $user->id)
+                ->first();
+                
+            if (!$vendor) {
+                return response()->json(['error' => 'Profil vendeur non trouvé ou non autorisé'], 403);
+            }
+            
+            // Si c'est un produit tombola et qu'un prix de ticket est fourni, valider avec le profil
+            if ($product->sale_mode === 'lottery' && $request->has('ticket_price')) {
+                $validation = \App\Services\TicketPriceCalculator::validateTicketPrice($request->ticket_price, $vendor);
+                if (!$validation['is_valid']) {
+                    return response()->json([
+                        'error' => 'Prix de ticket invalide selon les contraintes du profil vendeur',
+                        'warnings' => $validation['warnings']
+                    ], 422);
+                }
+            }
+        }
+
+        $updateData = $request->only([
             'name', 'description', 'price', 'ticket_price', 'images', 'status'
-        ]));
+        ]);
+        
+        // Ajouter vendor_profile_id seulement si explicitement fourni (peut être null pour retirer)
+        if ($request->has('vendor_profile_id')) {
+            $updateData['vendor_profile_id'] = $request->vendor_profile_id;
+        }
+
+        $product->update($updateData);
 
         return response()->json([
             'message' => 'Produit mis à jour avec succès',
-            'product' => $product->load(['category', 'merchant'])
+            'product' => $product->load(['category', 'merchant', 'vendorProfile'])
         ]);
     }
 
@@ -674,6 +743,12 @@ class ProductController extends Controller
             return response()->json(['error' => 'Non autorisé'], 403);
         }
 
+        // Charger le profil vendeur s'il existe
+        $vendor = null;
+        if ($product->vendor_profile_id) {
+            $vendor = $product->vendorProfile;
+        }
+
         if (!$product->canCreateLottery()) {
             $reasons = [];
             
@@ -698,6 +773,14 @@ class ProductController extends Controller
                 $reasons[] = 'Une tombola est déjà active pour ce produit';
             }
             
+            // Validation supplémentaire avec le profil vendeur
+            if ($vendor) {
+                $validation = \App\Services\TicketPriceCalculator::validateTicketPrice($ticketPrice, $vendor);
+                if (!$validation['is_valid']) {
+                    $reasons = array_merge($reasons, $validation['warnings']);
+                }
+            }
+            
             return response()->json([
                 'error' => 'Impossible de créer une tombola pour ce produit',
                 'details' => $reasons,
@@ -706,37 +789,62 @@ class ProductController extends Controller
                     'stock_quantity' => $product->stock_quantity,
                     'sale_mode' => $product->sale_mode,
                     'ticket_price' => $ticketPrice,
-                    'has_active_lottery' => $product->activeLottery()->exists()
+                    'has_active_lottery' => $product->activeLottery()->exists(),
+                    'vendor_profile' => $vendor ? [
+                        'type' => $vendor->type,
+                        'constraints' => $vendor->getConstraintsAttribute()
+                    ] : null
                 ]
             ], 422);
         }
 
         $validator = Validator::make($request->all(), [
             'duration_days' => 'required|integer|min:1|max:30',
+            'ticket_price' => 'nullable|numeric|min:100', // Permettre de modifier le prix du ticket
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $totalTickets = (int) ceil($product->price / $product->ticket_price);
+        // Si un nouveau prix de ticket est fourni, valider avec le profil vendeur
+        $ticketPrice = $request->ticket_price ?? $product->ticket_price;
+        if ($vendor && $request->has('ticket_price')) {
+            $validation = \App\Services\TicketPriceCalculator::validateTicketPrice($ticketPrice, $vendor);
+            if (!$validation['is_valid']) {
+                return response()->json([
+                    'error' => 'Prix de ticket invalide selon les contraintes du profil vendeur',
+                    'warnings' => $validation['warnings']
+                ], 422);
+            }
+        }
+
+        $totalTickets = (int) ceil($product->price / $ticketPrice);
         
         $lottery = Lottery::create([
             'lottery_number' => 'KMB-' . date('Y') . '-' . str_pad($product->id, 6, '0', STR_PAD_LEFT),
             'product_id' => $product->id,
             'total_tickets' => $totalTickets,
-            'ticket_price' => $product->ticket_price,
+            'ticket_price' => $ticketPrice,
             'start_date' => now(),
             'end_date' => now()->addDays($request->duration_days),
             'status' => 'active',
+            'meta' => [
+                'vendor_profile_id' => $vendor ? $vendor->id : null,
+            ]
         ]);
 
-        // Mettre à jour le statut du produit
-        $product->update(['status' => 'active']);
+        // Mettre à jour le statut du produit et le prix du ticket si modifié
+        $updateData = ['status' => 'active'];
+        if ($request->has('ticket_price')) {
+            $updateData['ticket_price'] = $ticketPrice;
+        }
+        $product->update($updateData);
 
         return response()->json([
             'message' => 'Tombola créée avec succès',
-            'lottery' => $lottery->load('product')
+            'lottery' => $lottery->load('product'),
+            'vendor_profile_used' => $vendor !== null
         ], 201);
     }
 

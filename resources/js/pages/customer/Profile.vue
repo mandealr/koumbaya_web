@@ -28,6 +28,22 @@
             <p class="text-sm text-gray-600">{{ user.email }}</p>
           </div>
 
+          <!-- Bouton devenir vendeur individuel -->
+          <div v-if="!isMerchant" class="mb-6">
+            <button
+              @click="becomeSeller"
+              :disabled="loadingBecomeSeller"
+              class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ShoppingBagIcon v-if="!loadingBecomeSeller" class="w-5 h-5 mr-2" />
+              <div v-else class="w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              {{ loadingBecomeSeller ? 'En cours...' : 'Devenir vendeur individuel' }}
+            </button>
+            <p class="text-xs text-gray-500 mt-2 text-center">
+              Vendez vos produits avec 500 tickets par tombola
+            </p>
+          </div>
+
           <nav class="space-y-1">
             <button
               v-for="tab in tabs"
@@ -401,6 +417,65 @@ const updatingAddress = ref(false)
 const updatingPassword = ref(false)
 const updatingNotifications = ref(false)
 const phoneInputRef = ref(null)
+
+// Variables pour le bouton "devenir vendeur"
+const loadingBecomeSeller = ref(false)
+const isMerchant = ref(false)
+
+// Fonction pour devenir vendeur individuel
+const becomeSeller = async () => {
+  if (loadingBecomeSeller.value) return
+  
+  loadingBecomeSeller.value = true
+  
+  try {
+    const response = await post('/user/become-seller', {
+      seller_type: 'individual'
+    })
+    
+    if (response.success) {
+      // Rafraîchir les données utilisateur
+      await authStore.refreshUser()
+      isMerchant.value = true
+      
+      if (window.$toast) {
+        window.$toast.success(
+          'Vous êtes maintenant un vendeur individuel ! Vous pouvez créer des tombolas avec 500 tickets fixes.',
+          '🎉 Félicitations !'
+        )
+      }
+    } else {
+      throw new Error(response?.message || 'Erreur lors de l\'activation du statut vendeur')
+    }
+  } catch (error) {
+    console.error('Error becoming seller:', error)
+    
+    let errorMessage = 'Erreur lors de l\'activation du statut vendeur'
+    
+    if (error.response?.status === 422 && error.response?.data?.errors) {
+      const validationErrors = error.response.data.errors
+      errorMessage = Object.values(validationErrors).flat().join(', ')
+    } else if (error.response?.data?.message) {
+      errorMessage = error.response.data.message
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
+    if (window.$toast) {
+      window.$toast.error(errorMessage, '❌ Erreur')
+    }
+  } finally {
+    loadingBecomeSeller.value = false
+  }
+}
+
+// Vérifier si l'utilisateur est déjà marchand
+const checkMerchantStatus = () => {
+  const userFromStore = authStore.user
+  isMerchant.value = userFromStore?.roles?.some(role => 
+    role.name === 'Business Individual' || role.name === 'Business Enterprise'
+  ) || false
+}
 
 const tabs = [
   { key: 'personal', label: 'Informations personnelles', icon: UserIcon },
@@ -957,5 +1032,8 @@ onMounted(async () => {
     loadUserPreferences(),
     loadSessions()
   ])
+  
+  // Vérifier le statut marchand après chargement
+  checkMerchantStatus()
 })
 </script>

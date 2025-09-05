@@ -91,7 +91,7 @@
             </div>
 
             <!-- Nombre de tickets personnalisable -->
-            <div v-if="showAdvanced" class="border-t pt-3">
+            <div v-if="showAdvanced && canCustomizeTickets" class="border-t pt-3">
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 Nombre de tickets (optionnel)
               </label>
@@ -121,14 +121,36 @@
                 placeholder="Nombre personnalisé..."
               />
             </div>
+            
+            <!-- Message pour les vendeurs individuels -->
+            <div v-else-if="showAdvanced && !canCustomizeTickets" class="border-t pt-3">
+              <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm text-yellow-800">
+                      <strong>Profil Vendeur Individuel:</strong> Le nombre de tickets est fixé à {{ form.numberOfTickets }} pour garantir un prix de ticket minimum de 200 FCFA.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <button
+              v-if="canCustomizeTickets"
               type="button"
               @click="showAdvanced = !showAdvanced"
               class="text-xs text-[#0099cc] hover:text-[#0088bb] transition-colors"
             >
               {{ showAdvanced ? '▼ Masquer les options' : '▶ Options avancées' }}
             </button>
+            <div v-else class="text-xs text-gray-500">
+              Options limitées pour profil vendeur individuel
+            </div>
           </div>
 
           <!-- Prix ticket (lecture seule, calculé automatiquement) -->
@@ -184,6 +206,7 @@
 <script setup>
 import { reactive, watch, ref, computed, onMounted } from 'vue'
 import { useApi } from '@/composables/api'
+import { useAuth } from '@/stores/auth'
 import { CurrencyDollarIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
@@ -200,9 +223,11 @@ const props = defineProps({
 const emit = defineEmits(['close', 'submit'])
 
 const { get, post } = useApi()
+const { user, isIndividualSeller } = useAuth()
 const calculation = ref(null)
 const categories = ref([])
 const showAdvanced = ref(false)
+// Supprimé car on utilise maintenant les rôles
 
 const form = reactive({
   name: '',
@@ -210,7 +235,7 @@ const form = reactive({
   value: '',
   ticketPrice: '',
   category: '',
-  numberOfTickets: 1000
+  numberOfTickets: 500  // Changé à 500 par défaut
 })
 
 watch(() => props.product, (newProduct) => {
@@ -220,7 +245,7 @@ watch(() => props.product, (newProduct) => {
     form.value = newProduct.value || ''
     form.ticketPrice = newProduct.ticketPrice || ''
     form.category = newProduct.category || ''
-    form.numberOfTickets = newProduct.min_participants || 1000
+    form.numberOfTickets = newProduct.min_participants || getDefaultTicketCount()
   }
 }, { immediate: true })
 
@@ -235,7 +260,7 @@ const calculateTicketPrice = async () => {
   try {
     const response = await post('/calculate-ticket-price', {
       product_price: form.value,
-      number_of_tickets: form.numberOfTickets || 1000
+      number_of_tickets: form.numberOfTickets || getDefaultTicketCount()
     })
     
     if (response.success) {
@@ -274,7 +299,7 @@ const submit = () => {
     ...form,
     price: form.value, // Renommer 'value' en 'price' pour l'API
     ticket_price: form.ticketPrice,
-    min_participants: form.numberOfTickets || 1000
+    min_participants: form.numberOfTickets || getDefaultTicketCount()
   }
   
   emit('submit', submitData)
@@ -305,7 +330,51 @@ watch(() => form.value, () => {
   }
 }, { immediate: true })
 
+// Helpers pour les profils vendeurs
+const canCustomizeTickets = computed(() => {
+  return !isIndividualSeller.value
+})
+
+const getDefaultTicketCount = () => {
+  return 500 // 500 par défaut pour tous
+}
+
+const getMinProductPrice = () => {
+  return isIndividualSeller.value ? 100000 : null
+}
+
+// Validation du prix minimum selon le profil
+watch(() => form.value, (newValue) => {
+  const minPrice = getMinProductPrice()
+  if (minPrice && newValue && newValue < minPrice) {
+    // Afficher un avertissement mais ne pas bloquer
+    console.warn(`Prix minimum recommandé: ${formatCurrency(minPrice)} pour profil individuel`)
+  }
+  
+  // Forcer les tickets à 500 pour les vendeurs individuels
+  if (isIndividualSeller.value) {
+    form.numberOfTickets = 500
+  }
+  
+  if (newValue && newValue > 0) {
+    calculateTicketPrice()
+  }
+})
+
+// Initialisation du nombre de tickets selon le profil
+watch(() => isIndividualSeller.value, (isIndividual) => {
+  if (isIndividual) {
+    form.numberOfTickets = 500
+    calculateTicketPrice()
+  }
+}, { immediate: true })
+
 onMounted(() => {
   loadCategories()
+  
+  // Configurer le nombre de tickets selon le profil au montage
+  if (isIndividualSeller.value) {
+    form.numberOfTickets = 500
+  }
 })
 </script>

@@ -32,7 +32,7 @@ export const useAuthStore = defineStore('auth', () => {
   })
   
   const isMerchant = computed(() => {
-    return hasRole('Business')
+    return hasRole('Business Enterprise') || hasRole('Business Individual')
   })
   
   const isCustomer = computed(() => {
@@ -40,7 +40,7 @@ export const useAuthStore = defineStore('auth', () => {
   })
   
   const canSell = computed(() => {
-    return hasRole('Business')
+    return hasRole('Business Enterprise') || hasRole('Business Individual')
   })
 
   // Actions
@@ -184,6 +184,8 @@ export const useAuthStore = defineStore('auth', () => {
       isAgent: isAgent.value,
       isMerchant: isMerchant.value,
       isCustomer: isCustomer.value,
+      isIndividualSeller: hasRole('Business Individual'),
+      isBusinessSeller: hasRole('Business Enterprise'),
       roles: user.value?.roles?.map(r => r.name)
     })
     
@@ -193,13 +195,19 @@ export const useAuthStore = defineStore('auth', () => {
       return 'admin.dashboard'
     }
     
-    // 2. BUSINESS (rôle Business uniquement) → Merchant Dashboard  
-    if (isMerchant.value) {
-      console.log('✅ Redirection vers merchant.dashboard (Business)')
+    // 2. BUSINESS INDIVIDUAL → Simple Merchant Dashboard
+    if (hasRole('Business Individual')) {
+      console.log('✅ Redirection vers merchant.simple-dashboard (Business Individual)')
+      return 'merchant.simple-dashboard'
+    }
+    
+    // 3. BUSINESS ENTERPRISE → Full Merchant Dashboard  
+    if (hasRole('Business Enterprise')) {
+      console.log('✅ Redirection vers merchant.dashboard (Business Enterprise)')
       return 'merchant.dashboard'
     }
     
-    // 3. CUSTOMERS (rôle Particulier ou par défaut) → Customer Dashboard
+    // 4. CUSTOMERS (rôle Particulier ou par défaut) → Customer Dashboard
     console.log('✅ Redirection vers customer.dashboard (Customer par défaut)')
     return 'customer.dashboard'
   }
@@ -222,6 +230,10 @@ export const useAuthStore = defineStore('auth', () => {
     canSell,
     hasRole,
     
+    // Nouveaux helpers pour les profils vendeurs
+    isIndividualSeller: computed(() => hasRole('Business Individual')),
+    isBusinessSeller: computed(() => hasRole('Business Enterprise')),
+    
     // Actions
     login,
     register,
@@ -235,3 +247,6 @@ export const useAuthStore = defineStore('auth', () => {
     getDefaultRedirect
   }
 })
+
+// Alias pour compatibilité
+export const useAuth = () => useAuthStore()
