@@ -253,6 +253,9 @@ const showQuickStats = computed(() => {
   return window.innerWidth < 1024 // Show on mobile/tablet
 })
 
+// Reactive data
+const unreadNotifications = ref(0)
+
 // Methods
 const logout = async () => {
   await authStore.logout()

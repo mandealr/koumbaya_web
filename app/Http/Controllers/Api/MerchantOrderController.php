@@ -224,7 +224,7 @@ class MerchantOrderController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $orders->items()->map(function ($order) {
+            'data' => collect($orders->items())->map(function ($order) {
                 return $this->formatOrderForMerchant($order);
             }),
             'pagination' => [
