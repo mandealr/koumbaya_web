@@ -931,9 +931,10 @@ class ProductController extends Controller
 
         if (!$product) {
             return response()->json([
-                'success' => false,
+                'success' => true,
+                'data' => null,
                 'message' => 'Aucun produit tombola actif trouvé'
-            ], 404);
+            ], 200);
         }
 
         // Ajouter des métadonnées utiles
