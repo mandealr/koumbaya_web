@@ -182,6 +182,12 @@
             />
             <p v-if="errors.price" class="mt-1 text-sm text-red-600">{{ errors.price }}</p>
             <p v-else-if="form.price && parseFloat(form.price) < 1000" class="mt-1 text-sm text-orange-600">La valeur minimum est de 1000 FCFA</p>
+            <!-- Message d'avertissement pour vendeur individuel -->
+            <div v-if="isIndividualSeller && form.sale_mode === 'lottery' && form.price && parseFloat(form.price) < 100000" class="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-2">
+              <p class="text-xs text-blue-800">
+                <strong>Recommandation:</strong> Pour un vendeur individuel avec 500 tickets fixes, un prix produit minimum de 100,000 FCFA est recommandé pour garantir un prix de ticket d'au moins 200 FCFA.
+              </p>
+            </div>
           </div>
 
           <div>
@@ -338,20 +344,47 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Nombre de tickets *
             </label>
-            <input
-              v-model="form.total_tickets"
-              type="number"
-              required
-              min="10"
-              max="10000"
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
-              placeholder="Ex: 400"
-              @input="calculateLotteryMetrics"
-              @blur="validateTotalTickets"
-            />
-            <p v-if="errors.total_tickets" class="mt-1 text-sm text-red-600">{{ errors.total_tickets }}</p>
-            <p v-else-if="form.total_tickets && (parseInt(form.total_tickets) < 10 || parseInt(form.total_tickets) > 10000)" class="mt-1 text-sm text-orange-600">Entre 10 et 10,000 tickets</p>
-            <p v-else class="text-sm text-gray-700 mt-1">Entre 10 et 10,000 tickets</p>
+            <!-- Vendeur individuel : nombre de tickets fixe -->
+            <div v-if="isIndividualSeller">
+              <input
+                v-model="form.total_tickets"
+                type="number"
+                required
+                readonly
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-100 cursor-not-allowed" style="color: #5f5f5f"
+              />
+              <div class="mt-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <div class="flex items-start">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm text-yellow-800">
+                      <strong>Profil Vendeur Individuel:</strong> Le nombre de tickets est fixé à 500 pour garantir un prix de ticket minimum de 200 FCFA.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Autres profils : nombre de tickets personnalisable -->
+            <div v-else>
+              <input
+                v-model="form.total_tickets"
+                type="number"
+                required
+                min="10"
+                max="10000"
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
+                placeholder="Ex: 400"
+                @input="calculateLotteryMetrics"
+                @blur="validateTotalTickets"
+              />
+              <p v-if="errors.total_tickets" class="mt-1 text-sm text-red-600">{{ errors.total_tickets }}</p>
+              <p v-else-if="form.total_tickets && (parseInt(form.total_tickets) < 10 || parseInt(form.total_tickets) > 10000)" class="mt-1 text-sm text-orange-600">Entre 10 et 10,000 tickets</p>
+              <p v-else class="text-sm text-gray-700 mt-1">Entre 10 et 10,000 tickets</p>
+            </div>
           </div>
 
           <div>
@@ -566,9 +599,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi } from '../../composables/api'
+import { useAuthStore } from '../../stores/auth'
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -581,6 +615,7 @@ import {
 
 const router = useRouter()
 const { get, post, loading: apiLoading, error: apiError } = useApi()
+const { user, isIndividualSeller, isBusinessSeller } = useAuthStore()
 
 // State
 const currentStep = ref(1)
@@ -606,11 +641,19 @@ const form = reactive({
   location: '',
   images: [],
   ticket_price: '',
-  total_tickets: '',
+  total_tickets: '', // Sera initialisé dans onMounted
   min_tickets: '', // This will be 'min_participants' in the API
   end_date: '',
   terms_accepted: false,
   duration_days: 7 // Pour la création de la tombola
+})
+
+// Watcher pour gérer le changement de mode de vente
+watch(() => form.sale_mode, (newMode) => {
+  if (newMode === 'lottery' && isIndividualSeller.value) {
+    // Forcer 500 tickets pour vendeur individuel en mode tombola
+    form.total_tickets = '500'
+  }
 })
 
 const errors = reactive({
@@ -796,6 +839,10 @@ const removeImage = (index) => {
 }
 
 const calculateLotteryMetrics = () => {
+  // Forcer 500 tickets pour vendeur individuel
+  if (isIndividualSeller.value && form.sale_mode === 'lottery') {
+    form.total_tickets = '500'
+  }
   // Trigger reactivity for computed properties
 }
 
@@ -966,6 +1013,14 @@ const validateTicketPrice = () => {
 const validateTotalTickets = () => {
   if (form.total_tickets) {
     const tickets = parseInt(form.total_tickets)
+    
+    // Pour vendeur individuel, toujours 500 tickets
+    if (isIndividualSeller.value) {
+      form.total_tickets = '500'
+      errors.total_tickets = ''
+      return
+    }
+    
     if (tickets < 10) {
       errors.total_tickets = 'Minimum 10 tickets requis'
     } else if (tickets > 10000) {
@@ -1002,5 +1057,10 @@ const loadCategories = async () => {
 onMounted(() => {
   loadCategories()
   console.log('CreateProduct page loaded')
+  
+  // Forcer le nombre de tickets à 500 pour les vendeurs individuels
+  if (isIndividualSeller.value) {
+    form.total_tickets = '500'
+  }
 })
 </script>
