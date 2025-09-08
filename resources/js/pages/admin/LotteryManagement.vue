@@ -196,7 +196,7 @@
                   Date de tirage
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  Détails
                 </th>
               </tr>
             </thead>
@@ -238,22 +238,14 @@
                   {{ formatDate(lottery.draw_date || lottery.end_date) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div class="flex space-x-2">
-                    <button
-                      @click="editLottery(lottery)"
-                      class="text-blue-600 hover:text-blue-900"
-                      title="Modifier"
-                    >
-                      <PencilIcon class="w-4 h-4" />
-                    </button>
-                    <button
-                      @click="viewParticipants(lottery)"
-                      class="text-blue-600 hover:text-blue-900"
-                      title="Voir participants"
-                    >
-                      <UsersIcon class="w-4 h-4" />
-                    </button>
-                  </div>
+                  <button
+                    @click="viewParticipants(lottery)"
+                    class="inline-flex items-center px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                    title="Voir participants"
+                  >
+                    <UsersIcon class="w-4 h-4 mr-1" />
+                    Participants
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -364,7 +356,7 @@
     </div>
 
     <!-- Participants Modal -->
-    <div v-if="showParticipantsModal" class="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+    <div v-if="showParticipantsModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h3 class="text-lg font-semibold text-gray-900">
@@ -436,7 +428,7 @@
     </div>
 
     <!-- Draw Confirmation Modal -->
-    <div v-if="showDrawModal" class="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+    <div v-if="showDrawModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg max-w-md w-full mx-4">
         <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900">Confirmer le tirage</h3>

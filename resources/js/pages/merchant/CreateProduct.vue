@@ -350,18 +350,69 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Date de fin de vente *
+              {{ lotteryDurationConstraints?.can_customize ? 'Durée de la tombola *' : 'Date de fin de vente *' }}
             </label>
-            <input
-              v-model="form.end_date"
-              type="datetime-local"
-              required
-              :min="minDate"
-              @change="validateEndDate"
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
-            />
-            <p v-if="errors.end_date" class="mt-1 text-sm text-red-600">{{ errors.end_date }}</p>
-            <p v-else-if="form.end_date && new Date(form.end_date) <= new Date()" class="mt-1 text-sm text-orange-600">La date de fin doit être dans le futur</p>
+            
+            <!-- Durée pour vendeurs business -->
+            <div v-if="lotteryDurationConstraints?.can_customize">
+              <div class="relative">
+                <input
+                  v-model="form.lottery_duration"
+                  type="number"
+                  required
+                  :min="lotteryDurationConstraints.min_days"
+                  :max="lotteryDurationConstraints.max_days"
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
+                  placeholder="30"
+                  @input="validateLotteryDuration"
+                />
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none">jours</span>
+              </div>
+              <p v-if="errors.lottery_duration" class="mt-1 text-sm text-red-600">{{ errors.lottery_duration }}</p>
+              <p v-else class="text-sm text-gray-700 mt-1">
+                Entre {{ lotteryDurationConstraints.min_days }} et {{ lotteryDurationConstraints.max_days }} jours
+              </p>
+            </div>
+            
+            <!-- Durée fixe pour vendeurs individuels -->
+            <div v-else-if="lotteryDurationConstraints && !lotteryDurationConstraints.can_customize">
+              <div class="relative">
+                <input
+                  :value="lotteryDurationConstraints.fixed_duration + ' jours'"
+                  type="text"
+                  readonly
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-100 cursor-not-allowed" style="color: #5f5f5f"
+                />
+              </div>
+              <div class="mt-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <div class="flex items-start">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm text-yellow-800">
+                      <strong>Profil Vendeur Individuel:</strong> La durée est fixée à {{ lotteryDurationConstraints.fixed_duration }} jours.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Fallback: date si pas de contraintes chargées -->
+            <div v-else>
+              <input
+                v-model="form.end_date"
+                type="datetime-local"
+                required
+                :min="minDate"
+                @change="validateEndDate"
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
+              />
+              <p v-if="errors.end_date" class="mt-1 text-sm text-red-600">{{ errors.end_date }}</p>
+              <p v-else-if="form.end_date && new Date(form.end_date) <= new Date()" class="mt-1 text-sm text-orange-600">La date de fin doit être dans le futur</p>
+            </div>
           </div>
 
           <div>
@@ -482,8 +533,13 @@
                 <span class="font-medium">{{ form.min_tickets }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-800">Date de fin :</span>
-                <span class="font-medium">{{ formatDate(form.end_date) }}</span>
+                <span class="text-gray-800">Durée :</span>
+                <span class="font-medium">
+                  {{ lotteryDurationConstraints && !lotteryDurationConstraints.can_customize ? 
+                     lotteryDurationConstraints.fixed_duration : 
+                     (form.lottery_duration || calculateDurationDays()) 
+                  }} jours
+                </span>
               </div>
               <div class="flex justify-between border-t pt-3">
                 <span class="text-gray-800">Revenus max :</span>
@@ -592,6 +648,7 @@ const steps = [
 ]
 
 const categories = ref([])
+const lotteryDurationConstraints = ref(null)
 
 const form = reactive({
   name: '',
@@ -607,6 +664,7 @@ const form = reactive({
   total_tickets: '', // Sera initialisé dans onMounted
   min_tickets: '', // This will be 'min_participants' in the API
   end_date: '',
+  lottery_duration: '', // Durée en jours pour les vendeurs business
   terms_accepted: false,
   duration_days: 7 // Pour la création de la tombola
 })
@@ -630,7 +688,8 @@ const errors = reactive({
   ticket_price: '',
   total_tickets: '',
   min_tickets: '',
-  end_date: ''
+  end_date: '',
+  lottery_duration: ''
 })
 
 // Computed
@@ -871,6 +930,11 @@ const handleSubmit = async () => {
     if (form.sale_mode === 'lottery') {
       productData.ticket_price = parseFloat(form.ticket_price)
       productData.min_participants = parseInt(form.min_tickets)
+      
+      // Ajouter la durée de tombola si pertinent
+      if (lotteryDurationConstraints.value?.can_customize) {
+        productData.lottery_duration = parseInt(form.lottery_duration)
+      }
     }
 
     // Create product
@@ -933,12 +997,35 @@ const handleApiError = (error) => {
 }
 
 const calculateDurationDays = () => {
-  if (!form.end_date) return 7
-  const endDate = new Date(form.end_date)
-  const now = new Date()
-  const diffTime = Math.abs(endDate - now)
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  return Math.min(Math.max(diffDays, 1), 30) // Between 1 and 30 days
+  // Pour les vendeurs avec durée personnalisable
+  if (lotteryDurationConstraints.value?.can_customize && form.lottery_duration) {
+    return parseInt(form.lottery_duration)
+  }
+  
+  // Pour les vendeurs avec durée fixe
+  if (lotteryDurationConstraints.value && !lotteryDurationConstraints.value.can_customize) {
+    return lotteryDurationConstraints.value.fixed_duration
+  }
+  
+  // Fallback: calculer depuis la date de fin si présente
+  if (form.end_date) {
+    const endDate = new Date(form.end_date)
+    const now = new Date()
+    const diffTime = Math.abs(endDate - now)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    // Respecter les contraintes si elles existent
+    if (lotteryDurationConstraints.value) {
+      const minDays = lotteryDurationConstraints.value.min_days || 1
+      const maxDays = lotteryDurationConstraints.value.max_days || 60
+      return Math.min(Math.max(diffDays, minDays), maxDays)
+    }
+    
+    return Math.min(Math.max(diffDays, 1), 30)
+  }
+  
+  // Valeur par défaut
+  return lotteryDurationConstraints.value?.default_duration || 30
 }
 
 const showSuccessToast = (message) => {
@@ -1010,6 +1097,30 @@ const validateTotalTickets = () => {
   }
 }
 
+// Validation de la durée de tombola
+const validateLotteryDuration = () => {
+  if (!lotteryDurationConstraints.value || !lotteryDurationConstraints.value.can_customize) {
+    errors.lottery_duration = ''
+    return
+  }
+  
+  if (form.lottery_duration) {
+    const duration = parseInt(form.lottery_duration)
+    const minDays = lotteryDurationConstraints.value.min_days
+    const maxDays = lotteryDurationConstraints.value.max_days
+    
+    if (isNaN(duration)) {
+      errors.lottery_duration = 'Veuillez entrer un nombre valide'
+    } else if (duration < minDays) {
+      errors.lottery_duration = `Minimum ${minDays} jour${minDays > 1 ? 's' : ''} requis`
+    } else if (duration > maxDays) {
+      errors.lottery_duration = `Maximum ${maxDays} jours autorisés`
+    } else {
+      errors.lottery_duration = ''
+    }
+  }
+}
+
 // Load categories on mount
 const loadCategories = async () => {
   try {
@@ -1033,8 +1144,32 @@ const loadCategories = async () => {
   }
 }
 
+// Charger les contraintes de durée de tombola
+const loadLotteryDurationConstraints = async () => {
+  try {
+    const response = await get('/products/lottery-duration-constraints')
+    if (response && response.data) {
+      lotteryDurationConstraints.value = response.data.constraints
+      console.log('Lottery duration constraints loaded:', lotteryDurationConstraints.value)
+      
+      // Si vendeur individuel, définir la durée fixe
+      if (lotteryDurationConstraints.value && !lotteryDurationConstraints.value.can_customize) {
+        form.lottery_duration = lotteryDurationConstraints.value.fixed_duration
+      } else {
+        // Pour les vendeurs business, utiliser la durée par défaut
+        form.lottery_duration = lotteryDurationConstraints.value?.default_duration || 30
+      }
+    }
+  } catch (error) {
+    console.error('Error loading lottery duration constraints:', error)
+    // En cas d'erreur, utiliser les valeurs par défaut
+    form.lottery_duration = 30
+  }
+}
+
 onMounted(() => {
   loadCategories()
+  loadLotteryDurationConstraints()
   console.log('CreateProduct page loaded')
   
   // Forcer le nombre de tickets à 500 pour les vendeurs individuels

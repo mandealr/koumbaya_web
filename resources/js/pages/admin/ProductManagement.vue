@@ -120,7 +120,7 @@
                   Tombola
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  Détails
                 </th>
               </tr>
             </thead>
@@ -180,29 +180,14 @@
                   <span v-else class="text-xs text-gray-500">{{ getSaleModeLabel(product.sale_mode) }}</span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div class="flex space-x-2">
-                    <button
-                      @click="editProduct(product)"
-                      class="text-blue-600 hover:text-blue-900"
-                      title="Modifier"
-                    >
-                      <PencilIcon class="w-4 h-4" />
-                    </button>
-                    <button
-                      @click="viewProduct(product.id)"
-                      class="text-blue-600 hover:text-blue-900"
-                      title="Voir"
-                    >
-                      <EyeIcon class="w-4 h-4" />
-                    </button>
-                    <button
-                      @click="deleteProduct(product.id)"
-                      class="text-red-600 hover:text-red-900"
-                      title="Supprimer"
-                    >
-                      <TrashIcon class="w-4 h-4" />
-                    </button>
-                  </div>
+                  <button
+                    @click="viewProduct(product.id)"
+                    class="inline-flex items-center px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                    title="Voir les détails"
+                  >
+                    <EyeIcon class="w-4 h-4 mr-1" />
+                    Voir
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -239,7 +224,7 @@
     </div>
 
     <!-- Edit Product Modal -->
-    <div v-if="showEditModal" class="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+    <div v-if="showEditModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900">
@@ -360,9 +345,7 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import ProductImage from '@/components/common/ProductImage.vue'
 import {
   ArrowPathIcon,
-  PencilIcon,
   EyeIcon,
-  TrashIcon,
   ShoppingBagIcon,
   TrophyIcon,
   CurrencyDollarIcon,
@@ -503,40 +486,7 @@ const updateProduct = async () => {
   }
 }
 
-const deleteProduct = async (id) => {
-  if (confirm('Voulez-vous vraiment supprimer ce produit ? Cette action est irréversible.')) {
-    try {
-      const response = await del(`/admin/products/${id}`)
-      if (response && response.success) {
-        await loadProducts()
-        if (window.$toast) {
-          window.$toast.success('Produit supprimé avec succès', '✓ Succès')
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors de la suppression:', error)
-      if (window.$toast) {
-        const message = error.response?.data?.message || 'Erreur lors de la suppression'
-        window.$toast.error(message, '✗ Erreur')
-      }
-    }
-  }
-}
-
-const editProduct = (product) => {
-  editingProduct.value = product
-  Object.assign(productForm, {
-    name: product.name,
-    description: product.description,
-    price: product.price,
-    ticket_price: product.ticket_price,
-    category_id: product.category_id,
-    sale_mode: product.sale_mode,
-    status: product.status,
-    is_featured: product.is_featured || false
-  })
-  showEditModal.value = true
-}
+// Méthodes de modification supprimées - Admin en lecture seule
 
 const viewProduct = (id) => {
   router.push(`/admin/products/${id}`)

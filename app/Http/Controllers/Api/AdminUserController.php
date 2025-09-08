@@ -116,10 +116,18 @@ class AdminUserController extends Controller
     }
 
     /**
-     * Create a new user
+     * Create a new user (Admin creation - SuperAdmin only)
      */
     public function store(Request $request)
     {
+        // Vérifier que l'utilisateur actuel est SuperAdmin
+        if (!auth()->user()->isSuperAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Seuls les Super Administrateurs peuvent créer des utilisateurs admin'
+            ], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -137,6 +145,14 @@ class AdminUserController extends Controller
             ], 422);
         }
 
+        // Empêcher la création de Super Admin
+        if ($request->role === 'Super Admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'La création de Super Admin n\'est pas autorisée'
+            ], 403);
+        }
+
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -144,7 +160,8 @@ class AdminUserController extends Controller
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
             'is_active' => $request->is_active ?? true,
-            'verified_at' => now() // Auto-verify admin-created users
+            'verified_at' => now(), // Auto-verify admin-created users
+            'user_type_id' => 3 // Admin type
         ]);
 
         // Attach role
@@ -156,7 +173,7 @@ class AdminUserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Utilisateur créé avec succès',
-            'data' => ['user' => $user]
+            'data' => ['user' => $user->load('roles')]
         ], 201);
     }
 
@@ -224,13 +241,51 @@ class AdminUserController extends Controller
     }
 
     /**
-     * Get available roles
+     * Get roles available for admin creation (SuperAdmin only)
+     */
+    public function getAdminRoles()
+    {
+        // Vérifier que l'utilisateur actuel est SuperAdmin
+        if (!auth()->user()->isSuperAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès refusé'
+            ], 403);
+        }
+
+        $roles = Role::where('active', true)
+            ->where('name', '!=', 'Super Admin') // Exclure Super Admin
+            ->whereIn('name', ['Admin', 'Agent', 'Agent Back Office']) // Seulement les rôles admin
+            ->select('name', 'description')
+            ->get()
+            ->map(function ($role) {
+                return [
+                    'value' => $role->name,
+                    'label' => $this->getRoleLabel($role->name),
+                    'description' => $role->description
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => ['roles' => $roles]
+        ]);
+    }
+
+    /**
+     * Get available roles (excluding Super Admin for creation)
      */
     private function getAvailableRoles()
     {
-        return Role::where('active', true)
-            ->select('name', 'description')
-            ->get()
+        $query = Role::where('active', true)
+            ->select('name', 'description');
+
+        // Exclure Super Admin de la liste pour la création
+        if (request()->is('*/create') || request()->isMethod('post')) {
+            $query->where('name', '!=', 'Super Admin');
+        }
+
+        return $query->get()
             ->map(function ($role) {
                 return [
                     'value' => $role->name,

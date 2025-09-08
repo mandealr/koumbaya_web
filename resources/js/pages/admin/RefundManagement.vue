@@ -236,7 +236,7 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Raison</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Détails</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
@@ -290,31 +290,14 @@
               </td>
 
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <div class="flex space-x-2">
-                  <button
-                    v-if="refund.status === 'pending'"
-                    @click="approveRefund(refund)"
-                    class="text-blue-600 hover:text-blue-900"
-                  >
-                    Approuver
-                  </button>
-
-                  <button
-                    v-if="refund.status === 'pending'"
-                    @click="showRejectModal(refund)"
-                    class="text-red-600 hover:text-red-900"
-                  >
-                    Rejeter
-                  </button>
-
-                  <button
-                    @click="viewRefundDetails(refund)"
-                    class="text-[#0099cc] hover:text-[#0088bb] flex items-center"
-                    title="Voir détails"
-                  >
-                    <EyeIcon class="w-4 h-4" />
-                  </button>
-                </div>
+                <button
+                  @click="viewRefundDetails(refund)"
+                  class="inline-flex items-center px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                  title="Voir détails"
+                >
+                  <EyeIcon class="w-4 h-4 mr-1" />
+                  Voir
+                </button>
               </td>
             </tr>
           </tbody>
@@ -325,7 +308,7 @@
     <!-- Process Automatic Modal -->
     <div v-if="showProcessAutomatic" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-black/20" @click="showProcessAutomatic = false"></div>
+        <div class="fixed inset-0 bg-black/40" @click="showProcessAutomatic = false"></div>
         <div class="relative bg-white rounded-lg max-w-md w-full">
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
@@ -384,7 +367,7 @@
     <!-- Reject Modal -->
     <div v-if="refundToReject" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-black/20" @click="refundToReject = null"></div>
+        <div class="fixed inset-0 bg-black/40" @click="refundToReject = null"></div>
         <div class="relative bg-white rounded-lg max-w-md w-full">
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">

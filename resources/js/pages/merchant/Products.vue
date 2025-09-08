@@ -308,7 +308,7 @@
     </div>
 
     <!-- Product Details Modal -->
-    <div v-if="showProductModal" class="fixed inset-0 bg-black/20 overflow-y-auto h-full w-full z-50">
+    <div v-if="showProductModal" class="fixed inset-0 bg-black/40 overflow-y-auto h-full w-full z-50">
       <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-xl bg-white max-h-[80vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-6">
           <h3 class="text-lg font-semibold text-gray-900">Détails du produit</h3>

@@ -249,7 +249,7 @@
     </div>
 
     <!-- Modal de confirmation de tirage -->
-    <div v-if="showDrawModal" class="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+    <div v-if="showDrawModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Confirmer le tirage</h3>
         <p class="text-sm text-gray-600 mb-6">

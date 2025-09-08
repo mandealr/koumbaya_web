@@ -132,7 +132,7 @@
                 Date
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                Détails
               </th>
             </tr>
           </thead>
@@ -172,23 +172,14 @@
                 {{ formatDate(payment.created_at) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div class="flex items-center space-x-2">
-                  <button 
-                    @click="viewPayment(payment)" 
-                    class="text-[#0099cc] hover:text-[#0088bb]"
-                    title="Voir détails"
-                  >
-                    <EyeIcon class="w-4 h-4" />
-                  </button>
-                  <button 
-                    v-if="payment.status === 'completed'" 
-                    @click="initiateRefund(payment)"
-                    class="text-orange-600 hover:text-orange-900"
-                    title="Initier remboursement"
-                  >
-                    <ArrowUturnLeftIcon class="w-4 h-4" />
-                  </button>
-                </div>
+                <button 
+                  @click="viewPayment(payment)" 
+                  class="inline-flex items-center px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                  title="Voir détails"
+                >
+                  <EyeIcon class="w-4 h-4 mr-1" />
+                  Voir
+                </button>
               </td>
             </tr>
           </tbody>
@@ -222,7 +213,7 @@
     </div>
 
     <!-- Payment Details Modal -->
-    <div v-if="showPaymentModal" class="fixed inset-0 bg-black/20 overflow-y-auto h-full w-full z-50">
+    <div v-if="showPaymentModal" class="fixed inset-0 bg-black/40 overflow-y-auto h-full w-full z-50">
       <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 shadow-lg rounded-md bg-white">
         <div class="mt-3">
           <div class="flex justify-between items-center mb-4">

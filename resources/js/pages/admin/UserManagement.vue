@@ -6,13 +6,23 @@
           <h1 class="text-3xl font-bold text-gray-900">Gestion des Utilisateurs</h1>
           <p class="mt-2 text-gray-600">Gérez tous les utilisateurs de la plateforme</p>
         </div>
-        <button 
-          @click="loadUsers"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-        >
-          <ArrowPathIcon class="w-5 h-5 inline mr-2" :class="loading ? 'animate-spin' : ''" />
-          Recharger
-        </button>
+        <div class="flex gap-3">
+          <button 
+            v-if="isSuperAdmin"
+            @click="showCreateModal = true"
+            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+          >
+            <PlusIcon class="w-5 h-5 mr-2" />
+            Créer un Admin
+          </button>
+          <button 
+            @click="loadUsers"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+          >
+            <ArrowPathIcon class="w-5 h-5 inline mr-2" :class="loading ? 'animate-spin' : ''" />
+            Recharger
+          </button>
+        </div>
       </div>
     </div>
 
@@ -202,15 +212,144 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de création d'admin -->
+    <div v-if="showCreateModal" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-lg w-full max-w-2xl shadow-xl">
+        <div class="flex items-center justify-between p-6 border-b">
+          <h2 class="text-xl font-semibold text-gray-900">Créer un Administrateur</h2>
+          <button @click="closeCreateModal" class="text-gray-400 hover:text-gray-600">
+            <XMarkIcon class="w-6 h-6" />
+          </button>
+        </div>
+        
+        <form @submit.prevent="createAdmin" class="p-6 space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Prénom *</label>
+              <input 
+                v-model="newAdmin.first_name"
+                type="text"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Jean"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
+              <input 
+                v-model="newAdmin.last_name"
+                type="text"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Dupont"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+            <input 
+              v-model="newAdmin.email"
+              type="email"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="admin@koumbaya.com"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone *</label>
+            <input 
+              v-model="newAdmin.phone"
+              type="tel"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="+241 70 00 00 00"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe *</label>
+            <input 
+              v-model="newAdmin.password"
+              type="password"
+              required
+              minlength="8"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Minimum 8 caractères"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Rôle *</label>
+            <select 
+              v-model="newAdmin.role"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Sélectionner un rôle</option>
+              <option v-for="role in adminRoles" :key="role.value" :value="role.value">
+                {{ role.label }}
+              </option>
+            </select>
+            <p class="mt-1 text-sm text-gray-500">{{ getSelectedRoleDescription() }}</p>
+          </div>
+
+          <div>
+            <label class="flex items-center">
+              <input 
+                v-model="newAdmin.is_active"
+                type="checkbox"
+                class="mr-2 rounded text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm text-gray-700">Activer immédiatement le compte</span>
+            </label>
+          </div>
+
+          <!-- Messages d'erreur -->
+          <div v-if="createError" class="bg-red-50 border border-red-200 rounded-md p-4">
+            <p class="text-sm text-red-800">{{ createError }}</p>
+          </div>
+        </form>
+
+        <div class="flex justify-end gap-3 px-6 py-4 bg-gray-50 rounded-b-lg">
+          <button 
+            @click="closeCreateModal"
+            type="button"
+            class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            Annuler
+          </button>
+          <button 
+            @click="createAdmin"
+            :disabled="creatingAdmin"
+            type="button"
+            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
+          >
+            <span v-if="!creatingAdmin">Créer l'administrateur</span>
+            <span v-else class="flex items-center">
+              <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+              Création...
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
-import { PlusIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
+import { PlusIcon, ArrowPathIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { useApi } from '@/composables/api'
+import { useAuthStore } from '@/stores/auth'
 
 const { get, post } = useApi()
+const authStore = useAuthStore()
+
+// Vérifier si l'utilisateur est SuperAdmin
+const isSuperAdmin = computed(() => authStore.user?.roles?.includes('Super Admin'))
 
 const users = ref([])
 const loading = ref(false)
@@ -219,11 +358,24 @@ const currentPage = ref(1)
 const itemsPerPage = ref(20)
 const totalUsers = ref(0)
 const availableRoles = ref([])
+const adminRoles = ref([])
+const creatingAdmin = ref(false)
+const createError = ref('')
 
 const filters = reactive({
   search: '',
   role: '',
   status: ''
+})
+
+const newAdmin = reactive({
+  first_name: '',
+  last_name: '',
+  email: '',
+  phone: '',
+  password: '',
+  role: '',
+  is_active: true
 })
 
 // Watch for filter changes and reload
@@ -314,6 +466,9 @@ const getRoleLabel = (role) => {
     'Super Admin': 'Super Admin',
     'Admin': 'Administrateur',
     'Agent': 'Agent de Support',
+    'Agent Back Office': 'Agent Back Office',
+    'Business Enterprise': 'Marchand Entreprise',
+    'Business Individual': 'Marchand Particulier',
     'Business': 'Marchand',
     'Particulier': 'Client'
   }
@@ -325,6 +480,9 @@ const getRoleClass = (role) => {
     'Super Admin': 'bg-purple-100 text-purple-800',
     'Admin': 'bg-red-100 text-red-800',
     'Agent': 'bg-yellow-100 text-yellow-800',
+    'Agent Back Office': 'bg-orange-100 text-orange-800',
+    'Business Enterprise': 'bg-blue-100 text-blue-800',
+    'Business Individual': 'bg-indigo-100 text-indigo-800',
     'Business': 'bg-blue-100 text-blue-800',
     'Particulier': 'bg-green-100 text-green-800'
   }
@@ -336,7 +494,83 @@ watch(currentPage, () => {
   loadUsers()
 })
 
+// Charger les rôles admin disponibles
+const loadAdminRoles = async () => {
+  try {
+    const response = await get('/admin/users/admin-roles')
+    if (response && response.data) {
+      adminRoles.value = response.data.roles || []
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement des rôles admin:', error)
+  }
+}
+
+// Créer un nouvel admin
+const createAdmin = async () => {
+  // Validation
+  if (!newAdmin.first_name || !newAdmin.last_name || !newAdmin.email || 
+      !newAdmin.phone || !newAdmin.password || !newAdmin.role) {
+    createError.value = 'Veuillez remplir tous les champs obligatoires'
+    return
+  }
+
+  if (newAdmin.password.length < 8) {
+    createError.value = 'Le mot de passe doit contenir au moins 8 caractères'
+    return
+  }
+
+  creatingAdmin.value = true
+  createError.value = ''
+
+  try {
+    const response = await post('/admin/users', newAdmin)
+    if (response && response.success) {
+      showCreateModal.value = false
+      await loadUsers() // Recharger la liste
+      resetNewAdminForm()
+      
+      if (window.$toast) {
+        window.$toast.success('Administrateur créé avec succès', '✓ Succès')
+      }
+    }
+  } catch (error) {
+    console.error('Erreur lors de la création:', error)
+    createError.value = error.response?.data?.message || 'Erreur lors de la création de l\'administrateur'
+  } finally {
+    creatingAdmin.value = false
+  }
+}
+
+// Fermer le modal de création
+const closeCreateModal = () => {
+  showCreateModal.value = false
+  resetNewAdminForm()
+  createError.value = ''
+}
+
+// Réinitialiser le formulaire
+const resetNewAdminForm = () => {
+  newAdmin.first_name = ''
+  newAdmin.last_name = ''
+  newAdmin.email = ''
+  newAdmin.phone = ''
+  newAdmin.password = ''
+  newAdmin.role = ''
+  newAdmin.is_active = true
+}
+
+// Obtenir la description du rôle sélectionné
+const getSelectedRoleDescription = () => {
+  if (!newAdmin.role) return ''
+  const role = adminRoles.value.find(r => r.value === newAdmin.role)
+  return role?.description || ''
+}
+
 onMounted(() => {
   loadUsers()
+  if (isSuperAdmin.value) {
+    loadAdminRoles()
+  }
 })
 </script>

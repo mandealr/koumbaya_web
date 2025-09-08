@@ -481,12 +481,24 @@ class ProductController extends Controller
         if ($request->sale_mode === 'lottery') {
             $rules['ticket_price'] = 'nullable|numeric|min:100'; // Optionnel, sera calculé si non fourni
             $rules['min_participants'] = 'nullable|integer|min:10|max:10000';
+            $rules['lottery_duration'] = 'nullable|integer|min:1|max:60'; // Durée en jours
         }
 
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Validation spécifique pour la durée de tombola selon le type de vendeur
+        if ($request->sale_mode === 'lottery' && $request->filled('lottery_duration')) {
+            $durationValidation = $this->validateLotteryDurationForUser($user, $request->lottery_duration);
+            if (!$durationValidation['valid']) {
+                return response()->json([
+                    'error' => $durationValidation['message'],
+                    'allowed_range' => $durationValidation['allowed_range'] ?? null
+                ], 422);
+            }
         }
 
         // Vérifier le profil vendeur si fourni
@@ -550,18 +562,22 @@ class ProductController extends Controller
         if ($request->sale_mode === 'lottery') {
             $totalTickets = (int) ceil($product->price / $product->ticket_price);
             
+            // Déterminer la durée selon le type de vendeur
+            $lotteryDuration = $this->getLotteryDurationForUser($user, $request->lottery_duration);
+            
             $product->lotteries()->create([
                 'lottery_number' => 'LOT-' . strtoupper(Str::random(8)),
                 'ticket_price' => $product->ticket_price,
                 'total_tickets' => $totalTickets,
                 'min_participants' => $product->min_participants ?? 50,
                 'start_date' => now(),
-                'end_date' => now()->addDays(30), // 30 jours par défaut
+                'end_date' => now()->addDays($lotteryDuration),
                 'status' => 'active',
                 'meta' => [
                     'auto_created' => true,
                     'created_with_product' => true,
                     'vendor_profile_id' => $vendor ? $vendor->id : null,
+                    'duration_days' => $lotteryDuration,
                 ]
             ]);
         }
@@ -1168,6 +1184,178 @@ class ProductController extends Controller
                     'total' => $products->total(),
                 ],
                 'sale_mode' => $mode
+            ]
+        ]);
+    }
+
+    /**
+     * Détermine la durée de tombola appropriée selon le type de vendeur
+     * 
+     * @param \App\Models\User $user
+     * @param int|null $requestedDuration
+     * @return int durée en jours
+     */
+    private function getLotteryDurationForUser($user, $requestedDuration = null)
+    {
+        $sellerProfiles = config('koumbaya.features.seller_profiles');
+        
+        // Vendeur particulier/individuel - durée fixe
+        if ($user->isIndividualSeller()) {
+            return $sellerProfiles['individual']['lottery_duration']['fixed'];
+        }
+        
+        // Vendeur business/entreprise - peut configurer
+        if ($user->isBusinessSeller()) {
+            $businessConfig = $sellerProfiles['business']['lottery_duration'];
+            
+            // Si aucune durée demandée, utiliser la durée par défaut
+            if (!$requestedDuration) {
+                return config('koumbaya.marketplace.default_lottery_duration', 30);
+            }
+            
+            // Valider la durée demandée dans les limites business
+            $minDays = $businessConfig['min_days'];
+            $maxDays = $businessConfig['max_days'];
+            
+            if ($requestedDuration < $minDays || $requestedDuration > $maxDays) {
+                // Si hors limites, utiliser la durée par défaut
+                return config('koumbaya.marketplace.default_lottery_duration', 30);
+            }
+            
+            return $requestedDuration;
+        }
+        
+        // Par défaut (marchands standard ou autres)
+        return config('koumbaya.marketplace.default_lottery_duration', 30);
+    }
+
+    /**
+     * Valide la durée de tombola selon le type de vendeur
+     * 
+     * @param \App\Models\User $user
+     * @param int $duration durée demandée en jours
+     * @return array résultat de la validation
+     */
+    private function validateLotteryDurationForUser($user, $duration)
+    {
+        $sellerProfiles = config('koumbaya.features.seller_profiles');
+        
+        // Vendeur particulier/individuel - durée fixe uniquement
+        if ($user->isIndividualSeller()) {
+            $fixedDuration = $sellerProfiles['individual']['lottery_duration']['fixed'];
+            
+            if ($duration != $fixedDuration) {
+                return [
+                    'valid' => false,
+                    'message' => "Les vendeurs particuliers peuvent uniquement créer des tombolas de {$fixedDuration} jours",
+                    'allowed_range' => ['fixed' => $fixedDuration]
+                ];
+            }
+            
+            return ['valid' => true];
+        }
+        
+        // Vendeur business/entreprise - peut configurer dans les limites
+        if ($user->isBusinessSeller()) {
+            $businessConfig = $sellerProfiles['business']['lottery_duration'];
+            $minDays = $businessConfig['min_days'];
+            $maxDays = $businessConfig['max_days'];
+            
+            if ($duration < $minDays || $duration > $maxDays) {
+                return [
+                    'valid' => false,
+                    'message' => "Les vendeurs business peuvent créer des tombolas entre {$minDays} et {$maxDays} jours",
+                    'allowed_range' => ['min' => $minDays, 'max' => $maxDays]
+                ];
+            }
+            
+            return ['valid' => true];
+        }
+        
+        // Vendeur standard - utiliser les limites par défaut
+        if ($duration < 1 || $duration > 60) {
+            return [
+                'valid' => false,
+                'message' => "La durée doit être entre 1 et 60 jours",
+                'allowed_range' => ['min' => 1, 'max' => 60]
+            ];
+        }
+        
+        return ['valid' => true];
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/products/lottery-duration-constraints",
+     *     tags={"Products"},
+     *     summary="Obtenir les contraintes de durée de tombola pour le vendeur connecté",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Contraintes de durée de tombola",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function getLotteryDurationConstraints()
+    {
+        $user = auth()->user();
+        
+        if (!$user->is_merchant) {
+            return response()->json(['error' => 'Seuls les marchands peuvent accéder à ces informations'], 403);
+        }
+        
+        $sellerProfiles = config('koumbaya.features.seller_profiles');
+        $constraints = [];
+        
+        // Vendeur particulier/individuel
+        if ($user->isIndividualSeller()) {
+            $constraints = [
+                'type' => 'individual',
+                'can_customize' => false,
+                'fixed_duration' => $sellerProfiles['individual']['lottery_duration']['fixed'],
+                'min_days' => $sellerProfiles['individual']['lottery_duration']['fixed'],
+                'max_days' => $sellerProfiles['individual']['lottery_duration']['fixed'],
+                'description' => 'Durée fixe de 30 jours pour les vendeurs particuliers'
+            ];
+        }
+        // Vendeur business/entreprise
+        elseif ($user->isBusinessSeller()) {
+            $constraints = [
+                'type' => 'business',
+                'can_customize' => true,
+                'fixed_duration' => null,
+                'min_days' => $sellerProfiles['business']['lottery_duration']['min_days'],
+                'max_days' => $sellerProfiles['business']['lottery_duration']['max_days'],
+                'description' => 'Configurez la durée entre 1 et 60 jours pour les vendeurs business'
+            ];
+        }
+        // Vendeur standard
+        else {
+            $constraints = [
+                'type' => 'standard',
+                'can_customize' => true,
+                'fixed_duration' => null,
+                'min_days' => 1,
+                'max_days' => 60,
+                'description' => 'Configurez la durée entre 1 et 60 jours'
+            ];
+        }
+        
+        $constraints['default_duration'] = config('koumbaya.marketplace.default_lottery_duration', 30);
+        
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'constraints' => $constraints,
+                'user_type' => [
+                    'is_individual_seller' => $user->isIndividualSeller(),
+                    'is_business_seller' => $user->isBusinessSeller(),
+                    'is_merchant' => $user->is_merchant
+                ]
             ]
         ]);
     }

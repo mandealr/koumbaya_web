@@ -190,7 +190,7 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paiement</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Détails</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
@@ -327,7 +327,7 @@
     </div>
 
     <!-- Modal de détails de commande -->
-    <div v-if="showModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div v-if="showModal" class="fixed inset-0 bg-black/40 overflow-y-auto h-full w-full z-50">
       <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-medium text-gray-900">Détails de la commande #{{ selectedOrder?.order_number }}</h3>

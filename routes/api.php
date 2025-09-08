@@ -220,6 +220,7 @@ Route::group([
 ], function () {
     // Products (Marchands seulement)
     Route::get('merchant/products', [ProductController::class, 'merchantProducts']);
+    Route::get('products/lottery-duration-constraints', [ProductController::class, 'getLotteryDurationConstraints']);
     Route::post('products', [ProductController::class, 'store']);
     Route::put('products/{id}', [ProductController::class, 'update']);
     Route::post('products/{id}/create-lottery', [ProductController::class, 'createLottery']);
@@ -290,6 +291,7 @@ Route::group([
     // Admin Users Management
     Route::prefix('users')->group(function () {
         Route::get('/', [AdminUserController::class, 'index']);
+        Route::get('/admin-roles', [AdminUserController::class, 'getAdminRoles']);
         Route::get('/{id}', [AdminUserController::class, 'show']);
         Route::post('/', [AdminUserController::class, 'store']);
         Route::put('/{id}', [AdminUserController::class, 'update']);

@@ -258,7 +258,7 @@
     </div>
 
     <!-- Modal de création de produit simplifié -->
-    <div v-if="showCreateProductModal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full z-50">
+    <div v-if="showCreateProductModal" class="fixed inset-0 bg-black/40 overflow-y-auto h-full w-full z-50">
       <div class="relative top-20 mx-auto p-8 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-2xl bg-white max-h-[80vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-6">
           <h3 class="text-2xl font-bold text-gray-900">Créer un Nouveau Produit</h3>

@@ -179,11 +179,23 @@ return [
                 'fixed_tickets' => 500, // Tickets fixes pour les vendeurs particuliers
                 'can_customize_tickets' => false, // Ne peuvent pas modifier le nombre
                 'min_product_price' => 100000, // Prix minimum produit (pour avoir ticket >= 200 FCFA)
+                'lottery_duration' => [
+                    'fixed' => 30, // Durée fixe de 30 jours
+                    'can_customize' => false, // Ne peut pas modifier la durée
+                    'min_days' => 30,
+                    'max_days' => 30,
+                ],
             ],
             'business' => [
                 'fixed_tickets' => null, // Peut choisir le nombre de tickets
                 'can_customize_tickets' => true, // Toutes les possibilités
                 'min_product_price' => null, // Pas de limite minimum
+                'lottery_duration' => [
+                    'fixed' => null, // Pas de durée fixe
+                    'can_customize' => true, // Peut configurer comme il veut
+                    'min_days' => 1, // Minimum 1 jour
+                    'max_days' => 60, // Maximum 60 jours
+                ],
             ]
         ],
         
