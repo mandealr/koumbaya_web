@@ -140,110 +140,92 @@ const routes = [
       {
         path: 'about',
         name: 'public.about',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'about' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'affiliates',
         name: 'public.affiliates',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'affiliates' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'earn-gombos',
         name: 'public.earn-gombos',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'earn-gombos' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'careers',
         name: 'public.careers',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'careers' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'media-press',
         name: 'public.media-press',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'media-press' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'lottery-participation',
         name: 'public.lottery-participation',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'lottery-participation' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'intellectual-property',
         name: 'public.intellectual-property',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'intellectual-property' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'order-delivery',
         name: 'public.order-delivery',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'order-delivery' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'report-suspicious',
         name: 'public.report-suspicious',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'report-suspicious' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'support-center',
         name: 'public.support-center',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'support-center' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'security-center',
         name: 'public.security-center',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'security-center' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'peace-on-koumbaya',
         name: 'public.peace-on-koumbaya',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'peace-on-koumbaya' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'sitemap',
         name: 'public.sitemap',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'sitemap' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'sell-on-koumbaya',
         name: 'public.sell-on-koumbaya',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'sell-on-koumbaya' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'terms',
         name: 'public.terms',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'terms' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'privacy',
         name: 'public.privacy',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'privacy' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'legal',
         name: 'public.legal',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'legal' }
+        component: () => import('@/pages/public/StaticPage.vue')
       },
       {
         path: 'cookies',
         name: 'public.cookies',
-        component: () => import('@/pages/public/StaticPage.vue'),
-        props: { page: 'cookies' }
+        component: () => import('@/pages/public/StaticPage.vue')
       }
     ]
   },

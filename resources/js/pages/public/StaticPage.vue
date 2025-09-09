@@ -32,6 +32,13 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
+// Extraire le nom de la page depuis le chemin
+const pageName = computed(() => {
+  // Récupérer la dernière partie du path sans le slash initial
+  const path = route.path.replace(/^\//, '')
+  return path
+})
+
 const pageContent = computed(() => {
   const contents = {
     'about': `
@@ -314,7 +321,7 @@ const pageContent = computed(() => {
     `
   }
 
-  return contents[route.params.page] || ''
+  return contents[pageName.value] || ''
 })
 
 const pageTitle = computed(() => {
@@ -339,7 +346,7 @@ const pageTitle = computed(() => {
     'cookies': 'Politique de cookies'
   }
 
-  return titles[route.params.page] || 'Page Koumbaya'
+  return titles[pageName.value] || 'Page Koumbaya'
 })
 </script>
 
