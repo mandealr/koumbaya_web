@@ -17,7 +17,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Middlewares nommés seulement (pas de globaux pour l'instant)
+        // Middleware global pour la sécurité
+        $middleware->web(append: [
+            \App\Http\Middleware\ForceHttpsMiddleware::class,
+            \App\Http\Middleware\SecurityHeadersMiddleware::class,
+            \App\Http\Middleware\InputValidationMiddleware::class,
+        ]);
+
+        // Middlewares nommés
         $middleware->alias([
             'auth.sanctum' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'merchant' => \App\Http\Middleware\MerchantMiddleware::class,
@@ -26,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'security' => \App\Http\Middleware\SecurityHeadersMiddleware::class,
             'validate.json' => \App\Http\Middleware\ValidateJsonMiddleware::class,
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
+            'csrf' => \App\Http\Middleware\VerifyCsrfToken::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

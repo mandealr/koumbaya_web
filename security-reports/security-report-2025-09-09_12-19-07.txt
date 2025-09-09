@@ -1,0 +1,12 @@
+RAPPORT DE SÉCURITÉ KOUMBAYA
+============================
+Date: Tue Sep  9 12:19:07 WAT 2025
+Environnement: 
+   INFO  The application environment is [local].  
+Version PHP: PHP 8.2.27 (cli) (built: Dec 17 2024 11:39:23) (NTS)
+Version Node: v24.5.0
+
+[0;34m1. 🧪 Tests de sécurité PHP...[0m
+PHPUnit 11.5.36 by Sebastian Bergmann and contributors.
+
+Unknown option "--verbose"
