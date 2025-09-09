@@ -145,12 +145,12 @@ const routes = [
       {
         path: 'affiliates',
         name: 'public.affiliates',
-        component: () => import('@/pages/public/StaticPage.vue')
+        component: () => import('@/pages/public/static/AffiliatesPage.vue')
       },
       {
         path: 'earn-gombos',
         name: 'public.earn-gombos',
-        component: () => import('@/pages/public/StaticPage.vue')
+        component: () => import('@/pages/public/static/EarnGombosPage.vue')
       },
       {
         path: 'careers',
@@ -160,7 +160,7 @@ const routes = [
       {
         path: 'media-press',
         name: 'public.media-press',
-        component: () => import('@/pages/public/StaticPage.vue')
+        component: () => import('@/pages/public/static/MediaPressPage.vue')
       },
       {
         path: 'lottery-participation',
@@ -180,17 +180,17 @@ const routes = [
       {
         path: 'report-suspicious',
         name: 'public.report-suspicious',
-        component: () => import('@/pages/public/StaticPage.vue')
+        component: () => import('@/pages/public/static/ReportSuspiciousPage.vue')
       },
       {
         path: 'support-center',
         name: 'public.support-center',
-        component: () => import('@/pages/public/StaticPage.vue')
+        component: () => import('@/pages/public/static/SupportCenterPage.vue')
       },
       {
         path: 'security-center',
         name: 'public.security-center',
-        component: () => import('@/pages/public/StaticPage.vue')
+        component: () => import('@/pages/public/static/SecurityCenterPage.vue')
       },
       {
         path: 'peace-on-koumbaya',
@@ -200,7 +200,7 @@ const routes = [
       {
         path: 'sitemap',
         name: 'public.sitemap',
-        component: () => import('@/pages/public/StaticPage.vue')
+        component: () => import('@/pages/public/static/SitemapPage.vue')
       },
       {
         path: 'sell-on-koumbaya',
