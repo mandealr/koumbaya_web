@@ -7,7 +7,7 @@
     <div class="space-y-12">
       <!-- Introduction -->
       <div class="text-center space-y-6">
-        <div class="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-full flex items-center justify-center mx-auto">
+        <div class="w-16 h-16 bg-gradient-to-br from-[#0099cc] to-[#006699] rounded-full flex items-center justify-center mx-auto">
           <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
           </svg>
@@ -18,7 +18,7 @@
             Gagnez des Gombos gratuitement !
           </h2>
           <p class="text-xl text-gray-700 leading-relaxed">
-            Les <strong class="text-yellow-600">Gombos</strong> sont notre monnaie virtuelle qui vous permet de participer aux tombolas Koumbaya. Plus vous en avez, plus vous pouvez tenter votre chance de remporter des articles incroyables !
+            Les <strong class="text-[#0099cc]">Gombos</strong> sont notre monnaie virtuelle qui vous permet de participer aux tombolas Koumbaya. Plus vous en avez, plus vous pouvez tenter votre chance de remporter des articles incroyables !
           </p>
         </div>
       </div>
@@ -26,16 +26,18 @@
       <!-- Qu'est-ce qu'un Gombo -->
       <div class="space-y-8">
         <div class="flex items-center gap-4 mb-8">
-          <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-            <div class="text-2xl">💰</div>
+          <div class="w-12 h-12 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+            <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
           </div>
           <h2 class="text-3xl font-bold text-gray-900">Qu'est-ce qu'un Gombo ?</h2>
         </div>
 
-        <div class="bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-8">
+        <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#006699]/5 border border-[#0099cc]/20 rounded-2xl p-8">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="text-center">
-              <div class="w-20 h-20 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div class="w-20 h-20 bg-[#0099cc] rounded-full flex items-center justify-center mx-auto mb-4">
                 <span class="text-3xl font-bold text-white">G</span>
               </div>
               <h3 class="text-xl font-semibold text-gray-900 mb-2">Monnaie virtuelle</h3>
@@ -44,8 +46,10 @@
               </p>
             </div>
             <div class="text-center">
-              <div class="w-20 h-20 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <div class="text-3xl">🎫</div>
+              <div class="w-20 h-20 bg-[#0099cc] rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
+                </svg>
               </div>
               <h3 class="text-xl font-semibold text-gray-900 mb-2">Participation aux tombolas</h3>
               <p class="text-gray-600">
@@ -53,8 +57,10 @@
               </p>
             </div>
             <div class="text-center">
-              <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <div class="text-3xl">🎁</div>
+              <div class="w-20 h-20 bg-[#0099cc] rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                </svg>
               </div>
               <h3 class="text-xl font-semibold text-gray-900 mb-2">Récompenses exclusives</h3>
               <p class="text-gray-600">
@@ -68,43 +74,47 @@
       <!-- Comment gagner des Gombos -->
       <div class="space-y-8">
         <div class="flex items-center gap-4 mb-8">
-          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-            <div class="text-2xl">🚀</div>
+          <div class="w-12 h-12 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+            <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103-.03-.202-.066-.308-.084a13.65 13.65 0 0 1-7.362 0c-.106.018-.205.054-.308.084m0 0a4.25 4.25 0 0 0-.417 2.716c.41-.138.83-.216 1.258-.216.428 0 .848.078 1.258.216a4.25 4.25 0 0 0-.417-2.716ZM6.75 7.296A4.5 4.5 0 0 1 12 3c2.291 0 4.344 1.815 4.5 4.043A17.5 17.5 0 0 0 12 12.75c-2.676 0-5.216-.584-7.25-1.657Z" />
+            </svg>
           </div>
           <h2 class="text-3xl font-bold text-gray-900">Comment gagner des Gombos ?</h2>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <!-- Missions quotidiennes -->
-          <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-8 hover:shadow-lg transition-all">
+          <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#006699]/5 border border-[#0099cc]/20 rounded-2xl p-8 hover:shadow-lg transition-all">
             <div class="flex items-center gap-4 mb-6">
-              <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                <div class="text-2xl">📅</div>
+              <div class="w-12 h-12 bg-[#0099cc] rounded-full flex items-center justify-center">
+                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5a2.25 2.25 0 0 0 2.25-2.25m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                </svg>
               </div>
               <h3 class="text-2xl font-bold text-gray-900">Missions quotidiennes</h3>
-              <span class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">+5 à +50 Gombos</span>
+              <span class="bg-[#0099cc]/10 text-[#0099cc] text-sm font-semibold px-3 py-1 rounded-full">+5 à +50 Gombos</span>
             </div>
             <ul class="space-y-3 text-gray-700">
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Connexion quotidienne (+5 Gombos)</span>
               </li>
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Visiter 3 produits différents (+10 Gombos)</span>
               </li>
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Partager un produit sur les réseaux (+15 Gombos)</span>
               </li>
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Compléter votre profil (+20 Gombos)</span>
@@ -113,35 +123,37 @@
           </div>
 
           <!-- Parrainage -->
-          <div class="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-2xl p-8 hover:shadow-lg transition-all">
+          <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#006699]/5 border border-[#0099cc]/20 rounded-2xl p-8 hover:shadow-lg transition-all">
             <div class="flex items-center gap-4 mb-6">
-              <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
-                <div class="text-2xl">👥</div>
+              <div class="w-12 h-12 bg-[#0099cc] rounded-full flex items-center justify-center">
+                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                </svg>
               </div>
               <h3 class="text-2xl font-bold text-gray-900">Parrainage</h3>
-              <span class="bg-purple-100 text-purple-800 text-sm font-semibold px-3 py-1 rounded-full">+100 Gombos</span>
+              <span class="bg-[#0099cc]/10 text-[#0099cc] text-sm font-semibold px-3 py-1 rounded-full">+100 Gombos</span>
             </div>
             <ul class="space-y-3 text-gray-700">
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Invitez vos amis avec votre code de parrainage</span>
               </li>
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>100 Gombos pour chaque ami qui s'inscrit</span>
               </li>
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Bonus de 50 Gombos pour votre ami aussi !</span>
               </li>
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Pas de limite sur le nombre de parrainages</span>
@@ -150,35 +162,38 @@
           </div>
 
           <!-- Événements spéciaux -->
-          <div class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-8 hover:shadow-lg transition-all">
+          <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#006699]/5 border border-[#0099cc]/20 rounded-2xl p-8 hover:shadow-lg transition-all">
             <div class="flex items-center gap-4 mb-6">
-              <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
-                <div class="text-2xl">🎉</div>
+              <div class="w-12 h-12 bg-[#0099cc] rounded-full flex items-center justify-center">
+                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z" />
+                </svg>
               </div>
               <h3 class="text-2xl font-bold text-gray-900">Événements spéciaux</h3>
-              <span class="bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full">Variable</span>
+              <span class="bg-[#0099cc]/10 text-[#0099cc] text-sm font-semibold px-3 py-1 rounded-full">Variable</span>
             </div>
             <ul class="space-y-3 text-gray-700">
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Concours mensuels sur les réseaux sociaux</span>
               </li>
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Double Gombos pendant les fêtes</span>
               </li>
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Événements surprise de la communauté</span>
               </li>
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Récompenses pour les utilisateurs actifs</span>
@@ -187,35 +202,37 @@
           </div>
 
           <!-- Achats et engagement -->
-          <div class="bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200 rounded-2xl p-8 hover:shadow-lg transition-all">
+          <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#006699]/5 border border-[#0099cc]/20 rounded-2xl p-8 hover:shadow-lg transition-all">
             <div class="flex items-center gap-4 mb-6">
-              <div class="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center">
-                <div class="text-2xl">🛍️</div>
+              <div class="w-12 h-12 bg-[#0099cc] rounded-full flex items-center justify-center">
+                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                </svg>
               </div>
               <h3 class="text-2xl font-bold text-gray-900">Achats & Engagement</h3>
-              <span class="bg-orange-100 text-orange-800 text-sm font-semibold px-3 py-1 rounded-full">+1% du montant</span>
+              <span class="bg-[#0099cc]/10 text-[#0099cc] text-sm font-semibold px-3 py-1 rounded-full">+1% du montant</span>
             </div>
             <ul class="space-y-3 text-gray-700">
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>1% en Gombos pour chaque achat</span>
               </li>
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Bonus fidélité pour les achats récurrents</span>
               </li>
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Écrire des avis produits (+25 Gombos)</span>
               </li>
               <li class="flex items-center gap-3">
-                <svg class="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Participer aux sondages communauté</span>
@@ -228,17 +245,21 @@
       <!-- Niveaux VIP -->
       <div class="space-y-8">
         <div class="flex items-center gap-4 mb-8">
-          <div class="w-12 h-12 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
-            <div class="text-2xl">👑</div>
+          <div class="w-12 h-12 bg-gradient-to-r from-[#0099cc] to-[#006699] rounded-full flex items-center justify-center">
+            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.228V2.721a48.336 48.336 0 0 0-6.75-.47m0 0v8.018a5.25 5.25 0 0 0-3.75 0V2.25m3.75 0c.394 0 .787.016 1.178.048m-1.178-.048a48.323 48.323 0 0 0-9.75 0V9a5.25 5.25 0 0 0 3.75 0V2.25Z" />
+            </svg>
           </div>
           <h2 class="text-3xl font-bold text-gray-900">Niveaux VIP Koumbaya</h2>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
           <!-- Niveau Bronze -->
-          <div class="bg-gradient-to-b from-orange-100 to-orange-200 border-2 border-orange-300 rounded-2xl p-6 text-center">
-            <div class="w-16 h-16 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <div class="text-2xl">🥉</div>
+          <div class="bg-gradient-to-b from-[#0099cc]/10 to-[#0099cc]/20 border-2 border-[#0099cc]/30 rounded-2xl p-6 text-center">
+            <div class="w-16 h-16 bg-gradient-to-r from-[#0099cc] to-[#006699] rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.228V2.721a48.336 48.336 0 0 0-6.75-.47m0 0v8.018a5.25 5.25 0 0 0-3.75 0V2.25m3.75 0c.394 0 .787.016 1.178.048m-1.178-.048a48.323 48.323 0 0 0-9.75 0V9a5.25 5.25 0 0 0 3.75 0V2.25Z" />
+              </svg>
             </div>
             <h3 class="text-xl font-bold text-gray-900 mb-2">Bronze</h3>
             <p class="text-sm text-gray-600 mb-4">0 - 999 Gombos</p>
@@ -250,9 +271,11 @@
           </div>
 
           <!-- Niveau Argent -->
-          <div class="bg-gradient-to-b from-gray-100 to-gray-200 border-2 border-gray-400 rounded-2xl p-6 text-center">
-            <div class="w-16 h-16 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <div class="text-2xl">🥈</div>
+          <div class="bg-gradient-to-b from-[#0099cc]/10 to-[#0099cc]/20 border-2 border-[#0099cc]/30 rounded-2xl p-6 text-center">
+            <div class="w-16 h-16 bg-gradient-to-r from-[#0099cc] to-[#006699] rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.228V2.721a48.336 48.336 0 0 0-6.75-.47m0 0v8.018a5.25 5.25 0 0 0-3.75 0V2.25m3.75 0c.394 0 .787.016 1.178.048m-1.178-.048a48.323 48.323 0 0 0-9.75 0V9a5.25 5.25 0 0 0 3.75 0V2.25Z" />
+              </svg>
             </div>
             <h3 class="text-xl font-bold text-gray-900 mb-2">Argent</h3>
             <p class="text-sm text-gray-600 mb-4">1000 - 4999 Gombos</p>
@@ -264,9 +287,11 @@
           </div>
 
           <!-- Niveau Or -->
-          <div class="bg-gradient-to-b from-yellow-100 to-yellow-200 border-2 border-yellow-400 rounded-2xl p-6 text-center">
-            <div class="w-16 h-16 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <div class="text-2xl">🥇</div>
+          <div class="bg-gradient-to-b from-[#0099cc]/10 to-[#0099cc]/20 border-2 border-[#0099cc]/30 rounded-2xl p-6 text-center">
+            <div class="w-16 h-16 bg-gradient-to-r from-[#0099cc] to-[#006699] rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.228V2.721a48.336 48.336 0 0 0-6.75-.47m0 0v8.018a5.25 5.25 0 0 0-3.75 0V2.25m3.75 0c.394 0 .787.016 1.178.048m-1.178-.048a48.323 48.323 0 0 0-9.75 0V9a5.25 5.25 0 0 0 3.75 0V2.25Z" />
+              </svg>
             </div>
             <h3 class="text-xl font-bold text-gray-900 mb-2">Or</h3>
             <p class="text-sm text-gray-600 mb-4">5000 - 9999 Gombos</p>
@@ -278,9 +303,11 @@
           </div>
 
           <!-- Niveau Diamant -->
-          <div class="bg-gradient-to-b from-blue-100 to-purple-200 border-2 border-purple-400 rounded-2xl p-6 text-center">
-            <div class="w-16 h-16 bg-gradient-to-r from-blue-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <div class="text-2xl">💎</div>
+          <div class="bg-gradient-to-b from-[#0099cc]/10 to-[#0099cc]/20 border-2 border-[#0099cc]/30 rounded-2xl p-6 text-center">
+            <div class="w-16 h-16 bg-gradient-to-r from-[#0099cc] to-[#006699] rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 12a.75.75 0 0 1-.75-.75 6.365 6.365 0 0 1 13.077-1.492.75.75 0 0 1-1.425.454 4.864 4.864 0 0 0-8.91-.994A.75.75 0 0 1 6 12ZM18 12a.75.75 0 0 1 .75.75 6.365 6.365 0 0 1-13.077 1.492.75.75 0 0 1 1.425-.454 4.864 4.864 0 0 0 8.91.994A.75.75 0 0 1 18 12ZM15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+              </svg>
             </div>
             <h3 class="text-xl font-bold text-gray-900 mb-2">Diamant</h3>
             <p class="text-sm text-gray-600 mb-4">10000+ Gombos</p>
@@ -294,10 +321,12 @@
       </div>
 
       <!-- Conseils pour maximiser vos gains -->
-      <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-8">
+      <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#006699]/5 rounded-2xl p-8">
         <div class="flex items-center gap-4 mb-6">
-          <div class="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center">
-            <div class="text-2xl text-white">💡</div>
+          <div class="w-12 h-12 bg-[#0099cc] rounded-full flex items-center justify-center">
+            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m4.5 0a12.052 12.052 0 0 0 1.654-.043A4.73 4.73 0 0 0 18.75 7.5H5.25a4.73 4.73 0 0 0 1.654 3.957 12.075 12.075 0 0 0 1.654.043m4.5 0a12.06 12.06 0 0 1-4.5 0m0 0a12.013 12.013 0 0 1-3.75-.189m0 0a11.964 11.964 0 0 1-3.478-.397 4.688 4.688 0 0 1-.06-1.414C2.884 8.067 2 6.667 2 5.25 2 4.836 2.336 4.5 2.75 4.5s.75.336.75.75c0 .414.336.75.75.75h1.5c.414 0 .75.336.75.75 0 1.417.884 2.817 2.656 3.5z" />
+            </svg>
           </div>
           <h2 class="text-3xl font-bold text-gray-900">Conseils pour maximiser vos gains</h2>
         </div>
@@ -307,25 +336,25 @@
             <h3 class="text-xl font-semibold text-gray-900 mb-4">✅ Bonnes pratiques :</h3>
             <ul class="space-y-3 text-gray-700">
               <li class="flex items-start gap-3">
-                <svg class="h-5 w-5 text-green-600 mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc] mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Connectez-vous tous les jours pour les bonus de connexion</span>
               </li>
               <li class="flex items-start gap-3">
-                <svg class="h-5 w-5 text-green-600 mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc] mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Complétez toutes vos missions quotidiennes</span>
               </li>
               <li class="flex items-start gap-3">
-                <svg class="h-5 w-5 text-green-600 mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc] mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Partagez Koumbaya avec vos amis pour les bonus de parrainage</span>
               </li>
               <li class="flex items-start gap-3">
-                <svg class="h-5 w-5 text-green-600 mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc] mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 <span>Suivez nos réseaux sociaux pour les événements spéciaux</span>
@@ -336,25 +365,25 @@
             <h3 class="text-xl font-semibold text-gray-900 mb-4">⚠️ Important à retenir :</h3>
             <ul class="space-y-3 text-gray-700">
               <li class="flex items-start gap-3">
-                <svg class="h-5 w-5 text-yellow-600 mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc] mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                 </svg>
                 <span>Les Gombos n'ont pas de valeur monétaire</span>
               </li>
               <li class="flex items-start gap-3">
-                <svg class="h-5 w-5 text-yellow-600 mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc] mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                 </svg>
                 <span>Les Gombos expirent après 1 an d'inactivité</span>
               </li>
               <li class="flex items-start gap-3">
-                <svg class="h-5 w-5 text-yellow-600 mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc] mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                 </svg>
                 <span>Utilisation interdite de bots ou méthodes automatisées</span>
               </li>
               <li class="flex items-start gap-3">
-                <svg class="h-5 w-5 text-yellow-600 mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-5 w-5 text-[#0099cc] mt-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                 </svg>
                 <span>Les conditions peuvent évoluer selon nos conditions d'utilisation</span>
@@ -365,11 +394,15 @@
       </div>
 
       <!-- Call to Action -->
-      <div class="bg-gradient-to-r from-yellow-600 to-orange-600 rounded-2xl p-12 text-white text-center">
+      <div class="bg-gradient-to-r from-[#0099cc] to-[#006699] rounded-2xl p-12 text-white text-center">
         <div class="max-w-3xl mx-auto space-y-6">
-          <div class="text-6xl mb-6">💰</div>
+          <div class="mb-6">
+            <svg class="h-16 w-16 text-white mx-auto" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+          </div>
           <h2 class="text-3xl md:text-4xl font-bold">Commencez à collecter vos Gombos !</h2>
-          <p class="text-xl text-yellow-100 leading-relaxed">
+          <p class="text-xl text-[#0099cc]/20 leading-relaxed">
             Plus vous êtes actif sur Koumbaya, plus vous gagnez de Gombos. 
             Connectez-vous dès maintenant et commencez votre collection !
           </p>
@@ -377,7 +410,7 @@
           <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
             <a
               href="/login"
-              class="inline-flex items-center gap-3 bg-white text-orange-600 px-8 py-4 rounded-xl font-bold hover:bg-yellow-50 transition-all duration-200 hover:scale-[1.05] shadow-lg text-lg"
+              class="inline-flex items-center gap-3 bg-white text-[#0099cc] px-8 py-4 rounded-xl font-bold hover:bg-[#0099cc]/5 transition-all duration-200 hover:scale-[1.05] shadow-lg text-lg"
             >
               <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
@@ -387,7 +420,7 @@
             
             <a
               href="/products"
-              class="inline-flex items-center gap-2 text-yellow-100 hover:text-white font-semibold transition-colors"
+              class="inline-flex items-center gap-2 text-[#0099cc]/20 hover:text-white font-semibold transition-colors"
             >
               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />

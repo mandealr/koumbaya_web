@@ -27,8 +27,10 @@
       <!-- Vos revenus d'affiliation -->
       <div class="space-y-8">
         <div class="flex items-center gap-4 mb-8">
-          <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-            <div class="text-2xl">💰</div>
+          <div class="w-12 h-12 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+            <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
           </div>
           <h2 class="text-3xl font-bold text-gray-900">Vos revenus d'affiliation</h2>
         </div>
@@ -37,7 +39,9 @@
           <!-- Commissions élevées -->
           <div class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-8">
             <div class="flex items-center gap-4 mb-6">
-              <div class="text-3xl">🔝</div>
+              <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
+              </svg>
               <h3 class="text-2xl font-bold text-gray-900">Commissions élevées</h3>
             </div>
             <p class="text-gray-700 text-lg leading-relaxed">
@@ -48,7 +52,10 @@
           <!-- Offres exclusives -->
           <div class="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-2xl p-8">
             <div class="flex items-center gap-4 mb-6">
-              <div class="text-3xl">🛍️</div>
+              <svg class="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
+              </svg>
               <h3 class="text-2xl font-bold text-gray-900">Offres exclusives à promouvoir</h3>
             </div>
             <p class="text-gray-700 text-lg leading-relaxed">
@@ -60,7 +67,9 @@
         <!-- Des marques de confiance -->
         <div class="bg-gradient-to-r from-[#0099cc]/5 to-blue-50 rounded-2xl p-8">
           <div class="flex items-center gap-4 mb-6">
-            <div class="text-3xl">🤝</div>
+            <svg class="h-8 w-8 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-6-3.5h7.5m6 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
             <h3 class="text-2xl font-bold text-gray-900">Des marques de confiance</h3>
           </div>
           <p class="text-gray-700 text-lg leading-relaxed">
@@ -84,7 +93,9 @@
           <!-- Influenceurs autorisés -->
           <div class="bg-white border-2 border-[#0099cc]/20 rounded-2xl p-8 hover:border-[#0099cc]/40 transition-all hover:shadow-lg">
             <div class="flex items-center gap-4 mb-6">
-              <div class="text-3xl">🎯</div>
+              <svg class="h-8 w-8 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+              </svg>
               <h3 class="text-2xl font-bold text-gray-900">Influenceurs autorisés</h3>
             </div>
             
@@ -94,22 +105,30 @@
             
             <ul class="space-y-4 mb-8">
               <li class="flex items-start gap-3">
-                <div class="text-xl">💸</div>
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
                 <span class="text-gray-700"><strong>Commission de 1 à 10 %</strong> sur chaque commande</span>
               </li>
               <li class="flex items-start gap-3">
-                <div class="text-xl">🎁</div>
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                </svg>
                 <span class="text-gray-700">Cartes cadeaux</span>
               </li>
               <li class="flex items-start gap-3">
-                <div class="text-xl">📲</div>
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+                </svg>
                 <span class="text-gray-700">Bonus pour chaque téléchargement utilisateur</span>
               </li>
             </ul>
             
             <div class="text-center">
               <div class="inline-flex items-center gap-2 bg-[#0099cc] hover:bg-[#0088bb] text-white px-6 py-3 rounded-xl font-medium transition-colors cursor-pointer">
-                <div class="text-lg">👉</div>
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
                 <span>Rejoignez dès maintenant</span>
               </div>
             </div>
@@ -118,7 +137,9 @@
           <!-- Sites web affiliés -->
           <div class="bg-white border-2 border-green-200 rounded-2xl p-8 hover:border-green-300 transition-all hover:shadow-lg">
             <div class="flex items-center gap-4 mb-6">
-              <div class="text-3xl">🌐</div>
+              <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 0 1-1.161.886l-.143.048a1.107 1.107 0 0 0-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 0 1-1.652.928l-.679-.906a1.125 1.125 0 0 0-1.906.172L4.5 15.75l-.612.153M12.75 3.031a9 9 0 0 0-8.862 12.872M12.75 3.031a9 9 0 0 1 6.69 14.036m0 0-.177-.529A2.25 2.25 0 0 0 17.128 15H16.5l-.324-.324a1.453 1.453 0 0 0-2.328.377l-.036.073a1.586 1.586 0 0 1-.982.816l-.99.282c-.55.157-.894.702-.8 1.267l.073.438c.08.474.49.821.97.821.846 0 1.598.542 1.865 1.345l.215.643m5.276-3.67a9.012 9.012 0 0 1-5.276 3.67m0 0a9.025 9.025 0 0 1-8.862-12.872M15.75 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              </svg>
               <h3 class="text-2xl font-bold text-gray-900">Sites web affiliés</h3>
             </div>
             
@@ -128,18 +149,24 @@
             
             <ul class="space-y-4 mb-8">
               <li class="flex items-start gap-3">
-                <div class="text-xl">📈</div>
+                <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
+                </svg>
                 <span class="text-gray-700">Taux de commission interessants sur les ventes</span>
               </li>
               <li class="flex items-start gap-3">
-                <div class="text-xl">🎯</div>
+                <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                </svg>
                 <span class="text-gray-700">Avantages personnalisés selon vos performances</span>
               </li>
             </ul>
             
             <div class="text-center">
               <div class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-medium transition-colors cursor-pointer">
-                <div class="text-lg">👉</div>
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
                 <span>Rejoignez dès maintenant</span>
               </div>
             </div>
@@ -148,7 +175,9 @@
           <!-- Membres standards -->
           <div class="bg-white border-2 border-yellow-200 rounded-2xl p-8 hover:border-yellow-300 transition-all hover:shadow-lg">
             <div class="flex items-center gap-4 mb-6">
-              <div class="text-3xl">👤</div>
+              <svg class="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+              </svg>
               <h3 class="text-2xl font-bold text-gray-900">Membres standards</h3>
             </div>
             
@@ -158,18 +187,24 @@
             
             <ul class="space-y-4 mb-8">
               <li class="flex items-start gap-3">
-                <div class="text-xl">💰</div>
+                <svg class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
                 <span class="text-gray-700"><strong>Commission de 1 à 10 %</strong> sur chaque commande</span>
               </li>
               <li class="flex items-start gap-3">
-                <div class="text-xl">📲</div>
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+                </svg>
                 <span class="text-gray-700">Bonus pour chaque téléchargement utilisateur</span>
               </li>
             </ul>
             
             <div class="text-center">
               <div class="inline-flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-xl font-medium transition-colors cursor-pointer">
-                <div class="text-lg">👉</div>
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
                 <span>Rejoignez dès maintenant</span>
               </div>
             </div>
@@ -178,7 +213,9 @@
           <!-- Organisations & institutions -->
           <div class="bg-white border-2 border-purple-200 rounded-2xl p-8 hover:border-purple-300 transition-all hover:shadow-lg">
             <div class="flex items-center gap-4 mb-6">
-              <div class="text-3xl">🏢</div>
+              <svg class="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15l-.75 18h-13.5L4.5 3ZM12.75 8.25h.008v.008h-.008V8.25Zm0 9.75h.008v.008h-.008V18ZM9.75 8.25h.008v.008H9.75V8.25Zm0 9.75h.008v.008H9.75V18Zm6-9.75h.008v.008h-.008V8.25Zm0 9.75h.008v.008h-.008V18Z" />
+              </svg>
               <h3 class="text-2xl font-bold text-gray-900">Organisations & institutions</h3>
             </div>
             
@@ -188,18 +225,24 @@
             
             <ul class="space-y-4 mb-8">
               <li class="flex items-start gap-3">
-                <div class="text-xl">🔄</div>
+                <svg class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3 3-3" />
+                </svg>
                 <span class="text-gray-700"><strong>Commissions secondaires :</strong> gagnez sur vos ventes directes et celles générées par les affiliés que vous avez parrainés.</span>
               </li>
               <li class="flex items-start gap-3">
-                <div class="text-xl">🧩</div>
+                <svg class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 5.427-.63 48.05 48.05 0 0 0 .582-4.717.532.532 0 0 0-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 0 0 .658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
+                </svg>
                 <span class="text-gray-700">Avantages personnalisés adaptés à vos performances</span>
               </li>
             </ul>
             
             <div class="text-center">
               <div class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-medium transition-colors cursor-pointer">
-                <div class="text-lg">👉</div>
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
                 <span>Rejoignez dès maintenant</span>
               </div>
             </div>

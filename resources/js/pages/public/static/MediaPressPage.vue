@@ -7,7 +7,7 @@
     <div class="space-y-12">
       <!-- Introduction -->
       <div class="text-center space-y-6">
-        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto">
+        <div class="w-16 h-16 bg-gradient-to-br from-[#0099cc] to-[#006699] rounded-full flex items-center justify-center mx-auto">
           <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
           </svg>
@@ -15,7 +15,7 @@
         
         <div class="max-w-4xl mx-auto">
           <p class="text-xl text-gray-700 leading-relaxed">
-            Nous aimons collaborer avec vous et partager des <strong class="text-purple-600">histoires inspirantes</strong> sur notre communauté de clients, nos partenaires de l'écosystème et nos partenaires marchands.
+            Nous aimons collaborer avec vous et partager des <strong class="text-[#0099cc]">histoires inspirantes</strong> sur notre communauté de clients, nos partenaires de l'écosystème et nos partenaires marchands.
           </p>
         </div>
       </div>
@@ -23,15 +23,17 @@
       <!-- Contact Presse -->
       <div class="space-y-8">
         <div class="flex items-center gap-4 mb-8">
-          <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-            <div class="text-2xl">📧</div>
+          <div class="w-12 h-12 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+            <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 21.75 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+            </svg>
           </div>
           <h2 class="text-3xl font-bold text-gray-900">Contactez notre équipe média</h2>
         </div>
 
-        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-8">
+        <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#006699]/5 border border-[#0099cc]/20 rounded-2xl p-8">
           <div class="text-center space-y-6">
-            <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto">
+            <div class="w-20 h-20 bg-[#0099cc] rounded-full flex items-center justify-center mx-auto">
               <svg class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 21.75 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
               </svg>
@@ -41,7 +43,7 @@
               <h3 class="text-2xl font-bold text-gray-900 mb-4">Contactez-nous par e-mail</h3>
               <a 
                 href="mailto:media@koumbaya.com" 
-                class="inline-flex items-center gap-3 text-2xl font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                class="inline-flex items-center gap-3 text-2xl font-semibold text-[#0099cc] hover:text-[#0066aa] transition-colors"
               >
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 21.75 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
@@ -56,17 +58,19 @@
       <!-- Informations importantes -->
       <div class="space-y-8">
         <div class="flex items-center gap-4 mb-8">
-          <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-            <div class="text-2xl">🔔</div>
+          <div class="w-12 h-12 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+            <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+            </svg>
           </div>
           <h2 class="text-3xl font-bold text-gray-900">Informations importantes</h2>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <!-- Pour la presse -->
-          <div class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-8">
+          <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#006699]/5 border border-[#0099cc]/20 rounded-2xl p-8">
             <div class="flex items-center gap-4 mb-6">
-              <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+              <div class="w-12 h-12 bg-[#0099cc] rounded-full flex items-center justify-center">
                 <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
@@ -74,7 +78,7 @@
               <h3 class="text-xl font-bold text-gray-900">Membres de la presse</h3>
             </div>
             <p class="text-gray-700 text-lg leading-relaxed">
-              <strong class="text-green-600">Seuls les membres de la presse recevront une réponse.</strong>
+              <strong class="text-[#0099cc]">Seuls les membres de la presse recevront une réponse.</strong>
             </p>
             <p class="text-gray-600 mt-4">
               Notre équipe média est dédiée exclusivement aux demandes journalistiques et relations presse.
@@ -82,9 +86,9 @@
           </div>
 
           <!-- Pour les clients -->
-          <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-8">
+          <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#006699]/5 border border-[#0099cc]/20 rounded-2xl p-8">
             <div class="flex items-center gap-4 mb-6">
-              <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+              <div class="w-12 h-12 bg-[#0099cc] rounded-full flex items-center justify-center">
                 <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                 </svg>
@@ -96,7 +100,7 @@
             </p>
             <a 
               href="/support-center" 
-              class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+              class="inline-flex items-center gap-2 text-[#0099cc] hover:text-[#0066aa] font-semibold transition-colors"
             >
               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
@@ -110,15 +114,18 @@
       <!-- Autres demandes -->
       <div class="space-y-8">
         <div class="flex items-center gap-4 mb-8">
-          <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-            <div class="text-2xl">📌</div>
+          <div class="w-12 h-12 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+            <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+            </svg>
           </div>
           <h2 class="text-3xl font-bold text-gray-900">Autres demandes</h2>
         </div>
 
-        <div class="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-2xl p-8">
+        <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#006699]/5 border border-[#0099cc]/20 rounded-2xl p-8">
           <div class="flex items-start gap-4">
-            <svg class="h-8 w-8 text-purple-600 mt-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <svg class="h-8 w-8 text-[#0099cc] mt-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
             </svg>
             <div>
@@ -128,7 +135,7 @@
               </p>
               <a 
                 href="/support-center" 
-                class="inline-flex items-center gap-3 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+                class="inline-flex items-center gap-3 bg-[#0099cc] hover:bg-[#0066aa] text-white px-6 py-3 rounded-xl font-semibold transition-colors"
               >
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
@@ -143,8 +150,10 @@
       <!-- Réseaux sociaux -->
       <div class="space-y-8">
         <div class="flex items-center gap-4 mb-8">
-          <div class="w-12 h-12 bg-gradient-to-br from-pink-100 to-red-100 rounded-full flex items-center justify-center">
-            <div class="text-2xl">🌐</div>
+          <div class="w-12 h-12 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+            <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 0 1-1.161.886l-.143.048a1.107 1.107 0 0 0-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 0 1-1.652.928l-.679-.906a1.125 1.125 0 0 0-1.906.172L4.5 15.75l-.612.153M12.75 3.031a9 9 0 0 0-8.862 12.872M12.75 3.031a9 9 0 0 1 6.69 14.036m0 0-.177-.529A2.25 2.25 0 0 0 17.128 15H16.5l-.324-.324a1.453 1.453 0 0 0-2.328.377l-.036.073a1.586 1.586 0 0 1-.982.816l-.99.282c-.55.157-.894.702-.8 1.267l.073.438c.08.474.49.821.97.821.846 0 1.598.542 1.865 1.345l.215.643m5.276-3.67a9.012 9.012 0 0 1-5.276 3.67m0 0a9.025 9.025 0 0 1-8.862-12.872M15.75 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            </svg>
           </div>
           <h2 class="text-3xl font-bold text-gray-900">Suivez-nous sur les réseaux sociaux</h2>
         </div>
@@ -205,17 +214,21 @@
       </div>
 
       <!-- Call to Action final -->
-      <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-8 text-white text-center">
+      <div class="bg-gradient-to-r from-[#0099cc] to-[#006699] rounded-2xl p-8 text-white text-center">
         <div class="max-w-2xl mx-auto space-y-4">
-          <div class="text-4xl mb-4">📻</div>
+          <div class="mb-4">
+            <svg class="h-12 w-12 text-white mx-auto" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
+            </svg>
+          </div>
           <h2 class="text-2xl md:text-3xl font-bold">Travaillons ensemble</h2>
-          <p class="text-purple-100 text-lg">
+          <p class="text-[#0099cc]/20 text-lg">
             Nous sommes toujours ravis de partager les histoires inspirantes de notre communauté avec les médias et la presse.
           </p>
           <div class="pt-4">
             <a 
               href="mailto:media@koumbaya.com"
-              class="inline-flex items-center gap-3 bg-white text-purple-600 px-6 py-3 rounded-xl font-semibold hover:bg-purple-50 transition-colors"
+              class="inline-flex items-center gap-3 bg-white text-[#0099cc] px-6 py-3 rounded-xl font-semibold hover:bg-[#0099cc]/5 transition-colors"
             >
               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 21.75 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />

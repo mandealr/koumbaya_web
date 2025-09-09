@@ -48,7 +48,7 @@
           Koumbaya propose un outil innovant mélant technologie agile, une vision centrée sur l'utilisateur, et environnement ludique en vue d'une satisfaction client à deux volets. Koumbaya transforme l'e-commerce en une véritable opportunité socio-économique, pratique et ludique pour tous.
         </p>
         
-        <div class="bg-blue-50 rounded-xl p-6 mt-8">
+        <div class="bg-[#0099cc]/5 rounded-xl p-6 mt-8">
           <h3 class="text-xl font-semibold text-gray-900 mb-4">Simplement dit :</h3>
           <ul class="space-y-3">
             <li class="flex items-start gap-3">
@@ -88,7 +88,11 @@
           <!-- Autonomisation -->
           <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all">
             <div class="flex items-center gap-3 mb-4">
-              <div class="text-2xl">💪</div>
+              <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+              </div>
               <h3 class="text-xl font-semibold text-gray-900">Autonomisation</h3>
             </div>
             <p class="text-gray-600">
@@ -99,7 +103,11 @@
           <!-- Innovation -->
           <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all">
             <div class="flex items-center gap-3 mb-4">
-              <div class="text-2xl">🚀</div>
+              <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103-.03-.202-.066-.308-.084a13.65 13.65 0 0 1-7.362 0c-.106.018-.205.054-.308.084m0 0a4.25 4.25 0 0 0-.417 2.716c.41-.138.83-.216 1.258-.216.428 0 .848.078 1.258.216a4.25 4.25 0 0 0-.417-2.716ZM6.75 7.296A4.5 4.5 0 0 1 12 3c2.291 0 4.344 1.815 4.5 4.043A17.5 17.5 0 0 0 12 12.75c-2.676 0-5.216-.584-7.25-1.657Z" />
+                </svg>
+              </div>
               <h3 class="text-xl font-semibold text-gray-900">Innovation</h3>
             </div>
             <p class="text-gray-600">
@@ -110,7 +118,11 @@
           <!-- Intégrité -->
           <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all">
             <div class="flex items-center gap-3 mb-4">
-              <div class="text-2xl">🤝</div>
+              <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m0 0L12 18.75m3-6L18.75 9m.75 3.75c0 1.39-.5 2.67-1.34 3.67-.84 1-1.99 1.58-3.16 1.58H4.5A2.25 2.25 0 0 1 2.25 15v-3A2.25 2.25 0 0 1 4.5 9.75h.75c.69 0 1.31-.28 1.76-.73s.73-1.07.73-1.76V6c0-1.66 1.34-3 3-3h3c1.66 0 3 1.34 3 3v1.26c0 .69.28 1.31.73 1.76s1.07.73 1.76.73h.75A2.25 2.25 0 0 1 21.75 12v3A2.25 2.25 0 0 1 19.5 17.25h-2.75" />
+                </svg>
+              </div>
               <h3 class="text-xl font-semibold text-gray-900">Intégrité</h3>
             </div>
             <p class="text-gray-600">
@@ -121,7 +133,11 @@
           <!-- Responsabilité sociale -->
           <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all">
             <div class="flex items-center gap-3 mb-4">
-              <div class="text-2xl">🌍</div>
+              <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3s-4.5 4.03-4.5 9 2.015 9 4.5 9Zm0 0c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3s-4.5 4.03-4.5 9 2.015 9 4.5 9Zm-9.716-6.747C3.124 16.5 6.749 18 12 18s8.876-1.5 9.716-3.747M3.284 14.253C2.124 7.5 6.749 6 12 6s8.876 1.5 9.716 8.253" />
+                </svg>
+              </div>
               <h3 class="text-xl font-semibold text-gray-900">Responsabilité sociale</h3>
             </div>
             <p class="text-gray-600">
@@ -132,7 +148,11 @@
           <!-- Le plaisir avant tout -->
           <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all md:col-span-2 lg:col-span-1">
             <div class="flex items-center gap-3 mb-4">
-              <div class="text-2xl">🎉</div>
+              <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+                <svg class="h-5 w-5 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
+                </svg>
+              </div>
               <h3 class="text-xl font-semibold text-gray-900">Le plaisir avant tout</h3>
             </div>
             <p class="text-gray-600">
