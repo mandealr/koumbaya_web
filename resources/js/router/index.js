@@ -140,7 +140,7 @@ const routes = [
       {
         path: 'about',
         name: 'public.about',
-        component: () => import('@/pages/public/StaticPage.vue')
+        component: () => import('@/pages/public/static/AboutPage.vue')
       },
       {
         path: 'affiliates',
@@ -155,7 +155,7 @@ const routes = [
       {
         path: 'careers',
         name: 'public.careers',
-        component: () => import('@/pages/public/StaticPage.vue')
+        component: () => import('@/pages/public/static/CareersPage.vue')
       },
       {
         path: 'media-press',
@@ -205,7 +205,7 @@ const routes = [
       {
         path: 'sell-on-koumbaya',
         name: 'public.sell-on-koumbaya',
-        component: () => import('@/pages/public/StaticPage.vue')
+        component: () => import('@/pages/public/static/SellOnKoumbayaPage.vue')
       },
       {
         path: 'terms',
