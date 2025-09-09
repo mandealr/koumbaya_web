@@ -1,28 +1,57 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-6">{{ pageTitle }}</h1>
-          
-          <div class="prose prose-lg max-w-none" v-html="pageContent"></div>
-          
-          <!-- Contenu par défaut si la page n'est pas encore définie -->
-          <div v-if="!pageContent" class="text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">Page en construction</h3>
-            <p class="mt-1 text-sm text-gray-500">Cette page sera bientôt disponible.</p>
-            <div class="mt-6">
-              <router-link to="/" class="text-[#0099cc] hover:text-[#007399] font-medium">
-                Retour à l'accueil
-              </router-link>
-            </div>
+  <div class="min-h-screen bg-white">
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-[#0099cc] via-[#0088bb] to-[#0077aa] text-white py-20">
+      <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6">
+          {{ pageTitle }}
+        </h1>
+        <p class="text-xl md:text-2xl text-blue-100 leading-relaxed" v-if="pageDescription">
+          {{ pageDescription }}
+        </p>
+      </div>
+    </section>
+
+    <!-- Main Content Section -->
+    <section class="py-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="p-8 md:p-12">
+            <div class="prose prose-lg max-w-none" v-html="pageContent"></div>
           </div>
         </div>
+
+        <!-- Call to Action si nécessaire -->
+        <div v-if="showCTA" class="mt-12 text-center">
+          <router-link
+            :to="ctaLink"
+            class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-xl text-white bg-[#0099cc] hover:bg-[#0088bb] transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
+          >
+            {{ ctaText }}
+          </router-link>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <!-- Related Links Section si nécessaire -->
+    <section v-if="relatedLinks && relatedLinks.length > 0" class="py-20 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-12">
+          Pages connexes
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <router-link
+            v-for="link in relatedLinks"
+            :key="link.path"
+            :to="link.path"
+            class="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-200 hover:scale-[1.02]"
+          >
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ link.title }}</h3>
+            <p class="text-gray-600">{{ link.description }}</p>
+          </router-link>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -34,294 +63,72 @@ const route = useRoute()
 
 // Extraire le nom de la page depuis le chemin
 const pageName = computed(() => {
-  // Récupérer la dernière partie du path sans le slash initial
   const path = route.path.replace(/^\//, '')
   return path
 })
 
+const pageDescription = computed(() => {
+  const descriptions = {
+    'about': 'Découvrez notre mission et nos valeurs',
+    'terms': 'Conditions générales d\'utilisation de la plateforme Koumbaya',
+    'privacy': 'Comment nous protégeons vos données personnelles',
+    'legal': 'Informations légales et réglementaires',
+    'cookies': 'Notre politique d\'utilisation des cookies'
+  }
+  return descriptions[pageName.value] || ''
+})
+
 const pageContent = computed(() => {
+  // TODO: Ajouter ici le contenu fourni par l'utilisateur
   const contents = {
     'about': `
-      <p>Koumbaya est une plateforme révolutionnaire qui démocratise l'accès aux produits premium grâce à un système de tombolas innovant et équitable.</p>
-      <h2>Notre Mission</h2>
-      <p>Nous croyons que tout le monde devrait avoir la possibilité d'acquérir des produits de qualité à des prix abordables. Notre système de tirage spécial permet à chacun de participer avec des montants minimes pour gagner des produits exceptionnels.</p>
-      <h2>Comment ça marche ?</h2>
-      <p>1. Choisissez un produit qui vous intéresse<br>
-      2. Achetez des tickets pour participer au tirage<br>
-      3. Attendez le tirage automatique<br>
-      4. Si vous gagnez, recevez votre produit !</p>
-      <h2>Transparence et Équité</h2>
-      <p>Tous nos tirages sont effectués de manière automatique et transparente. Chaque participant a une chance égale de gagner, proportionnelle au nombre de tickets achetés.</p>
-    `,
-    'affiliates': `
-      <p>Rejoignez notre programme d'affiliation et gagnez des commissions sur chaque vente réalisée grâce à vos recommandations.</p>
-      <h2>Avantages du Programme</h2>
-      <ul>
-        <li>Commissions attractives jusqu'à 10%</li>
-        <li>Outils marketing personnalisés</li>
-        <li>Tableau de bord détaillé</li>
-        <li>Paiements mensuels garantis</li>
-      </ul>
-      <h2>Comment participer ?</h2>
-      <p>1. Inscrivez-vous gratuitement<br>
-      2. Obtenez votre lien d'affiliation unique<br>
-      3. Partagez-le avec votre audience<br>
-      4. Gagnez des commissions sur chaque vente</p>
-    `,
-    'earn-gombos': `
-      <h2>Qu'est-ce que les Gombos ?</h2>
-      <p>Les Gombos sont la monnaie virtuelle de Koumbaya qui vous permet de participer gratuitement aux tirages spéciaux.</p>
-      <h2>Comment gagner des Gombos ?</h2>
-      <ul>
-        <li><strong>Inscription :</strong> 100 Gombos offerts</li>
-        <li><strong>Parrainage :</strong> 50 Gombos par ami inscrit</li>
-        <li><strong>Achats :</strong> 1 Gombo pour 1000 FCFA dépensés</li>
-        <li><strong>Partages sociaux :</strong> 10 Gombos par partage</li>
-        <li><strong>Avis produits :</strong> 20 Gombos par avis vérifié</li>
-      </ul>
-      <h2>Utiliser vos Gombos</h2>
-      <p>Les Gombos peuvent être utilisés pour obtenir des tickets gratuits sur certains tirages spéciaux. 100 Gombos = 1 ticket gratuit.</p>
-    `,
-    'careers': `
-      <p>Rejoignez l'équipe Koumbaya et participez à la révolution du e-commerce en Afrique.</p>
-      <h2>Pourquoi nous rejoindre ?</h2>
-      <ul>
-        <li>Environnement de travail dynamique et innovant</li>
-        <li>Opportunités de croissance professionnelle</li>
-        <li>Impact social positif</li>
-        <li>Équipe multiculturelle</li>
-      </ul>
-      <h2>Postes actuellement ouverts</h2>
-      <p>Nous recherchons actuellement des talents dans les domaines suivants :</p>
-      <ul>
-        <li>Développement (Frontend/Backend)</li>
-        <li>Marketing Digital</li>
-        <li>Service Client</li>
-        <li>Gestion de Projet</li>
-      </ul>
-      <p>Envoyez votre CV à : <a href="mailto:careers@koumbaya.com">careers@koumbaya.com</a></p>
-    `,
-    'media-press': `
-      <h2>Koumbaya dans les Médias</h2>
-      <p>Retrouvez toutes les actualités et communications de presse de Koumbaya.</p>
-      <h2>Kit Presse</h2>
-      <p>Téléchargez notre kit presse contenant :</p>
-      <ul>
-        <li>Logo haute résolution</li>
-        <li>Communiqués de presse récents</li>
-        <li>Photos de l'équipe</li>
-        <li>Statistiques clés</li>
-      </ul>
-      <h2>Contact Presse</h2>
-      <p>Pour toute demande presse, contactez : <a href="mailto:press@koumbaya.com">press@koumbaya.com</a></p>
-    `,
-    'lottery-participation': `
-      <h2>Comment participer aux tirages spéciaux ?</h2>
-      <p>Participer aux tirages spéciaux Koumbaya est simple et transparent.</p>
-      <h3>Étapes de participation</h3>
-      <ol>
-        <li><strong>Choisissez un produit :</strong> Parcourez notre catalogue et sélectionnez le produit qui vous intéresse</li>
-        <li><strong>Achetez des tickets :</strong> Chaque ticket coûte un prix fixe défini pour le tirage</li>
-        <li><strong>Attendez le tirage :</strong> Les tirages sont effectués automatiquement une fois tous les tickets vendus</li>
-        <li><strong>Vérifiez les résultats :</strong> Vous serez notifié par email et SMS si vous gagnez</li>
-      </ol>
-      <h3>Règles importantes</h3>
-      <ul>
-        <li>Un participant peut acheter plusieurs tickets pour augmenter ses chances</li>
-        <li>Les tirages sont 100% aléatoires et vérifiables</li>
-        <li>Les gagnants ont 30 jours pour réclamer leur prix</li>
-      </ul>
-    `,
-    'intellectual-property': `
-      <h2>Politique de Propriété Intellectuelle</h2>
-      <p>Koumbaya respecte les droits de propriété intellectuelle et attend de ses utilisateurs qu'ils en fassent de même.</p>
-      <h3>Signalement de violation</h3>
-      <p>Si vous pensez que du contenu sur notre plateforme viole vos droits de propriété intellectuelle, veuillez nous contacter avec :</p>
-      <ul>
-        <li>Description détaillée du contenu concerné</li>
-        <li>Preuve de vos droits sur le contenu</li>
-        <li>Vos coordonnées complètes</li>
-      </ul>
-      <h3>Protection du contenu</h3>
-      <p>Tout le contenu publié sur Koumbaya, incluant textes, images, logos et vidéos, est protégé par les lois sur la propriété intellectuelle.</p>
-    `,
-    'order-delivery': `
-      <h2>Informations sur la livraison</h2>
-      <p>Koumbaya s'engage à livrer vos gains dans les meilleurs délais.</p>
-      <h3>Délais de livraison</h3>
-      <ul>
-        <li><strong>Libreville :</strong> 2-3 jours ouvrables</li>
-        <li><strong>Autres villes du Gabon :</strong> 5-7 jours ouvrables</li>
-        <li><strong>International :</strong> 10-15 jours ouvrables</li>
-      </ul>
-      <h3>Suivi de commande</h3>
-      <p>Une fois votre prix expédié, vous recevrez un numéro de suivi par email et SMS pour suivre votre colis en temps réel.</p>
-      <h3>Réception</h3>
-      <p>À la réception, vérifiez l'état de votre colis. En cas de problème, contactez-nous immédiatement.</p>
-    `,
-    'report-suspicious': `
-      <h2>Signaler une activité suspecte</h2>
-      <p>La sécurité de notre communauté est notre priorité. Aidez-nous à maintenir Koumbaya sûr en signalant toute activité suspecte.</p>
-      <h3>Que signaler ?</h3>
-      <ul>
-        <li>Tentatives de fraude ou d'escroquerie</li>
-        <li>Comptes suspects ou faux profils</li>
-        <li>Produits contrefaits</li>
-        <li>Comportements abusifs</li>
-        <li>Violations des conditions d'utilisation</li>
-      </ul>
-      <h3>Comment signaler ?</h3>
-      <p>Envoyez-nous un email détaillé à : <a href="mailto:security@koumbaya.com">security@koumbaya.com</a></p>
-      <p>Incluez autant d'informations que possible : captures d'écran, liens, descriptions détaillées.</p>
-    `,
-    'support-center': `
-      <h2>Centre d'Assistance Koumbaya</h2>
-      <p>Trouvez rapidement des réponses à vos questions.</p>
-      <h3>Questions Fréquentes</h3>
-      <ul>
-        <li><a href="#" class="text-[#0099cc]">Comment participer à un tirage ?</a></li>
-        <li><a href="#" class="text-[#0099cc]">Comment vérifier si j'ai gagné ?</a></li>
-        <li><a href="#" class="text-[#0099cc]">Quels sont les modes de paiement acceptés ?</a></li>
-        <li><a href="#" class="text-[#0099cc]">Comment devenir vendeur ?</a></li>
-      </ul>
-      <h3>Nous contacter</h3>
-      <p><strong>Email :</strong> support@koumbaya.com<br>
-      <strong>Téléphone :</strong> +241 01 23 45 67<br>
-      <strong>WhatsApp :</strong> +241 06 12 34 56<br>
-      <strong>Horaires :</strong> Lun-Ven 8h-18h, Sam 9h-13h</p>
-    `,
-    'security-center': `
-      <h2>Centre de Sécurité</h2>
-      <p>Votre sécurité est notre priorité absolue. Découvrez comment nous protégeons vos données et transactions.</p>
-      <h3>Nos mesures de sécurité</h3>
-      <ul>
-        <li><strong>Chiffrement SSL :</strong> Toutes les données sont chiffrées</li>
-        <li><strong>Paiements sécurisés :</strong> Nous utilisons des passerelles de paiement certifiées</li>
-        <li><strong>Protection des données :</strong> Vos informations personnelles sont protégées</li>
-        <li><strong>Authentification renforcée :</strong> Double authentification disponible</li>
-      </ul>
-      <h3>Conseils de sécurité</h3>
-      <ul>
-        <li>Utilisez un mot de passe fort et unique</li>
-        <li>Ne partagez jamais vos identifiants</li>
-        <li>Vérifiez toujours l'URL avant de vous connecter</li>
-        <li>Méfiez-vous des emails suspects</li>
-      </ul>
-    `,
-    'peace-on-koumbaya': `
-      <h2>Avoir la paix sur Koumbaya</h2>
-      <p>Nous nous engageons à créer un environnement sûr et paisible pour tous nos utilisateurs.</p>
-      <h3>Nos garanties</h3>
-      <ul>
-        <li><strong>Tirages équitables :</strong> Algorithmes certifiés et transparents</li>
-        <li><strong>Protection des acheteurs :</strong> Remboursement si tirage annulé</li>
-        <li><strong>Vendeurs vérifiés :</strong> Tous nos vendeurs sont authentifiés</li>
-        <li><strong>Support réactif :</strong> Assistance disponible 6j/7</li>
-      </ul>
-      <h3>Résolution des conflits</h3>
-      <p>En cas de problème, notre équipe de médiation est là pour vous aider à trouver une solution équitable.</p>
-    `,
-    'sitemap': `
-      <h2>Plan du Site</h2>
-      <h3>Pages Principales</h3>
-      <ul>
-        <li><router-link to="/" class="text-[#0099cc]">Accueil</router-link></li>
-        <li><router-link to="/products" class="text-[#0099cc]">Produits</router-link></li>
-        <li><router-link to="/results" class="text-[#0099cc]">Résultats</router-link></li>
-        <li><router-link to="/how-it-works" class="text-[#0099cc]">Comment ça marche</router-link></li>
-      </ul>
-      <h3>Compte</h3>
-      <ul>
-        <li><router-link to="/login" class="text-[#0099cc]">Connexion</router-link></li>
-        <li><router-link to="/register" class="text-[#0099cc]">Inscription</router-link></li>
-      </ul>
-      <h3>Informations</h3>
-      <ul>
-        <li><router-link to="/about" class="text-[#0099cc]">À propos</router-link></li>
-        <li><router-link to="/contact" class="text-[#0099cc]">Contact</router-link></li>
-      </ul>
-    `,
-    'sell-on-koumbaya': `
-      <h2>Vendez sur Koumbaya</h2>
-      <p>Rejoignez des centaines de vendeurs qui utilisent Koumbaya pour écouler rapidement leurs stocks.</p>
-      <h3>Pourquoi vendre sur Koumbaya ?</h3>
-      <ul>
-        <li><strong>Ventes garanties :</strong> Vendez tout votre stock en une fois</li>
-        <li><strong>Paiement rapide :</strong> Recevez votre argent sous 48h</li>
-        <li><strong>Pas de stocks morts :</strong> Plus de produits invendus</li>
-        <li><strong>Marketing inclus :</strong> Nous gérons la promotion</li>
-      </ul>
-      <h3>Comment commencer ?</h3>
-      <ol>
-        <li>Créez votre compte vendeur</li>
-        <li>Ajoutez vos produits</li>
-        <li>Définissez le nombre de tickets</li>
-        <li>Lancez votre tirage spécial</li>
-      </ol>
-      <p class="mt-6">
-        <router-link to="/register" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-[#0099cc] hover:bg-[#007399]">
-          Commencer à vendre
-        </router-link>
-      </p>
+      <div class="space-y-8">
+        <p class="text-gray-700 text-lg leading-relaxed">
+          Contenu à fournir pour la page À propos...
+        </p>
+      </div>
     `,
     'terms': `
-      <h2>Conditions Générales d'Utilisation</h2>
-      <p class="text-sm text-gray-600">Dernière mise à jour : Janvier 2025</p>
-      <h3>1. Acceptation des conditions</h3>
-      <p>En utilisant Koumbaya, vous acceptez ces conditions d'utilisation.</p>
-      <h3>2. Utilisation du service</h3>
-      <p>Vous devez avoir au moins 18 ans pour utiliser notre service.</p>
-      <h3>3. Compte utilisateur</h3>
-      <p>Vous êtes responsable de la sécurité de votre compte.</p>
-      <h3>4. Participation aux tirages</h3>
-      <p>Les tirages sont soumis à des règles spécifiques détaillées sur chaque page produit.</p>
+      <div class="space-y-8">
+        <p class="text-gray-700 text-lg leading-relaxed">
+          Contenu à fournir pour les conditions d'utilisation...
+        </p>
+      </div>
     `,
     'privacy': `
-      <h2>Politique de Confidentialité</h2>
-      <p class="text-sm text-gray-600">Dernière mise à jour : Janvier 2025</p>
-      <h3>1. Collecte des données</h3>
-      <p>Nous collectons uniquement les données nécessaires au fonctionnement du service.</p>
-      <h3>2. Utilisation des données</h3>
-      <p>Vos données sont utilisées pour :</p>
-      <ul>
-        <li>Gérer votre compte</li>
-        <li>Traiter vos participations</li>
-        <li>Vous contacter en cas de gain</li>
-        <li>Améliorer nos services</li>
-      </ul>
-      <h3>3. Protection des données</h3>
-      <p>Nous utilisons les meilleures pratiques de sécurité pour protéger vos informations.</p>
+      <div class="space-y-8">
+        <p class="text-gray-700 text-lg leading-relaxed">
+          Contenu à fournir pour la politique de confidentialité...
+        </p>
+      </div>
     `,
     'legal': `
-      <h2>Mentions Légales</h2>
-      <h3>Éditeur</h3>
-      <p>Koumbaya SARL<br>
-      Capital social : 10 000 000 FCFA<br>
-      Siège social : Libreville, Gabon<br>
-      RCCM : GA-LBV-2024-B-1234</p>
-      <h3>Directeur de publication</h3>
-      <p>M. Jean Dupont</p>
-      <h3>Hébergement</h3>
-      <p>Site hébergé par : [Nom de l'hébergeur]<br>
-      Adresse : [Adresse de l'hébergeur]</p>
+      <div class="space-y-8">
+        <p class="text-gray-700 text-lg leading-relaxed">
+          Contenu à fournir pour les mentions légales...
+        </p>
+      </div>
     `,
     'cookies': `
-      <h2>Politique de Cookies</h2>
-      <p>Koumbaya utilise des cookies pour améliorer votre expérience.</p>
-      <h3>Qu'est-ce qu'un cookie ?</h3>
-      <p>Un cookie est un petit fichier texte stocké sur votre appareil lors de votre visite.</p>
-      <h3>Types de cookies utilisés</h3>
-      <ul>
-        <li><strong>Cookies essentiels :</strong> Nécessaires au fonctionnement du site</li>
-        <li><strong>Cookies analytiques :</strong> Pour comprendre l'utilisation du site</li>
-        <li><strong>Cookies de préférences :</strong> Pour mémoriser vos choix</li>
-      </ul>
-      <h3>Gérer les cookies</h3>
-      <p>Vous pouvez désactiver les cookies dans les paramètres de votre navigateur.</p>
+      <div class="space-y-8">
+        <p class="text-gray-700 text-lg leading-relaxed">
+          Contenu à fournir pour la politique de cookies...
+        </p>
+      </div>
     `
   }
 
-  return contents[pageName.value] || ''
+  // Pour toutes les autres pages, afficher un message temporaire
+  return contents[pageName.value] || `
+    <div class="text-center py-12">
+      <p class="text-gray-600 text-lg mb-6">
+        Cette page sera bientôt disponible avec le contenu approprié.
+      </p>
+      <p class="text-gray-500">
+        Veuillez fournir le contenu spécifique pour cette page.
+      </p>
+    </div>
+  `
 })
 
 const pageTitle = computed(() => {
@@ -348,67 +155,125 @@ const pageTitle = computed(() => {
 
   return titles[pageName.value] || 'Page Koumbaya'
 })
+
+// Configuration des CTA pour certaines pages
+const showCTA = computed(() => {
+  return ['sell-on-koumbaya', 'affiliates', 'careers'].includes(pageName.value)
+})
+
+const ctaText = computed(() => {
+  const ctas = {
+    'sell-on-koumbaya': 'Commencer à vendre',
+    'affiliates': 'Rejoindre le programme',
+    'careers': 'Voir les offres d\'emploi'
+  }
+  return ctas[pageName.value] || 'En savoir plus'
+})
+
+const ctaLink = computed(() => {
+  const links = {
+    'sell-on-koumbaya': '/register',
+    'affiliates': '/register',
+    'careers': '/contact'
+  }
+  return links[pageName.value] || '/contact'
+})
+
+// Liens connexes pour certaines pages
+const relatedLinks = computed(() => {
+  const links = {
+    'about': [
+      { path: '/how-it-works', title: 'Comment ça marche', description: 'Découvrez le fonctionnement de Koumbaya' },
+      { path: '/contact', title: 'Contactez-nous', description: 'Une question ? Nous sommes là pour vous' },
+      { path: '/careers', title: 'Carrières', description: 'Rejoignez notre équipe' }
+    ],
+    'support-center': [
+      { path: '/how-it-works', title: 'FAQ', description: 'Questions fréquemment posées' },
+      { path: '/contact', title: 'Contact', description: 'Parlez à notre équipe support' },
+      { path: '/report-suspicious', title: 'Signaler un problème', description: 'Signalez une activité suspecte' }
+    ],
+    'legal': [
+      { path: '/terms', title: 'CGU', description: 'Conditions générales d\'utilisation' },
+      { path: '/privacy', title: 'Confidentialité', description: 'Protection de vos données' },
+      { path: '/cookies', title: 'Cookies', description: 'Politique de cookies' }
+    ]
+  }
+  return links[pageName.value] || []
+})
 </script>
 
 <style scoped>
-/* Styles personnalisés pour la prose sans @apply */
-.prose h2 {
-  font-size: 1.5rem;
+/* Styles pour la prose avec le même design que Contact */
+:deep(.prose) {
+  color: #374151;
+}
+
+:deep(.prose h2) {
+  font-size: 1.875rem;
   font-weight: 700;
   color: #111827;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+:deep(.prose h3) {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
   margin-top: 2rem;
   margin-bottom: 1rem;
 }
 
-.prose h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
+:deep(.prose p) {
+  font-size: 1.125rem;
+  line-height: 1.75;
+  margin-bottom: 1.5rem;
 }
 
-.prose p {
-  color: #374151;
-  margin-bottom: 1rem;
-  line-height: 1.625;
-}
-
-.prose ul {
+:deep(.prose ul) {
   list-style-type: disc;
-  list-style-position: inside;
-  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
-.prose ul li {
+:deep(.prose ul li) {
   margin-bottom: 0.5rem;
+  line-height: 1.75;
 }
 
-.prose ol {
+:deep(.prose ol) {
   list-style-type: decimal;
-  list-style-position: inside;
-  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
-.prose ol li {
+:deep(.prose ol li) {
   margin-bottom: 0.5rem;
+  line-height: 1.75;
 }
 
-.prose li {
-  color: #374151;
-}
-
-.prose a {
+:deep(.prose a) {
   color: #0099cc;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease-in-out;
+}
+
+:deep(.prose a:hover) {
+  color: #0088bb;
   text-decoration: underline;
 }
 
-.prose a:hover {
-  color: #007399;
-}
-
-.prose strong {
+:deep(.prose strong) {
   font-weight: 600;
   color: #111827;
+}
+
+:deep(.prose blockquote) {
+  border-left: 4px solid #0099cc;
+  padding-left: 1.5rem;
+  margin: 2rem 0;
+  font-style: italic;
+  color: #4b5563;
 }
 </style>
