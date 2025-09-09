@@ -124,13 +124,13 @@ class SecurityHeadersMiddleware
     private function logSuspiciousActivity(Request $request): void
     {
         $suspiciousPatterns = [
-            'script[^>]*>.*?</script>',
-            'javascript:',
-            'on\w+\s*=',
-            'eval\s*\(',
-            '<\s*iframe',
-            'document\.cookie',
-            'window\.location',
+            '/script[^>]*>.*?<\/script>/i',
+            '/javascript:/i',
+            '/on\w+\s*=/i',
+            '/eval\s*\(/i',
+            '/<\s*iframe/i',
+            '/document\.cookie/i',
+            '/window\.location/i',
         ];
 
         $userAgent = $request->userAgent() ?? '';
@@ -138,7 +138,7 @@ class SecurityHeadersMiddleware
         $content = $request->getContent();
 
         foreach ($suspiciousPatterns as $pattern) {
-            if (preg_match('/' . $pattern . '/i', $userAgent . $queryString . $content)) {
+            if (preg_match($pattern, $userAgent . $queryString . $content)) {
                 \Log::warning('Suspicious activity detected', [
                     'ip' => $request->ip(),
                     'user_agent' => $userAgent,
