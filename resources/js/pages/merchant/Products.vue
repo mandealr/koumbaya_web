@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900">Mes Produits</h1>
-        <p class="mt-2 text-gray-600">Gérez vos produits et suivez vos tombolas en cours</p>
+        <h1 class="text-3xl font-bold text-gray-900">Mes Articles</h1>
+        <p class="mt-2 text-gray-600">Gérez vos articles et suivez vos tirages spéciaux en cours</p>
       </div>
       <div class="flex space-x-3">
         <router-link
@@ -12,7 +12,7 @@
           class="inline-flex items-center px-6 py-3 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
         >
           <PlusIcon class="w-5 h-5 mr-2" />
-          Nouveau Produit
+          Nouvel Article
         </router-link>
       </div>
     </div>
@@ -226,7 +226,7 @@
           <div class="grid grid-cols-2 gap-4 mb-4 text-center">
             <div class="bg-green-50 p-3 rounded-lg">
               <p class="text-green-700 font-semibold text-lg">{{ formatAmount(product.revenue || 0) }}</p>
-              <p class="text-green-600 text-xs">Revenus</p>
+              <p class="text-green-600 text-xs">Koumbich</p>
             </div>
             <div class="bg-blue-50 p-3 rounded-lg">
               <p v-if="product.sale_mode === 'lottery'" class="text-blue-700 font-semibold text-lg">{{ formatAmount(product.ticket_price || 0) }}</p>
@@ -378,7 +378,7 @@
               </div>
               <div class="bg-blue-100 p-4 rounded-lg">
                 <p class="text-2xl font-bold text-blue-600">{{ formatAmount(selectedProduct.revenue) }}</p>
-                <p class="text-sm text-gray-600">Revenus (FCFA)</p>
+                <p class="text-sm text-gray-600">Koumbich (FCFA)</p>
               </div>
               <div class="bg-purple-100 p-4 rounded-lg">
                 <p class="text-2xl font-bold text-purple-600">{{ selectedProduct.progress }}%</p>
@@ -605,7 +605,7 @@ const loadProductStats = async () => {
           color: 'bg-[#0099cc]'
         },
         {
-          label: 'Total revenus',
+          label: 'Total koumbich',
           value: formatCurrency(data.total_revenue || 0),
           change: data.revenue_change || 0,
           icon: CurrencyDollarIcon,

@@ -34,8 +34,8 @@
             @click="activeSection = section.id"
             :class="[
               'w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center',
-              activeSection === section.id 
-                ? 'bg-[#0099cc]/10 text-[#0099cc] border border-[#0099cc]/20' 
+              activeSection === section.id
+                ? 'bg-[#0099cc]/10 text-[#0099cc] border border-[#0099cc]/20'
                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
             ]"
           >
@@ -53,24 +53,24 @@
             <div class="admin-card-header mb-6">
               <h3 class="text-lg font-semibold text-gray-900">Paramètres généraux</h3>
             </div>
-            
+
             <form @submit.prevent="updateGeneralSettings" class="space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Nom de la plateforme</label>
-                  <input 
+                  <input
                     v-model="generalSettings.app_name"
-                    type="text" 
+                    type="text"
                     class="admin-input"
                     placeholder="Koumbaya"
                   >
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">URL de base</label>
-                  <input 
+                  <input
                     v-model="generalSettings.app_url"
-                    type="url" 
+                    type="url"
                     class="admin-input"
                     placeholder="https://koumbaya.com"
                   >
@@ -79,7 +79,7 @@
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Description de la plateforme</label>
-                <textarea 
+                <textarea
                   v-model="generalSettings.app_description"
                   rows="3"
                   class="admin-input"
@@ -90,14 +90,14 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Email de contact</label>
-                  <input 
+                  <input
                     v-model="generalSettings.contact_email"
-                    type="email" 
+                    type="email"
                     class="admin-input"
                     placeholder="contact@koumbaya.com"
                   >
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone de contact</label>
                   <PhoneInputAdmin
@@ -134,7 +134,7 @@
               </div>
 
               <div class="flex justify-end">
-                <button 
+                <button
                   type="submit"
                   :disabled="loading"
                   class="admin-btn-primary disabled:opacity-50"
@@ -162,7 +162,7 @@
                 </button>
               </div>
             </div>
-            
+
             <!-- Search -->
             <div class="mb-6">
               <div class="w-full md:w-1/2 lg:w-1/3">
@@ -273,7 +273,7 @@
                 </button>
               </div>
             </div>
-            
+
             <!-- Search -->
             <div class="mb-6">
               <div class="w-full md:w-1/2 lg:w-1/3">
@@ -370,7 +370,7 @@
             <div class="admin-card-header mb-6">
               <h3 class="text-lg font-semibold text-gray-900">Paramètres de paiement</h3>
             </div>
-            
+
             <form @submit.prevent="updatePaymentSettings" class="space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -382,12 +382,12 @@
                     <option value="USD">Dollar US (USD)</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Commission plateforme (%)</label>
-                  <input 
+                  <input
                     v-model.number="paymentSettings.platform_commission"
-                    type="number" 
+                    type="number"
                     min="0"
                     max="100"
                     step="0.1"
@@ -399,7 +399,7 @@
 
               <div class="space-y-4">
                 <h4 class="font-medium text-gray-900">Méthodes de paiement actives</h4>
-                
+
                 <div class="space-y-3">
                   <div v-for="method in paymentMethods" :key="method.id" class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                     <div class="flex items-center">
@@ -422,9 +422,9 @@
                     </div>
                     <div class="flex items-center space-x-3">
                       <label class="relative inline-flex items-center cursor-pointer">
-                        <input 
-                          v-model="method.active" 
-                          type="checkbox" 
+                        <input
+                          v-model="method.active"
+                          type="checkbox"
                           class="sr-only peer"
                         >
                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#0099cc]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0099cc]"></div>
@@ -446,7 +446,7 @@
               </div>
 
               <div class="flex justify-end">
-                <button 
+                <button
                   type="submit"
                   :disabled="loading"
                   class="admin-btn-primary disabled:opacity-50"
@@ -462,25 +462,25 @@
             <div class="admin-card-header mb-6">
               <h3 class="text-lg font-semibold text-gray-900">Paramètres des tombolas</h3>
             </div>
-            
+
             <form @submit.prevent="updateLotterySettings" class="space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Prix minimum ticket (FCFA)</label>
-                  <input 
+                  <input
                     v-model.number="lotterySettings.min_ticket_price"
-                    type="number" 
+                    type="number"
                     min="100"
                     class="admin-input"
                     placeholder="1000"
                   >
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Prix maximum ticket (FCFA)</label>
-                  <input 
+                  <input
                     v-model.number="lotterySettings.max_ticket_price"
-                    type="number" 
+                    type="number"
                     min="1000"
                     class="admin-input"
                     placeholder="100000"
@@ -491,20 +491,20 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Participants minimum par tombola</label>
-                  <input 
+                  <input
                     v-model.number="lotterySettings.min_participants"
-                    type="number" 
+                    type="number"
                     min="2"
                     class="admin-input"
                     placeholder="10"
                   >
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Durée maximum (jours)</label>
-                  <input 
+                  <input
                     v-model.number="lotterySettings.max_duration_days"
-                    type="number" 
+                    type="number"
                     min="1"
                     class="admin-input"
                     placeholder="30"
@@ -514,7 +514,7 @@
 
               <div class="space-y-4">
                 <h4 class="font-medium text-gray-900">Options automatiques</h4>
-                
+
                 <div class="space-y-3">
                   <div class="flex items-center justify-between">
                     <div>
@@ -522,9 +522,9 @@
                       <p class="text-sm text-gray-600">Rembourser automatiquement si pas assez de participants</p>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
-                      <input 
-                        v-model="lotterySettings.auto_refund" 
-                        type="checkbox" 
+                      <input
+                        v-model="lotterySettings.auto_refund"
+                        type="checkbox"
                         class="sr-only peer"
                       >
                       <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#0099cc]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0099cc]"></div>
@@ -537,9 +537,9 @@
                       <p class="text-sm text-gray-600">Effectuer le tirage automatiquement à la date de fin</p>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
-                      <input 
-                        v-model="lotterySettings.auto_draw" 
-                        type="checkbox" 
+                      <input
+                        v-model="lotterySettings.auto_draw"
+                        type="checkbox"
                         class="sr-only peer"
                       >
                       <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#0099cc]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0099cc]"></div>
@@ -549,7 +549,7 @@
               </div>
 
               <div class="flex justify-end">
-                <button 
+                <button
                   type="submit"
                   :disabled="loading"
                   class="admin-btn-primary disabled:opacity-50"
@@ -565,24 +565,24 @@
             <div class="admin-card-header mb-6">
               <h3 class="text-lg font-semibold text-gray-900">Paramètres de notifications</h3>
             </div>
-            
+
             <form @submit.prevent="updateNotificationSettings" class="space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Email expéditeur</label>
-                  <input 
+                  <input
                     v-model="notificationSettings.from_email"
-                    type="email" 
+                    type="email"
                     class="admin-input"
                     placeholder="noreply@koumbaya.com"
                   >
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Nom expéditeur</label>
-                  <input 
+                  <input
                     v-model="notificationSettings.from_name"
-                    type="text" 
+                    type="text"
                     class="admin-input"
                     placeholder="Koumbaya"
                   >
@@ -591,7 +591,7 @@
 
               <div class="space-y-4">
                 <h4 class="font-medium text-gray-900">Types de notifications automatiques</h4>
-                
+
                 <div class="space-y-3">
                   <div v-for="notification in notificationTypes" :key="notification.id" class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                     <div>
@@ -599,9 +599,9 @@
                       <p class="text-sm text-gray-600">{{ notification.description }}</p>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
-                      <input 
-                        v-model="notification.enabled" 
-                        type="checkbox" 
+                      <input
+                        v-model="notification.enabled"
+                        type="checkbox"
                         class="sr-only peer"
                       >
                       <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#0099cc]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0099cc]"></div>
@@ -611,7 +611,7 @@
               </div>
 
               <div class="flex justify-end">
-                <button 
+                <button
                   type="submit"
                   :disabled="loading"
                   class="admin-btn-primary disabled:opacity-50"
@@ -627,7 +627,7 @@
             <div class="admin-card-header mb-6">
               <h3 class="text-lg font-semibold text-gray-900">Maintenance et sécurité</h3>
             </div>
-            
+
             <div class="space-y-6">
               <!-- Mode maintenance -->
               <div class="p-4 border border-yellow-200 bg-yellow-50 rounded-lg">
@@ -637,18 +637,18 @@
                     <p class="text-sm text-yellow-700">Désactiver temporairement l'accès public à la plateforme</p>
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      v-model="maintenanceSettings.maintenance_mode" 
-                      type="checkbox" 
+                    <input
+                      v-model="maintenanceSettings.maintenance_mode"
+                      type="checkbox"
                       class="sr-only peer"
                     >
                     <div class="w-11 h-6 bg-yellow-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-yellow-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-600"></div>
                   </label>
                 </div>
-                
+
                 <div v-if="maintenanceSettings.maintenance_mode" class="mt-4">
                   <label class="block text-sm font-medium text-yellow-800 mb-2">Message de maintenance</label>
-                  <textarea 
+                  <textarea
                     v-model="maintenanceSettings.maintenance_message"
                     rows="2"
                     class="w-full border border-yellow-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-yellow-50"
@@ -660,7 +660,7 @@
               <!-- Actions de maintenance -->
               <div class="space-y-4">
                 <h4 class="font-medium text-gray-900">Actions de maintenance</h4>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <button
                     @click="clearCache"
@@ -670,7 +670,7 @@
                     <TrashIcon class="w-4 h-4 mr-2" />
                     Vider le cache
                   </button>
-                  
+
                   <button
                     @click="optimizeDatabase"
                     :disabled="loading"
@@ -679,7 +679,7 @@
                     <CogIcon class="w-4 h-4 mr-2" />
                     Optimiser la BDD
                   </button>
-                  
+
                   <button
                     @click="generateSitemap"
                     :disabled="loading"
@@ -688,7 +688,7 @@
                     <DocumentIcon class="w-4 h-4 mr-2" />
                     Générer sitemap
                   </button>
-                  
+
                   <button
                     @click="testEmailConfig"
                     :disabled="loading"
@@ -701,7 +701,7 @@
               </div>
 
               <div class="flex justify-end">
-                <button 
+                <button
                   @click="updateMaintenanceSettings"
                   :disabled="loading"
                   class="admin-btn-primary disabled:opacity-50"
@@ -716,9 +716,9 @@
     </div>
 
     <!-- Modales pour les pays et langues -->
-    
+
     <!-- Country Modal -->
-    <div v-if="showCountryModal || showEditCountryModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div v-if="showCountryModal || showEditCountryModal" class="fixed inset-0 bg-gray-600 bg-opacity-40 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg max-w-md w-full mx-4">
         <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900">
@@ -795,7 +795,7 @@
     </div>
 
     <!-- Language Modal -->
-    <div v-if="showLanguageModal || showEditLanguageModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div v-if="showLanguageModal || showEditLanguageModal" class="fixed inset-0 bg-gray-600 bg-opacity-40 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg max-w-md w-full mx-4">
         <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900">
@@ -883,7 +883,7 @@
     </div>
 
     <!-- Payment Configuration Modal -->
-    <div v-if="showPaymentConfigModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div v-if="showPaymentConfigModal" class="fixed inset-0 bg-gray-600 bg-opacity-40 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg max-w-2xl w-full mx-4">
         <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900">
@@ -1328,7 +1328,7 @@ const loadSettings = async () => {
       Object.assign(lotterySettings, response.data.lottery || {})
       Object.assign(notificationSettings, response.data.notifications || {})
       Object.assign(maintenanceSettings, response.data.maintenance || {})
-      
+
       if (response.data.payment_methods) {
         paymentMethods.value.forEach(method => {
           const savedMethod = response.data.payment_methods.find(pm => pm.id === method.id)
@@ -1337,16 +1337,16 @@ const loadSettings = async () => {
           }
         })
       }
-      
+
       // Load countries and languages
       if (response.data.countries) {
         countries.value = response.data.countries
       }
-      
+
       if (response.data.languages) {
         languages.value = response.data.languages
       }
-      
+
       if (response.data.notification_types) {
         notificationTypes.value = response.data.notification_types
       }
@@ -1361,7 +1361,7 @@ const loadSettings = async () => {
     } else {
       // API pas encore implémentée, charger les données par défaut pour le développement
       console.info('API /admin/settings pas encore implémentée, chargement des données par défaut')
-      
+
       // Données par défaut pour le développement
       Object.assign(generalSettings, {
         app_name: 'Koumbaya',
@@ -1372,12 +1372,12 @@ const loadSettings = async () => {
         default_language: 'fr',
         default_country: 'GA'
       })
-      
+
       Object.assign(paymentSettings, {
         default_currency: 'XAF',
         platform_commission: 5.0
       })
-      
+
       Object.assign(lotterySettings, {
         min_ticket_price: 1000,
         max_ticket_price: 100000,
@@ -1386,23 +1386,23 @@ const loadSettings = async () => {
         auto_refund: true,
         auto_draw: false
       })
-      
+
       Object.assign(notificationSettings, {
         from_email: 'noreply@koumbaya.com',
         from_name: 'Koumbaya'
       })
-      
+
       Object.assign(maintenanceSettings, {
         maintenance_mode: false,
         maintenance_message: 'La plateforme est temporairement en maintenance. Nous reviendrons bientôt !'
       })
-      
+
       // Données par défaut pour les pays (Gabon en premier)
       countries.value = [
         {
           id: 1,
           name: 'Gabon',
-          code: 'GA', 
+          code: 'GA',
           currency: 'XAF',
           flag: 'https://flagcdn.com/w40/ga.png',
           is_active: true
@@ -1411,12 +1411,12 @@ const loadSettings = async () => {
           id: 2,
           name: 'France',
           code: 'FR',
-          currency: 'EUR', 
+          currency: 'EUR',
           flag: 'https://flagcdn.com/w40/fr.png',
           is_active: true
         }
       ]
-      
+
       // Données par défaut pour les langues
       languages.value = [
         {
@@ -1438,7 +1438,7 @@ const loadSettings = async () => {
           is_active: true
         }
       ]
-      
+
       // Données par défaut pour les types de notification
       notificationTypes.value = [
         {
@@ -1599,7 +1599,7 @@ const configurePaymentMethod = (method) => {
 
 const clearCache = async () => {
   if (!confirm('Vider le cache de l\'application ?')) return
-  
+
   loading.value = true
   try {
     const response = await post('/admin/settings/cache/clear')
@@ -1620,7 +1620,7 @@ const clearCache = async () => {
 
 const optimizeDatabase = async () => {
   if (!confirm('Optimiser la base de données ? Cette opération peut prendre du temps.')) return
-  
+
   loading.value = true
   try {
     const response = await post('/admin/settings/database/optimize')
@@ -1685,7 +1685,7 @@ const filteredCountries = computed(() => {
 
   if (countryFilters.search) {
     const search = countryFilters.search.toLowerCase()
-    filtered = filtered.filter(country => 
+    filtered = filtered.filter(country =>
       country.name?.toLowerCase().includes(search) ||
       country.iso_code_2?.toLowerCase().includes(search) ||
       country.iso_code_3?.toLowerCase().includes(search)
@@ -1700,7 +1700,7 @@ const filteredLanguages = computed(() => {
 
   if (languageFilters.search) {
     const search = languageFilters.search.toLowerCase()
-    filtered = filtered.filter(language => 
+    filtered = filtered.filter(language =>
       language.name.toLowerCase().includes(search) ||
       language.native_name.toLowerCase().includes(search) ||
       language.code.toLowerCase().includes(search)
@@ -1794,7 +1794,7 @@ const toggleCountryStatus = async (country) => {
 
 const deleteCountry = async (countryId) => {
   if (!confirm('Êtes-vous sûr de vouloir supprimer ce pays ?')) return
-  
+
   try {
     const response = await post(`/admin/countries/${countryId}/delete`)
     if (response && response.success) {
@@ -1909,7 +1909,7 @@ const toggleLanguageStatus = async (language) => {
 
 const deleteLanguage = async (languageId) => {
   if (!confirm('Êtes-vous sûr de vouloir supprimer cette langue ?')) return
-  
+
   try {
     const response = await post(`/admin/languages/${languageId}/delete`)
     if (response && response.success) {
@@ -1948,7 +1948,7 @@ const updatePaymentMethodConfig = async () => {
       config: editingPaymentMethod.value.config,
       active: editingPaymentMethod.value.active
     })
-    
+
     if (response && response.success) {
       if (window.$toast) {
         window.$toast.success(`Configuration ${editingPaymentMethod.value.name} sauvegardée`, '✅ Configuration')

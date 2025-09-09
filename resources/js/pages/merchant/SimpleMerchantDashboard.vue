@@ -5,8 +5,8 @@
       <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-3xl font-bold text-gray-900">Espace Vendeur Simplifié</h1>
-            <p class="mt-2 text-gray-600">Interface dédiée aux vendeurs individuels - Simple et efficace</p>
+            <h1 class="text-3xl font-bold text-gray-900">Espace Koumbiste Simplifié</h1>
+            <p class="mt-2 text-gray-600">Interface dédiée aux koumbistes individuels - Simple et efficace</p>
             <div class="mt-4 inline-flex items-center px-4 py-2 bg-blue-50 text-blue-800 rounded-lg text-sm font-medium">
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -200,7 +200,7 @@
             </div>
 
             <div class="text-sm text-gray-600">
-              <p><strong>Revenus:</strong> {{ formatAmount(product.revenue || 0) }} FCFA</p>
+              <p><strong>Koumbich:</strong> {{ formatAmount(product.revenue || 0) }} FCFA</p>
             </div>
           </div>
         </div>
@@ -341,7 +341,7 @@
                   <li>• <strong>Mode:</strong> Tombola automatique</li>
                   <li>• <strong>Nombre de tickets:</strong> 500 (fixe)</li>
                   <li>• <strong>Prix par ticket:</strong> {{ formatAmount(Math.ceil((newProduct.price || 100000) / 500)) }} FCFA</li>
-                  <li>• <strong>Revenus potentiels:</strong> {{ formatAmount((newProduct.price || 100000)) }} FCFA</li>
+                  <li>• <strong>Koumbich potentiel:</strong> {{ formatAmount((newProduct.price || 100000)) }} FCFA</li>
                 </ul>
               </div>
             </div>

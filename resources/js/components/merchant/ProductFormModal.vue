@@ -2,19 +2,19 @@
   <div v-if="show" class="fixed inset-0 z-50 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen px-4 text-center">
       <!-- Backdrop -->
-      <div class="fixed inset-0 bg-black/40 transition-opacity" @click="close"></div>
+      <div class="fixed inset-0 bg-gray-600 bg-opacity-40 transition-opacity" @click="close"></div>
 
       <!-- Modal -->
       <div class="koumbaya-card inline-block w-full max-w-2xl my-8 overflow-hidden text-left align-middle bg-white shadow-xl transform transition-all">
         <div class="koumbaya-card-header">
           <h3 class="koumbaya-heading-4">
-            {{ product.id ? 'Modifier le produit' : 'Nouveau produit' }}
+            {{ product.id ? 'Modifier l\'article' : 'Nouvel article' }}
           </h3>
         </div>
-        
+
         <form @submit.prevent="submit" class="koumbaya-card-body space-y-4">
           <div class="koumbaya-form-group">
-            <label class="koumbaya-label">Nom du produit</label>
+            <label class="koumbaya-label">Nom de l'article</label>
             <input
               v-model="form.name"
               type="text"
@@ -57,10 +57,10 @@
                 {{ form.numberOfTickets || 1000 }} tickets
               </span>
             </div>
-            
+
             <div class="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span class="text-gray-600">Prix produit:</span>
+                <span class="text-gray-600">Prix article:</span>
                 <span class="font-medium ml-2">{{ formatCurrency(calculation.product_price) }}</span>
               </div>
               <div>
@@ -103,8 +103,8 @@
                   @click="updateTicketCount(ticketCount)"
                   :class="[
                     'px-3 py-2 text-sm border rounded-lg transition-colors',
-                    form.numberOfTickets === ticketCount 
-                      ? 'border-[#0099cc] bg-[#0099cc] text-white' 
+                    form.numberOfTickets === ticketCount
+                      ? 'border-[#0099cc] bg-[#0099cc] text-white'
                       : 'border-gray-300 hover:border-[#0099cc]'
                   ]"
                 >
@@ -121,7 +121,7 @@
                 placeholder="Nombre personnalisé..."
               />
             </div>
-            
+
             <!-- Message pour les vendeurs individuels -->
             <div v-else-if="showAdvanced && !canCustomizeTickets" class="border-t pt-3">
               <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
@@ -262,7 +262,7 @@ const calculateTicketPrice = async () => {
       product_price: form.value,
       number_of_tickets: form.numberOfTickets || getDefaultTicketCount()
     })
-    
+
     if (response.success) {
       calculation.value = response.data
       form.ticketPrice = response.data.final_ticket_price
@@ -301,7 +301,7 @@ const submit = () => {
     ticket_price: form.ticketPrice,
     min_participants: form.numberOfTickets || getDefaultTicketCount()
   }
-  
+
   emit('submit', submitData)
 }
 
@@ -350,12 +350,12 @@ watch(() => form.value, (newValue) => {
     // Afficher un avertissement mais ne pas bloquer
     console.warn(`Prix minimum recommandé: ${formatCurrency(minPrice)} pour profil individuel`)
   }
-  
+
   // Forcer les tickets à 500 pour les vendeurs individuels
   if (isIndividualSeller.value) {
     form.numberOfTickets = 500
   }
-  
+
   if (newValue && newValue > 0) {
     calculateTicketPrice()
   }
@@ -371,7 +371,7 @@ watch(() => isIndividualSeller.value, (isIndividual) => {
 
 onMounted(() => {
   loadCategories()
-  
+
   // Configurer le nombre de tickets selon le profil au montage
   if (isIndividualSeller.value) {
     form.numberOfTickets = 500

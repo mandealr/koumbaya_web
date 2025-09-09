@@ -4,8 +4,8 @@
     <div class="mb-8">
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Gestion des tombolas</h1>
-          <p class="mt-2 text-gray-600">Gérez les tirages et suivez les résultats des tombolas</p>
+          <h1 class="text-3xl font-bold text-gray-900">Gestion des tirages spéciaux</h1>
+          <p class="mt-2 text-gray-600">Gérez les tirages et suivez les résultats des tirages spéciaux</p>
         </div>
         <button
           @click="refreshData"
@@ -61,7 +61,7 @@
           </button>
         </nav>
       </div>
-      
+
       <!-- Actions rapides -->
       <div class="mt-4 flex justify-between items-center">
         <div class="flex space-x-3">
@@ -75,7 +75,7 @@
             Tirages disponibles ({{ statistics.pending_draws || 0 }})
           </button>
         </div>
-        
+
         <div class="text-sm text-gray-500">
           Dernière mise à jour : {{ new Date().toLocaleTimeString('fr-FR') }}
         </div>
@@ -95,13 +95,13 @@
           <h3 class="text-lg font-semibold text-gray-900">Tirages en attente</h3>
           <p class="text-sm text-gray-600">Tombolas prêtes pour le tirage</p>
         </div>
-        
+
         <div v-if="pendingDraws.length === 0" class="text-center py-12">
           <ClockIcon class="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun tirage en attente</h3>
           <p class="text-gray-600">Toutes les tombolas sont à jour</p>
         </div>
-        
+
         <div v-else class="divide-y divide-gray-200">
           <div
             v-for="lottery in pendingDraws"
@@ -128,7 +128,7 @@
                   </div>
                 </div>
               </div>
-              
+
               <div class="flex space-x-3">
                 <button
                   @click="viewParticipants(lottery)"
@@ -146,12 +146,12 @@
                 </button>
               </div>
             </div>
-            
+
             <!-- Progress Bar -->
             <div class="mt-4">
               <div class="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                <div
+                  class="bg-blue-600 h-2 rounded-full transition-all duration-300"
                   :style="{ width: lottery.progress + '%' }"
                 ></div>
               </div>
@@ -166,8 +166,8 @@
       <div class="bg-white rounded-lg shadow-sm border border-gray-200">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <div>
-            <h3 class="text-lg font-semibold text-gray-900">Tombolas actives</h3>
-            <p class="text-sm text-gray-600">Tombolas en cours de vente</p>
+            <h3 class="text-lg font-semibold text-gray-900">Tirages spéciaux actifs</h3>
+            <p class="text-sm text-gray-600">Tirages spéciaux en cours de vente</p>
           </div>
           <div class="flex space-x-2">
             <input
@@ -178,7 +178,7 @@
             />
           </div>
         </div>
-        
+
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
@@ -222,8 +222,8 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">{{ lottery.progress }}%</div>
                   <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
-                    <div 
-                      class="bg-blue-600 h-2 rounded-full" 
+                    <div
+                      class="bg-blue-600 h-2 rounded-full"
                       :style="{ width: lottery.progress + '%' }"
                     ></div>
                   </div>
@@ -280,7 +280,7 @@
             </select>
           </div>
         </div>
-        
+
         <div class="divide-y divide-gray-200">
           <div
             v-for="lottery in filteredCompletedLotteries"
@@ -307,7 +307,7 @@
                   </div>
                 </div>
               </div>
-              
+
               <div class="text-right">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
                   <CheckCircleIcon class="w-4 h-4 mr-1" />
@@ -318,7 +318,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- Winner Details -->
             <div v-if="lottery.winner" class="mt-4 bg-green-50 p-4 rounded-lg">
               <div class="flex items-center justify-between">
@@ -335,7 +335,7 @@
                 </div>
               </div>
             </div>
-            
+
             <div class="flex justify-end space-x-2 mt-4">
               <button
                 @click="viewDrawDetails(lottery)"
@@ -356,7 +356,7 @@
     </div>
 
     <!-- Participants Modal -->
-    <div v-if="showParticipantsModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div v-if="showParticipantsModal" class="fixed inset-0 bg-gray-600 bg-opacity-40 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h3 class="text-lg font-semibold text-gray-900">
@@ -379,7 +379,7 @@
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
@@ -428,7 +428,7 @@
     </div>
 
     <!-- Draw Confirmation Modal -->
-    <div v-if="showDrawModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div v-if="showDrawModal" class="fixed inset-0 bg-gray-600 bg-opacity-40 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg max-w-md w-full mx-4">
         <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900">Confirmer le tirage</h3>
@@ -436,7 +436,7 @@
 
         <div class="px-6 py-4">
           <p class="text-gray-600 mb-4">
-            Êtes-vous sûr de vouloir effectuer le tirage pour 
+            Êtes-vous sûr de vouloir effectuer le tirage pour
             <span class="font-semibold">{{ selectedLottery?.product?.title || selectedLottery?.product?.name }}</span> ?
           </p>
           <div class="bg-gray-50 p-4 rounded-lg mb-4">
@@ -502,18 +502,18 @@ const totalPages = ref(1)
 const itemsPerPage = ref(20)
 
 const tabs = computed(() => [
-  { 
-    key: 'pending', 
+  {
+    key: 'pending',
     label: 'Tirages en attente',
     count: statistics.value.pending_draws || 0
   },
-  { 
-    key: 'active', 
-    label: 'Tombolas actives',
+  {
+    key: 'active',
+    label: 'Tirages spéciaux actifs',
     count: statistics.value.active_lotteries || 0
   },
-  { 
-    key: 'completed', 
+  {
+    key: 'completed',
     label: 'Historique',
     count: statistics.value.completed_lotteries || 0
   }
@@ -557,22 +557,22 @@ const completedFilters = reactive({
 
 // Computed values for different lottery states
 const pendingDraws = computed(() => {
-  return lotteries.value.filter(lottery => 
-    lottery.status === 'active' && 
+  return lotteries.value.filter(lottery =>
+    lottery.status === 'active' &&
     !lottery.is_drawn &&
     new Date(lottery.end_date) <= new Date()
   )
 })
 
 const activeLotteries = computed(() => {
-  return lotteries.value.filter(lottery => 
-    lottery.status === 'active' && 
+  return lotteries.value.filter(lottery =>
+    lottery.status === 'active' &&
     new Date(lottery.end_date) > new Date()
   )
 })
 
 const completedLotteries = computed(() => {
-  return lotteries.value.filter(lottery => 
+  return lotteries.value.filter(lottery =>
     lottery.status === 'completed' || lottery.is_drawn
   )
 })
@@ -582,7 +582,7 @@ const filteredActiveLotteries = computed(() => {
 
   if (activeFilters.search) {
     const search = activeFilters.search.toLowerCase()
-    filtered = filtered.filter(lottery => 
+    filtered = filtered.filter(lottery =>
       lottery.product?.title?.toLowerCase().includes(search) ||
       lottery.product?.name?.toLowerCase().includes(search) ||
       lottery.product?.description?.toLowerCase().includes(search) ||
@@ -598,7 +598,7 @@ const filteredCompletedLotteries = computed(() => {
 
   if (completedFilters.search) {
     const search = completedFilters.search.toLowerCase()
-    filtered = filtered.filter(lottery => 
+    filtered = filtered.filter(lottery =>
       lottery.product?.title?.toLowerCase().includes(search) ||
       lottery.product?.name?.toLowerCase().includes(search) ||
       lottery.winner?.first_name?.toLowerCase().includes(search) ||
@@ -611,10 +611,10 @@ const filteredCompletedLotteries = computed(() => {
   if (completedFilters.period) {
     const now = new Date()
     const period = completedFilters.period
-    
+
     filtered = filtered.filter(lottery => {
       const drawDate = new Date(lottery.draw_date || lottery.created_at)
-      
+
       if (period === 'week') {
         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
         return drawDate >= weekAgo
@@ -625,7 +625,7 @@ const filteredCompletedLotteries = computed(() => {
         const quarterAgo = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate())
         return drawDate >= quarterAgo
       }
-      
+
       return true
     })
   }
@@ -688,7 +688,7 @@ const loadLotteries = async () => {
     const params = new URLSearchParams()
     params.append('per_page', itemsPerPage.value)
     params.append('page', currentPage.value)
-    
+
     // Filter by tab
     if (activeTab.value === 'active') {
       params.append('status', 'active')
@@ -702,11 +702,11 @@ const loadLotteries = async () => {
     }
 
     const response = await get(`/admin/lotteries?${params.toString()}`)
-    
+
     if (response && response.data) {
       lotteries.value = response.data.map(lottery => ({
         ...lottery,
-        progress: lottery.sold_tickets && lottery.total_tickets 
+        progress: lottery.sold_tickets && lottery.total_tickets
           ? Math.round((lottery.sold_tickets / lottery.total_tickets) * 100)
           : 0
       }))
@@ -750,18 +750,18 @@ const conductDraw = (lottery) => {
 
 const confirmDraw = async () => {
   conductingDraw.value = true
-  
+
   try {
     const response = await post(`/admin/lotteries/${selectedLottery.value.id}/draw`)
-    
+
     if (response && response.success) {
       if (window.$toast) {
         window.$toast.success('Tirage effectué avec succès', '✓ Succès')
       }
-      
+
       // Refresh data to update the lists
       await refreshData()
-      
+
       // Switch to completed tab to show the result
       activeTab.value = 'completed'
     }
@@ -811,7 +811,7 @@ const exportResults = async (lottery) => {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      
+
       if (window.$toast) {
         window.$toast.success('Export téléchargé avec succès', '✓ Succès')
       }

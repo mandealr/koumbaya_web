@@ -183,8 +183,8 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commande</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produit/Tombola</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Koumbuyer</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Article/Tirage spécial</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
@@ -300,7 +300,7 @@
               résultats
             </p>
           </div>
-          
+
           <div class="flex items-center space-x-2">
             <button
               @click="loadOrders(pagination.current_page - 1)"
@@ -309,11 +309,11 @@
             >
               Précédent
             </button>
-            
+
             <span class="text-sm text-gray-700">
               Page {{ pagination.current_page }} de {{ pagination.last_page }}
             </span>
-            
+
             <button
               @click="loadOrders(pagination.current_page + 1)"
               :disabled="pagination.current_page >= pagination.last_page"
@@ -327,7 +327,7 @@
     </div>
 
     <!-- Modal de détails de commande -->
-    <div v-if="showModal" class="fixed inset-0 bg-black/40 overflow-y-auto h-full w-full z-50">
+    <div v-if="showModal" class="fixed inset-0 bg-gray-600 bg-opacity-40 overflow-y-auto h-full w-full z-50">
       <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-medium text-gray-900">Détails de la commande #{{ selectedOrder?.order_number }}</h3>
@@ -340,12 +340,12 @@
             </svg>
           </button>
         </div>
-        
+
         <div v-if="selectedOrder" class="space-y-6">
           <!-- Informations générales -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <h4 class="font-medium text-gray-900 mb-2">Informations client</h4>
+              <h4 class="font-medium text-gray-900 mb-2">Informations koumbuyer</h4>
               <p><strong>Nom:</strong> {{ selectedOrder.customer_name }}</p>
               <p><strong>Email:</strong> {{ selectedOrder.user.email }}</p>
               <p><strong>Téléphone:</strong> {{ selectedOrder.user.phone || 'N/A' }}</p>
@@ -475,7 +475,7 @@ const loadStats = async () => {
 // Charger les commandes
 const loadOrders = async (page = 1) => {
   loading.value = true
-  
+
   try {
     const params = new URLSearchParams({
       page: page,
@@ -519,14 +519,14 @@ const updateOrderStatus = async (order, newStatus) => {
     const response = await apiPut(`/admin/orders/${order.order_number}/status`, {
       status: newStatus
     })
-    
+
     if (response.success) {
       // Mettre à jour localement
       order.status = newStatus
       order.status_label = response.data.status_label
-      
+
       showSuccess(`Statut de la commande #${order.order_number} mis à jour`)
-      
+
       // Recharger les stats
       loadStats()
     }

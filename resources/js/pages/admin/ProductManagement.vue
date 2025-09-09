@@ -3,8 +3,8 @@
     <!-- Page Header -->
     <div class="mb-8 flex justify-between items-center">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900">Gestion des produits</h1>
-        <p class="mt-2 text-gray-600">Gérez les produits disponibles pour les tombolas</p>
+        <h1 class="text-3xl font-bold text-gray-900">Gestion des articles</h1>
+        <p class="mt-2 text-gray-600">Gérez les articles disponibles pour les tirages spéciaux</p>
       </div>
       <button
         @click="loadProducts"
@@ -39,16 +39,16 @@
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Rechercher</label>
-          <input 
+          <input
             v-model="filters.search"
-            type="text" 
-            placeholder="Nom du produit..."
+            type="text"
+            placeholder="Nom de l'article..."
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
-          <select 
+          <select
             v-model="filters.category"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
@@ -60,7 +60,7 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-          <select 
+          <select
             v-model="filters.status"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
@@ -71,7 +71,7 @@
           </select>
         </div>
         <div class="flex items-end">
-          <button 
+          <button
             @click="resetFilters"
             class="w-full px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
           >
@@ -102,7 +102,7 @@
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Produit
+                  Article
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Catégorie
@@ -117,7 +117,7 @@
                   Statut
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tombola
+                  Tirage spécial
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Détails
@@ -166,8 +166,8 @@
                   <div v-if="product.lottery">
                     <div class="flex items-center">
                       <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                        <div 
-                          class="bg-blue-600 h-2 rounded-full" 
+                        <div
+                          class="bg-blue-600 h-2 rounded-full"
                           :style="{ width: product.lottery.progress + '%' }"
                         ></div>
                       </div>
@@ -198,19 +198,19 @@
         <div class="px-6 py-3 border-t border-gray-200">
           <div class="flex items-center justify-between">
             <div class="text-sm text-gray-700">
-              Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à 
-              {{ Math.min(currentPage * itemsPerPage, totalProducts) }} sur 
+              Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à
+              {{ Math.min(currentPage * itemsPerPage, totalProducts) }} sur
               {{ totalProducts }} résultats
             </div>
             <div class="flex space-x-2">
-              <button 
+              <button
                 @click="currentPage--"
                 :disabled="currentPage === 1"
                 class="px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded disabled:opacity-50"
               >
                 Précédent
               </button>
-              <button 
+              <button
                 @click="currentPage++"
                 :disabled="currentPage === totalPages"
                 class="px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded disabled:opacity-50"
@@ -224,11 +224,11 @@
     </div>
 
     <!-- Edit Product Modal -->
-    <div v-if="showEditModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div v-if="showEditModal" class="fixed inset-0 bg-gray-600 bg-opacity-40 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900">
-            Modifier le produit
+            Modifier l'article
           </h3>
         </div>
 
@@ -244,7 +244,7 @@
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie *</label>
                 <select
@@ -271,7 +271,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Prix du produit (FCFA) *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Prix de l'article (FCFA) *</label>
                 <input
                   v-model.number="productForm.price"
                   type="number"
@@ -280,7 +280,7 @@
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               <div v-if="productForm.sale_mode === 'lottery'">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Prix par ticket (FCFA)</label>
                 <input
@@ -305,14 +305,14 @@
                   <option value="cancelled">Annulé</option>
                 </select>
               </div>
-              
+
               <div class="flex items-center pt-6">
                 <input
                   v-model="productForm.is_featured"
                   type="checkbox"
                   class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <label class="ml-2 text-sm text-gray-700">Produit en vedette</label>
+                <label class="ml-2 text-sm text-gray-700">Article en vedette</label>
               </div>
             </div>
           </div>
@@ -375,7 +375,7 @@ const filters = reactive({
 
 const stats = ref([
   {
-    label: 'Total produits',
+    label: 'Total articles',
     value: '0',
     color: 'bg-blue-500',
     icon: ShoppingBagIcon
@@ -436,18 +436,18 @@ const loadProducts = async () => {
     const params = new URLSearchParams()
     params.append('page', currentPage.value)
     params.append('per_page', itemsPerPage.value)
-    
+
     if (filters.search) params.append('search', filters.search)
     if (filters.category) params.append('category_id', filters.category)
     if (filters.status) params.append('status', filters.status)
-    
+
     const response = await get(`/admin/products?${params.toString()}`)
-    
+
     if (response && response.data) {
       products.value = response.data.products || []
       totalProducts.value = response.data.pagination?.total || 0
       categories.value = response.data.categories || []
-      
+
       // Update stats
       if (response.data.stats) {
         stats.value[0].value = response.data.stats.total?.toString() || '0'

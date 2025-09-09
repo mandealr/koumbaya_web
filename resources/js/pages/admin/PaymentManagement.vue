@@ -20,8 +20,8 @@
 
     <!-- Payment Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div 
-        v-for="stat in paymentStats" 
+      <div
+        v-for="stat in paymentStats"
         :key="stat.label"
         class="admin-card hover:shadow-md transition-shadow duration-200"
       >
@@ -40,9 +40,9 @@
               'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
               stat.change >= 0 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
             ]">
-              <component 
-                :is="stat.change >= 0 ? ArrowUpIcon : ArrowDownIcon" 
-                class="w-3 h-3 mr-1" 
+              <component
+                :is="stat.change >= 0 ? ArrowUpIcon : ArrowDownIcon"
+                class="w-3 h-3 mr-1"
               />
               {{ Math.abs(stat.change) }}%
             </span>
@@ -104,7 +104,7 @@
       <div class="admin-card-header">
         <h3 class="text-lg font-semibold text-gray-900">Transactions récentes</h3>
       </div>
-      
+
       <div v-if="loading" class="flex justify-center py-12">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0099cc]"></div>
       </div>
@@ -172,8 +172,8 @@
                 {{ formatDate(payment.created_at) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button 
-                  @click="viewPayment(payment)" 
+                <button
+                  @click="viewPayment(payment)"
                   class="inline-flex items-center px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
                   title="Voir détails"
                 >
@@ -189,20 +189,20 @@
       <!-- Pagination -->
       <div class="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
         <div class="text-sm text-gray-700">
-          Affichage de <span class="font-medium">{{ startIndex }}</span> à 
-          <span class="font-medium">{{ endIndex }}</span> sur 
+          Affichage de <span class="font-medium">{{ startIndex }}</span> à
+          <span class="font-medium">{{ endIndex }}</span> sur
           <span class="font-medium">{{ totalPayments }}</span> résultats
         </div>
         <div class="flex space-x-2">
-          <button 
-            @click="previousPage" 
+          <button
+            @click="previousPage"
             :disabled="currentPage === 1"
             class="admin-btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Précédent
           </button>
-          <button 
-            @click="nextPage" 
+          <button
+            @click="nextPage"
             :disabled="currentPage === totalPages"
             class="admin-btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -213,7 +213,7 @@
     </div>
 
     <!-- Payment Details Modal -->
-    <div v-if="showPaymentModal" class="fixed inset-0 bg-black/40 overflow-y-auto h-full w-full z-50">
+    <div v-if="showPaymentModal" class="fixed inset-0 bg-gray-600 bg-opacity-40 overflow-y-auto h-full w-full z-50">
       <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 shadow-lg rounded-md bg-white">
         <div class="mt-3">
           <div class="flex justify-between items-center mb-4">
@@ -222,7 +222,7 @@
               <XMarkIcon class="w-6 h-6" />
             </button>
           </div>
-          
+
           <div v-if="selectedPayment" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
               <div>
@@ -366,18 +366,18 @@ const loadPayments = async () => {
     const params = new URLSearchParams()
     params.append('page', currentPage.value)
     params.append('per_page', perPage.value)
-    
+
     if (filters.search) params.append('search', filters.search)
     if (filters.status) params.append('status', filters.status)
     if (filters.startDate) params.append('start_date', filters.startDate)
     if (filters.endDate) params.append('end_date', filters.endDate)
-    
+
     const response = await get(`/admin/payments?${params.toString()}`)
-    
+
     if (response && response.success && response.data) {
       payments.value = response.data.payments || []
       totalPayments.value = response.data.pagination?.total || 0
-      
+
       if (response.data.stats) {
         realTimeStats.value = response.data.stats
       }
@@ -460,7 +460,7 @@ const initiateRefund = async (payment) => {
       const response = await post(`/admin/payments/${payment.id}/refund`, {
         reason: 'admin_initiated'
       })
-      
+
       if (response && response.success) {
         if (window.$toast) {
           window.$toast.success('Remboursement initié avec succès', '✅ Remboursement')
@@ -485,9 +485,9 @@ const exportPayments = async () => {
     if (filters.status) params.append('status', filters.status)
     if (filters.startDate) params.append('start_date', filters.startDate)
     if (filters.endDate) params.append('end_date', filters.endDate)
-    
+
     const response = await get(`/admin/payments/export?${params.toString()}`)
-    
+
     if (response && response.success && response.data) {
       // Create and download file
       const blob = new Blob([JSON.stringify(response.data, null, 2)], {
@@ -501,7 +501,7 @@ const exportPayments = async () => {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      
+
       if (window.$toast) {
         window.$toast.success('Export téléchargé avec succès', '✅ Export')
       }

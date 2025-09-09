@@ -47,12 +47,12 @@
             Informations sur l'entreprise
           </h3>
           <ul class="space-y-3">
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">À propos de Koumbaya</a></li>
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Affiliés & Influenceurs</a></li>
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Gagnez des Gombos</a></li>
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Nous contacter</a></li>
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Carrières</a></li>
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Media & Presse</a></li>
+            <li><router-link to="/about" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">À propos de Koumbaya</router-link></li>
+            <li><router-link to="/affiliates" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Affiliés & Influenceurs</router-link></li>
+            <li><router-link to="/earn-gombos" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Gagnez des Gombos</router-link></li>
+            <li><router-link to="/contact" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Nous contacter</router-link></li>
+            <li><router-link to="/careers" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Carrières</router-link></li>
+            <li><router-link to="/media-press" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Media & Presse</router-link></li>
           </ul>
         </div>
 
@@ -62,12 +62,12 @@
             Service client
           </h3>
           <ul class="space-y-3">
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Participation aux tombolas</a></li>
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Politique de propriété intellectuelle</a></li>
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Informations sur la réception des commandes</a></li>
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Signaler une activité suspecte</a></li>
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Centre d'assistance</a></li>
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Centre de sécurité</a></li>
+            <li><router-link to="/lottery-participation" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Participation aux tirages spéciaux</router-link></li>
+            <li><router-link to="/intellectual-property" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Politique de propriété intellectuelle</router-link></li>
+            <li><router-link to="/order-delivery" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Informations sur la réception des commandes</router-link></li>
+            <li><router-link to="/report-suspicious" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Signaler une activité suspecte</router-link></li>
+            <li><router-link to="/support-center" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Centre d'assistance</router-link></li>
+            <li><router-link to="/security-center" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Centre de sécurité</router-link></li>
           </ul>
         </div>
 
@@ -77,10 +77,10 @@
             Centre d'Assistance
           </h3>
           <ul class="space-y-3">
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Centre de Sécurité</a></li>
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Avoir la paix sur Koumbaya</a></li>
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Plan du site</a></li>
-            <li><a href="#" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors font-medium">Vendre sur Koumbaya</a></li>
+            <li><router-link to="/security-center" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Centre de Sécurité</router-link></li>
+            <li><router-link to="/peace-on-koumbaya" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Avoir la paix sur Koumbaya</router-link></li>
+            <li><router-link to="/sitemap" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors">Plan du site</router-link></li>
+            <li><router-link to="/sell-on-koumbaya" class="text-sm text-gray-600 hover:text-[#0099cc] transition-colors font-medium">Vendre sur Koumbaya</router-link></li>
           </ul>
         </div>
 
@@ -90,10 +90,10 @@
       <div class="mt-12 pt-8 border-t border-gray-200">
         <div class="flex flex-col md:flex-row justify-between items-center">
           <div class="flex flex-wrap items-center space-x-6 mb-4 md:mb-0">
-            <a href="#" class="text-sm text-gray-500 hover:text-[#0099cc] transition-colors">Conditions d'utilisation</a>
-            <a href="#" class="text-sm text-gray-500 hover:text-[#0099cc] transition-colors">Politique de confidentialité</a>
-            <a href="#" class="text-sm text-gray-500 hover:text-[#0099cc] transition-colors">Mentions légales</a>
-            <a href="#" class="text-sm text-gray-500 hover:text-[#0099cc] transition-colors">Cookies</a>
+            <router-link to="/terms" class="text-sm text-gray-500 hover:text-[#0099cc] transition-colors">Conditions d'utilisation</router-link>
+            <router-link to="/privacy" class="text-sm text-gray-500 hover:text-[#0099cc] transition-colors">Politique de confidentialité</router-link>
+            <router-link to="/legal" class="text-sm text-gray-500 hover:text-[#0099cc] transition-colors">Mentions légales</router-link>
+            <router-link to="/cookies" class="text-sm text-gray-500 hover:text-[#0099cc] transition-colors">Cookies</router-link>
           </div>
           <div class="text-sm text-gray-500">
             &copy; 2025 Koumbaya. Tous droits réservés.
