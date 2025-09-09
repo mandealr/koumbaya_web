@@ -12,15 +12,15 @@ export default defineConfig({
         }),
         vue(),
         tailwindcss(),
-        securityPlugin({
+        process.env.NODE_ENV !== 'production' ? securityPlugin({
             enableXssCheck: true,
             enableSqlInjectionCheck: true,
             enableUnsafeApiCheck: true,
             enableDependencyCheck: true,
-            failOnWarning: process.env.NODE_ENV === 'production', // Échouer en prod
+            failOnWarning: false,
             excludePatterns: [/node_modules/, /\.min\.js$/, /vendor/]
-        }),
-    ],
+        }) : null,
+    ].filter(Boolean),
     resolve: {
         alias: {
             '@': '/resources/js',

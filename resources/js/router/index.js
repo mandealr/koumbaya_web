@@ -135,6 +135,115 @@ const routes = [
         path: 'contact',
         name: 'public.contact',
         component: Contact
+      },
+      // Pages statiques du footer
+      {
+        path: 'about',
+        name: 'public.about',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'about' }
+      },
+      {
+        path: 'affiliates',
+        name: 'public.affiliates',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'affiliates' }
+      },
+      {
+        path: 'earn-gombos',
+        name: 'public.earn-gombos',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'earn-gombos' }
+      },
+      {
+        path: 'careers',
+        name: 'public.careers',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'careers' }
+      },
+      {
+        path: 'media-press',
+        name: 'public.media-press',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'media-press' }
+      },
+      {
+        path: 'lottery-participation',
+        name: 'public.lottery-participation',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'lottery-participation' }
+      },
+      {
+        path: 'intellectual-property',
+        name: 'public.intellectual-property',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'intellectual-property' }
+      },
+      {
+        path: 'order-delivery',
+        name: 'public.order-delivery',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'order-delivery' }
+      },
+      {
+        path: 'report-suspicious',
+        name: 'public.report-suspicious',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'report-suspicious' }
+      },
+      {
+        path: 'support-center',
+        name: 'public.support-center',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'support-center' }
+      },
+      {
+        path: 'security-center',
+        name: 'public.security-center',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'security-center' }
+      },
+      {
+        path: 'peace-on-koumbaya',
+        name: 'public.peace-on-koumbaya',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'peace-on-koumbaya' }
+      },
+      {
+        path: 'sitemap',
+        name: 'public.sitemap',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'sitemap' }
+      },
+      {
+        path: 'sell-on-koumbaya',
+        name: 'public.sell-on-koumbaya',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'sell-on-koumbaya' }
+      },
+      {
+        path: 'terms',
+        name: 'public.terms',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'terms' }
+      },
+      {
+        path: 'privacy',
+        name: 'public.privacy',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'privacy' }
+      },
+      {
+        path: 'legal',
+        name: 'public.legal',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'legal' }
+      },
+      {
+        path: 'cookies',
+        name: 'public.cookies',
+        component: () => import('@/pages/public/StaticPage.vue'),
+        props: { page: 'cookies' }
       }
     ]
   },
