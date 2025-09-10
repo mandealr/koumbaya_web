@@ -752,31 +752,1437 @@ const pageContent = computed(() => {
       </div>
     `,
     'terms': `
-      <div class="space-y-8">
-        <p class="text-gray-700 text-lg leading-relaxed">
-          Contenu à fournir pour les conditions d'utilisation...
-        </p>
+      <div class="space-y-12">
+        <!-- Date de mise à jour -->
+        <div class="bg-gradient-to-r from-[#0099cc]/5 to-[#0099cc]/10 rounded-xl p-4 border border-[#0099cc]/20">
+          <p class="text-sm text-[#0099cc] font-medium text-center">
+            Dernière mise à jour : ${new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+        </div>
+
+        <!-- Introduction -->
+        <div class="space-y-6">
+          <p class="text-lg text-gray-700 leading-relaxed">
+            Bienvenue sur <strong class="text-[#0099cc]">Koumbaya</strong>. En utilisant notre plateforme, vous acceptez d'être lié par les présentes Conditions Générales d'Utilisation.
+          </p>
+          <p class="text-gray-700">
+            Ces conditions régissent votre utilisation du site web et de l'application mobile Koumbaya (ci-après la "Plateforme").
+          </p>
+        </div>
+
+        <!-- 1. Inscription et compte utilisateur -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">1. Inscription et compte utilisateur</h2>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">1.1 Conditions d'inscription</h3>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-[#0099cc] rounded-full mt-2"></div>
+                <span class="text-gray-700">Vous devez être âgé d'au moins 13 ans pour utiliser Koumbaya</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-[#0099cc] rounded-full mt-2"></div>
+                <span class="text-gray-700">Les informations fournies lors de l'inscription doivent être exactes et complètes</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-[#0099cc] rounded-full mt-2"></div>
+                <span class="text-gray-700">Vous êtes responsable de maintenir la confidentialité de vos identifiants</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">1.2 Types de comptes</h3>
+            <div class="space-y-4">
+              <div>
+                <h4 class="font-medium text-[#0099cc] mb-2">Compte Acheteur</h4>
+                <p class="text-gray-700">Permet d'acheter des produits, participer aux tirages et bénéficier des offres</p>
+              </div>
+              <div>
+                <h4 class="font-medium text-[#0099cc] mb-2">Compte Vendeur</h4>
+                <p class="text-gray-700">Permet de vendre des produits en respectant nos politiques commerciales</p>
+              </div>
+              <div>
+                <h4 class="font-medium text-[#0099cc] mb-2">Compte Affilié</h4>
+                <p class="text-gray-700">Permet de gagner des commissions en recommandant Koumbaya</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Utilisation de la plateforme -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">2. Utilisation de la plateforme</h2>
+          </div>
+
+          <div class="bg-[#0099cc]/5 rounded-xl p-6 border border-[#0099cc]/20">
+            <h3 class="font-semibold text-gray-900 mb-4">2.1 Utilisation autorisée</h3>
+            <p class="text-gray-700 mb-4">Vous vous engagez à utiliser Koumbaya uniquement à des fins légales et conformément aux présentes conditions.</p>
+            
+            <h3 class="font-semibold text-gray-900 mb-4 mt-6">2.2 Utilisations interdites</h3>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-red-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                </svg>
+                <span class="text-gray-700">Vendre des produits illégaux, contrefaits ou volés</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-red-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                </svg>
+                <span class="text-gray-700">Usurper l'identité d'une autre personne ou entité</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-red-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                </svg>
+                <span class="text-gray-700">Collecter des informations d'autres utilisateurs sans autorisation</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-red-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                </svg>
+                <span class="text-gray-700">Manipuler les prix ou les évaluations</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 3. Transactions et paiements -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">3. Transactions et paiements</h2>
+          </div>
+
+          <div class="space-y-4">
+            <div class="bg-white border border-gray-200 rounded-xl p-6">
+              <h3 class="font-semibold text-gray-900 mb-3">3.1 Achats</h3>
+              <p class="text-gray-700">En effectuant un achat sur Koumbaya, vous acceptez de payer le prix indiqué ainsi que tous les frais applicables (livraison, taxes, etc.).</p>
+            </div>
+            
+            <div class="bg-white border border-gray-200 rounded-xl p-6">
+              <h3 class="font-semibold text-gray-900 mb-3">3.2 Méthodes de paiement</h3>
+              <p class="text-gray-700">Nous acceptons les cartes bancaires, les paiements mobiles et autres moyens de paiement sécurisés indiqués lors du checkout.</p>
+            </div>
+            
+            <div class="bg-white border border-gray-200 rounded-xl p-6">
+              <h3 class="font-semibold text-gray-900 mb-3">3.3 Gombos (Monnaie virtuelle)</h3>
+              <ul class="space-y-2">
+                <li class="flex items-start gap-2">
+                  <div class="w-1.5 h-1.5 bg-[#0099cc] rounded-full mt-2"></div>
+                  <span class="text-gray-700">Les Gombos n'ont pas de valeur monétaire réelle</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <div class="w-1.5 h-1.5 bg-[#0099cc] rounded-full mt-2"></div>
+                  <span class="text-gray-700">Ils ne peuvent être échangés contre de l'argent</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <div class="w-1.5 h-1.5 bg-[#0099cc] rounded-full mt-2"></div>
+                  <span class="text-gray-700">Ils peuvent être utilisés pour participer aux tirages au sort</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Tirages au sort -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">4. Tirages au sort</h2>
+          </div>
+
+          <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#0099cc]/10 border border-[#0099cc]/20 rounded-xl p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Règles de participation</h3>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span class="text-gray-700">La participation nécessite des Gombos ou l'achat d'un ticket</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span class="text-gray-700">Les gagnants sont sélectionnés de manière aléatoire et transparente</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span class="text-gray-700">Les prix doivent être réclamés dans les délais indiqués</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span class="text-gray-700">Certaines restrictions géographiques peuvent s'appliquer</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 5. Propriété intellectuelle -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">5. Propriété intellectuelle</h2>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6">
+            <p class="text-gray-700 mb-4">Tout le contenu présent sur Koumbaya (logos, textes, images, logiciels) est protégé par des droits de propriété intellectuelle.</p>
+            <p class="text-gray-700">Vous ne pouvez pas reproduire, distribuer ou créer des œuvres dérivées sans notre autorisation écrite préalable.</p>
+          </div>
+        </div>
+
+        <!-- 6. Limitation de responsabilité -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">6. Limitation de responsabilité</h2>
+          </div>
+
+          <div class="bg-[#0099cc]/5 rounded-xl p-6 border border-[#0099cc]/20">
+            <p class="text-gray-700 mb-4">
+              Koumbaya agit en tant qu'intermédiaire entre acheteurs et vendeurs. Nous ne sommes pas responsables de :
+            </p>
+            <ul class="space-y-2">
+              <li class="flex items-start gap-2">
+                <div class="w-1.5 h-1.5 bg-[#0099cc] rounded-full mt-2"></div>
+                <span class="text-gray-700">La qualité, sécurité ou légalité des produits listés</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <div class="w-1.5 h-1.5 bg-[#0099cc] rounded-full mt-2"></div>
+                <span class="text-gray-700">La véracité des annonces</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <div class="w-1.5 h-1.5 bg-[#0099cc] rounded-full mt-2"></div>
+                <span class="text-gray-700">La capacité des vendeurs à vendre ou des acheteurs à payer</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 7. Résiliation -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">7. Résiliation</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white border border-gray-200 rounded-xl p-6">
+              <h3 class="font-semibold text-gray-900 mb-3">Résiliation par l'utilisateur</h3>
+              <p class="text-gray-700">Vous pouvez fermer votre compte à tout moment depuis vos paramètres.</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6">
+              <h3 class="font-semibold text-gray-900 mb-3">Résiliation par Koumbaya</h3>
+              <p class="text-gray-700">Nous nous réservons le droit de suspendre ou fermer votre compte en cas de violation de ces conditions.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. Modifications -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">8. Modifications des conditions</h2>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6">
+            <p class="text-gray-700">
+              Nous pouvons modifier ces conditions à tout moment. Les modifications prennent effet dès leur publication sur la Plateforme. 
+              Votre utilisation continue de Koumbaya après les modifications constitue votre acceptation des nouvelles conditions.
+            </p>
+          </div>
+        </div>
+
+        <!-- 9. Contact -->
+        <div class="bg-gradient-to-r from-[#0099cc] to-[#0088bb] rounded-2xl p-8 text-white text-center">
+          <div class="max-w-2xl mx-auto space-y-4">
+            <svg class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+            </svg>
+            <h2 class="text-2xl md:text-3xl font-bold">Des questions ?</h2>
+            <p class="text-blue-100 text-lg">
+              Pour toute question concernant ces conditions d'utilisation, contactez-nous :
+            </p>
+            <a 
+              href="mailto:legal@koumbaya.com" 
+              class="inline-flex items-center gap-3 bg-white text-[#0099cc] px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-colors"
+            >
+              legal@koumbaya.com
+            </a>
+          </div>
+        </div>
       </div>
     `,
     'privacy': `
-      <div class="space-y-8">
-        <p class="text-gray-700 text-lg leading-relaxed">
-          Contenu à fournir pour la politique de confidentialité...
-        </p>
+      <div class="space-y-12">
+        <!-- Date de mise à jour -->
+        <div class="bg-gradient-to-r from-[#0099cc]/5 to-[#0099cc]/10 rounded-xl p-4 border border-[#0099cc]/20">
+          <p class="text-sm text-[#0099cc] font-medium text-center">
+            Dernière mise à jour : ${new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+        </div>
+
+        <!-- Introduction -->
+        <div class="space-y-6">
+          <p class="text-lg text-gray-700 leading-relaxed">
+            Chez <strong class="text-[#0099cc]">Koumbaya</strong>, la protection de vos données personnelles est notre priorité. Cette politique de confidentialité explique comment nous collectons, utilisons et protégeons vos informations.
+          </p>
+          <p class="text-gray-700">
+            Cette politique s'applique à tous les services fournis par Koumbaya, y compris notre site web et notre application mobile.
+          </p>
+        </div>
+
+        <!-- 1. Données collectées -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">1. Données collectées</h2>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">1.1 Données fournies directement</h3>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-[#0099cc] rounded-full mt-2"></div>
+                <span class="text-gray-700"><strong>Informations de compte :</strong> nom, email, numéro de téléphone, adresse</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-[#0099cc] rounded-full mt-2"></div>
+                <span class="text-gray-700"><strong>Informations de paiement :</strong> détails de carte bancaire (traités de manière sécurisée)</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-[#0099cc] rounded-full mt-2"></div>
+                <span class="text-gray-700"><strong>Communications :</strong> messages échangés avec notre service client</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">1.2 Données collectées automatiquement</h3>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-[#0099cc] rounded-full mt-2"></div>
+                <span class="text-gray-700"><strong>Données d'utilisation :</strong> pages visitées, temps passé, fonctionnalités utilisées</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-[#0099cc] rounded-full mt-2"></div>
+                <span class="text-gray-700"><strong>Données techniques :</strong> adresse IP, type de navigateur, système d'exploitation</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-[#0099cc] rounded-full mt-2"></div>
+                <span class="text-gray-700"><strong>Cookies :</strong> voir notre politique de cookies pour plus de détails</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 2. Utilisation des données -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">2. Utilisation des données</h2>
+          </div>
+
+          <div class="bg-[#0099cc]/5 rounded-xl p-6 border border-[#0099cc]/20">
+            <p class="text-gray-700 mb-4">Nous utilisons vos données pour :</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-3">
+                <h4 class="font-semibold text-[#0099cc]">Services essentiels</h4>
+                <ul class="space-y-2">
+                  <li class="flex items-start gap-2">
+                    <svg class="h-4 w-4 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    <span class="text-sm text-gray-700">Gérer votre compte</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <svg class="h-4 w-4 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    <span class="text-sm text-gray-700">Traiter vos commandes</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <svg class="h-4 w-4 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    <span class="text-sm text-gray-700">Gérer les tirages au sort</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <svg class="h-4 w-4 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    <span class="text-sm text-gray-700">Fournir le service client</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="space-y-3">
+                <h4 class="font-semibold text-[#0099cc]">Amélioration des services</h4>
+                <ul class="space-y-2">
+                  <li class="flex items-start gap-2">
+                    <svg class="h-4 w-4 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    <span class="text-sm text-gray-700">Personnaliser votre expérience</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <svg class="h-4 w-4 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    <span class="text-sm text-gray-700">Améliorer nos produits</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <svg class="h-4 w-4 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    <span class="text-sm text-gray-700">Prévenir la fraude</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <svg class="h-4 w-4 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    <span class="text-sm text-gray-700">Envoyer des communications pertinentes</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Partage des données -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">3. Partage des données</h2>
+          </div>
+
+          <div class="bg-white border border-gray-200 rounded-xl p-6">
+            <p class="text-gray-700 mb-4">Nous partageons vos données uniquement dans les cas suivants :</p>
+            <div class="space-y-4">
+              <div>
+                <h3 class="font-semibold text-[#0099cc] mb-2">Avec votre consentement</h3>
+                <p class="text-gray-700">Nous partageons vos informations lorsque vous nous en donnez l'autorisation explicite.</p>
+              </div>
+              <div>
+                <h3 class="font-semibold text-[#0099cc] mb-2">Prestataires de services</h3>
+                <p class="text-gray-700">Avec des partenaires de confiance pour le traitement des paiements, la livraison et l'hébergement.</p>
+              </div>
+              <div>
+                <h3 class="font-semibold text-[#0099cc] mb-2">Obligations légales</h3>
+                <p class="text-gray-700">Pour respecter les lois applicables ou répondre à des demandes légitimes des autorités.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Vos droits -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">4. Vos droits</h2>
+          </div>
+
+          <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#0099cc]/10 border border-[#0099cc]/20 rounded-xl p-6">
+            <p class="text-gray-700 mb-4">Conformément au RGPD et autres lois sur la protection des données, vous avez le droit de :</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-white rounded-lg p-4 border border-[#0099cc]/20">
+                <div class="flex items-start gap-3">
+                  <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <div>
+                    <h4 class="font-semibold text-gray-900">Accès</h4>
+                    <p class="text-sm text-gray-700">Accéder à vos données personnelles</p>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-white rounded-lg p-4 border border-[#0099cc]/20">
+                <div class="flex items-start gap-3">
+                  <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                  </svg>
+                  <div>
+                    <h4 class="font-semibold text-gray-900">Rectification</h4>
+                    <p class="text-sm text-gray-700">Corriger vos données inexactes</p>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-white rounded-lg p-4 border border-[#0099cc]/20">
+                <div class="flex items-start gap-3">
+                  <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                  </svg>
+                  <div>
+                    <h4 class="font-semibold text-gray-900">Effacement</h4>
+                    <p class="text-sm text-gray-700">Supprimer vos données personnelles</p>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-white rounded-lg p-4 border border-[#0099cc]/20">
+                <div class="flex items-start gap-3">
+                  <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  <div>
+                    <h4 class="font-semibold text-gray-900">Portabilité</h4>
+                    <p class="text-sm text-gray-700">Recevoir vos données dans un format structuré</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="text-gray-700 mt-4">
+              Pour exercer ces droits, contactez-nous à <a href="mailto:privacy@koumbaya.com" class="text-[#0099cc] hover:underline">privacy@koumbaya.com</a>
+            </p>
+          </div>
+        </div>
+
+        <!-- 5. Sécurité -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">5. Sécurité des données</h2>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6">
+            <p class="text-gray-700 mb-4">
+              Nous mettons en œuvre des mesures de sécurité techniques et organisationnelles pour protéger vos données :
+            </p>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+                <span class="text-gray-700">Chiffrement des données sensibles</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+                <span class="text-gray-700">Accès restreint aux données personnelles</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+                <span class="text-gray-700">Audits de sécurité réguliers</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+                <span class="text-gray-700">Formation du personnel sur la protection des données</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 6. Conservation des données -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">6. Conservation des données</h2>
+          </div>
+
+          <div class="bg-[#0099cc]/5 rounded-xl p-6 border border-[#0099cc]/20">
+            <p class="text-gray-700 mb-4">
+              Nous conservons vos données personnelles aussi longtemps que nécessaire pour :
+            </p>
+            <ul class="space-y-2">
+              <li class="flex items-start gap-2">
+                <div class="w-1.5 h-1.5 bg-[#0099cc] rounded-full mt-2"></div>
+                <span class="text-gray-700">Fournir nos services</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <div class="w-1.5 h-1.5 bg-[#0099cc] rounded-full mt-2"></div>
+                <span class="text-gray-700">Respecter nos obligations légales</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <div class="w-1.5 h-1.5 bg-[#0099cc] rounded-full mt-2"></div>
+                <span class="text-gray-700">Résoudre les litiges éventuels</span>
+              </li>
+            </ul>
+            <p class="text-gray-700 mt-4">
+              Les données peuvent être anonymisées pour des analyses statistiques après suppression de votre compte.
+            </p>
+          </div>
+        </div>
+
+        <!-- 7. Transferts internationaux -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">7. Transferts internationaux</h2>
+          </div>
+
+          <div class="bg-white border border-gray-200 rounded-xl p-6">
+            <p class="text-gray-700">
+              Vos données peuvent être transférées et stockées dans des pays en dehors de votre pays de résidence. 
+              Dans ce cas, nous nous assurons que des garanties appropriées sont en place pour protéger vos données 
+              conformément à cette politique.
+            </p>
+          </div>
+        </div>
+
+        <!-- 8. Enfants -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">8. Protection des mineurs</h2>
+          </div>
+
+          <div class="bg-[#0099cc]/5 rounded-xl p-6 border border-[#0099cc]/20">
+            <p class="text-gray-700">
+              Koumbaya n'est pas destiné aux enfants de moins de 13 ans. Nous ne collectons pas sciemment 
+              des données personnelles d'enfants de moins de 13 ans. Si nous découvrons que nous avons 
+              collecté des données d'un enfant de moins de 13 ans, nous les supprimerons rapidement.
+            </p>
+          </div>
+        </div>
+
+        <!-- 9. Modifications -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">9. Modifications de cette politique</h2>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6">
+            <p class="text-gray-700">
+              Nous pouvons mettre à jour cette politique de confidentialité périodiquement. 
+              Nous vous informerons de tout changement important par email ou via une notification 
+              sur notre Plateforme. Nous vous encourageons à consulter régulièrement cette politique.
+            </p>
+          </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="bg-gradient-to-r from-[#0099cc] to-[#0088bb] rounded-2xl p-8 text-white text-center">
+          <div class="max-w-2xl mx-auto space-y-4">
+            <svg class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+            </svg>
+            <h2 class="text-2xl md:text-3xl font-bold">Contact</h2>
+            <p class="text-blue-100 text-lg">
+              Pour toute question concernant cette politique de confidentialité ou vos données personnelles :
+            </p>
+            <div class="space-y-3">
+              <a 
+                href="mailto:privacy@koumbaya.com" 
+                class="inline-flex items-center gap-3 bg-white text-[#0099cc] px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-colors"
+              >
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                </svg>
+                privacy@koumbaya.com
+              </a>
+              <p class="text-blue-100">
+                DPO : Délégué à la Protection des Données<br/>
+                Koumbaya SARL<br/>
+                Libreville, Gabon
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     `,
     'legal': `
-      <div class="space-y-8">
-        <p class="text-gray-700 text-lg leading-relaxed">
-          Contenu à fournir pour les mentions légales...
-        </p>
+      <div class="space-y-12">
+        <!-- Date de mise à jour -->
+        <div class="bg-gradient-to-r from-[#0099cc]/5 to-[#0099cc]/10 rounded-xl p-4 border border-[#0099cc]/20">
+          <p class="text-sm text-[#0099cc] font-medium text-center">
+            Dernière mise à jour : ${new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+        </div>
+
+        <!-- 1. Éditeur du site -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m2.25-18v18m13.5-18v18m2.25-18v18M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.75m-.75 3h.75m-.75 3h.75m-3.75 3.75h.75M21 21v-3.375c0-.621-.504-1.125-1.125-1.125h-2.25c-.621 0-1.125.504-1.125 1.125V21" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">1. Éditeur du site</h2>
+          </div>
+
+          <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#0099cc]/10 border border-[#0099cc]/20 rounded-xl p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h3 class="font-semibold text-[#0099cc] mb-4">Informations légales</h3>
+                <div class="space-y-3">
+                  <div>
+                    <span class="font-medium text-gray-900">Dénomination sociale :</span>
+                    <span class="text-gray-700 ml-2">Koumbaya SARL</span>
+                  </div>
+                  <div>
+                    <span class="font-medium text-gray-900">Forme juridique :</span>
+                    <span class="text-gray-700 ml-2">Société à Responsabilité Limitée</span>
+                  </div>
+                  <div>
+                    <span class="font-medium text-gray-900">Capital social :</span>
+                    <span class="text-gray-700 ml-2">1 000 000 FCFA</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h3 class="font-semibold text-[#0099cc] mb-4">Coordonnées</h3>
+                <div class="space-y-3">
+                  <div class="flex items-start gap-3">
+                    <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                    </svg>
+                    <div>
+                      <span class="font-medium text-gray-900">Siège social :</span>
+                      <p class="text-gray-700">Libreville, Gabon</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                    </svg>
+                    <div>
+                      <span class="font-medium text-gray-900">Email :</span>
+                      <a href="mailto:contact@koumbaya.com" class="text-[#0099cc] hover:underline ml-2">contact@koumbaya.com</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Directeur de publication -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">2. Directeur de publication</h2>
+          </div>
+
+          <div class="bg-white border border-gray-200 rounded-xl p-6">
+            <p class="text-gray-700">
+              Le directeur de publication est le représentant légal de la société Koumbaya SARL.
+            </p>
+          </div>
+        </div>
+
+        <!-- 3. Hébergement -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008zm-3 0h.008v.008h-.008v-.008z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">3. Hébergement</h2>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Services d'hébergement</h3>
+            <div class="space-y-4">
+              <div>
+                <span class="font-medium text-gray-900">Hébergeur principal :</span>
+                <p class="text-gray-700 mt-1">
+                  Services d'hébergement cloud sécurisés conformes aux standards internationaux de sécurité et de protection des données.
+                </p>
+              </div>
+              <div>
+                <span class="font-medium text-gray-900">Infrastructure :</span>
+                <p class="text-gray-700 mt-1">
+                  Centres de données redondants avec certification ISO 27001 et conformité RGPD.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Propriété intellectuelle -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">4. Propriété intellectuelle</h2>
+          </div>
+
+          <div class="bg-[#0099cc]/5 rounded-xl p-6 border border-[#0099cc]/20">
+            <div class="space-y-4">
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-3">Droits de propriété</h3>
+                <p class="text-gray-700">
+                  L'ensemble des éléments accessibles sur le site koumbaya.com (textes, images, graphismes, logo, icônes, sons, logiciels, etc.) 
+                  demeure la propriété exclusive de Koumbaya SARL, à l'exception des marques, logos ou contenus appartenant à d'autres 
+                  sociétés partenaires ou auteurs.
+                </p>
+              </div>
+              
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-3">Utilisation autorisée</h3>
+                <ul class="space-y-2">
+                  <li class="flex items-start gap-2">
+                    <svg class="h-4 w-4 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    <span class="text-gray-700">Consultation personnelle et privée du site</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <svg class="h-4 w-4 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    <span class="text-gray-700">Utilisation des services proposés par Koumbaya</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-3">Utilisations interdites</h3>
+                <ul class="space-y-2">
+                  <li class="flex items-start gap-2">
+                    <svg class="h-4 w-4 text-red-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 715.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg>
+                    <span class="text-gray-700">Reproduction, représentation, modification ou exploitation commerciale sans autorisation écrite</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <svg class="h-4 w-4 text-red-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 715.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg>
+                    <span class="text-gray-700">Création d'œuvres dérivées basées sur le contenu du site</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Responsabilité -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 713.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">5. Limitation de responsabilité</h2>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-xl p-6">
+              <h3 class="font-semibold text-gray-900 mb-4">Disponibilité du service</h3>
+              <p class="text-gray-700 mb-3">
+                Koumbaya s'efforce de maintenir accessible le site 24h/24 et 7j/7, sauf en cas de force majeure ou d'événement hors de notre contrôle.
+              </p>
+              <p class="text-gray-700">
+                Des interruptions peuvent survenir pour maintenance, mises à jour ou améliorations techniques.
+              </p>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6">
+              <h3 class="font-semibold text-gray-900 mb-4">Contenu utilisateur</h3>
+              <p class="text-gray-700 mb-3">
+                Koumbaya agit en tant qu'intermédiaire technique entre les utilisateurs et ne peut être tenu responsable du contenu publié par ses utilisateurs.
+              </p>
+              <p class="text-gray-700">
+                Nous nous réservons le droit de supprimer tout contenu inapproprié signalé.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Cookies et tracking -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">6. Cookies et données personnelles</h2>
+          </div>
+
+          <div class="bg-[#0099cc]/5 rounded-xl p-6 border border-[#0099cc]/20">
+            <p class="text-gray-700 mb-4">
+              Le site koumbaya.com utilise des cookies pour améliorer l'expérience utilisateur et analyser l'audience.
+            </p>
+            <div class="space-y-3">
+              <div class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                </svg>
+                <div>
+                  <span class="font-semibold text-gray-900">Politique de cookies :</span>
+                  <a href="/cookies" class="text-[#0099cc] hover:underline ml-1">Consultez notre politique détaillée</a>
+                </div>
+              </div>
+              <div class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-[#0099cc] mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                </svg>
+                <div>
+                  <span class="font-semibold text-gray-900">Protection des données :</span>
+                  <a href="/privacy" class="text-[#0099cc] hover:underline ml-1">Notre politique de confidentialité</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. Droit applicable -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v4.5H6v-4.5z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">7. Droit applicable et juridiction</h2>
+          </div>
+
+          <div class="bg-white border border-gray-200 rounded-xl p-6">
+            <div class="space-y-4">
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-2">Droit applicable</h3>
+                <p class="text-gray-700">
+                  Les présentes mentions légales et l'utilisation du site koumbaya.com sont régies par le droit gabonais.
+                </p>
+              </div>
+              
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-2">Juridiction compétente</h3>
+                <p class="text-gray-700">
+                  En cas de litige, et à défaut de résolution amiable, les tribunaux de Libreville (Gabon) seront seuls compétents.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. Médiation -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">8. Médiation de la consommation</h2>
+          </div>
+
+          <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#0099cc]/10 border border-[#0099cc]/20 rounded-xl p-6">
+            <p class="text-gray-700 mb-4">
+              En application des dispositions du droit de la consommation applicable, Koumbaya met à disposition de ses clients 
+              un dispositif de médiation de la consommation.
+            </p>
+            <div class="space-y-3">
+              <div>
+                <span class="font-medium text-gray-900">Pour les consommateurs :</span>
+                <p class="text-gray-700 mt-1">
+                  En cas de litige non résolu avec notre service client, vous pouvez saisir gratuitement un médiateur 
+                  de la consommation dans les conditions prévues par la réglementation.
+                </p>
+              </div>
+              <div>
+                <span class="font-medium text-gray-900">Contact médiation :</span>
+                <p class="text-gray-700 mt-1">
+                  Les coordonnées du médiateur compétent vous seront communiquées sur demande ou en cas de litige non résolu.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="bg-gradient-to-r from-[#0099cc] to-[#0088bb] rounded-2xl p-8 text-white text-center">
+          <div class="max-w-2xl mx-auto space-y-4">
+            <svg class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+            </svg>
+            <h2 class="text-2xl md:text-3xl font-bold">Contact</h2>
+            <p class="text-blue-100 text-lg">
+              Pour toute question concernant ces mentions légales :
+            </p>
+            <div class="space-y-3">
+              <a 
+                href="mailto:legal@koumbaya.com" 
+                class="inline-flex items-center gap-3 bg-white text-[#0099cc] px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-colors"
+              >
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                </svg>
+                legal@koumbaya.com
+              </a>
+              <p class="text-blue-100">
+                Service juridique<br/>
+                Koumbaya SARL<br/>
+                Libreville, Gabon
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     `,
     'cookies': `
-      <div class="space-y-8">
-        <p class="text-gray-700 text-lg leading-relaxed">
-          Contenu à fournir pour la politique de cookies...
-        </p>
+      <div class="space-y-12">
+        <!-- Date de mise à jour -->
+        <div class="bg-gradient-to-r from-[#0099cc]/5 to-[#0099cc]/10 rounded-xl p-4 border border-[#0099cc]/20">
+          <p class="text-sm text-[#0099cc] font-medium text-center">
+            Dernière mise à jour : ${new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+        </div>
+
+        <!-- Introduction -->
+        <div class="space-y-6">
+          <p class="text-lg text-gray-700 leading-relaxed">
+            Cette politique explique comment <strong class="text-[#0099cc]">Koumbaya</strong> utilise les cookies et technologies similaires 
+            sur notre site web et notre application mobile pour améliorer votre expérience utilisateur.
+          </p>
+          <p class="text-gray-700">
+            En continuant à utiliser nos services, vous acceptez l'utilisation de cookies conformément à cette politique.
+          </p>
+        </div>
+
+        <!-- 1. Qu'est-ce qu'un cookie -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">1. Qu'est-ce qu'un cookie ?</h2>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6">
+            <p class="text-gray-700 mb-4">
+              Les cookies sont de petits fichiers texte stockés sur votre appareil (ordinateur, smartphone, tablette) 
+              lorsque vous visitez un site web. Ils permettent au site de se souvenir de vos actions et préférences.
+            </p>
+            <div class="space-y-3">
+              <h3 class="font-semibold text-gray-900">Types de cookies :</h3>
+              <ul class="space-y-2">
+                <li class="flex items-start gap-2">
+                  <div class="w-1.5 h-1.5 bg-[#0099cc] rounded-full mt-2"></div>
+                  <span class="text-gray-700"><strong>Cookies de session :</strong> supprimés à la fermeture du navigateur</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <div class="w-1.5 h-1.5 bg-[#0099cc] rounded-full mt-2"></div>
+                  <span class="text-gray-700"><strong>Cookies persistants :</strong> restent stockés pour une durée déterminée</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <div class="w-1.5 h-1.5 bg-[#0099cc] rounded-full mt-2"></div>
+                  <span class="text-gray-700"><strong>Cookies tiers :</strong> placés par des services externes</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Cookies utilisés par Koumbaya -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">2. Cookies utilisés par Koumbaya</h2>
+          </div>
+
+          <!-- Cookies essentiels -->
+          <div class="bg-[#0099cc]/5 rounded-xl p-6 border border-[#0099cc]/20">
+            <div class="flex items-center gap-3 mb-4">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 713.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              </svg>
+              <h3 class="text-xl font-semibold text-gray-900">Cookies essentiels (obligatoires)</h3>
+            </div>
+            <p class="text-gray-700 mb-4">
+              Ces cookies sont nécessaires au fonctionnement de base du site et ne peuvent pas être désactivés.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-white rounded-lg p-4 border border-[#0099cc]/20">
+                <h4 class="font-semibold text-[#0099cc] mb-2">Authentification</h4>
+                <p class="text-sm text-gray-700">Maintient votre session de connexion</p>
+                <p class="text-xs text-gray-500 mt-1">Durée : Session</p>
+              </div>
+              <div class="bg-white rounded-lg p-4 border border-[#0099cc]/20">
+                <h4 class="font-semibold text-[#0099cc] mb-2">Sécurité</h4>
+                <p class="text-sm text-gray-700">Protection CSRF et validation des formulaires</p>
+                <p class="text-xs text-gray-500 mt-1">Durée : Session</p>
+              </div>
+              <div class="bg-white rounded-lg p-4 border border-[#0099cc]/20">
+                <h4 class="font-semibold text-[#0099cc] mb-2">Panier</h4>
+                <p class="text-sm text-gray-700">Sauvegarde les articles dans votre panier</p>
+                <p class="text-xs text-gray-500 mt-1">Durée : 30 jours</p>
+              </div>
+              <div class="bg-white rounded-lg p-4 border border-[#0099cc]/20">
+                <h4 class="font-semibold text-[#0099cc] mb-2">Préférences</h4>
+                <p class="text-sm text-gray-700">Langue et paramètres d'affichage</p>
+                <p class="text-xs text-gray-500 mt-1">Durée : 1 an</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cookies fonctionnels -->
+          <div class="bg-white border border-gray-200 rounded-xl p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m0 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m6-6h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+              </svg>
+              <h3 class="text-xl font-semibold text-gray-900">Cookies fonctionnels (optionnels)</h3>
+            </div>
+            <p class="text-gray-700 mb-4">
+              Ces cookies améliorent votre expérience en se souvenant de vos préférences.
+            </p>
+            <div class="space-y-3">
+              <div class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-[#0099cc] rounded-full mt-2"></div>
+                <div>
+                  <span class="font-semibold text-gray-900">Personnalisation :</span>
+                  <span class="text-gray-700 ml-1">Thème, disposition, préférences d'affichage</span>
+                </div>
+              </div>
+              <div class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-[#0099cc] rounded-full mt-2"></div>
+                <div>
+                  <span class="font-semibold text-gray-900">Historique :</span>
+                  <span class="text-gray-700 ml-1">Articles récemment consultés, recherches sauvegardées</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cookies analytiques -->
+          <div class="bg-white border border-gray-200 rounded-xl p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+              </svg>
+              <h3 class="text-xl font-semibold text-gray-900">Cookies analytiques (optionnels)</h3>
+            </div>
+            <p class="text-gray-700 mb-4">
+              Ces cookies nous aident à comprendre comment vous utilisez notre site pour l'améliorer.
+            </p>
+            <div class="space-y-3">
+              <div class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-[#0099cc] rounded-full mt-2"></div>
+                <div>
+                  <span class="font-semibold text-gray-900">Statistiques d'usage :</span>
+                  <span class="text-gray-700 ml-1">Pages visitées, temps passé, parcours utilisateur</span>
+                </div>
+              </div>
+              <div class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-[#0099cc] rounded-full mt-2"></div>
+                <div>
+                  <span class="font-semibold text-gray-900">Performance :</span>
+                  <span class="text-gray-700 ml-1">Vitesse de chargement, erreurs techniques</span>
+                </div>
+              </div>
+              <div class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-[#0099cc] rounded-full mt-2"></div>
+                <div>
+                  <span class="font-semibold text-gray-900">Données anonymisées :</span>
+                  <span class="text-gray-700 ml-1">Aucune donnée personnelle identifiable</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Cookies tiers -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">3. Services tiers et cookies</h2>
+          </div>
+
+          <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#0099cc]/10 border border-[#0099cc]/20 rounded-xl p-6">
+            <p class="text-gray-700 mb-4">
+              Nous utilisons des services tiers qui peuvent placer leurs propres cookies :
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-white rounded-lg p-4 border border-[#0099cc]/20">
+                <h4 class="font-semibold text-[#0099cc] mb-2">Paiements</h4>
+                <p class="text-sm text-gray-700">Processeurs de paiement sécurisés</p>
+                <p class="text-xs text-gray-500 mt-1">Finalité : Transaction sécurisée</p>
+              </div>
+              <div class="bg-white rounded-lg p-4 border border-[#0099cc]/20">
+                <h4 class="font-semibold text-[#0099cc] mb-2">Livraison</h4>
+                <p class="text-sm text-gray-700">Services de suivi de commandes</p>
+                <p class="text-xs text-gray-500 mt-1">Finalité : Suivi des expéditions</p>
+              </div>
+              <div class="bg-white rounded-lg p-4 border border-[#0099cc]/20">
+                <h4 class="font-semibold text-[#0099cc] mb-2">Support client</h4>
+                <p class="text-sm text-gray-700">Chat en ligne et assistance</p>
+                <p class="text-xs text-gray-500 mt-1">Finalité : Service client</p>
+              </div>
+              <div class="bg-white rounded-lg p-4 border border-[#0099cc]/20">
+                <h4 class="font-semibold text-[#0099cc] mb-2">Sécurité</h4>
+                <p class="text-sm text-gray-700">Protection anti-fraude</p>
+                <p class="text-xs text-gray-500 mt-1">Finalité : Sécurité des transactions</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Gestion des cookies -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m0 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m6-6h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">4. Comment gérer vos cookies</h2>
+          </div>
+
+          <div class="space-y-6">
+            <!-- Paramètres Koumbaya -->
+            <div class="bg-[#0099cc]/5 rounded-xl p-6 border border-[#0099cc]/20">
+              <div class="flex items-center gap-3 mb-4">
+                <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <h3 class="text-xl font-semibold text-gray-900">Centre de préférences Koumbaya</h3>
+              </div>
+              <p class="text-gray-700 mb-4">
+                Vous pouvez gérer vos préférences de cookies directement depuis votre compte Koumbaya.
+              </p>
+              <div class="text-center">
+                <button class="inline-flex items-center gap-3 bg-[#0099cc] hover:bg-[#0088bb] text-white px-6 py-3 rounded-xl font-semibold transition-colors">
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Gérer mes cookies
+                </button>
+              </div>
+            </div>
+
+            <!-- Paramètres navigateur -->
+            <div class="bg-white border border-gray-200 rounded-xl p-6">
+              <h3 class="text-xl font-semibold text-gray-900 mb-4">Paramètres de votre navigateur</h3>
+              <p class="text-gray-700 mb-4">
+                Vous pouvez également contrôler les cookies directement depuis votre navigateur :
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="text-center p-4 border border-gray-200 rounded-lg">
+                  <svg class="h-8 w-8 mx-auto mb-2 text-[#0099cc]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  <h4 class="font-semibold text-gray-900">Chrome</h4>
+                  <p class="text-xs text-gray-600 mt-1">Paramètres > Confidentialité</p>
+                </div>
+                <div class="text-center p-4 border border-gray-200 rounded-lg">
+                  <svg class="h-8 w-8 mx-auto mb-2 text-[#0099cc]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  <h4 class="font-semibold text-gray-900">Firefox</h4>
+                  <p class="text-xs text-gray-600 mt-1">Options > Vie privée</p>
+                </div>
+                <div class="text-center p-4 border border-gray-200 rounded-lg">
+                  <svg class="h-8 w-8 mx-auto mb-2 text-[#0099cc]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  <h4 class="font-semibold text-gray-900">Safari</h4>
+                  <p class="text-xs text-gray-600 mt-1">Préférences > Confidentialité</p>
+                </div>
+                <div class="text-center p-4 border border-gray-200 rounded-lg">
+                  <svg class="h-8 w-8 mx-auto mb-2 text-[#0099cc]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  <h4 class="font-semibold text-gray-900">Edge</h4>
+                  <p class="text-xs text-gray-600 mt-1">Paramètres > Confidentialité</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Impact de la désactivation -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">5. Conséquences de la désactivation</h2>
+          </div>
+
+          <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+            <div class="flex items-start gap-3">
+              <svg class="h-6 w-6 text-yellow-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+              <div>
+                <h3 class="font-semibold text-yellow-800 mb-3">Si vous désactivez les cookies :</h3>
+                <ul class="space-y-2">
+                  <li class="flex items-start gap-2">
+                    <div class="w-2 h-2 bg-yellow-600 rounded-full mt-2"></div>
+                    <span class="text-yellow-800">Vous devrez vous reconnecter à chaque visite</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <div class="w-2 h-2 bg-yellow-600 rounded-full mt-2"></div>
+                    <span class="text-yellow-800">Votre panier sera vidé à la fermeture du navigateur</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <div class="w-2 h-2 bg-yellow-600 rounded-full mt-2"></div>
+                    <span class="text-yellow-800">Vos préférences ne seront pas sauvegardées</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <div class="w-2 h-2 bg-yellow-600 rounded-full mt-2"></div>
+                    <span class="text-yellow-800">Certaines fonctionnalités peuvent ne pas marcher correctement</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Modifications -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-10 h-10 bg-[#0099cc]/10 rounded-full flex items-center justify-center">
+              <svg class="h-6 w-6 text-[#0099cc]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">6. Modifications de cette politique</h2>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6">
+            <p class="text-gray-700">
+              Nous pouvons modifier cette politique de cookies pour refléter les changements dans nos pratiques 
+              ou pour d'autres raisons opérationnelles, légales ou réglementaires. Nous vous informerons de 
+              toute modification importante par une notification sur notre site.
+            </p>
+          </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="bg-gradient-to-r from-[#0099cc] to-[#0088bb] rounded-2xl p-8 text-white text-center">
+          <div class="max-w-2xl mx-auto space-y-4">
+            <svg class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+            </svg>
+            <h2 class="text-2xl md:text-3xl font-bold">Des questions sur nos cookies ?</h2>
+            <p class="text-blue-100 text-lg">
+              Pour toute question concernant notre utilisation des cookies :
+            </p>
+            <div class="space-y-3">
+              <a 
+                href="mailto:privacy@koumbaya.com" 
+                class="inline-flex items-center gap-3 bg-white text-[#0099cc] px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-colors"
+              >
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                </svg>
+                privacy@koumbaya.com
+              </a>
+              <p class="text-blue-100">
+                Équipe Protection des Données<br/>
+                Koumbaya SARL<br/>
+                Libreville, Gabon
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     `,
     'careers': `
