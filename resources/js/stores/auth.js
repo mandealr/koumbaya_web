@@ -195,21 +195,21 @@ export const useAuthStore = defineStore('auth', () => {
       return 'admin.dashboard'
     }
     
-    // 2. BUSINESS INDIVIDUAL → Simple Merchant Dashboard
+    // 2. BUSINESS INDIVIDUAL → Simple Merchant Dashboard (vendeur individuel)
     if (hasRole('Business Individual')) {
-      console.log('✅ Redirection vers merchant.simple-dashboard (Business Individual)')
+      console.log('✅ Redirection vers merchant.simple-dashboard (Vendeur Individuel)')
       return 'merchant.simple-dashboard'
     }
     
-    // 3. BUSINESS ENTERPRISE → Full Merchant Dashboard  
+    // 3. BUSINESS ENTERPRISE → Full Merchant Dashboard (vendeur entreprise)
     if (hasRole('Business Enterprise')) {
-      console.log('✅ Redirection vers merchant.dashboard (Business Enterprise)')
+      console.log('✅ Redirection vers merchant.dashboard (Vendeur Entreprise - dashboard complet)')
       return 'merchant.dashboard'
     }
     
     // 4. LEGACY BUSINESS → Simple Merchant Dashboard (rétrocompatibilité)
     if (hasRole('Business')) {
-      console.log('✅ Redirection vers merchant.simple-dashboard (Business legacy)')
+      console.log('✅ Redirection vers merchant.simple-dashboard (Business legacy - simple dashboard)')
       return 'merchant.simple-dashboard'
     }
     

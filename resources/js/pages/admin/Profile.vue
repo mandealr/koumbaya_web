@@ -47,6 +47,12 @@
               <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
               Administrateur actif
             </span>
+            
+            <!-- Rôle détaillé -->
+            <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+              <p class="text-xs font-medium text-gray-700 mb-1">Rôle</p>
+              <p class="text-sm text-gray-900">{{ displayUserRoles }}</p>
+            </div>
           </div>
           
           <div class="border-t border-gray-200 px-6 py-4">
@@ -368,7 +374,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/api'
 import {
@@ -416,6 +422,39 @@ const passwordForm = reactive({
   current_password: '',
   new_password: '',
   confirm_password: ''
+})
+
+// Afficher les rôles de l'utilisateur avec descriptions détaillées
+const displayUserRoles = computed(() => {
+  const user = authStore.user
+  if (!user) return 'Non défini'
+  
+  // Utiliser uniquement les rôles avec descriptions détaillées
+  if (user.roles && Array.isArray(user.roles) && user.roles.length > 0) {
+    const roleDescriptions = user.roles.map(role => {
+      switch(role.name) {
+        case 'Business Individual':
+          return 'Vendeur Individuel (simple-dashboard)'
+        case 'Business Enterprise':
+          return 'Vendeur Entreprise (dashboard complet)'
+        case 'Business':
+          return 'Vendeur (legacy)'
+        case 'Particulier':
+          return 'Client'
+        case 'Admin':
+          return 'Administrateur'
+        case 'Super Admin':
+          return 'Super Administrateur'
+        case 'Agent':
+          return 'Agent'
+        default:
+          return role.name
+      }
+    })
+    return roleDescriptions.join(', ')
+  }
+  
+  return 'Non défini'
 })
 
 // Admin stats

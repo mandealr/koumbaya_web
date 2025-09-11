@@ -144,6 +144,14 @@
               </div>
             </div>
 
+            <!-- Rôle utilisateur -->
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Rôle</label>
+              <div class="text-sm text-gray-600">
+                {{ displayUserRoles }}
+              </div>
+            </div>
+
             <div class="mt-6 flex justify-end">
               <button
                 type="submit"
@@ -393,7 +401,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import {
   UserIcon,
@@ -476,6 +484,39 @@ const checkMerchantStatus = () => {
     role.name === 'Business Individual' || role.name === 'Business Enterprise'
   ) || false
 }
+
+// Afficher les rôles de l'utilisateur avec descriptions détaillées
+const displayUserRoles = computed(() => {
+  const userFromStore = authStore.user
+  if (!userFromStore) return 'Non défini'
+  
+  // Utiliser uniquement les rôles avec descriptions détaillées
+  if (userFromStore.roles && Array.isArray(userFromStore.roles) && userFromStore.roles.length > 0) {
+    const roleDescriptions = userFromStore.roles.map(role => {
+      switch(role.name) {
+        case 'Business Individual':
+          return 'Vendeur Individuel (simple-dashboard)'
+        case 'Business Enterprise':
+          return 'Vendeur Entreprise (dashboard complet)'
+        case 'Business':
+          return 'Vendeur (legacy)'
+        case 'Particulier':
+          return 'Client'
+        case 'Admin':
+          return 'Administrateur'
+        case 'Super Admin':
+          return 'Super Administrateur'
+        case 'Agent':
+          return 'Agent'
+        default:
+          return role.name
+      }
+    })
+    return roleDescriptions.join(', ')
+  }
+  
+  return 'Non défini'
+})
 
 const tabs = [
   { key: 'personal', label: 'Informations personnelles', icon: UserIcon },

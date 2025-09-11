@@ -302,7 +302,9 @@ class User extends Authenticatable
 
     public function isMerchant(): bool
     {
-        return $this->hasRole('Business Enterprise') || $this->hasRole('Business Individual');
+        return $this->hasRole('Business Enterprise') || 
+               $this->hasRole('Business Individual') || 
+               $this->hasRole('Business'); // Support for legacy Business role
     }
 
     /**

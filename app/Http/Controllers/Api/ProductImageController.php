@@ -12,11 +12,16 @@ use Intervention\Image\Drivers\Gd\Driver;
 
 class ProductImageController extends Controller
 {
-    protected ImageManager $imageManager;
+    protected ?ImageManager $imageManager = null;
 
     public function __construct()
     {
-        $this->imageManager = new ImageManager(new Driver());
+        try {
+            $this->imageManager = new ImageManager(new Driver());
+        } catch (\Exception $e) {
+            // Fallback si ImageManager ne peut pas être instancié
+            $this->imageManager = null;
+        }
         $this->middleware(['auth:sanctum']);
     }
 
@@ -255,6 +260,11 @@ class ProductImageController extends Controller
     private function processImage($uploadedFile): string
     {
         try {
+            // Si ImageManager n'est pas disponible, retourner le contenu du fichier tel quel
+            if (!$this->imageManager) {
+                return file_get_contents($uploadedFile->getRealPath());
+            }
+            
             // Lire l'image
             $image = $this->imageManager->read($uploadedFile->getRealPath());
             

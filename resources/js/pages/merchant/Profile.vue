@@ -228,10 +228,29 @@ const userInitials = computed(() => {
 const displayUserRoles = computed(() => {
   if (!user.value) return 'Non défini'
   
-  // Utiliser uniquement les rôles
+  // Utiliser uniquement les rôles avec descriptions détaillées
   if (user.value.roles && Array.isArray(user.value.roles) && user.value.roles.length > 0) {
-    const roleNames = user.value.roles.map(role => role.name)
-    return roleNames.join(', ')
+    const roleDescriptions = user.value.roles.map(role => {
+      switch(role.name) {
+        case 'Business Individual':
+          return 'Vendeur Individuel (simple-dashboard)'
+        case 'Business Enterprise':
+          return 'Vendeur Entreprise (dashboard complet)'
+        case 'Business':
+          return 'Vendeur (legacy)'
+        case 'Particulier':
+          return 'Client'
+        case 'Admin':
+          return 'Administrateur'
+        case 'Super Admin':
+          return 'Super Administrateur'
+        case 'Agent':
+          return 'Agent'
+        default:
+          return role.name
+      }
+    })
+    return roleDescriptions.join(', ')
   }
   
   return 'Non défini'

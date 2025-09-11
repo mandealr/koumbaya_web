@@ -1304,7 +1304,7 @@ class ProductController extends Controller
     {
         $user = auth()->user();
         
-        if (!$user->is_merchant) {
+        if (!$user->isMerchant()) {
             return response()->json(['error' => 'Seuls les marchands peuvent accéder à ces informations'], 403);
         }
         
