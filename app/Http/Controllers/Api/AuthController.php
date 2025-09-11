@@ -676,9 +676,16 @@ class AuthController extends Controller
         // - user_type_id = 1 (Marchand) → rôle 'Business Individual' ou 'Business Enterprise'
         
         if ($user->user_type_id === 1) {
-            // Pour les marchands, on assigne par défaut Business Individual
-            // L'upgrade vers Business Enterprise peut se faire plus tard
-            $roleName = 'Business Individual';
+            // Pour les marchands, différencier selon s'ils ont une entreprise ou non
+            $hasCompanyName = !empty($request->company_name) || !empty($request->business_name);
+            
+            if ($hasCompanyName) {
+                // Si nom d'entreprise fourni → Business Enterprise (dashboard complet)
+                $roleName = 'Business Enterprise';
+            } else {
+                // Sinon → Business Individual (simple dashboard)
+                $roleName = 'Business Individual';
+            }
         } else {
             // Client (par défaut) = rôle Particulier uniquement
             $roleName = 'Particulier';
