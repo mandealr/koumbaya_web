@@ -32,7 +32,7 @@ export const useAuthStore = defineStore('auth', () => {
   })
   
   const isMerchant = computed(() => {
-    return hasRole('Business Enterprise') || hasRole('Business Individual')
+    return hasRole('Business Enterprise') || hasRole('Business Individual') || hasRole('Business')
   })
   
   const isCustomer = computed(() => {
@@ -40,7 +40,7 @@ export const useAuthStore = defineStore('auth', () => {
   })
   
   const canSell = computed(() => {
-    return hasRole('Business Enterprise') || hasRole('Business Individual')
+    return hasRole('Business Enterprise') || hasRole('Business Individual') || hasRole('Business')
   })
 
   // Actions
@@ -207,7 +207,13 @@ export const useAuthStore = defineStore('auth', () => {
       return 'merchant.dashboard'
     }
     
-    // 4. CUSTOMERS (rôle Particulier ou par défaut) → Customer Dashboard
+    // 4. LEGACY BUSINESS → Simple Merchant Dashboard (rétrocompatibilité)
+    if (hasRole('Business')) {
+      console.log('✅ Redirection vers merchant.simple-dashboard (Business legacy)')
+      return 'merchant.simple-dashboard'
+    }
+    
+    // 5. CUSTOMERS (rôle Particulier ou par défaut) → Customer Dashboard
     console.log('✅ Redirection vers customer.dashboard (Customer par défaut)')
     return 'customer.dashboard'
   }

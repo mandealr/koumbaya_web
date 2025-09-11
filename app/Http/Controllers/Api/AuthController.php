@@ -671,13 +671,14 @@ class AuthController extends Controller
      */
     private function assignUserRoles(User $user, Request $request): void
     {
-        // Système de rôles simplifié basé UNIQUEMENT sur user_type_id :
+        // Système de rôles basé sur user_type_id :
         // - user_type_id = 2 (Client) → rôle 'Particulier' (achats, participation aux tombolas)
-        // - user_type_id = 1 (Marchand) → rôle 'Business' (vente, gestion des produits/tombolas)
+        // - user_type_id = 1 (Marchand) → rôle 'Business Individual' ou 'Business Enterprise'
         
         if ($user->user_type_id === 1) {
-            // Marchand = rôle Business uniquement
-            $roleName = 'Business';
+            // Pour les marchands, on assigne par défaut Business Individual
+            // L'upgrade vers Business Enterprise peut se faire plus tard
+            $roleName = 'Business Individual';
         } else {
             // Client (par défaut) = rôle Particulier uniquement
             $roleName = 'Particulier';
