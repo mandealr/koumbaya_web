@@ -740,7 +740,10 @@ const canProceed = computed(() => {
     case 1:
       return validateStep1()
     case 2:
-      return true // Images are optional according to API
+      // Les images sont optionnelles, mais on vérifie qu'il n'y a pas d'upload en cours
+      const imageUploadComponent = document.querySelector('.image-upload-container')
+      const isUploading = imageUploadComponent?.querySelector('.animate-spin') !== null
+      return !isUploading // On peut procéder seulement si aucun upload n'est en cours
     case 3:
       return validateStep3()
     case 4:
@@ -932,24 +935,11 @@ const handleFileDrop = (event) => {
 
 // Handlers pour le nouveau système ImageUpload
 const handleImageUploadSuccess = ({ index, url, response }) => {
-  console.log('=== ÉTAPE 2: IMAGE UPLOAD SUCCESS ===')
-  console.log('Index:', index)
-  console.log('URL:', url)
-  console.log('Response:', response)
-  console.log('Form images avant:', {
-    images: form.images,
-    imageUrls: form.imageUrls
-  })
-  
+  console.log('Image upload success:', { index, url })
   showSuccessToast(`Image ${index + 1} uploadée avec succès`)
   
-  console.log('Form images après:', {
-    images: form.images,
-    imageUrls: form.imageUrls
-  })
-  console.log('Nombre total d\'images:', form.imageUrls.length)
-  console.log('Can proceed to next step:', canProceed.value)
-  console.log('=====================================')
+  // Le v-model du composant ImageUpload gère automatiquement la mise à jour de form.imageUrls
+  // Pas besoin de modifier manuellement form.imageUrls ici
 }
 
 const handleImageUploadError = ({ index, error }) => {

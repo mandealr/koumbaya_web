@@ -150,7 +150,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { PhotoIcon, PlusIcon, XMarkIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 import { useApi } from '@/composables/api'
 
@@ -200,15 +200,35 @@ const uploadProgress = ref(0)
 // Computed
 const remainingSlots = computed(() => props.maxFiles - images.value.length)
 
+// Variable pour éviter les boucles infinies
+let isUpdatingFromProps = false
+let isEmittingUpdate = false
+
 // Watchers
-watch(() => props.modelValue, (newValue) => {
+watch(() => props.modelValue, (newValue, oldValue) => {
+  // Éviter la boucle infinie
+  if (isEmittingUpdate) return
+  
+  // Vérifier si la valeur a réellement changé
+  const oldUrls = oldValue ? oldValue.sort().join(',') : ''
+  const newUrls = newValue ? newValue.sort().join(',') : ''
+  if (oldUrls === newUrls) return
+  
+  isUpdatingFromProps = true
   if (newValue && newValue.length > 0) {
-    images.value = newValue.map(url => ({
-      preview: url,
-      url: url,
-      uploaded: true
-    }))
+    // Ne recréer les objets images que si nécessaire
+    const currentUrls = images.value.filter(img => img.uploaded).map(img => img.url).sort().join(',')
+    if (currentUrls !== newUrls) {
+      images.value = newValue.map(url => ({
+        preview: url,
+        url: url,
+        uploaded: true
+      }))
+    }
+  } else if (!newValue || newValue.length === 0) {
+    images.value = []
   }
+  isUpdatingFromProps = false
 }, { immediate: true })
 
 // Watcher pour les images existantes
@@ -228,8 +248,17 @@ watch(() => props.existingImages, (newExistingImages) => {
 }, { immediate: true })
 
 watch(images, (newImages) => {
+  // Éviter la boucle infinie
+  if (isUpdatingFromProps) return
+  
+  isEmittingUpdate = true
   const uploadedImages = newImages.filter(img => img.uploaded && img.url).map(img => img.url)
   emit('update:modelValue', uploadedImages)
+  
+  // Utiliser nextTick pour s'assurer que l'émission est terminée
+  nextTick(() => {
+    isEmittingUpdate = false
+  })
 }, { deep: true })
 
 // Methods
@@ -305,6 +334,8 @@ const uploadImage = async (index) => {
   const image = images.value[index]
   if (!image || image.uploaded || image.uploading) return
   
+  console.log('Starting image upload:', { index, fileName: image.name, fileSize: image.size })
+  
   image.uploading = true
   image.error = false
   isUploading.value = true
@@ -329,6 +360,13 @@ const uploadImage = async (index) => {
       image.uploaded = true
       image.url = response.data.url
       image.uploading = false
+      
+      console.log('Image upload completed:', { 
+        index, 
+        url: response.data.url,
+        totalImages: images.value.length,
+        uploadedCount: images.value.filter(img => img.uploaded).length
+      })
       
       emit('success', { index, url: response.data.url, response })
     } else {
