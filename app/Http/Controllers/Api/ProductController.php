@@ -582,7 +582,7 @@ class ProductController extends Controller
             ]);
         }
 
-        $product->load(['category', 'merchant', 'activeLottery', 'vendorProfile']);
+        $product->load(['category', 'merchant', 'activeLottery']);
 
         return response()->json([
             'message' => 'Produit créé avec succès',
