@@ -659,48 +659,6 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * Vérifier le compte utilisateur avec OTP (Mobile)
-     */
-    public function verifyAccount(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'otp_code' => 'required|string|size:6'
-        ]);
-
-        if ($validator->fails()) {
-            return $this->sendValidationError($validator);
-        }
-
-        // Vérifier l'OTP
-        $otpResult = OtpService::verifyOtp($request->email, $request->otp_code, 'registration');
-        
-        if (!$otpResult['success']) {
-            return response()->json([
-                'success' => false,
-                'message' => $otpResult['message']
-            ], 400);
-        }
-
-        // Marquer l'utilisateur comme vérifié
-        $user = User::where('email', $request->email)->first();
-        if ($user) {
-            $user->update(['verified_at' => now()]);
-            $user->load(['wallet', 'roles']);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Compte vérifié avec succès',
-                'user' => $user
-            ]);
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Utilisateur non trouvé'
-        ], 404);
-    }
 
     /**
      * Envoyer l'email de vérification avec lien
