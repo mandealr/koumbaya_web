@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Services\TicketPriceCalculator;
 
 /**
  * @OA\Tag(
@@ -560,18 +561,26 @@ class ProductController extends Controller
 
         // Si c'est un produit tombola, créer automatiquement la tombola
         if ($request->sale_mode === 'lottery') {
-            $totalTickets = (int) ceil($product->price / $product->ticket_price);
+            // Utiliser la nouvelle logique de calcul
+            $ticketCalculation = TicketPriceCalculator::calculateMaxTicketsForPrice(
+                $product->price,
+                $product->ticket_price ?? 200
+            );
+            
+            $totalTickets = $ticketCalculation['max_tickets'];
             
             // Déterminer la durée selon le type de vendeur
             $lotteryDuration = $this->getLotteryDurationForUser($user, $request->lottery_duration);
             
             $product->lotteries()->create([
                 'lottery_number' => 'LOT-' . strtoupper(Str::random(8)),
+                'title' => 'Tombola - ' . $product->name,
+                'description' => 'Tombola pour le produit : ' . $product->name,
                 'ticket_price' => $product->ticket_price,
-                'total_tickets' => $totalTickets,
-                'min_participants' => $product->min_participants ?? 50,
-                'start_date' => now(),
-                'end_date' => now()->addDays($lotteryDuration),
+                'max_tickets' => $totalTickets,
+                'sold_tickets' => 0,
+                'currency' => 'XAF',
+                'draw_date' => now()->addDays($lotteryDuration),
                 'status' => 'active',
                 'meta' => [
                     'auto_created' => true,

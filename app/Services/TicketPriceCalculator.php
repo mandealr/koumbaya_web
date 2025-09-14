@@ -5,6 +5,46 @@ namespace App\Services;
 class TicketPriceCalculator
 {
     /**
+     * Calcule le nombre de tickets selon le prix fixe du ticket
+     * Logique inverse : Nombre de tickets = Prix du produit ÷ Prix du ticket
+     */
+    public static function calculateMaxTicketsForPrice(
+        float $productPrice,
+        float $ticketPrice = 200, // Prix fixe du ticket
+        float $commissionRate = 0.10,
+        float $marginRate = 0.15
+    ): array {
+        // Validation des paramètres
+        if ($productPrice <= 0) {
+            throw new \InvalidArgumentException('Le prix du produit doit être supérieur à 0');
+        }
+        
+        if ($ticketPrice <= 0) {
+            throw new \InvalidArgumentException('Le prix du ticket doit être supérieur à 0');
+        }
+        
+        // Calculer le montant total nécessaire (produit + commissions)
+        $totalAmount = $productPrice * (1 + $commissionRate + $marginRate);
+        
+        // Calculer le nombre maximum de tickets
+        $maxTickets = floor($totalAmount / $ticketPrice);
+        
+        // Calculer le quota réel à atteindre
+        $quotaToReach = $maxTickets * $ticketPrice;
+        
+        return [
+            'max_tickets' => (int) $maxTickets,
+            'ticket_price' => $ticketPrice,
+            'quota_to_reach' => $quotaToReach,
+            'product_price' => $productPrice,
+            'total_with_fees' => $totalAmount,
+            'commission_amount' => $productPrice * $commissionRate,
+            'margin_amount' => $productPrice * $marginRate,
+            'coverage_percentage' => ($quotaToReach / $totalAmount) * 100
+        ];
+    }
+
+    /**
      * Calcule automatiquement le prix d'un ticket de tombola
      * 
      * Formule: Prix ticket = (Prix de l'Article + (Prix de l'Article × Commission) + (Prix de l'Article × Marge)) / Nombre de Tickets
