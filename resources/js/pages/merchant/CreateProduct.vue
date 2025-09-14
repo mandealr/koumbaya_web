@@ -285,30 +285,58 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Prix par ticket (FCFA) *
+              Nombre de tickets *
             </label>
-            <input
-              v-model="form.ticket_price"
-              type="number"
-              required
-              min="100"
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
-              placeholder="Ex: 2500"
-              @input="calculateLotteryMetrics"
-              @blur="validateTicketPrice"
-            />
-            <p v-if="errors.ticket_price" class="mt-1 text-sm text-red-600">{{ errors.ticket_price }}</p>
-            <p v-else-if="form.ticket_price && parseFloat(form.ticket_price) < 100" class="mt-1 text-sm text-orange-600">Le prix minimum est de 100 FCFA</p>
-            <p v-else class="text-sm text-gray-700 mt-1">Minimum 100 FCFA</p>
+            <!-- Vendeur individuel : nombre de tickets fixe -->
+            <div v-if="isIndividualSeller">
+              <input
+                v-model="form.total_tickets"
+                type="number"
+                required
+                readonly
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-100 cursor-not-allowed" style="color: #5f5f5f"
+              />
+              <div class="mt-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <div class="flex items-start">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm text-yellow-800">
+                      <strong>Profil Vendeur Individuel:</strong> Le nombre de tickets est fixé à 500 pour garantir un prix de ticket minimum de 200 FCFA.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Autres profils : nombre de tickets personnalisable -->
+            <div v-else>
+              <input
+                v-model="form.total_tickets"
+                type="number"
+                required
+                min="10"
+                max="10000"
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
+                placeholder="Ex: 400"
+                @input="calculateLotteryMetrics"
+                @blur="validateTotalTickets"
+              />
+              <p v-if="errors.total_tickets" class="mt-1 text-sm text-red-600">{{ errors.total_tickets }}</p>
+              <p v-else-if="form.total_tickets && (parseInt(form.total_tickets) < 10 || parseInt(form.total_tickets) > 10000)" class="mt-1 text-sm text-orange-600">Entre 10 et 10,000 tickets</p>
+              <p v-else class="text-sm text-gray-700 mt-1">Entre 10 et 10,000 tickets</p>
+            </div>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Nombre de tickets *
+              Prix par ticket (FCFA) *
             </label>
-            <!-- Nombre de tickets automatiquement calculé (lecture seule) -->
+            <!-- Prix du ticket automatiquement calculé (lecture seule) -->
             <input
-              v-model="calculatedTotalTickets"
+              v-model="calculatedTicketPrice"
               type="number"
               required
               readonly
@@ -323,7 +351,7 @@
                 </div>
                 <div class="ml-3">
                   <p class="text-sm text-blue-800">
-                    <strong>Calcul automatique:</strong> Le nombre de tickets est automatiquement calculé selon la formule : (Prix du produit × 1.25) ÷ Prix du ticket.
+                    <strong>Calcul automatique:</strong> Le prix du ticket est automatiquement calculé selon la formule : (Prix du produit + Commission + Marge) ÷ Nombre de tickets.
                   </p>
                 </div>
               </div>
@@ -503,12 +531,12 @@
                 <span class="font-medium text-purple-600">Tombola</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-800">Prix/ticket :</span>
-                <span class="font-medium">{{ formatAmount(form.ticket_price) }} FCFA</span>
+                <span class="text-gray-800">Total tickets :</span>
+                <span class="font-medium">{{ form.total_tickets }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-800">Total tickets :</span>
-                <span class="font-medium">{{ calculatedTotalTickets }}</span>
+                <span class="text-gray-800">Prix/ticket :</span>
+                <span class="font-medium">{{ formatAmount(calculatedTicketPrice) }} FCFA</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-800">Minimum requis :</span>
@@ -656,6 +684,13 @@ watch(() => form.sale_mode, (newMode, oldMode) => {
   console.log('=== CHANGEMENT MODE DE VENTE ===')
   console.log('Old mode:', oldMode)
   console.log('New mode:', newMode)
+  console.log('Is individual seller:', isIndividualSeller.value)
+  
+  if (newMode === 'lottery' && isIndividualSeller.value) {
+    // Forcer 500 tickets pour vendeur individuel en mode tombola
+    console.log('Forcing 500 tickets for individual seller in lottery mode')
+    form.total_tickets = '500'
+  }
   
   // Réinitialiser les champs spécifiques à la tombola si on passe en vente directe
   if (newMode === 'direct') {
@@ -696,35 +731,43 @@ const minDate = computed(() => {
   return tomorrow.toISOString().slice(0, 16)
 })
 
-// Computed property for automatic ticket count calculation
-const calculatedTotalTickets = computed(() => {
-  if (form.sale_mode !== 'lottery' || !form.price || !form.ticket_price) {
+// Computed property for automatic ticket price calculation
+const calculatedTicketPrice = computed(() => {
+  if (form.sale_mode !== 'lottery' || !form.price || !form.total_tickets) {
     return 0
   }
   
   const productPrice = parseFloat(form.price)
-  const ticketPrice = parseFloat(form.ticket_price)
+  const ticketCount = parseInt(form.total_tickets)
   
-  if (productPrice <= 0 || ticketPrice <= 0) {
+  if (productPrice <= 0 || ticketCount <= 0) {
     return 0
   }
   
-  // Use the same logic as backend: (product_price × 1.25) ÷ ticket_price
-  const totalAmount = productPrice * 1.25 // 1 + commission (10%) + margin (15%)
-  const maxTickets = Math.floor(totalAmount / ticketPrice)
+  // Configuration des taux (à terme depuis les paramètres admin)
+  const commissionRate = 0.10 // 10%
+  const marginRate = 0.15     // 15%
   
-  console.log('=== CALCUL AUTOMATIQUE TICKETS ===')
+  // Formule: Prix ticket = (Prix Article + Commission + Marge) ÷ Nombre de Tickets
+  const commission = productPrice * commissionRate
+  const margin = productPrice * marginRate
+  const totalAmount = productPrice + commission + margin
+  const ticketPrice = totalAmount / ticketCount
+  
+  console.log('=== CALCUL AUTOMATIQUE PRIX TICKET ===')
   console.log('Product price:', productPrice)
-  console.log('Ticket price:', ticketPrice)
-  console.log('Total amount (with fees):', totalAmount)
-  console.log('Calculated max tickets:', maxTickets)
-  console.log('=================================')
+  console.log('Ticket count:', ticketCount)
+  console.log('Commission (10%):', commission)
+  console.log('Margin (15%):', margin)
+  console.log('Total amount:', totalAmount)
+  console.log('Calculated ticket price:', ticketPrice)
+  console.log('=====================================')
   
-  return Math.max(1, maxTickets) // Minimum 1 ticket
+  return Math.round(ticketPrice) // Arrondir à l'entier le plus proche
 })
 
 const lotteryMetrics = computed(() => {
-  const totalRevenue = (form.ticket_price || 0) * (calculatedTotalTickets.value || 0)
+  const totalRevenue = (calculatedTicketPrice.value || 0) * (form.total_tickets || 0)
   const platformFee = totalRevenue * 0.05
   const netRevenue = totalRevenue - platformFee
   const profitMargin = form.price ? Math.round(((netRevenue - form.price) / form.price) * 100) : 0
@@ -737,11 +780,11 @@ const lotteryMetrics = computed(() => {
   }
 })
 
-// Watcher to update form.total_tickets when calculated value changes
-watch(calculatedTotalTickets, (newValue) => {
-  if (form.sale_mode === 'lottery' && newValue !== parseInt(form.total_tickets)) {
-    form.total_tickets = newValue.toString()
-    console.log('Updated form.total_tickets to calculated value:', newValue)
+// Watcher to update form.ticket_price when calculated value changes
+watch(calculatedTicketPrice, (newValue) => {
+  if (form.sale_mode === 'lottery' && newValue !== parseFloat(form.ticket_price)) {
+    form.ticket_price = newValue.toString()
+    console.log('Updated form.ticket_price to calculated value:', newValue)
   }
 }, { flush: 'post' })
 
@@ -1067,12 +1110,12 @@ const calculateLotteryMetrics = () => {
   console.log('Sale mode:', form.sale_mode)
   console.log('Inputs:', {
     price: form.price,
-    ticket_price: form.ticket_price,
-    total_tickets: calculatedTotalTickets.value
+    total_tickets: form.total_tickets,
+    calculated_ticket_price: calculatedTicketPrice.value
   })
   
-  // Update form.total_tickets with calculated value
-  form.total_tickets = calculatedTotalTickets.value.toString()
+  // Update form.ticket_price with calculated value
+  form.ticket_price = calculatedTicketPrice.value.toString()
   
   // Log computed metrics
   console.log('Computed metrics:', {
@@ -1133,10 +1176,7 @@ const handleSubmit = async () => {
   clearErrors()
 
   try {
-    // Use the calculated total tickets value
-    console.log('Using calculated total tickets:', calculatedTotalTickets.value)
-    
-    // Prepare product data
+    // Prepare product data with reversed lottery logic (user inputs tickets, system calculates price)
     const productData = {
       name: form.name,
       description: form.description,
@@ -1150,11 +1190,13 @@ const handleSubmit = async () => {
 
     // Add lottery-specific fields only if lottery mode
     if (form.sale_mode === 'lottery') {
-      productData.ticket_price = parseFloat(form.ticket_price)
-      productData.min_participants = parseInt(form.min_tickets)
+      productData.ticket_price = calculatedTicketPrice.value
+      productData.total_tickets = parseInt(form.total_tickets)
+      productData.min_participants = parseInt(form.min_tickets || form.total_tickets)
       
       console.log('Adding lottery fields:', {
         ticket_price: productData.ticket_price,
+        total_tickets: productData.total_tickets,
         min_participants: productData.min_participants
       })
       
@@ -1322,20 +1364,32 @@ const validateTicketPrice = () => {
 
 const validateTotalTickets = () => {
   console.log('=== ÉTAPE 3: VALIDATION NOMBRE TICKETS ===')
-  console.log('Calculated total tickets:', calculatedTotalTickets.value)
+  console.log('Total tickets:', form.total_tickets)
+  console.log('Is individual seller:', isIndividualSeller.value)
   
-  // No validation needed since tickets are automatically calculated
-  // Just ensure the calculated value is reasonable
-  if (calculatedTotalTickets.value < 1) {
-    errors.total_tickets = 'Impossible de calculer le nombre de tickets avec ces paramètres'
-    console.log('Validation failed: calculated tickets too low')
-  } else {
-    errors.total_tickets = ''
-    // Update form value with calculated value
-    form.total_tickets = calculatedTotalTickets.value.toString()
-    console.log('Validation passed - updated form.total_tickets to:', form.total_tickets)
+  if (form.total_tickets) {
+    const tickets = parseInt(form.total_tickets)
+    console.log('Parsed tickets:', tickets)
+    
+    // Pour vendeur individuel, toujours 500 tickets
+    if (isIndividualSeller.value) {
+      console.log('Forcing 500 tickets for individual seller')
+      form.total_tickets = '500'
+      errors.total_tickets = ''
+      return
+    }
+    
+    if (tickets < 10) {
+      errors.total_tickets = 'Minimum 10 tickets requis'
+      console.log('Validation failed: too few tickets')
+    } else if (tickets > 10000) {
+      errors.total_tickets = 'Maximum 10,000 tickets autorisés'
+      console.log('Validation failed: too many tickets')
+    } else {
+      errors.total_tickets = ''
+      console.log('Validation passed')
+    }
   }
-  
   console.log('==========================================')
 }
 
@@ -1436,8 +1490,13 @@ onMounted(() => {
   loadCategories()
   loadLotteryDurationConstraints()
   
-  // Initialize total_tickets to empty string - will be calculated automatically
-  form.total_tickets = ''
+  // Forcer le nombre de tickets à 500 pour les vendeurs individuels
+  if (isIndividualSeller.value) {
+    console.log('Setting default 500 tickets for individual seller')
+    form.total_tickets = '500'
+  } else {
+    form.total_tickets = ''
+  }
   
   // Set default end date (tomorrow)
   const tomorrow = new Date()

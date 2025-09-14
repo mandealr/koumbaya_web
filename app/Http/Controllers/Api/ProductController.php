@@ -480,7 +480,8 @@ class ProductController extends Controller
 
         // Add lottery-specific validation rules only if lottery mode
         if ($request->sale_mode === 'lottery') {
-            $rules['ticket_price'] = 'nullable|numeric|min:100'; // Optionnel, sera calculé si non fourni
+            $rules['total_tickets'] = 'required|integer|min:10|max:10000'; // Nombre de tickets requis
+            $rules['ticket_price'] = 'nullable|numeric|min:100'; // Calculé automatiquement
             $rules['min_participants'] = 'nullable|integer|min:10|max:10000';
             $rules['lottery_duration'] = 'nullable|integer|min:1|max:60'; // Durée en jours
         }
@@ -514,23 +515,25 @@ class ProductController extends Controller
             }
         }
 
-        // Si mode tombola et pas de prix de ticket fourni, calculer automatiquement
+        // Pour mode tombola, calculer automatiquement le prix du ticket basé sur le nombre de tickets fourni
         $ticketPrice = $request->ticket_price;
-        if ($request->sale_mode === 'lottery' && !$ticketPrice) {
-            // Utiliser le service de calcul avec le profil vendeur
+        $totalTickets = $request->total_tickets;
+        
+        if ($request->sale_mode === 'lottery') {
+            // Utiliser la nouvelle logique: calculer le prix basé sur le nombre de tickets fourni
             $ticketPrice = \App\Services\TicketPriceCalculator::calculateTicketPrice(
                 $request->price,
-                1000, // Nombre de tickets par défaut
-                null, // Commission par défaut
-                null, // Marge par défaut
-                $vendor
+                $totalTickets ?? 1000, // Utiliser le nombre fourni par l'utilisateur
+                null, // Commission par défaut (10%)
+                null, // Marge par défaut (15%)
+                $user // Utiliser l'utilisateur pour les contraintes
             );
             
-            // Valider le prix calculé avec le profil vendeur
-            $validation = \App\Services\TicketPriceCalculator::validateTicketPrice($ticketPrice, $vendor);
+            // Valider le prix calculé
+            $validation = \App\Services\TicketPriceCalculator::validateTicketPrice($ticketPrice);
             if (!$validation['is_valid']) {
                 return response()->json([
-                    'error' => 'Prix de ticket invalide selon les contraintes du profil vendeur',
+                    'error' => 'Prix de ticket invalide selon les contraintes',
                     'warnings' => $validation['warnings']
                 ], 422);
             }
@@ -554,20 +557,16 @@ class ProductController extends Controller
         // Add lottery-specific fields only if lottery mode
         if ($request->sale_mode === 'lottery') {
             $productData['ticket_price'] = $ticketPrice;
-            $productData['min_participants'] = $request->min_participants ?? 50;
+            $productData['total_tickets'] = $totalTickets;
+            $productData['min_participants'] = $request->min_participants ?? $totalTickets;
         }
 
         $product = Product::create($productData);
 
         // Si c'est un produit tombola, créer automatiquement la tombola
         if ($request->sale_mode === 'lottery') {
-            // Utiliser la nouvelle logique de calcul
-            $ticketCalculation = TicketPriceCalculator::calculateMaxTicketsForPrice(
-                $product->price,
-                $product->ticket_price ?? 200
-            );
-            
-            $totalTickets = $ticketCalculation['max_tickets'];
+            // Utiliser la nouvelle logique: l'utilisateur a fourni le nombre de tickets
+            // et nous avons calculé le prix du ticket
             
             // Déterminer la durée selon le type de vendeur
             $lotteryDuration = $this->getLotteryDurationForUser($user, $request->lottery_duration);
@@ -576,7 +575,7 @@ class ProductController extends Controller
                 'lottery_number' => 'LOT-' . strtoupper(Str::random(8)),
                 'title' => 'Tombola - ' . $product->name,
                 'description' => 'Tombola pour le produit : ' . $product->name,
-                'ticket_price' => $product->ticket_price,
+                'ticket_price' => $ticketPrice,
                 'max_tickets' => $totalTickets,
                 'sold_tickets' => 0,
                 'currency' => 'XAF',
@@ -587,6 +586,7 @@ class ProductController extends Controller
                     'created_with_product' => true,
                     'vendor_profile_id' => $vendor ? $vendor->id : null,
                     'duration_days' => $lotteryDuration,
+                    'calculation_method' => 'tickets_to_price', // Nouvelle méthode de calcul
                 ]
             ]);
         }

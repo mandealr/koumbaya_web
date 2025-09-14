@@ -24,6 +24,7 @@ class Product extends Model
         'is_active',
         'views_count',
         'meta',
+        'total_tickets',
     ];
 
     /**
