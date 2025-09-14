@@ -522,23 +522,30 @@ const loadFeaturedProducts = async () => {
     
     // Ajouter les produits tombola
     if (lotteryResponse && lotteryResponse.success && lotteryResponse.data) {
-      const lotteryProducts = (lotteryResponse.data.products || lotteryResponse.data).slice(0, 2).map(product => ({
-        id: product.id,
-        name: product.name || product.title,
-        value: product.price || 0,
-        price: product.price || 0,
-        ticketPrice: product.ticket_price || product.active_lottery?.ticket_price || 1000,
-        ticket_price: product.ticket_price || product.active_lottery?.ticket_price || 1000,
-        image_url: product.image_url || product.main_image,
-        image: product.image_url || product.main_image || placeholderImg,
-        soldTickets: product.active_lottery?.sold_tickets || 0,
-        totalTickets: product.active_lottery?.total_tickets || 1000,
-        isNew: isNewProduct(product.created_at),
-        sale_mode: 'lottery',
-        has_active_lottery: product.has_active_lottery || false,
-        lottery_ends_soon: product.lottery_ends_soon || false,
-        category: product.category
-      }))
+      const lotteryProducts = (lotteryResponse.data.products || lotteryResponse.data).slice(0, 2).map(product => {
+        const lottery = product.active_lottery
+        const soldTickets = parseInt(lottery?.sold_tickets || 0)
+        const maxTickets = parseInt(lottery?.max_tickets || lottery?.total_tickets || 1000)
+        const progressFromAPI = lottery?.progress_percentage || lottery?.participation_rate || 0
+        
+        return {
+          id: product.id,
+          name: product.name || product.title,
+          value: product.price || 0,
+          price: product.price || 0,
+          ticketPrice: product.ticket_price || lottery?.ticket_price || 1000,
+          ticket_price: product.ticket_price || lottery?.ticket_price || 1000,
+          image_url: product.image_url || product.main_image,
+          image: product.image_url || product.main_image || placeholderImg,
+          soldTickets: soldTickets,
+          totalTickets: maxTickets,
+          isNew: isNewProduct(product.created_at),
+          sale_mode: 'lottery',
+          has_active_lottery: product.has_active_lottery || false,
+          lottery_ends_soon: product.lottery_ends_soon || false,
+          category: product.category
+        }
+      })
       allProducts.push(...lotteryProducts)
     }
     
@@ -587,20 +594,24 @@ const loadLatestLotteryProduct = async () => {
       console.log('Données produit:', product)
       console.log('Données lottery:', lottery)
       
+      // Utiliser directement les données calculées par l'API
       const soldTickets = parseInt(lottery?.sold_tickets || 0)
-      const totalTickets = parseInt(lottery?.total_tickets || 1000)
-      const calculatedProgress = totalTickets > 0 ? Math.round((soldTickets / totalTickets) * 100) : 0
+      const maxTickets = parseInt(lottery?.max_tickets || lottery?.total_tickets || 1000)
+      const progressFromAPI = lottery?.progress_percentage || lottery?.participation_rate || 0
       
-      console.log('Tickets vendus (brut):', lottery?.sold_tickets)
-      console.log('Total tickets (brut):', lottery?.total_tickets)
-      console.log('Tickets vendus (parseInt):', soldTickets)
-      console.log('Total tickets (parseInt):', totalTickets)
-      console.log('Progression calculée:', calculatedProgress)
+      console.log('📊 Données lottery brutes:', {
+        sold_tickets: lottery?.sold_tickets,
+        max_tickets: lottery?.max_tickets,
+        total_tickets: lottery?.total_tickets,
+        progress_percentage: lottery?.progress_percentage,
+        participation_rate: lottery?.participation_rate
+      })
       
-      // Vérification supplémentaire
-      if (totalTickets < 100) {
-        console.warn('⚠️ Total tickets semble faible:', totalTickets, '- vérifier les données API')
-      }
+      // Utiliser la progression calculée par l'API, sinon calculer manuellement
+      const finalProgress = progressFromAPI > 0 ? Math.round(progressFromAPI) : 
+                           (maxTickets > 0 ? Math.round((soldTickets / maxTickets) * 100) : 0)
+      
+      console.log('📈 Progression finale utilisée:', finalProgress)
       
       latestLotteryProduct.value = {
         id: product.id,
@@ -609,8 +620,8 @@ const loadLatestLotteryProduct = async () => {
         ticketPrice: lottery?.ticket_price || product.ticket_price || 1500,
         image: product.image_url || product.main_image || placeholderImg,
         soldTickets: soldTickets,
-        totalTickets: totalTickets,
-        progress: calculatedProgress,
+        totalTickets: maxTickets,
+        progress: finalProgress,
         timeRemaining: lottery?.time_remaining,
         isEndingSoon: lottery?.is_ending_soon || false
       }

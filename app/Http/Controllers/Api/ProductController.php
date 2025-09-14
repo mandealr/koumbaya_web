@@ -201,6 +201,24 @@ class ProductController extends Controller
     }
 
     /**
+     * Synchroniser les données de tombola avec la réalité
+     */
+    private function syncLotteryData($product)
+    {
+        if ($product->activeLottery) {
+            // Rafraîchir sold_tickets avec le nombre réel de tickets payés
+            $realSoldTickets = $product->activeLottery->paidTickets()->count();
+            if ($realSoldTickets != $product->activeLottery->sold_tickets) {
+                $product->activeLottery->update(['sold_tickets' => $realSoldTickets]);
+                $product->activeLottery->refresh();
+            }
+            
+            $product->activeLottery->append(['remaining_tickets', 'progress_percentage', 'time_remaining', 'participation_rate', 'is_ending_soon']);
+        }
+        return $product;
+    }
+
+    /**
      * Appliquer le tri aux résultats
      */
     private function applySorting($query, $sortBy)
@@ -968,11 +986,8 @@ class ProductController extends Controller
         // Ajouter des métadonnées utiles
         $product->append(['has_active_lottery', 'lottery_ends_soon', 'popularity_score', 'image_url']);
 
-        // Charger les détails de la tombola active
-        $activeLottery = $product->activeLottery;
-        if ($activeLottery) {
-            $activeLottery->append(['remaining_tickets', 'progress_percentage', 'time_remaining', 'participation_rate', 'is_ending_soon']);
-        }
+        // Synchroniser les données de tombola
+        $this->syncLotteryData($product);
 
         return response()->json([
             'success' => true,
@@ -1085,10 +1100,8 @@ class ProductController extends Controller
         $products->each(function ($product) {
             $product->append(['has_active_lottery', 'lottery_ends_soon', 'popularity_score', 'image_url']);
             
-            // Ajouter les détails de la tombola active si elle existe
-            if ($product->activeLottery) {
-                $product->activeLottery->append(['remaining_tickets', 'progress_percentage', 'time_remaining', 'participation_rate', 'is_ending_soon']);
-            }
+            // Synchroniser les données de tombola
+            $this->syncLotteryData($product);
         });
 
         return response()->json([
@@ -1176,9 +1189,7 @@ class ProductController extends Controller
         $products->getCollection()->transform(function ($product) use ($mode) {
             if ($mode === 'lottery') {
                 $product->append(['has_active_lottery', 'lottery_ends_soon', 'popularity_score', 'image_url']);
-                if ($product->activeLottery) {
-                    $product->activeLottery->append(['remaining_tickets', 'progress_percentage', 'time_remaining', 'participation_rate', 'is_ending_soon']);
-                }
+                $this->syncLotteryData($product);
             } else {
                 $product->append(['image_url']);
             }
