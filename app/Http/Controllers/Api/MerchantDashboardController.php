@@ -170,7 +170,22 @@ class MerchantDashboardController extends Controller
             $limit = $request->get('limit', 10);
 
             $topProducts = Product::select([
-                'products.*',
+                'products.id',
+                'products.name', 
+                'products.price',
+                'products.image',
+                'products.created_at',
+                'products.updated_at',
+                'products.merchant_id',
+                'products.category_id',
+                'products.description',
+                'products.is_active',
+                'products.views_count',
+                'products.sale_mode',
+                'products.meta',
+                'products.currency',
+                'products.stock_quantity',
+                'products.is_featured',
                 DB::raw('COALESCE(SUM(payments.amount), 0) as total_revenue'),
                 DB::raw('COALESCE(COUNT(DISTINCT payments.id), 0) as tickets_sold'),
                 DB::raw('COUNT(DISTINCT payments.id) as total_transactions')
@@ -181,11 +196,24 @@ class MerchantDashboardController extends Controller
                      ->where('payments.status', '=', 'completed');
             })
             ->where('products.merchant_id', $merchantId)
-            ->groupBy('products.id', 'products.name', 'products.price', 
-                     'products.image', 'products.created_at', 'products.updated_at', 
-                     'products.merchant_id', 'products.category_id', 'products.description',
-                     'products.is_active', 'products.views_count', 'products.sale_mode',
-                     'products.meta')
+            ->groupBy(
+                'products.id',
+                'products.name', 
+                'products.price',
+                'products.image',
+                'products.created_at',
+                'products.updated_at',
+                'products.merchant_id',
+                'products.category_id',
+                'products.description',
+                'products.is_active',
+                'products.views_count',
+                'products.sale_mode',
+                'products.meta',
+                'products.currency',
+                'products.stock_quantity',
+                'products.is_featured'
+            )
             ->orderBy('total_revenue', 'desc')
             ->limit($limit)
             ->get();

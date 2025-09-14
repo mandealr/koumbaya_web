@@ -674,14 +674,6 @@ watch(() => form.sale_mode, (newMode, oldMode) => {
   console.log('================================')
 })
 
-// Watcher to update form.total_tickets when calculated value changes
-watch(calculatedTotalTickets, (newValue) => {
-  if (form.sale_mode === 'lottery') {
-    form.total_tickets = newValue.toString()
-    console.log('Updated form.total_tickets to calculated value:', newValue)
-  }
-})
-
 const errors = reactive({
   name: '',
   description: '',
@@ -744,6 +736,14 @@ const lotteryMetrics = computed(() => {
     profitMargin
   }
 })
+
+// Watcher to update form.total_tickets when calculated value changes
+watch(calculatedTotalTickets, (newValue) => {
+  if (form.sale_mode === 'lottery' && newValue !== parseInt(form.total_tickets)) {
+    form.total_tickets = newValue.toString()
+    console.log('Updated form.total_tickets to calculated value:', newValue)
+  }
+}, { flush: 'post' })
 
 // État pour l'upload d'images
 const isUploadingImages = ref(false)
@@ -1175,24 +1175,11 @@ const handleSubmit = async () => {
     if (productResponse.product) {
       console.log('Product created successfully, ID:', productResponse.product.id)
       
-      // Create lottery only if lottery mode is selected
+      // Product creation automatically creates lottery if sale_mode is 'lottery'
+      // No need to make separate lottery creation call
       if (form.sale_mode === 'lottery') {
-        const durationDays = calculateDurationDays()
-        const lotteryData = {
-          duration_days: durationDays
-        }
-        
-        console.log('Creating lottery with data:', lotteryData)
-        
-        try {
-          const lotteryResponse = await post(`/products/${productResponse.product.id}/create-lottery`, lotteryData)
-          console.log('Lottery creation response:', lotteryResponse)
-          showSuccessToast('Produit et tombola créés avec succès !')
-        } catch (lotteryError) {
-          console.error('Error creating lottery:', lotteryError)
-          console.error('Lottery error details:', lotteryError.response?.data)
-          showWarningToast('Produit créé mais erreur lors de la création de la tombola')
-        }
+        console.log('Lottery was automatically created with the product')
+        showSuccessToast('Produit et tombola créés avec succès !')
       } else {
         showSuccessToast('Produit créé avec succès !')
       }
