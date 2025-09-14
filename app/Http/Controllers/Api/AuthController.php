@@ -731,23 +731,50 @@ class AuthController extends Controller
             ], 400);
         }
 
-        try {
-            $this->sendVerificationEmail($user);
+        // Déterminer le type de vérification selon le client
+        $userAgent = $request->header('User-Agent', '');
+        $platform = $request->header('X-Platform', 'web');
+        $isFlutterApp = str_contains($userAgent, 'Dart/') || 
+                       str_contains($userAgent, 'KoumbayaFlutter') || 
+                       $platform === 'mobile' || 
+                       $request->has('is_mobile_app');
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Un nouvel email de vérification a été envoyé.',
-                'verification_sent_to' => $user->email
-            ]);
+        try {
+            if ($isFlutterApp) {
+                // Mobile: Envoyer OTP
+                $otpResult = OtpService::sendEmailOtp($user->email, 'registration');
+                
+                if (!$otpResult['success']) {
+                    throw new \Exception($otpResult['message']);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Un nouveau code de vérification a été envoyé.',
+                    'verification_sent_to' => $this->maskEmail($user->email),
+                    'verification_type' => 'otp'
+                ]);
+            } else {
+                // Web: Envoyer email avec lien de vérification
+                $this->sendVerificationEmail($user);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Un nouvel email de vérification a été envoyé.',
+                    'verification_sent_to' => $user->email,
+                    'verification_type' => 'email_link'
+                ]);
+            }
         } catch (\Exception $e) {
-            \Log::error('Erreur lors de l\'envoi de l\'email de vérification:', [
+            \Log::error('Erreur lors de l\'envoi de vérification:', [
                 'user_id' => $user->id,
+                'type' => $isFlutterApp ? 'otp' : 'email_link',
                 'error' => $e->getMessage()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de l\'envoi de l\'email de vérification.'
+                'message' => 'Erreur lors de l\'envoi de la vérification.'
             ], 500);
         }
     }

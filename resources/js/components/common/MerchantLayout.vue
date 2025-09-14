@@ -139,6 +139,9 @@
 
     <!-- Page content -->
     <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <!-- Bannière de vérification -->
+      <VerificationRequiredBanner />
+      
       <router-view />
     </main>
 
@@ -172,6 +175,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/api'
 import KoumbayaFooter from './KoumbayaFooter.vue'
 import NotificationIcon from '@/components/common/NotificationIcon.vue'
+import VerificationRequiredBanner from './VerificationRequiredBanner.vue'
 import {
   HomeIcon,
   ShoppingBagIcon,

@@ -69,6 +69,7 @@ const routes = [
     name: 'verify-email',
     component: VerifyEmail
   },
+  
 
   // Password Reset Routes (no layout)
   {

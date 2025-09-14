@@ -168,7 +168,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/api'
 import KoumbayaFooter from './KoumbayaFooter.vue'
-import VerificationBanner from './VerificationBanner.vue'
+import VerificationBanner from './VerificationRequiredBanner.vue'
 import NotificationIcon from '@/components/common/NotificationIcon.vue'
 import {
   UserIcon,

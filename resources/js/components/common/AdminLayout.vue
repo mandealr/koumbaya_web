@@ -186,6 +186,9 @@
 
       <!-- Page content -->
       <main class="p-6">
+        <!-- Bannière de vérification -->
+        <VerificationRequiredBanner />
+        
         <router-view />
       </main>
     </div>
@@ -199,6 +202,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useApi } from '@/composables/api'
 import logoIcon from '/icon.png'
 import NotificationIcon from '@/components/common/NotificationIcon.vue'
+import VerificationRequiredBanner from './VerificationRequiredBanner.vue'
 import {
   HomeIcon,
   UsersIcon,
