@@ -61,23 +61,26 @@ class ProductImageController extends Controller
             // Traiter et optimiser l'image
             $processedImage = $this->processImage($uploadedFile);
             
-            // Sauvegarder l'image dans le storage
-            $path = Storage::disk('public')->put($uploadPath . '/' . $filename, $processedImage);
+            // Construire le chemin complet du fichier
+            $fullPath = $uploadPath . '/' . $filename;
             
-            if (!$path) {
+            // Sauvegarder l'image dans le storage
+            $saved = Storage::disk('public')->put($fullPath, $processedImage);
+            
+            if (!$saved) {
                 throw new \Exception('Erreur lors de la sauvegarde du fichier');
             }
 
             // Construire l'URL publique
-            $url = Storage::disk('public')->url($path);
+            $url = Storage::disk('public')->url($fullPath);
             
             // Informations sur le fichier
             $fileInfo = [
                 'filename' => $filename,
                 'original_name' => $uploadedFile->getClientOriginalName(),
-                'path' => $path,
+                'path' => $fullPath,
                 'url' => $url,
-                'size' => Storage::disk('public')->size($path),
+                'size' => strlen($processedImage), // Utiliser strlen au lieu de Storage::size
                 'mime_type' => $uploadedFile->getMimeType(),
                 'index' => $index,
                 'uploaded_at' => now()->toISOString()
@@ -279,13 +282,13 @@ class ProductImageController extends Controller
             switch ($extension) {
                 case 'jpg':
                 case 'jpeg':
-                    return $image->toJpeg(quality: 85);
+                    return $image->toJpeg(quality: 85)->toString();
                 case 'png':
-                    return $image->toPng();
+                    return $image->toPng()->toString();
                 case 'webp':
-                    return $image->toWebp(quality: 85);
+                    return $image->toWebp(quality: 85)->toString();
                 default:
-                    return $image->toJpeg(quality: 85);
+                    return $image->toJpeg(quality: 85)->toString();
             }
             
         } catch (\Exception $e) {
