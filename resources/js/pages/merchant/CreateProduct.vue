@@ -220,6 +220,7 @@
             @success="handleImageUploadSuccess"
             @error="handleImageUploadError"
             @progress="handleImageUploadProgress"
+            @start="handleImageUploadStart"
           />
 
           <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
@@ -735,16 +736,27 @@ const lotteryMetrics = computed(() => {
   }
 })
 
+// État pour l'upload d'images
+const isUploadingImages = ref(false)
+
 const canProceed = computed(() => {
   switch (currentStep.value) {
     case 1:
       return validateStep1()
     case 2:
-      // Vérifier qu'au moins une image est uploadée et qu'aucun upload n'est en cours
-      const imageUploadComponent = document.querySelector('.image-upload-container')
-      const isUploading = imageUploadComponent?.querySelector('.animate-spin') !== null
+      // Vérifier qu'au moins une image est uploadée en utilisant l'état interne
       const hasImages = (form.imageUrls && form.imageUrls.length > 0) || (form.images && form.images.length > 0)
-      return hasImages && !isUploading // Au moins une image uploadée ET aucun upload en cours
+      const uploadInProgress = isUploadingImages.value
+      
+      console.log('=== VALIDATION ÉTAPE 2 ===')
+      console.log('Total images (new system):', form.imageUrls?.length || 0)
+      console.log('Total images (old system):', form.images?.length || 0)
+      console.log('Has images:', hasImages)
+      console.log('Upload in progress:', uploadInProgress)
+      console.log('Can proceed:', hasImages && !uploadInProgress)
+      console.log('=========================')
+      
+      return hasImages && !uploadInProgress // Au moins une image uploadée ET aucun upload en cours
     case 3:
       return validateStep3()
     case 4:
@@ -935,12 +947,29 @@ const handleFileDrop = (event) => {
 }
 
 // Handlers pour le nouveau système ImageUpload
+const handleImageUploadStart = ({ index }) => {
+  console.log('=== ÉTAPE 2: IMAGE UPLOAD START ===')
+  console.log('Starting upload for image index:', index)
+  isUploadingImages.value = true
+  console.log('Upload state set to:', isUploadingImages.value)
+  console.log('====================================')
+}
+
 const handleImageUploadSuccess = ({ index, url, response }) => {
-  console.log('Image upload success:', { index, url })
+  console.log('=== ÉTAPE 2: IMAGE UPLOAD SUCCESS ===')
+  console.log('Index:', index)
+  console.log('URL:', url)
+  console.log('Response:', response)
+  console.log('Total images après upload:', form.imageUrls?.length || 0)
+  
+  // Réinitialiser l'état d'upload après succès
+  isUploadingImages.value = false
+  
   showSuccessToast(`Image ${index + 1} uploadée avec succès`)
   
   // Le v-model du composant ImageUpload gère automatiquement la mise à jour de form.imageUrls
   // Pas besoin de modifier manuellement form.imageUrls ici
+  console.log('=====================================')
 }
 
 const handleImageUploadError = ({ index, error }) => {
@@ -949,6 +978,10 @@ const handleImageUploadError = ({ index, error }) => {
   console.log('Error:', error)
   console.log('Error message:', error.message)
   console.log('Error stack:', error.stack)
+  
+  // Réinitialiser l'état d'upload après erreur
+  isUploadingImages.value = false
+  
   console.error('Erreur upload image:', { index, error })
   showErrorToast(`Erreur lors de l'upload de l'image ${index + 1}: ${error.message}`)
   console.log('===================================')
@@ -956,6 +989,18 @@ const handleImageUploadError = ({ index, error }) => {
 
 const handleImageUploadProgress = ({ index, progress }) => {
   console.log(`=== ÉTAPE 2: Upload image ${index + 1}: ${progress}% ===`)
+  
+  // Marquer qu'un upload est en cours
+  if (progress > 0 && progress < 100) {
+    isUploadingImages.value = true
+  } else if (progress === 100) {
+    // Attendre un peu avant de réinitialiser, car le traitement serveur peut prendre du temps
+    setTimeout(() => {
+      if (isUploadingImages.value) {
+        isUploadingImages.value = false
+      }
+    }, 1000)
+  }
 }
 
 // Ancien système pour compatibilité (sera supprimé plus tard)
