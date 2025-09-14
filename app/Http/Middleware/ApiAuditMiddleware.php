@@ -57,6 +57,11 @@ class ApiAuditMiddleware
     protected function logApiRequest(Request $request, $response)
     {
         try {
+            // Vérifier si la table audit_logs existe
+            if (!\Schema::hasTable('audit_logs')) {
+                return; // Skip silencieusement si la table n'existe pas
+            }
+
             $statusCode = method_exists($response, 'getStatusCode') 
                 ? $response->getStatusCode() 
                 : 200;
