@@ -670,11 +670,33 @@ const form = reactive({
 })
 
 // Watcher pour gérer le changement de mode de vente
-watch(() => form.sale_mode, (newMode) => {
+watch(() => form.sale_mode, (newMode, oldMode) => {
+  console.log('=== CHANGEMENT MODE DE VENTE ===')
+  console.log('Old mode:', oldMode)
+  console.log('New mode:', newMode)
+  console.log('Is individual seller:', isIndividualSeller.value)
+  
   if (newMode === 'lottery' && isIndividualSeller.value) {
     // Forcer 500 tickets pour vendeur individuel en mode tombola
+    console.log('Forcing 500 tickets for individual seller in lottery mode')
     form.total_tickets = '500'
   }
+  
+  // Réinitialiser les champs spécifiques à la tombola si on passe en vente directe
+  if (newMode === 'direct') {
+    console.log('Switching to direct sale - clearing lottery fields')
+    form.ticket_price = ''
+    form.total_tickets = ''
+    form.min_tickets = ''
+    form.end_date = ''
+  }
+  
+  console.log('Updated form state:', {
+    sale_mode: form.sale_mode,
+    ticket_price: form.ticket_price,
+    total_tickets: form.total_tickets
+  })
+  console.log('================================')
 })
 
 const errors = reactive({
@@ -753,13 +775,41 @@ const validateStep1 = () => {
 }
 
 const validateStep3 = () => {
+  console.log('=== VALIDATION ÉTAPE 3 ===')
+  console.log('Sale mode:', form.sale_mode)
+  
   // Direct sale mode - always valid (no extra fields required)
   if (form.sale_mode === 'direct') {
+    console.log('Direct sale mode - always valid')
+    console.log('==========================')
     return true
   }
   
   // Lottery mode - validate lottery fields
   if (form.sale_mode === 'lottery') {
+    console.log('Lottery mode - validating fields...')
+    console.log('Form values:', {
+      ticket_price: form.ticket_price,
+      total_tickets: form.total_tickets,
+      min_tickets: form.min_tickets,
+      end_date: form.end_date,
+      lottery_duration: form.lottery_duration
+    })
+    
+    const checks = {
+      hasTicketPrice: !!form.ticket_price,
+      hasTotalTickets: !!form.total_tickets,
+      hasMinTickets: !!form.min_tickets,
+      hasEndDate: !!form.end_date,
+      ticketPriceValid: parseFloat(form.ticket_price) >= 100,
+      totalTicketsValid: parseInt(form.total_tickets) >= 10,
+      minTicketsValid: parseInt(form.min_tickets) >= 10,
+      minTicketsNotExceedTotal: parseInt(form.min_tickets) <= parseInt(form.total_tickets),
+      endDateValid: new Date(form.end_date) > new Date()
+    }
+    
+    console.log('Validation checks:', checks)
+    
     const isValid = form.ticket_price && 
                     form.total_tickets && 
                     form.min_tickets && 
@@ -770,31 +820,100 @@ const validateStep3 = () => {
                     parseInt(form.min_tickets) <= parseInt(form.total_tickets) &&
                     new Date(form.end_date) > new Date() // End date in future
     
+    console.log('Overall validation result:', isValid)
+    
     // Clear step 3 errors if valid
     if (isValid) {
       errors.ticket_price = ''
       errors.total_tickets = ''
       errors.min_tickets = ''
       errors.end_date = ''
+      console.log('Cleared all step 3 errors')
+    } else {
+      console.log('Validation failed - checking individual fields...')
+      if (!form.ticket_price || parseFloat(form.ticket_price) < 100) {
+        console.log('Ticket price invalid')
+      }
+      if (!form.total_tickets || parseInt(form.total_tickets) < 10) {
+        console.log('Total tickets invalid')
+      }
+      if (!form.min_tickets || parseInt(form.min_tickets) < 10) {
+        console.log('Min tickets invalid')
+      }
+      if (parseInt(form.min_tickets) > parseInt(form.total_tickets)) {
+        console.log('Min tickets exceeds total tickets')
+      }
+      if (!form.end_date || new Date(form.end_date) <= new Date()) {
+        console.log('End date invalid')
+      }
     }
     
+    console.log('==========================')
     return isValid
   }
   
+  console.log('Unknown sale mode - returning false')
+  console.log('==========================')
   return false
 }
 
 // Methods
 const nextStep = () => {
+  console.log('=== NAVIGATION: NEXT STEP ===')
+  console.log('Current step:', currentStep.value)
+  console.log('Can proceed:', canProceed.value)
+  console.log('Form state:', {
+    name: form.name,
+    description: form.description?.substring(0, 50) + '...',
+    category_id: form.category_id,
+    condition: form.condition,
+    sale_mode: form.sale_mode,
+    price: form.price,
+    location: form.location,
+    images: form.images.length,
+    imageUrls: form.imageUrls.length,
+    ticket_price: form.ticket_price,
+    total_tickets: form.total_tickets,
+    min_tickets: form.min_tickets,
+    end_date: form.end_date,
+    lottery_duration: form.lottery_duration
+  })
+  
   if (canProceed.value && currentStep.value < steps.length) {
+    console.log(`Moving from step ${currentStep.value} to step ${currentStep.value + 1}`)
     currentStep.value++
+    
+    // Log spécifique quand on arrive à l'étape 3 (tombola)
+    if (currentStep.value === 3) {
+      console.log('=== ARRIVÉE À L\'ÉTAPE 3: CONFIGURATION TOMBOLA ===')
+      console.log('Sale mode:', form.sale_mode)
+      console.log('Lottery duration constraints:', lotteryDurationConstraints.value)
+      console.log('Is individual seller:', isIndividualSeller.value)
+      console.log('Form lottery values:', {
+        ticket_price: form.ticket_price,
+        total_tickets: form.total_tickets,
+        min_tickets: form.min_tickets,
+        lottery_duration: form.lottery_duration
+      })
+    }
+  } else {
+    console.log('Cannot proceed - validation failed')
+    console.log('Validation details:', {
+      step1Valid: currentStep.value === 1 ? validateStep1() : 'N/A',
+      step2Valid: currentStep.value === 2 ? true : 'N/A', // Images optional
+      step3Valid: currentStep.value === 3 ? validateStep3() : 'N/A'
+    })
   }
+  console.log('=============================')
 }
 
 const previousStep = () => {
+  console.log('=== NAVIGATION: PREVIOUS STEP ===')
+  console.log(`Moving from step ${currentStep.value} to step ${currentStep.value - 1}`)
   if (currentStep.value > 1) {
     currentStep.value--
   }
+  console.log('=================================')
 }
 
 const triggerFileInput = () => {
@@ -813,17 +932,39 @@ const handleFileDrop = (event) => {
 
 // Handlers pour le nouveau système ImageUpload
 const handleImageUploadSuccess = ({ index, url, response }) => {
-  console.log('Image uploadée avec succès:', { index, url, response })
+  console.log('=== ÉTAPE 2: IMAGE UPLOAD SUCCESS ===')
+  console.log('Index:', index)
+  console.log('URL:', url)
+  console.log('Response:', response)
+  console.log('Form images avant:', {
+    images: form.images,
+    imageUrls: form.imageUrls
+  })
+  
   showSuccessToast(`Image ${index + 1} uploadée avec succès`)
+  
+  console.log('Form images après:', {
+    images: form.images,
+    imageUrls: form.imageUrls
+  })
+  console.log('Nombre total d\'images:', form.imageUrls.length)
+  console.log('Can proceed to next step:', canProceed.value)
+  console.log('=====================================')
 }
 
 const handleImageUploadError = ({ index, error }) => {
+  console.log('=== ÉTAPE 2: IMAGE UPLOAD ERROR ===')
+  console.log('Index:', index)
+  console.log('Error:', error)
+  console.log('Error message:', error.message)
+  console.log('Error stack:', error.stack)
   console.error('Erreur upload image:', { index, error })
   showErrorToast(`Erreur lors de l'upload de l'image ${index + 1}: ${error.message}`)
+  console.log('===================================')
 }
 
 const handleImageUploadProgress = ({ index, progress }) => {
-  console.log(`Upload image ${index + 1}: ${progress}%`)
+  console.log(`=== ÉTAPE 2: Upload image ${index + 1}: ${progress}% ===`)
 }
 
 // Ancien système pour compatibilité (sera supprimé plus tard)
@@ -877,10 +1018,29 @@ const removeImage = (index) => {
 }
 
 const calculateLotteryMetrics = () => {
+  console.log('=== ÉTAPE 3: CALCUL DES MÉTRIQUES TOMBOLA ===')
+  console.log('Is individual seller:', isIndividualSeller.value)
+  console.log('Sale mode:', form.sale_mode)
+  console.log('Inputs:', {
+    price: form.price,
+    ticket_price: form.ticket_price,
+    total_tickets: form.total_tickets
+  })
+  
   // Forcer 500 tickets pour vendeur individuel
   if (isIndividualSeller.value && form.sale_mode === 'lottery') {
+    console.log('Forcing 500 tickets for individual seller')
     form.total_tickets = '500'
   }
+  
+  // Log computed metrics
+  console.log('Computed metrics:', {
+    totalRevenue: lotteryMetrics.value.totalRevenue,
+    platformFee: lotteryMetrics.value.platformFee,
+    netRevenue: lotteryMetrics.value.netRevenue,
+    profitMargin: lotteryMetrics.value.profitMargin
+  })
+  console.log('==============================================')
   // Trigger reactivity for computed properties
 }
 
@@ -909,12 +1069,32 @@ const getConditionLabel = (condition) => {
 }
 
 const handleSubmit = async () => {
+  console.log('=== SOUMISSION FINALE DU FORMULAIRE ===')
+  console.log('Form state before submission:', {
+    name: form.name,
+    description: form.description?.substring(0, 50) + '...',
+    category_id: form.category_id,
+    condition: form.condition,
+    sale_mode: form.sale_mode,
+    price: form.price,
+    location: form.location,
+    images: form.images.length,
+    imageUrls: form.imageUrls,
+    ticket_price: form.ticket_price,
+    total_tickets: form.total_tickets,
+    min_tickets: form.min_tickets,
+    end_date: form.end_date,
+    lottery_duration: form.lottery_duration,
+    terms_accepted: form.terms_accepted
+  })
+  
   loading.value = true
   clearErrors()
 
   try {
     // Calculate total tickets based on price and ticket price
     const calculatedTotalTickets = Math.ceil(form.price / form.ticket_price)
+    console.log('Calculated total tickets:', calculatedTotalTickets)
     
     // Prepare product data
     const productData = {
@@ -925,33 +1105,52 @@ const handleSubmit = async () => {
       sale_mode: form.sale_mode,
       images: form.imageUrls.length > 0 ? form.imageUrls : form.images.map(img => img.preview) // Utiliser les URLs uploadées ou fallback vers base64
     }
+    
+    console.log('Product data to submit:', productData)
 
     // Add lottery-specific fields only if lottery mode
     if (form.sale_mode === 'lottery') {
       productData.ticket_price = parseFloat(form.ticket_price)
       productData.min_participants = parseInt(form.min_tickets)
       
+      console.log('Adding lottery fields:', {
+        ticket_price: productData.ticket_price,
+        min_participants: productData.min_participants
+      })
+      
       // Ajouter la durée de tombola si pertinent
       if (lotteryDurationConstraints.value?.can_customize) {
         productData.lottery_duration = parseInt(form.lottery_duration)
+        console.log('Added custom lottery duration:', productData.lottery_duration)
       }
     }
 
+    console.log('Final product data:', productData)
+
     // Create product
+    console.log('Creating product...')
     const productResponse = await post('/products', productData)
+    console.log('Product creation response:', productResponse)
     
     if (productResponse.product) {
+      console.log('Product created successfully, ID:', productResponse.product.id)
+      
       // Create lottery only if lottery mode is selected
       if (form.sale_mode === 'lottery') {
+        const durationDays = calculateDurationDays()
         const lotteryData = {
-          duration_days: calculateDurationDays()
+          duration_days: durationDays
         }
         
+        console.log('Creating lottery with data:', lotteryData)
+        
         try {
-          await post(`/products/${productResponse.product.id}/create-lottery`, lotteryData)
+          const lotteryResponse = await post(`/products/${productResponse.product.id}/create-lottery`, lotteryData)
+          console.log('Lottery creation response:', lotteryResponse)
           showSuccessToast('Produit et tombola créés avec succès !')
         } catch (lotteryError) {
           console.error('Error creating lottery:', lotteryError)
+          console.error('Lottery error details:', lotteryError.response?.data)
           showWarningToast('Produit créé mais erreur lors de la création de la tombola')
         }
       } else {
@@ -959,6 +1158,7 @@ const handleSubmit = async () => {
       }
       
       // Redirect to products list
+      console.log('Redirecting to products list...')
       setTimeout(() => {
         router.push('/merchant/products')
       }, 1500)
@@ -966,9 +1166,11 @@ const handleSubmit = async () => {
 
   } catch (error) {
     console.error('Error creating product:', error)
+    console.error('Error response:', error.response?.data)
     handleApiError(error)
   } finally {
     loading.value = false
+    console.log('========================================')
   }
 }
 
@@ -1066,22 +1268,43 @@ const validateEndDate = () => {
 
 // Additional validation helpers
 const validateTicketPrice = () => {
+  console.log('=== ÉTAPE 3: VALIDATION PRIX TICKET ===')
+  console.log('Ticket price:', form.ticket_price)
+  
   if (form.ticket_price) {
     const price = parseFloat(form.ticket_price)
+    console.log('Parsed price:', price)
+    
     if (price < 100) {
       errors.ticket_price = 'Le prix minimum est de 100 FCFA'
+      console.log('Validation failed: price too low')
     } else {
       errors.ticket_price = ''
+      console.log('Validation passed')
+    }
+    
+    // Log du calcul du prix minimum recommandé
+    if (isIndividualSeller.value && form.price) {
+      const minRecommendedPrice = parseFloat(form.price) / 500 // 500 tickets fixes
+      console.log('Recommended minimum ticket price for individual seller:', minRecommendedPrice)
+      console.log('Current ticket price meets recommendation:', price >= minRecommendedPrice)
     }
   }
+  console.log('=======================================')
 }
 
 const validateTotalTickets = () => {
+  console.log('=== ÉTAPE 3: VALIDATION NOMBRE TICKETS ===')
+  console.log('Total tickets:', form.total_tickets)
+  console.log('Is individual seller:', isIndividualSeller.value)
+  
   if (form.total_tickets) {
     const tickets = parseInt(form.total_tickets)
+    console.log('Parsed tickets:', tickets)
     
     // Pour vendeur individuel, toujours 500 tickets
     if (isIndividualSeller.value) {
+      console.log('Forcing 500 tickets for individual seller')
       form.total_tickets = '500'
       errors.total_tickets = ''
       return
@@ -1089,12 +1312,16 @@ const validateTotalTickets = () => {
     
     if (tickets < 10) {
       errors.total_tickets = 'Minimum 10 tickets requis'
+      console.log('Validation failed: too few tickets')
     } else if (tickets > 10000) {
       errors.total_tickets = 'Maximum 10,000 tickets autorisés'
+      console.log('Validation failed: too many tickets')
     } else {
       errors.total_tickets = ''
+      console.log('Validation passed')
     }
   }
+  console.log('==========================================')
 }
 
 // Validation de la durée de tombola
@@ -1146,35 +1373,73 @@ const loadCategories = async () => {
 
 // Charger les contraintes de durée de tombola
 const loadLotteryDurationConstraints = async () => {
+  console.log('=== CHARGEMENT CONTRAINTES DURÉE TOMBOLA ===')
+  console.log('User type:', user.value?.seller_type)
+  console.log('Is individual seller:', isIndividualSeller.value)
+  console.log('Is business seller:', isBusinessSeller.value)
+  
   try {
     const response = await get('/products/lottery-duration-constraints')
+    console.log('API Response:', response)
+    
     if (response && response.data) {
       lotteryDurationConstraints.value = response.data.constraints
       console.log('Lottery duration constraints loaded:', lotteryDurationConstraints.value)
+      console.log('Can customize:', lotteryDurationConstraints.value?.can_customize)
+      console.log('Fixed duration:', lotteryDurationConstraints.value?.fixed_duration)
+      console.log('Min days:', lotteryDurationConstraints.value?.min_days)
+      console.log('Max days:', lotteryDurationConstraints.value?.max_days)
+      console.log('Default duration:', lotteryDurationConstraints.value?.default_duration)
       
       // Si vendeur individuel, définir la durée fixe
       if (lotteryDurationConstraints.value && !lotteryDurationConstraints.value.can_customize) {
         form.lottery_duration = lotteryDurationConstraints.value.fixed_duration
+        console.log('Set fixed duration for individual seller:', form.lottery_duration)
       } else {
         // Pour les vendeurs business, utiliser la durée par défaut
         form.lottery_duration = lotteryDurationConstraints.value?.default_duration || 30
+        console.log('Set default duration for business seller:', form.lottery_duration)
       }
     }
   } catch (error) {
     console.error('Error loading lottery duration constraints:', error)
+    console.error('Error details:', error.response?.data)
     // En cas d'erreur, utiliser les valeurs par défaut
     form.lottery_duration = 30
+    console.log('Using fallback duration:', form.lottery_duration)
   }
+  console.log('============================================')
 }
 
 onMounted(() => {
+  console.log('=== INITIALISATION CREATE PRODUCT PAGE ===')
+  console.log('User:', user.value)
+  console.log('User seller type:', user.value?.seller_type)
+  console.log('Is individual seller:', isIndividualSeller.value)
+  console.log('Is business seller:', isBusinessSeller.value)
+  
   loadCategories()
   loadLotteryDurationConstraints()
-  console.log('CreateProduct page loaded')
   
   // Forcer le nombre de tickets à 500 pour les vendeurs individuels
   if (isIndividualSeller.value) {
+    console.log('Setting default 500 tickets for individual seller')
     form.total_tickets = '500'
   }
+  
+  // Set default end date (tomorrow)
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  tomorrow.setHours(12, 0, 0, 0)
+  form.end_date = tomorrow.toISOString().slice(0, 16)
+  console.log('Set default end date:', form.end_date)
+  
+  console.log('Initial form state:', {
+    sale_mode: form.sale_mode,
+    total_tickets: form.total_tickets,
+    end_date: form.end_date,
+    lottery_duration: form.lottery_duration
+  })
+  console.log('=========================================')
 })
 </script>
