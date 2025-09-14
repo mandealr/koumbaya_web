@@ -205,15 +205,20 @@ class ProductController extends Controller
      */
     private function syncLotteryData($product)
     {
-        if ($product->activeLottery) {
-            // Rafraîchir sold_tickets avec le nombre réel de tickets payés
-            $realSoldTickets = $product->activeLottery->paidTickets()->count();
-            if ($realSoldTickets != $product->activeLottery->sold_tickets) {
-                $product->activeLottery->update(['sold_tickets' => $realSoldTickets]);
-                $product->activeLottery->refresh();
+        if ($product && $product->activeLottery) {
+            try {
+                // Rafraîchir sold_tickets avec le nombre réel de tickets payés
+                $realSoldTickets = $product->activeLottery->paidTickets()->count();
+                if ($realSoldTickets != $product->activeLottery->sold_tickets) {
+                    $product->activeLottery->update(['sold_tickets' => $realSoldTickets]);
+                    $product->activeLottery->refresh();
+                }
+                
+                $product->activeLottery->append(['remaining_tickets', 'progress_percentage', 'time_remaining', 'participation_rate', 'is_ending_soon']);
+            } catch (\Exception $e) {
+                // Log l'erreur mais continue sans crash
+                \Log::warning('Erreur lors de la synchronisation des données de tombola: ' . $e->getMessage());
             }
-            
-            $product->activeLottery->append(['remaining_tickets', 'progress_percentage', 'time_remaining', 'participation_rate', 'is_ending_soon']);
         }
         return $product;
     }
@@ -965,37 +970,51 @@ class ProductController extends Controller
      */
     public function latestLottery(Request $request)
     {
-        $product = Product::with(['category', 'merchant', 'activeLottery'])
-            ->where('is_active', true)
-            ->where('sale_mode', 'lottery')
-            ->whereHas('activeLottery', function ($query) {
-                $query->where('status', 'active')
-                      ->where('draw_date', '>', now());
-            })
-            ->orderBy('created_at', 'desc')
-            ->first();
+        try {
+            // Version simple sans synchronisation pour débugger
+            $product = Product::with(['category', 'merchant', 'activeLottery'])
+                ->where('is_active', true)
+                ->where('sale_mode', 'lottery')
+                ->whereHas('activeLottery', function ($query) {
+                    $query->where('status', 'active')
+                          ->where('draw_date', '>', now());
+                })
+                ->orderBy('created_at', 'desc')
+                ->first();
 
-        if (!$product) {
+            if (!$product) {
+                return response()->json([
+                    'success' => true,
+                    'data' => null,
+                    'message' => 'Aucun produit tombola actif trouvé'
+                ], 200);
+            }
+
+            // Ajouter des métadonnées utiles
+            $product->append(['has_active_lottery', 'lottery_ends_soon', 'popularity_score', 'image_url']);
+
+            // Synchroniser les données de tombola SEULEMENT si activeLottery existe
+            if ($product->activeLottery) {
+                $product->activeLottery->append(['remaining_tickets', 'progress_percentage', 'time_remaining', 'participation_rate', 'is_ending_soon']);
+            }
+
             return response()->json([
                 'success' => true,
-                'data' => null,
-                'message' => 'Aucun produit tombola actif trouvé'
-            ], 200);
+                'data' => [
+                    'product' => new ProductResource($product),
+                    'lottery' => $product->activeLottery ? new LotteryResource($product->activeLottery) : null
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Erreur dans latestLottery: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération du produit tombola',
+                'error' => app()->environment('local') ? $e->getMessage() : 'Erreur interne du serveur'
+            ], 500);
         }
-
-        // Ajouter des métadonnées utiles
-        $product->append(['has_active_lottery', 'lottery_ends_soon', 'popularity_score', 'image_url']);
-
-        // Synchroniser les données de tombola
-        $this->syncLotteryData($product);
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'product' => new ProductResource($product),
-                'lottery' => $activeLottery ? new LotteryResource($activeLottery) : null
-            ]
-        ]);
     }
 
     /**
