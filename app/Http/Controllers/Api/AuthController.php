@@ -135,7 +135,11 @@ class AuthController extends Controller
 
         // Déterminer le type de vérification selon le client
         $userAgent = $request->header('User-Agent', '');
-        $isFlutterApp = str_contains($userAgent, 'Dart/') || $request->has('is_mobile_app');
+        $platform = $request->header('X-Platform', 'web');
+        $isFlutterApp = str_contains($userAgent, 'Dart/') || 
+                       str_contains($userAgent, 'KoumbayaFlutter') || 
+                       $platform === 'mobile' || 
+                       $request->has('is_mobile_app');
 
         if ($isFlutterApp) {
             // Mobile: Envoyer OTP
@@ -320,6 +324,104 @@ class AuthController extends Controller
         return response()->json([
             'user' => $user
         ]);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/auth/verify-account",
+     *     tags={"Authentication"},
+     *     summary="Vérifier un compte utilisateur avec OTP",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email","otp_code"},
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com"),
+     *             @OA\Property(property="otp_code", type="string", example="123456")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Compte vérifié avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Compte vérifié avec succès"),
+     *             @OA\Property(property="user", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Code invalide"),
+     *     @OA\Response(response=404, description="Utilisateur non trouvé")
+     * )
+     */
+    public function verifyAccount(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'otp_code' => 'required|string|size:6',
+        ]);
+
+        if ($validator->fails()) {
+            AuditLog::logAuth('auth.verify_account.validation_failed', auth()->user(), [
+                'email' => $request->email,
+                'errors' => $validator->errors()->toArray()
+            ]);
+            return $this->validationErrorResponse($validator);
+        }
+
+        // Vérifier que l'utilisateur existe
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            AuditLog::logAuth('auth.verify_account.user_not_found', null, [
+                'email' => $request->email
+            ]);
+            return $this->errorResponse('Utilisateur non trouvé', 404);
+        }
+
+        // Vérifier le code OTP
+        $result = OtpService::verifyOtp($request->email, $request->otp_code, 'registration');
+        
+        if (!$result['success']) {
+            AuditLog::logAuth('auth.verify_account.otp_failed', $user, [
+                'email' => $request->email,
+                'error' => $result['message']
+            ]);
+            return $this->errorResponse($result['message'], 400);
+        }
+
+        // Marquer le compte comme vérifié
+        $user->verified_at = now();
+        $user->save();
+
+        // Charger les relations
+        $user->load(['wallet', 'roles']);
+
+        // Log succès
+        AuditLog::logAuth('auth.verify_account.success', $user, [
+            'email' => $request->email
+        ]);
+
+        return $this->successResponse([
+            'user' => $user
+        ], 'Compte vérifié avec succès');
+    }
+
+    /**
+     * Masquer une adresse email pour la sécurité
+     */
+    private function maskEmail($email)
+    {
+        $parts = explode('@', $email);
+        if (count($parts) != 2) return $email;
+        
+        $localPart = $parts[0];
+        $domain = $parts[1];
+        
+        if (strlen($localPart) <= 2) {
+            return str_repeat('*', strlen($localPart)) . '@' . $domain;
+        }
+        
+        $maskedLocal = substr($localPart, 0, 2) . str_repeat('*', strlen($localPart) - 2);
+        return $maskedLocal . '@' . $domain;
     }
 
     /**
