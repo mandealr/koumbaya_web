@@ -158,7 +158,7 @@
             </div>
 
             <div class="refund-details">
-                <h3><span class="emoji">📋</span> Détails de la demande</h3>
+                <h3><span class="emoji"></span> Détails de la demande</h3>
 
                 <div class="detail-row">
                     <span class="detail-label">Montant demandé :</span>
@@ -216,7 +216,7 @@
 
             @if ($refund->lottery)
                 <div class="refund-details">
-                    <h3><span class="emoji">🎁</span> Tombola concernée</h3>
+                    <h3><span class="emoji"></span> Tombola concernée</h3>
 
                     <div class="detail-row">
                         <span class="detail-label">Numéro :</span>
@@ -253,7 +253,7 @@
             @endif
 
             <div class="next-steps">
-                <h3><span class="emoji">💡</span> Que faire maintenant ?</h3>
+                <h3><span class="emoji"></span> Que faire maintenant ?</h3>
 
                 <ul>
                     <li><strong>Contacter le support :</strong> Si vous pensez qu'il y a une erreur, contactez notre
@@ -271,9 +271,9 @@
             </div>
 
             <div style="text-align: center; margin: 30px 0;">
-                <a href="mailto:support@koumbaya.cm?subject=Contestation remboursement {{ $refund->refund_number }}"
+                <a href="mailto:support@koumbaya.com?subject=Contestation remboursement {{ $refund->refund_number }}"
                     class="btn">
-                    📧 Contacter le Support
+                    @ Contacter le Support
                 </a>
 
                 <a href="{{ config('app.frontend_url') }}/customer/refunds" class="btn btn-secondary">
@@ -283,7 +283,7 @@
 
             <div
                 style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 15px; margin: 20px 0;">
-                <h4 style="margin-top: 0; color: #856404;"><span class="emoji">ℹ️</span> Politique de remboursement
+                <h4 style="margin-top: 0; color: #856404;"><span class="emoji"></span> Politique de remboursement
                 </h4>
                 <p style="margin-bottom: 0; font-size: 14px;">
                     Les remboursements sont accordés selon nos conditions générales. Les tombolas actives avec des
@@ -300,8 +300,8 @@
 
         <div class="footer">
             <p><strong>Koumbaya Marketplace</strong></p>
-            <p>La plateforme de tombolas la plus transparente du Cameroun</p>
-            <p>📧 support@koumbaya.cm | 📞 +237 123 456 789</p>
+            <p>La plateforme de tombolas la plus transparente du Gabon</p>
+            <p>@ support@koumbaya.com |  +241 123 456 789</p>
 
             <p style="margin-top: 15px; font-size: 12px; opacity: 0.8;">
                 Référence de la demande : {{ $refund->refund_number }}<br>

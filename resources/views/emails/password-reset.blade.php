@@ -3,7 +3,7 @@
 
     Bonjour {{ $user->first_name }} {{ $user->last_name }},
 
-    Vous avez demandé la réinitialisation de votre mot de passe sur **Koumbaya MarketPlace**.
+    Vous avez demandé la réinitialisation de votre mot de passe sur **Koumbaya Marketplace**.
 
     Voici votre code de vérification à usage unique :
 
@@ -24,7 +24,7 @@
     @endcomponent
 
     @component('mail::panel')
-        🔒 **Sécurité :** Si vous n'avez pas demandé cette réinitialisation, ignorez cet email. Votre compte reste sécurisé et
+         **Sécurité :** Si vous n'avez pas demandé cette réinitialisation, ignorez cet email. Votre compte reste sécurisé et
         aucune action n'est requise.
     @endcomponent
 
@@ -38,7 +38,7 @@
     **Besoin d'aide ?** Notre équipe support est disponible à support@koumbaya.com
 
     Cordialement,
-    **L'équipe Koumbaya** 💙
+    **L'équipe Koumbaya** 
 
     @component('mail::subcopy')
         Si vous avez des difficultés à cliquer sur le bouton, copiez et collez l'URL suivante dans votre navigateur web :

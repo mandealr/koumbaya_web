@@ -4,14 +4,14 @@
 <!-- Winner Icon with Animation -->
 <div style="text-align: center; margin-bottom: 32px;">
     <div style="display: inline-block; padding: 24px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-radius: 50%; color: white; font-size: 48px; box-shadow: 0 8px 24px rgba(251, 191, 36, 0.4); position: relative; animation: celebrate 2s ease-in-out infinite;">
-        🏆
+        
     </div>
-    <div style="margin-top: 12px; font-size: 24px;">🎊 🎉 🎊</div>
+    <div style="margin-top: 12px; font-size: 24px;">  </div>
 </div>
 
 <!-- Winning Announcement -->
 <h1 style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; color: #b45309; font-size: 32px; font-weight: bold; margin: 0 0 16px 0; text-align: center; text-shadow: 2px 2px 4px rgba(180, 83, 9, 0.1);">
-    🎉 FÉLICITATIONS ! 🎉
+     FÉLICITATIONS ! 
 </h1>
 
 <div style="background: linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%); border: 3px solid #f59e0b; border-radius: 16px; padding: 24px; margin: 32px 0; text-align: center; box-shadow: 0 8px 24px rgba(251, 191, 36, 0.2);">
@@ -19,12 +19,12 @@
         VOUS AVEZ GAGNÉ !
     </h2>
     <p style="margin: 0; color: #92400e; font-size: 18px; font-weight: 600;">
-        {{ $user->first_name ?? 'Cher gagnant' }}, vous êtes notre grand gagnant ! 🌟
+        {{ $user->first_name ?? 'Cher gagnant' }}, vous êtes notre grand gagnant ! 
     </p>
 </div>
 
 <p style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; font-size: 18px; line-height: 1.6; margin: 0 0 32px 0; text-align: center; color: #2d3748; font-weight: 600;">
-    Nous avons le plaisir de vous annoncer que vous êtes le gagnant de notre tombola ! 🎊
+    Nous avons le plaisir de vous annoncer que vous êtes le gagnant de notre tombola ! 
 </p>
 
 <!-- Prize Card -->
@@ -40,10 +40,10 @@
         <img src="{{ $product->image }}" alt="{{ $product->title }}" style="max-width: 250px; height: auto; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); border: 3px solid #10b981;">
         @endif
     </div>
-    <h3 style="margin: 0 0 12px 0; color: #065f46; font-size: 24px; font-weight: bold;">🎁 {{ $product->title }}</h3>
+    <h3 style="margin: 0 0 12px 0; color: #065f46; font-size: 24px; font-weight: bold;"> {{ $product->title }}</h3>
     <p style="margin: 0 0 20px 0; color: #059669; font-size: 16px; line-height: 1.5;">{{ $product->description }}</p>
     <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 12px 24px; border-radius: 25px; display: inline-block; font-weight: bold; font-size: 18px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-        💎 Valeur: {{ number_format($product->price, 0, ',', ' ') }} FCFA
+         Valeur: {{ number_format($product->price, 0, ',', ' ') }} FCFA
     </div>
     @endif
 </div>
@@ -51,7 +51,7 @@
 <!-- Winning Details -->
 <div style="background: white; border: 2px solid #fbbf24; border-radius: 12px; padding: 24px; margin: 32px 0;">
     <h3 style="margin: 0 0 20px 0; color: #92400e; font-size: 20px; font-weight: bold; text-align: center;">
-        🏅 Détails de votre gain
+         Détails de votre gain
     </h3>
     
     <table style="width: 100%; border-collapse: collapse;">
@@ -76,7 +76,7 @@
             <td style="padding: 12px 0; color: #2d3748; font-weight: bold;">{{ $totalParticipants ?? 'N/A' }} participants</td>
         </tr>
         <tr style="border-top: 2px solid #e5e7eb;">
-            <td style="padding: 16px 0 12px 0; color: #065f46; font-weight: bold; font-size: 18px;">🎊 Vous avez gagné:</td>
+            <td style="padding: 16px 0 12px 0; color: #065f46; font-weight: bold; font-size: 18px;"> Vous avez gagné:</td>
             <td style="padding: 16px 0 12px 0; color: #065f46; font-weight: bold; font-size: 18px;">{{ isset($product) ? $product->title : 'Prix à définir' }}</td>
         </tr>
     </table>
@@ -85,7 +85,7 @@
 <!-- Next Steps -->
 <div style="background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%); border-left: 4px solid #f59e0b; padding: 24px; border-radius: 8px; margin: 32px 0;">
     <div style="display: flex; align-items: flex-start;">
-        <div style="font-size: 24px; margin-right: 12px;">📋</div>
+        <div style="font-size: 24px; margin-right: 12px;"></div>
         <div>
             <p style="margin: 0 0 12px 0; font-weight: bold; color: #92400e; font-size: 18px;">Prochaines étapes</p>
             <ol style="margin: 0; padding-left: 20px; font-size: 15px; color: #92400e; line-height: 1.6;">
@@ -101,7 +101,7 @@
 <!-- Contact Information -->
 <div style="background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%); border: 2px solid #0099cc; border-radius: 12px; padding: 24px; margin: 32px 0; text-align: center;">
     <h3 style="margin: 0 0 16px 0; color: #0c4a6e; font-size: 18px; font-weight: bold;">
-        📞 Notre équipe vous contacte bientôt !
+         Notre équipe vous contacte bientôt !
     </h3>
     <p style="margin: 0 0 16px 0; color: #0c4a6e; font-size: 15px; line-height: 1.5;">
         Un membre de notre équipe vous appellera au <strong>{{ $user->phone ?? 'numéro enregistré' }}</strong> 
@@ -110,8 +110,8 @@
     <div style="background: white; border-radius: 8px; padding: 16px; margin: 16px 0;">
         <p style="margin: 0; color: #374151; font-size: 14px;">
             <strong>Contact urgent:</strong><br>
-            📧 gagnants@koumbaya.com<br>
-            📱 +241 01 XX XX XX<br>
+            @ gagnants@koumbaya.com<br>
+             +241 01 XX XX XX<br>
             🕒 Lundi - Vendredi : 8h - 18h
         </p>
     </div>
@@ -124,7 +124,7 @@
             <a href="{{ config('app.url') }}/customer/tickets" 
                target="_blank" 
                style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #92400e; text-decoration: none; padding: 16px 40px; border-radius: 12px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4); border: 2px solid #f59e0b;">
-                🏆 Voir mon ticket gagnant
+                 Voir mon ticket gagnant
             </a>
         </td>
     </tr>
@@ -133,7 +133,7 @@
 <!-- Important Notice -->
 <div style="background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); border-left: 4px solid #dc2626; padding: 20px; border-radius: 8px; margin: 32px 0;">
     <div style="display: flex; align-items: flex-start;">
-        <div style="font-size: 20px; margin-right: 12px;">⚠️</div>
+        <div style="font-size: 20px; margin-right: 12px;"></div>
         <div>
             <p style="margin: 0 0 8px 0; font-weight: bold; color: #991b1b;">Important !</p>
             <ul style="margin: 0; padding-left: 16px; font-size: 14px; color: #991b1b; line-height: 1.5;">
@@ -149,30 +149,30 @@
 <!-- Share Your Joy -->
 <div style="background: linear-gradient(135deg, #f3e8ff 0%, #ddd6fe 100%); border-radius: 12px; padding: 24px; margin: 32px 0; text-align: center;">
     <h3 style="margin: 0 0 16px 0; color: #6b21a8; font-size: 18px; font-weight: bold;">
-        🌟 Partagez votre joie !
+         Partagez votre joie !
     </h3>
     <p style="margin: 0 0 16px 0; color: #7c3aed; font-size: 14px;">
         N'hésitez pas à partager cette grande nouvelle avec vos proches !
     </p>
     <div style="margin-top: 16px;">
-        <span style="font-size: 24px; margin: 0 4px;">🎉</span>
-        <span style="font-size: 24px; margin: 0 4px;">🎊</span>
-        <span style="font-size: 24px; margin: 0 4px;">🏆</span>
-        <span style="font-size: 24px; margin: 0 4px;">🎁</span>
-        <span style="font-size: 24px; margin: 0 4px;">🌟</span>
+        <span style="font-size: 24px; margin: 0 4px;"></span>
+        <span style="font-size: 24px; margin: 0 4px;"></span>
+        <span style="font-size: 24px; margin: 0 4px;"></span>
+        <span style="font-size: 24px; margin: 0 4px;"></span>
+        <span style="font-size: 24px; margin: 0 4px;"></span>
     </div>
 </div>
 
 <p style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; font-size: 18px; line-height: 1.6; margin: 40px 0 0 0; text-align: center; color: #2d3748; font-weight: 600;">
-    Encore une fois, toutes nos félicitations ! 🎊<br>
-    <strong style="color: #fbbf24;">L'équipe Koumbaya</strong> 🎯<br>
+    Encore une fois, toutes nos félicitations ! <br>
+    <strong style="color: #fbbf24;">L'équipe Koumbaya</strong> <br>
     <em style="color: #6b7280; font-size: 14px;">"Rendre l'impossible accessible"</em>
 </p>
 
 <!-- Winner Badge -->
 <div style="text-align: center; margin-top: 32px;">
     <div style="display: inline-block; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #92400e; padding: 12px 24px; border-radius: 25px; font-weight: bold; font-size: 14px; border: 2px solid #f59e0b; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);">
-        🏆 GAGNANT OFFICIEL KOUMBAYA 🏆
+         GAGNANT OFFICIEL Koumbaya Marketplace 
     </div>
 </div>
 @endsection

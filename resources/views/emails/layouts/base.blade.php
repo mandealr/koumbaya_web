@@ -48,7 +48,7 @@
                 <tr>
                     <td class="header koumbaya-gradient" style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; padding: 25px 0; text-align: center; background: linear-gradient(135deg, #0099cc 0%, #0088bb 100%);">
                         <a href="{{ config('app.url') }}" style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; color: #ffffff; font-size: 24px; font-weight: bold; text-decoration: none; display: inline-block; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">
-                            🎯 KOUMBAYA
+                            KOUMBAYA MARKETPLACE
                         </a>
                         <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">Rendre l'impossible accessible</p>
                     </td>
@@ -78,17 +78,17 @@
                                     
                                     <!-- Social Links -->
                                     <div style="margin-bottom: 20px;">
-                                        <a href="#" style="display: inline-block; margin: 0 8px; padding: 8px; background-color: #0099cc; color: white; text-decoration: none; border-radius: 50%; width: 40px; height: 40px; text-align: center; line-height: 24px;">📘</a>
-                                        <a href="#" style="display: inline-block; margin: 0 8px; padding: 8px; background-color: #0099cc; color: white; text-decoration: none; border-radius: 50%; width: 40px; height: 40px; text-align: center; line-height: 24px;">📱</a>
-                                        <a href="#" style="display: inline-block; margin: 0 8px; padding: 8px; background-color: #0099cc; color: white; text-decoration: none; border-radius: 50%; width: 40px; height: 40px; text-align: center; line-height: 24px;">📧</a>
+                                        <a href="#" style="display: inline-block; margin: 0 8px; padding: 8px; background-color: #0099cc; color: white; text-decoration: none; border-radius: 50%; width: 40px; height: 40px; text-align: center; line-height: 24px;">FB</a>
+                                        <a href="#" style="display: inline-block; margin: 0 8px; padding: 8px; background-color: #0099cc; color: white; text-decoration: none; border-radius: 50%; width: 40px; height: 40px; text-align: center; line-height: 24px;">IG</a>
+                                        <a href="#" style="display: inline-block; margin: 0 8px; padding: 8px; background-color: #0099cc; color: white; text-decoration: none; border-radius: 50%; width: 40px; height: 40px; text-align: center; line-height: 24px;">@</a>
                                     </div>
 
                                     <!-- Contact Info -->
                                     <p style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; line-height: 1.5em; margin: 0 0 16px 0; color: #718096; font-size: 14px; text-align: center;">
-                                        <strong>Koumbaya</strong><br>
-                                        📍 Libreville, Gabon<br>
-                                        📞 +241 01 XX XX XX<br>
-                                        ✉️ contact@koumbaya.com
+                                        <strong>Koumbaya Marketplace</strong><br>
+                                        Libreville, Gabon<br>
+                                        +241 01 XX XX XX<br>
+                                        support@koumbaya.com
                                     </p>
 
                                     <!-- Copyright -->

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✅ Confirmation d'achat de ticket</title>
+    <title>Confirmation d'achat de ticket</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -150,18 +150,18 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><span class="emoji">✅</span> ACHAT CONFIRMÉ</h1>
+            <h1>ACHAT CONFIRMÉ</h1>
             <p>Votre ticket de tombola a été acheté avec succès !</p>
         </div>
 
         <div class="content">
             <div class="success-card">
-                <h2><span class="emoji">🎫</span> Ticket acheté</h2>
+                <h2>Ticket acheté</h2>
                 <p>Félicitations ! Vous participez maintenant à cette tombola.</p>
             </div>
 
             <div class="ticket-info">
-                <h3><span class="emoji">🎟️</span> Vos informations de ticket</h3>
+                <h3>Vos informations de ticket</h3>
                 @foreach($tickets as $ticket)
                 <div class="ticket-number">{{ $ticket->ticket_number }}</div>
                 @endforeach
@@ -172,7 +172,7 @@
             </div>
 
             <div class="lottery-info">
-                <h3><span class="emoji">🎁</span> Tombola</h3>
+                <h3>Tombola</h3>
                 
                 @if($lottery->product->image_url)
                     <img src="{{ $lottery->product->image_url }}" alt="{{ $lottery->product->title }}" class="product-image">
@@ -217,7 +217,7 @@
             </div>
 
             <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 20px; margin: 20px 0;">
-                <h3><span class="emoji">ℹ️</span> Informations importantes</h3>
+                <h3>Informations importantes</h3>
                 <ul>
                     <li>Conservez cet email comme preuve d'achat</li>
                     <li>Le tirage aura lieu automatiquement à la date prévue</li>
@@ -237,15 +237,15 @@
             </div>
 
             <div style="text-align: center; color: #6c757d;">
-                <p><span class="emoji">🤞</span> <strong>Bonne chance pour le tirage !</strong> <span class="emoji">🍀</span></p>
+                <p><strong>Bonne chance pour le tirage !</strong></p>
                 <p><em>Merci de votre confiance en Koumbaya Marketplace</em></p>
             </div>
         </div>
 
         <div class="footer">
             <p><strong>Koumbaya Marketplace</strong></p>
-            <p>La plateforme de tombolas la plus transparente du Cameroun</p>
-            <p>📧 support@koumbaya.cm | 📞 +237 123 456 789</p>
+            <p>La plateforme de tombolas la plus transparente du Gabon</p>
+            <p>support@koumbaya.com | +241 123 456 789</p>
         </div>
     </div>
 </body>

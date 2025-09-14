@@ -4,7 +4,7 @@
 <!-- Success Icon -->
 <div style="text-align: center; margin-bottom: 24px;">
     <div style="display: inline-block; padding: 20px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; color: white; font-size: 32px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-        🎉
+        
     </div>
 </div>
 
@@ -14,7 +14,7 @@
 </h1>
 
 <p style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0; text-align: center; color: #4a5568;">
-    Félicitations {{ $user->first_name ?? 'cher participant' }} ! 🎊
+    Félicitations {{ $user->first_name ?? 'cher participant' }} ! 
 </p>
 
 <p style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; font-size: 16px; line-height: 1.6; margin: 0 0 32px 0; text-align: left; color: #4a5568;">
@@ -32,7 +32,7 @@
     <h3 style="margin: 0 0 8px 0; color: #2d3748; font-size: 20px; font-weight: bold;">{{ $product->title }}</h3>
     <p style="margin: 0 0 16px 0; color: #4a5568; font-size: 14px;">{{ $product->description }}</p>
     <div style="background: linear-gradient(135deg, #0099cc 0%, #0088bb 100%); color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; font-weight: bold;">
-        💰 Valeur: {{ number_format($product->price, 0, ',', ' ') }} FCFA
+         Valeur: {{ number_format($product->price, 0, ',', ' ') }} FCFA
     </div>
     @endif
 </div>
@@ -40,7 +40,7 @@
 <!-- Ticket Details -->
 <div style="background: white; border: 2px solid #10b981; border-radius: 12px; padding: 24px; margin: 32px 0;">
     <h3 style="margin: 0 0 16px 0; color: #065f46; font-size: 18px; font-weight: bold; text-align: center;">
-        🎫 Détails de votre participation
+         Détails de votre participation
     </h3>
     
     <table style="width: 100%; border-collapse: collapse;">
@@ -96,7 +96,7 @@
             <a href="{{ config('app.url') }}/customer/tickets" 
                target="_blank" 
                style="background: linear-gradient(135deg, #0099cc 0%, #0088bb 100%); color: white; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600; display: inline-block; box-shadow: 0 4px 12px rgba(0, 153, 204, 0.3);">
-                🎫 Voir mes tickets
+                 Voir mes tickets
             </a>
         </td>
     </tr>
@@ -106,7 +106,7 @@
 @if(isset($lottery))
 <div style="background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%); border-left: 4px solid #0099cc; padding: 20px; border-radius: 8px; margin: 32px 0;">
     <div style="display: flex; align-items: flex-start;">
-        <div style="font-size: 20px; margin-right: 12px;">📊</div>
+        <div style="font-size: 20px; margin-right: 12px;"></div>
         <div>
             <p style="margin: 0 0 8px 0; font-weight: 600; color: #0c4a6e;">Progression de la tombola</p>
             <p style="margin: 0; font-size: 14px; color: #0c4a6e; line-height: 1.5;">
@@ -126,7 +126,7 @@
 <!-- What's Next -->
 <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-left: 4px solid #10b981; padding: 20px; border-radius: 8px; margin: 32px 0;">
     <div style="display: flex; align-items: flex-start;">
-        <div style="font-size: 20px; margin-right: 12px;">🚀</div>
+        <div style="font-size: 20px; margin-right: 12px;"></div>
         <div>
             <p style="margin: 0 0 8px 0; font-weight: 600; color: #065f46;">Et maintenant ?</p>
             <ul style="margin: 0; padding-left: 16px; font-size: 14px; color: #065f46; line-height: 1.5;">
@@ -140,8 +140,8 @@
 </div>
 
 <p style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; font-size: 16px; line-height: 1.6; margin: 32px 0 0 0; text-align: left; color: #4a5568;">
-    Merci de votre confiance et bonne chance ! 🍀<br>
-    <strong style="color: #0099cc;">L'équipe Koumbaya</strong> 🎯
+    Merci de votre confiance et bonne chance ! <br>
+    <strong style="color: #0099cc;">L'équipe Koumbaya</strong> 
 </p>
 
 <!-- Support -->

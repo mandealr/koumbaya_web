@@ -17,7 +17,7 @@ abstract class BaseKoumbayaMail extends Mailable
      */
     public function build()
     {
-        return $this->from(config('mail.from.address'), 'Koumbaya')
+        return $this->from(config('mail.from.address'), config('mail.from.name'))
                     ->with([
                         'unsubscribeUrl' => $this->getUnsubscribeUrl(),
                     ]);

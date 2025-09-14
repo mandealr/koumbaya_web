@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎉 Félicitations ! Vous avez gagné !</title>
+    <title> Félicitations ! Vous avez gagné !</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -137,13 +137,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><span class="emoji">🎉</span> FÉLICITATIONS !</h1>
+            <h1><span class="emoji"></span> FÉLICITATIONS !</h1>
             <p>Vous êtes le grand gagnant de notre tombola Koumbaya !</p>
         </div>
 
         <div class="content">
             <div class="winner-card">
-                <h2><span class="emoji">🏆</span> Vous avez gagné !</h2>
+                <h2><span class="emoji"></span> Vous avez gagné !</h2>
 
                 @if ($lottery->product->image_url)
                     <img src="{{ $lottery->product->image_url }}" alt="{{ $lottery->product->title }}"
@@ -155,7 +155,7 @@
             </div>
 
             <div class="details">
-                <h3><span class="emoji">📋</span> Détails du gain</h3>
+                <h3><span class="emoji"></span> Détails du gain</h3>
                 <p><strong>Tombola :</strong> {{ $lottery->lottery_number }}</p>
                 <p><strong>Ticket gagnant :</strong> {{ $winningTicket->ticket_number }}</p>
                 <p><strong>Date du tirage :</strong> {{ $lottery->draw_date->format('d/m/Y à H:i') }}</p>
@@ -171,13 +171,13 @@
             </div>
 
             <div class="next-steps">
-                <h3><span class="emoji">📞</span> Prochaines étapes</h3>
+                <h3><span class="emoji"></span> Prochaines étapes</h3>
                 <p><strong>Pour récupérer votre prix :</strong></p>
                 <ol>
-                    <li>Contactez notre service client au <strong>+237 123 456 789</strong></li>
+                    <li>Contactez notre service client au <strong>+241 123 456 789</strong></li>
                     <li>Munissez-vous de votre code de vérification : <strong>{{ $verificationCode }}</strong></li>
                     <li>Présentez une pièce d'identité valide</li>
-                    <li>Le retrait se fait dans nos locaux à Douala</li>
+                    <li>Le retrait se fait dans nos locaux à Libreville</li>
                 </ol>
                 <p><em>Vous avez 30 jours pour récupérer votre prix.</em></p>
             </div>
@@ -190,15 +190,15 @@
 
             <div style="text-align: center; color: #6c757d;">
                 <p><em>Merci de votre participation à Koumbaya Marketplace !</em></p>
-                <p><span class="emoji">🎊</span> <strong>Félicitations encore une fois !</strong> <span
-                        class="emoji">🎊</span></p>
+                <p><span class="emoji"></span> <strong>Félicitations encore une fois !</strong> <span
+                        class="emoji"></span></p>
             </div>
         </div>
 
         <div class="footer">
             <p><strong>Koumbaya Marketplace</strong></p>
-            <p>La plateforme de tombolas la plus transparente du Cameroun</p>
-            <p>📧 support@koumbaya.cm | 📞 +237 123 456 789</p>
+            <p>La plateforme de tombolas la plus transparente du Gabon</p>
+            <p>@ support@koumbaya.com |  +241 123 456 789</p>
         </div>
     </div>
 </body>

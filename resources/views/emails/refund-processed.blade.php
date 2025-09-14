@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💸 Remboursement traité</title>
+    <title>Remboursement traité</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -143,19 +143,19 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><span class="emoji">💸</span> REMBOURSEMENT TRAITÉ</h1>
+            <h1>REMBOURSEMENT TRAITÉ</h1>
             <p>Votre remboursement a été traité avec succès !</p>
         </div>
 
         <div class="content">
             <div class="refund-card">
-                <h2><span class="emoji">✅</span> Remboursement effectué</h2>
+                <h2>Remboursement effectué</h2>
                 <div class="amount">{{ number_format($refund->amount, 0, ',', ' ') }} FCFA</div>
                 <p>Référence : <span class="verification-code">{{ $refund->refund_number }}</span></p>
             </div>
 
             <div class="refund-details">
-                <h3><span class="emoji">📋</span> Détails du remboursement</h3>
+                <h3>Détails du remboursement</h3>
                 
                 <div class="detail-row">
                     <span class="detail-label">Montant remboursé :</span>
@@ -186,7 +186,7 @@
             </div>
 
             <div class="reason-box">
-                <h4><span class="emoji">❓</span> Raison du remboursement</h4>
+                <h4>Raison du remboursement</h4>
                 <p>
                     @switch($refund->reason)
                         @case('insufficient_participants')
@@ -209,7 +209,7 @@
 
             @if($refund->lottery)
             <div class="refund-details">
-                <h3><span class="emoji">🎁</span> Tombola concernée</h3>
+                <h3>Tombola concernée</h3>
                 
                 <div class="detail-row">
                     <span class="detail-label">Numéro de tombola :</span>
@@ -229,7 +229,7 @@
             @endif
 
             <div class="timeline">
-                <h4><span class="emoji">📅</span> Chronologie</h4>
+                <h4>Chronologie</h4>
                 
                 <div class="timeline-item">
                     <span>Demande créée</span>
@@ -250,7 +250,7 @@
             </div>
 
             <div class="next-steps">
-                <h3><span class="emoji">💡</span> Que se passe-t-il maintenant ?</h3>
+                <h3>Que se passe-t-il maintenant ?</h3>
                 
                 @if($refund->refund_method === 'mobile_money')
                 <ul>
@@ -281,7 +281,7 @@
 
             @if($refund->notes)
             <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
-                <h4 style="margin-top: 0; color: #1565c0;">📝 Notes</h4>
+                <h4 style="margin-top: 0; color: #1565c0;">Notes</h4>
                 <p style="margin-bottom: 0;">{{ $refund->notes }}</p>
             </div>
             @endif
@@ -293,8 +293,8 @@
 
         <div class="footer">
             <p><strong>Koumbaya Marketplace</strong></p>
-            <p>La plateforme de tombolas la plus transparente du Cameroun</p>
-            <p>📧 support@koumbaya.cm | 📞 +237 123 456 789</p>
+            <p>La plateforme de tombolas la plus transparente du Gabon</p>
+            <p>support@koumbaya.com | +241 123 456 789</p>
             
             <p style="margin-top: 15px; font-size: 12px; opacity: 0.8;">
                 Référence de remboursement : {{ $refund->refund_number }}<br>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📊 Résultats de la Tombola</title>
+    <title> Résultats de la Tombola</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -128,13 +128,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><span class="emoji">📊</span> RÉSULTATS DE LA TOMBOLA</h1>
+            <h1><span class="emoji"></span> RÉSULTATS DE LA TOMBOLA</h1>
             <p>{{ $lottery->lottery_number }}</p>
         </div>
 
         <div class="content">
             <div class="result-card">
-                <h2><span class="emoji">🎁</span> Produit en jeu</h2>
+                <h2><span class="emoji"></span> Produit en jeu</h2>
                 
                 @if($lottery->product->image_url)
                     <img src="{{ $lottery->product->image_url }}" alt="{{ $lottery->product->title }}" class="product-image">
@@ -145,7 +145,7 @@
             </div>
 
             <div class="winner-info">
-                <h3><span class="emoji">🏆</span> GAGNANT OFFICIEL</h3>
+                <h3><span class="emoji"></span> GAGNANT OFFICIEL</h3>
                 <p><strong>Nom :</strong> {{ substr($winner->first_name, 0, 1) }}**** {{ substr($winner->last_name, 0, 1) }}****</p>
                 <p><strong>Ville :</strong> {{ $winner->city ?? 'Non spécifiée' }}</p>
                 <p><strong>Ticket gagnant :</strong> {{ $lottery->winner_ticket_number }}</p>
@@ -176,7 +176,7 @@
 
             @if($isWinner)
                 <div style="background: #e6f7ff; border: 1px solid #0099cc; padding: 20px; border-radius: 5px; text-align: center;">
-                    <h3><span class="emoji">🎉</span> FÉLICITATIONS !</h3>
+                    <h3><span class="emoji"></span> FÉLICITATIONS !</h3>
                     <p>Vous êtes le grand gagnant de cette tombola !</p>
                     <p>Un email spécial avec toutes les instructions vous a été envoyé.</p>
                 </div>
@@ -202,8 +202,8 @@
 
         <div class="footer">
             <p><strong>Koumbaya Marketplace</strong></p>
-            <p>La plateforme de tombolas la plus transparente du Cameroun</p>
-            <p>📧 support@koumbaya.cm | 📞 +237 123 456 789</p>
+            <p>La plateforme de tombolas la plus transparente du Gabon</p>
+            <p>@ support@koumbaya.com |  +241 123 456 789</p>
             <p><a href="{{ config('app.frontend_url') }}/results" style="color: #17a2b8;">Vérifiez tous les résultats en ligne</a></p>
         </div>
     </div>

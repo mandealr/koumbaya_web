@@ -4,7 +4,7 @@
 <!-- Greeting Icon -->
 <div style="text-align: center; margin-bottom: 24px;">
     <div style="display: inline-block; padding: 20px; background: linear-gradient(135deg, #0099cc 0%, #0088bb 100%); border-radius: 50%; color: white; font-size: 32px; box-shadow: 0 4px 12px rgba(0, 153, 204, 0.3);">
-        🔐
+        
     </div>
 </div>
 
@@ -14,7 +14,7 @@
 </h1>
 
 <p style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0; text-align: center; color: #4a5568;">
-    Salut {{ $user->first_name ?? 'cher utilisateur' }} ! 👋
+    Salut {{ $user->first_name ?? 'cher utilisateur' }} ! 
 </p>
 
 <p style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; font-size: 16px; line-height: 1.6; margin: 0 0 32px 0; text-align: left; color: #4a5568;">
@@ -33,7 +33,7 @@
                            target="_blank" 
                            rel="noopener" 
                            style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; -webkit-text-size-adjust: none; border-radius: 8px; color: #fff; display: inline-block; overflow: hidden; text-decoration: none; background: linear-gradient(135deg, #0099cc 0%, #0088bb 100%); border: 12px solid transparent; border-image: linear-gradient(135deg, #0099cc 0%, #0088bb 100%); border-image-slice: 1; font-size: 16px; font-weight: 600; padding: 12px 32px; box-shadow: 0 4px 12px rgba(0, 153, 204, 0.3); transition: all 0.2s ease;">
-                            🔐 Réinitialiser mon mot de passe
+                             Réinitialiser mon mot de passe
                         </a>
                     </td>
                 </tr>
@@ -45,7 +45,7 @@
 <!-- Security Info Box -->
 <div style="background: linear-gradient(135deg, #fef5e7 0%, #fed7aa 100%); border-left: 4px solid #f59e0b; padding: 20px; border-radius: 8px; margin: 32px 0;">
     <div style="display: flex; align-items: flex-start;">
-        <div style="font-size: 20px; margin-right: 12px;">⚠️</div>
+        <div style="font-size: 20px; margin-right: 12px;"></div>
         <div>
             <p style="margin: 0 0 8px 0; font-weight: 600; color: #92400e;">Important !</p>
             <p style="margin: 0; font-size: 14px; color: #92400e; line-height: 1.5;">
@@ -62,7 +62,7 @@
 <!-- Tips Box -->
 <div style="background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%); border-left: 4px solid #0099cc; padding: 20px; border-radius: 8px; margin: 32px 0;">
     <div style="display: flex; align-items: flex-start;">
-        <div style="font-size: 20px; margin-right: 12px;">💡</div>
+        <div style="font-size: 20px; margin-right: 12px;"></div>
         <div>
             <p style="margin: 0 0 8px 0; font-weight: 600; color: #0c4a6e;">Conseils de sécurité</p>
             <ul style="margin: 0; padding-left: 16px; font-size: 14px; color: #0c4a6e; line-height: 1.5;">
@@ -76,7 +76,7 @@
 
 <p style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; font-size: 16px; line-height: 1.6; margin: 32px 0 0 0; text-align: left; color: #4a5568;">
     Cordialement,<br>
-    <strong style="color: #0099cc;">L'équipe Koumbaya</strong> 🎯
+    <strong style="color: #0099cc;">L'équipe Koumbaya</strong> 
 </p>
 
 <!-- Subcopy -->

@@ -4,7 +4,7 @@
     Bonjour,
 
     @if ($purpose === 'registration')
-        Bienvenue sur **Koumbaya MarketPlace** !
+        Bienvenue sur **Koumbaya Marketplace** !
     @elseif($purpose === 'login')
         Connexion sécurisée à votre compte **Koumbaya**.
     @elseif($purpose === 'payment')
@@ -28,7 +28,7 @@
     3. **Validez pour continuer**
 
     @component('mail::panel')
-        🔒 **Sécurité :** Si vous n'avez pas demandé ce code, ignorez cet email. Votre compte reste sécurisé.
+        **Important :** Si vous n'avez pas demandé ce code, ignorez cet email. Votre compte reste sécurisé.
     @endcomponent
 
     ---
