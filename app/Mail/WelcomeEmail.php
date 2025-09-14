@@ -29,7 +29,7 @@ class WelcomeEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Bienvenue sur Koumbaya Marketplace !'
+            subject: 'Bienvenue sur Koumbaya Marketplace !',
             from: config('mail.from.address', 'noreply@koumbaya.com'),
             replyTo: 'support@koumbaya.com'
         );
