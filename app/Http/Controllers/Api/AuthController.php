@@ -230,21 +230,23 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        // Déterminer si on utilise email ou téléphone
-        $loginField = $request->has('email') ? 'email' : 'phone';
-        $identifier = $request->input($loginField);
-
-        $rules = [
+        // Validation flexible: email OU téléphone + mot de passe
+        $validator = Validator::make($request->all(), [
             'password' => 'required|string|min:6',
-        ];
+            'email' => 'nullable|email',
+            'phone' => 'nullable|string',
+        ]);
 
-        if ($loginField === 'email') {
-            $rules['email'] = 'required|email';
-        } else {
-            $rules['phone'] = 'required|string';
-        }
+        // Vérifier qu'au moins un des deux est présent
+        $validator->after(function ($validator) use ($request) {
+            if (!$request->filled('email') && !$request->filled('phone')) {
+                $validator->errors()->add('identifier', 'Email ou téléphone requis pour la connexion.');
+            }
+        });
 
-        $validator = Validator::make($request->all(), $rules);
+        // Déterminer si on utilise email ou téléphone
+        $loginField = $request->filled('email') ? 'email' : 'phone';
+        $identifier = $request->input($loginField);
 
         if ($validator->fails()) {
             AuditLog::logAuth('auth.login.validation_failed', null, [

@@ -175,10 +175,14 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function getDefaultRedirect() {
-    if (!user.value) return 'home'
+    if (!user.value) {
+      console.log('❌ Pas d\'utilisateur connecté, redirection vers home')
+      return 'home'
+    }
     
     console.log('🔄 Logique de redirection:', {
       email: user.value?.email,
+      userRoles: user.value?.roles,
       isManager: isManager.value,
       isAdmin: isAdmin.value,
       isAgent: isAgent.value,
@@ -189,9 +193,13 @@ export const useAuthStore = defineStore('auth', () => {
       roles: user.value?.roles?.map(r => r.name)
     })
     
-    // 1. MANAGERS → Admin Dashboard
+    // 1. MANAGERS (Super Admin, Admin, Agent) → Admin Dashboard
     if (isManager.value) {
-      console.log('✅ Redirection vers admin.dashboard (Manager)')
+      console.log('✅ Utilisateur manager détecté, redirection vers admin.dashboard')
+      console.log('  - isAdmin:', isAdmin.value)
+      console.log('  - hasRole Super Admin:', hasRole('Super Admin'))
+      console.log('  - hasRole Admin:', hasRole('Admin'))
+      console.log('  - hasRole Agent:', hasRole('Agent'))
       return 'admin.dashboard'
     }
     
