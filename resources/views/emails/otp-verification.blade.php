@@ -18,7 +18,7 @@
     @component('mail::panel')
         # {{ $code }}
 
-        **Ce code expire dans 5 minutes.**
+        **Ce code expire dans 30 minutes.**
     @endcomponent
 
     ## Comment utiliser ce code ?

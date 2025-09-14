@@ -10,7 +10,7 @@
     @component('mail::panel')
         # {{ $otp }}
 
-        **Ce code expire dans 5 minutes.**
+        **Ce code expire dans 30 minutes.**
     @endcomponent
 
     ## Comment procéder ?

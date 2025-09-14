@@ -13,7 +13,7 @@ class OtpService
     /**
      * Générer et envoyer un OTP par email
      */
-    public static function sendEmailOtp($email, $purpose = Otp::PURPOSE_REGISTRATION, $expirationMinutes = 5)
+    public static function sendEmailOtp($email, $purpose = Otp::PURPOSE_REGISTRATION, $expirationMinutes = 30)
     {
         try {
             // Générer le code OTP
@@ -60,7 +60,7 @@ class OtpService
     /**
      * Générer et envoyer un OTP par SMS
      */
-    public static function sendSmsOtp($phone, $purpose = Otp::PURPOSE_REGISTRATION, $expirationMinutes = 5)
+    public static function sendSmsOtp($phone, $purpose = Otp::PURPOSE_REGISTRATION, $expirationMinutes = 30)
     {
         try {
             // Nettoyer et valider le numéro de téléphone
@@ -148,30 +148,67 @@ class OtpService
                 })
             ]);
 
-            $isValid = Otp::verify($identifier, $code, $purpose);
+            // Vérifier si le code existe et analyser le problème spécifique
+            $otp = Otp::where('identifier', $identifier)
+                ->where('code', $code)
+                ->where('purpose', $purpose)
+                ->first();
 
-            if ($isValid) {
-                Log::info('OTP validé avec succès', [
+            if (!$otp) {
+                Log::warning('OTP invalide', [
                     'identifier' => $identifier,
-                    'purpose' => $purpose
+                    'code' => $code,
+                    'purpose' => $purpose,
+                    'debug_info' => 'Code inexistant'
                 ]);
 
                 return [
-                    'success' => true,
-                    'message' => 'Code de vérification validé avec succès'
+                    'success' => false,
+                    'message' => 'Code de vérification incorrect'
                 ];
             }
 
-            Log::warning('OTP invalide', [
+            if ($otp->is_used) {
+                Log::warning('OTP déjà utilisé', [
+                    'identifier' => $identifier,
+                    'code' => $code,
+                    'purpose' => $purpose,
+                    'debug_info' => 'Code déjà utilisé'
+                ]);
+
+                return [
+                    'success' => false,
+                    'message' => 'Ce code a déjà été utilisé'
+                ];
+            }
+
+            if ($otp->isExpired()) {
+                Log::warning('OTP expiré', [
+                    'identifier' => $identifier,
+                    'code' => $code,
+                    'purpose' => $purpose,
+                    'expires_at' => $otp->expires_at,
+                    'debug_info' => 'Code expiré'
+                ]);
+
+                return [
+                    'success' => false,
+                    'message' => 'Code expiré. Demandez un nouveau code de vérification.'
+                ];
+            }
+
+            // Le code est valide, le marquer comme utilisé
+            $otp->is_used = true;
+            $otp->save();
+
+            Log::info('OTP validé avec succès', [
                 'identifier' => $identifier,
-                'code' => $code,
-                'purpose' => $purpose,
-                'debug_info' => 'Code non trouvé ou conditions non remplies'
+                'purpose' => $purpose
             ]);
 
             return [
-                'success' => false,
-                'message' => 'Code de vérification invalide ou expiré'
+                'success' => true,
+                'message' => 'Code de vérification validé avec succès'
             ];
         } catch (\Exception $e) {
             Log::error('Erreur validation OTP', [
@@ -410,7 +447,7 @@ class OtpService
             default => 'Votre code de vérification Koumbaya est :'
         };
 
-        return $baseMessage . "\n\n" . $code . "\n\nCe code expire dans 5 minutes.\n\nÉquipe Koumbaya";
+        return $baseMessage . "\n\n" . $code . "\n\nCe code expire dans 30 minutes.\n\nÉquipe Koumbaya";
     }
 
     /**
@@ -457,7 +494,7 @@ class OtpService
 
                 <div class='code-box'>
                     <div class='code'>{$code}</div>
-                    <p><strong>Ce code expire dans 5 minutes.</strong></p>
+                    <p><strong>Ce code expire dans 30 minutes.</strong></p>
                 </div>
 
                 <div class='warning'>
@@ -480,10 +517,10 @@ class OtpService
     private static function getSmsMessage($code, $purpose)
     {
         return match ($purpose) {
-            Otp::PURPOSE_REGISTRATION => "Koumbaya: Votre code d'inscription est {$code}. Valide 5 min.",
-            Otp::PURPOSE_PASSWORD_RESET => "Koumbaya: Code de réinitialisation {$code}. Valide 5 min.",
-            Otp::PURPOSE_LOGIN => "Koumbaya: Code de connexion {$code}. Valide 5 min.",
-            Otp::PURPOSE_PAYMENT => "Koumbaya: Code de paiement {$code}. Valide 5 min.",
+            Otp::PURPOSE_REGISTRATION => "Koumbaya: Votre code d'inscription est {$code}. Valide 30 min.",
+            Otp::PURPOSE_PASSWORD_RESET => "Koumbaya: Code de réinitialisation {$code}. Valide 30 min.",
+            Otp::PURPOSE_LOGIN => "Koumbaya: Code de connexion {$code}. Valide 30 min.",
+            Otp::PURPOSE_PAYMENT => "Koumbaya: Code de paiement {$code}. Valide 30 min.",
             default => "Koumbaya: Code de vérification {$code}. Valide 5 min."
         };
     }

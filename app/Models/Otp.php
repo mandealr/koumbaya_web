@@ -37,7 +37,7 @@ class Otp extends Model
     /**
      * Générer un code OTP
      */
-    public static function generate($identifier, $type, $purpose, $expirationMinutes = 5)
+    public static function generate($identifier, $type, $purpose, $expirationMinutes = 30)
     {
         // Nettoyer les anciens codes non utilisés pour cet identifiant
         self::where('identifier', $identifier)
