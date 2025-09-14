@@ -232,56 +232,42 @@ class OtpService
         $subject = self::getEmailSubject($purpose);
 
         try {
-            // En mode développement, on peut utiliser log
-            if (config('app.env') === 'local') {
-                Log::info('OTP Email (DEV MODE)', [
-                    'to' => $email,
-                    'subject' => $subject,
-                    'code' => $code
-                ]);
-                return true; // Simuler l'envoi réussi en développement
-            }
+            // Log pour debug (mais continue l'envoi réel)
+            Log::info('OTP Email envoi en cours', [
+                'to' => $email,
+                'subject' => $subject,
+                'code' => $code,
+                'env' => config('app.env'),
+                'mail_mailer' => config('mail.default')
+            ]);
 
-            // Essayer d'utiliser les templates, avec fallback en cas d'erreur
-            try {
-                if ($purpose === 'password_reset') {
-                    // Créer un utilisateur fictif pour le template si pas d'utilisateur trouvé
-                    $user = \App\Models\User::where('email', $email)->first();
-                    if (!$user) {
-                        $user = (object) ['first_name' => 'Utilisateur', 'last_name' => ''];
-                    }
-
-                    $resetUrl = config('app.frontend_url', 'https://koumbaya.com') . '/reset-password-verify?identifier=' . urlencode($email) . '&method=email';
-
-                    Mail::send('emails.password-reset', [
-                        'user' => $user,
-                        'otp' => $code,
-                        'resetUrl' => $resetUrl
-                    ], function ($mail) use ($email, $subject) {
-                        $mail->to($email)->subject($subject);
-                    });
-                } else {
-                    // Pour les autres purposes, utiliser le template OTP
-                    Mail::send('emails.otp-verification', [
-                        'code' => $code,
-                        'purpose' => $purpose
-                    ], function ($mail) use ($email, $subject) {
-                        $mail->to($email)->subject($subject);
-                    });
+            // Utiliser la classe Mailable pour un envoi plus fiable
+            if ($purpose === 'password_reset') {
+                // Créer un utilisateur fictif pour le template si pas d'utilisateur trouvé
+                $user = \App\Models\User::where('email', $email)->first();
+                if (!$user) {
+                    $user = (object) ['first_name' => 'Utilisateur', 'last_name' => ''];
                 }
-            } catch (\Exception $templateError) {
-                Log::warning('Erreur template email, utilisation du fallback', [
-                    'error' => $templateError->getMessage()
-                ]);
 
-                // Fallback: utiliser un email simple mais bien formaté
-                $message = self::getFormattedEmailMessage($code, $purpose);
-                Mail::send([], [], function ($mail) use ($email, $subject, $message) {
-                    $mail->to($email)
-                        ->subject($subject)
-                        ->html($message);
+                $resetUrl = config('app.frontend_url', 'https://koumbaya.com') . '/reset-password-verify?identifier=' . urlencode($email) . '&method=email';
+
+                Mail::send('emails.password-reset', [
+                    'user' => $user,
+                    'otp' => $code,
+                    'resetUrl' => $resetUrl
+                ], function ($mail) use ($email, $subject) {
+                    $mail->to($email)->subject($subject);
                 });
+            } else {
+                // Utiliser la classe Mailable OtpVerificationEmail
+                \Mail::to($email)->send(new \App\Mail\OtpVerificationEmail($code, $purpose));
             }
+
+            Log::info('OTP Email envoyé avec succès', [
+                'email' => $email,
+                'purpose' => $purpose,
+                'code' => $code
+            ]);
 
             return true;
         } catch (\Exception $e) {
