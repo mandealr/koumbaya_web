@@ -96,6 +96,7 @@ Route::group([
     Route::get('products/latest-lottery', [ProductController::class, 'latestLottery']);
     Route::get('products/latest-lottery-only', [ProductController::class, 'latestLotteryOnly']);
     Route::get('products/by-sale-mode/{mode}', [ProductController::class, 'getBySaleMode']);
+    Route::get('products/lottery-duration-constraints', [ProductController::class, 'getLotteryDurationConstraints']);
     Route::get('products/{id}', [ProductController::class, 'show']);
     
     // Lotteries (routes spécifiques avant les routes avec paramètres)
@@ -134,9 +135,6 @@ Route::group([
     Route::post('calculate-ticket-price', [TicketPriceController::class, 'calculate']);
     Route::post('ticket-price-suggestions', [TicketPriceController::class, 'suggestions']);
     Route::get('ticket-calculation-config', [TicketPriceController::class, 'config']);
-    
-    // Configuration produits (public pour les contraintes)
-    Route::get('products/lottery-duration-constraints', [ProductController::class, 'getLotteryDurationConstraints']);
 });
 
 // Routes protégées (authentification requise) avec rate limiting
