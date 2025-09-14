@@ -556,9 +556,12 @@ class ProductController extends Controller
 
         // Add lottery-specific fields only if lottery mode
         if ($request->sale_mode === 'lottery') {
-            $productData['ticket_price'] = $ticketPrice;
-            $productData['total_tickets'] = $totalTickets;
-            $productData['min_participants'] = $request->min_participants ?? $totalTickets;
+            // Store lottery data in meta field (existing pattern in codebase)
+            $productData['meta'] = [
+                'ticket_price' => $ticketPrice,
+                'total_tickets' => $totalTickets,
+                'min_participants' => $request->min_participants ?? $totalTickets,
+            ];
         }
 
         $product = Product::create($productData);

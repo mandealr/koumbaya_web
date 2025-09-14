@@ -24,7 +24,6 @@ class Product extends Model
         'is_active',
         'views_count',
         'meta',
-        'total_tickets',
     ];
 
     /**
@@ -40,6 +39,7 @@ class Product extends Model
         'image_url',
         'title', // Alias pour 'name'
         'ticket_price', // Compatibilité backward
+        'total_tickets', // Nombre de tickets pour tombola
         'min_participants', // Compatibilité backward
         'status', // Compatibilité backward
         'has_active_lottery',
@@ -198,12 +198,30 @@ class Product extends Model
     }
 
     /**
+     * Accesseur pour total_tickets
+     */
+    public function getTotalTicketsAttribute()
+    {
+        return $this->meta['total_tickets'] ?? null;
+    }
+
+    /**
      * Mutateur pour ticket_price (compatibilité backward)
      */
     public function setTicketPriceAttribute($value)
     {
         $meta = $this->meta ?? [];
         $meta['ticket_price'] = $value;
+        $this->attributes['meta'] = json_encode($meta);
+    }
+
+    /**
+     * Mutateur pour total_tickets
+     */
+    public function setTotalTicketsAttribute($value)
+    {
+        $meta = $this->meta ?? [];
+        $meta['total_tickets'] = $value;
         $this->attributes['meta'] = json_encode($meta);
     }
 
