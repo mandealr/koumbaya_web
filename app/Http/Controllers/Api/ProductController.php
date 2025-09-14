@@ -524,8 +524,8 @@ class ProductController extends Controller
             $ticketPrice = \App\Services\TicketPriceCalculator::calculateTicketPrice(
                 $request->price,
                 $totalTickets ?? 1000, // Utiliser le nombre fourni par l'utilisateur
-                null, // Commission par défaut (10%)
-                null, // Marge par défaut (15%)
+                0.10, // Commission par défaut (10%)
+                0.15, // Marge par défaut (15%)
                 $user // Utiliser l'utilisateur pour les contraintes
             );
             
