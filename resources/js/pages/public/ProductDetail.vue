@@ -79,7 +79,7 @@
               </h1>
               <div class="flex items-center gap-4 mb-6">
                 <span class="bg-[#0099cc]/10 text-[#0099cc] px-4 py-2 rounded-full font-semibold">
-                  {{ getCategoryName(product.category) }}
+                  {{ product.category }}
                 </span>
                 <div class="flex items-center text-yellow-500">
                   <StarIcon v-for="n in 5" :key="n" class="h-5 w-5 fill-current" />
@@ -430,37 +430,8 @@ const hasActiveLottery = computed(() => {
   return product.value && product.value.activeLottery && product.value.activeLottery.id
 })
 
-// Mock related products
-const relatedProducts = ref([
-  {
-    id: 2,
-    name: 'MacBook Pro M3',
-    value: 2500000,
-    ticketPrice: 2500,
-    image: placeholderImg
-  },
-  {
-    id: 3,
-    name: 'PlayStation 5',
-    value: 650000,
-    ticketPrice: 1000,
-    image: placeholderImg
-  },
-  {
-    id: 4,
-    name: 'AirPods Pro 2',
-    value: 350000,
-    ticketPrice: 500,
-    image: placeholderImg
-  },
-  {
-    id: 5,
-    name: 'Tesla Model Y',
-    value: 45000000,
-    ticketPrice: 50000,
-    image: placeholderImg
-  }
-])
+// Produits similaires (chargés depuis l'API)
+const relatedProducts = ref([])
 
 // Methods
 const formatPrice = (price) => {
@@ -482,19 +453,25 @@ const formatDate = (date) => {
   })
 }
 
-const getCategoryName = (category) => {
-  const categories = {
-    electronics: 'Électronique',
-    fashion: 'Mode',
-    automotive: 'Automobile',
-    home: 'Maison'
-  }
-  return categories[category] || 'Autre'
-}
 
 const getTimeRemaining = () => {
-  // Mock time remaining calculation
-  return '5j 12h'
+  if (!product.value?.activeLottery?.draw_date) return 'Non défini'
+  
+  const drawDate = new Date(product.value.activeLottery.draw_date)
+  const now = new Date()
+  const timeDiff = drawDate - now
+  
+  if (timeDiff <= 0) return 'Terminé'
+  
+  const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  
+  if (days > 0) {
+    return `${days}j ${hours}h`
+  } else {
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60))
+    return `${hours}h ${minutes}min`
+  }
 }
 
 const participateNow = () => {
@@ -589,6 +566,26 @@ const viewProduct = (prod) => {
   router.push({ name: 'public.product.detail', params: { id: prod.id } })
 }
 
+const loadRelatedProducts = async (categoryId, currentProductId) => {
+  try {
+    const response = await get(`/products?category_id=${categoryId}&limit=4`)
+    relatedProducts.value = (response.data || response || [])
+      .filter(p => p.id !== currentProductId)
+      .slice(0, 4)
+      .map(p => ({
+        id: p.id,
+        name: p.name || p.title,
+        value: p.price,
+        ticketPrice: p.ticket_price || 0,
+        image: p.image_url || p.main_image || p.image || placeholderImg
+      }))
+  } catch (err) {
+    console.warn('Erreur lors du chargement des produits similaires:', err)
+    // En cas d'erreur, laisser un tableau vide
+    relatedProducts.value = []
+  }
+}
+
 const loadProduct = async () => {
   try {
     loading.value = true
@@ -610,29 +607,32 @@ const loadProduct = async () => {
       throw new Error('Produit non trouvé dans la réponse API')
     }
     
-    // Simulate different product types based on ID for testing
-    const isLotteryProduct = productData.id % 2 === 1 // Odd IDs = lottery, Even IDs = direct purchase
+    // Déterminer le type de produit depuis les données API
+    const isLotteryProduct = productData.sale_mode === 'lottery'
     
-    // Adapt API response to component format
+    // Utiliser les vraies données API
     product.value = {
       id: productData.id,
-      name: productData.name || (isLotteryProduct ? 'iPhone 15 Pro' : 'MacBook Pro M3'),
-      description: productData.description || (isLotteryProduct 
-        ? 'Le dernier flagship d\'Apple avec une caméra révolutionnaire et la puce A17 Pro'
-        : 'Le MacBook Pro le plus puissant avec la puce M3 et un écran Liquid Retina XDR'),
-      value: productData.price || (isLotteryProduct ? 750000 : 1200000),
-      ticketPrice: productData.ticket_price || (isLotteryProduct ? 1000 : 0),
-      image: productData.image_url || productData.main_image || placeholderImg,
-      category: productData.category?.name || 'electronics',
-      soldTickets: isLotteryProduct ? (productData.active_lottery?.sold_tickets || 637) : 0,
-      participants: isLotteryProduct ? (productData.active_lottery?.sold_tickets || 637) : 0,
-      drawDate: isLotteryProduct ? (productData.active_lottery?.end_date || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)) : null,
+      name: productData.name || productData.title,
+      description: productData.description,
+      value: productData.price,
+      ticketPrice: productData.ticket_price || 0,
+      image: productData.image_url || productData.main_image || productData.image || placeholderImg,
+      category: productData.category?.name || productData.category?.slug || 'Non catégorisé',
+      soldTickets: productData.active_lottery?.sold_tickets || 0,
+      participants: productData.active_lottery?.sold_tickets || 0,
+      drawDate: productData.active_lottery?.draw_date || productData.active_lottery?.end_date,
       isNew: productData.created_at ? new Date(productData.created_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) : false,
-      activeLottery: isLotteryProduct ? (productData.active_lottery || { id: 1, sold_tickets: 637, end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }) : null,
+      activeLottery: productData.active_lottery || null,
       lotteries: productData.lotteries || []
     }
     
     console.log('Product loaded successfully:', product.value.name)
+    
+    // Charger les produits similaires de la même catégorie
+    if (productData.category_id) {
+      await loadRelatedProducts(productData.category_id, productData.id)
+    }
   } catch (err) {
     console.error('Erreur lors du chargement du produit:', err)
     error.value = err.response?.data?.message || 'Erreur lors du chargement du produit'
