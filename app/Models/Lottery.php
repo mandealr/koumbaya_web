@@ -11,6 +11,8 @@ class Lottery extends Model
 
     protected $fillable = [
         'lottery_number',
+        'title',
+        'description',
         'product_id',
         'max_tickets',
         'sold_tickets',
@@ -20,6 +22,8 @@ class Lottery extends Model
         'winner_ticket_number',
         'status',
         'draw_process_info',
+        'currency',
+        'meta',
     ];
 
     protected function casts(): array
@@ -28,6 +32,7 @@ class Lottery extends Model
             'ticket_price' => 'decimal:2',
             'draw_date' => 'datetime',
             'completed_at' => 'datetime',
+            'meta' => 'array',
         ];
     }
 
@@ -312,5 +317,27 @@ class Lottery extends Model
             ->where('user_id', $user->id)
             ->where('status', '!=', 'cancelled')
             ->count();
+    }
+
+    /**
+     * Boot method to set automatic values for title and description
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($lottery) {
+            // Auto-set title if not provided
+            if (empty($lottery->title)) {
+                $productName = $lottery->product ? $lottery->product->name : 'Produit';
+                $lottery->title = 'Tombola - ' . $productName;
+            }
+
+            // Auto-set description if not provided
+            if (empty($lottery->description)) {
+                $productName = $lottery->product ? $lottery->product->name : 'un produit';
+                $lottery->description = 'Tombola pour le produit : ' . $productName;
+            }
+        });
     }
 }
