@@ -222,25 +222,66 @@ class MerchantDashboardController extends Controller
             $topProducts->load(['category']);
 
             $productsData = $topProducts->map(function ($product) {
-                // Vérifier s'il y a une tombola active pour ce produit
-                $activeLottery = Lottery::where('product_id', $product->id)
-                    ->where('status', 'active')
-                    ->first();
+                try {
+                    // Vérifier s'il y a une tombola active pour ce produit
+                    $activeLottery = Lottery::where('product_id', $product->id)
+                        ->where('status', 'active')
+                        ->first();
 
-                return [
-                    'id' => $product->id,
-                    'title' => $product->title ?? 'Produit sans titre',
-                    'price' => floatval($product->price ?? 0),
-                    'ticket_price' => floatval($product->ticket_price ?? 0),
-                    'image_url' => $product->image_url ?? $product->images,
-                    'category' => $product->category->name ?? 'Non classé',
-                    'total_revenue' => floatval($product->total_revenue ?? 0),
-                    'tickets_sold' => intval($product->tickets_sold ?? 0),
-                    'total_transactions' => intval($product->total_transactions ?? 0),
-                    'has_active_lottery' => $activeLottery !== null,
-                    'lottery_status' => $activeLottery->status ?? null,
-                    'conversion_rate' => $this->getProductConversionRate($product->id),
-                ];
+                    // Récupérer le ticket_price de façon sécurisée
+                    $ticketPrice = 0;
+                    if ($product->meta && is_array($product->meta)) {
+                        $ticketPrice = $product->meta['ticket_price'] ?? 0;
+                    } elseif ($product->meta && is_string($product->meta)) {
+                        $meta = json_decode($product->meta, true);
+                        $ticketPrice = $meta['ticket_price'] ?? 0;
+                    }
+
+                    // Récupérer l'image de façon sécurisée
+                    $imageUrl = null;
+                    if ($product->image) {
+                        if (str_starts_with($product->image, 'http') || str_starts_with($product->image, '/')) {
+                            $imageUrl = $product->image;
+                        } else {
+                            $imageUrl = "/storage/products/{$product->image}";
+                        }
+                    }
+
+                    return [
+                        'id' => $product->id,
+                        'title' => $product->name ?? 'Produit sans titre',
+                        'name' => $product->name ?? 'Produit sans titre',
+                        'price' => floatval($product->price ?? 0),
+                        'ticket_price' => floatval($ticketPrice),
+                        'image_url' => $imageUrl,
+                        'category' => $product->category->name ?? 'Non classé',
+                        'total_revenue' => floatval($product->total_revenue ?? 0),
+                        'tickets_sold' => intval($product->tickets_sold ?? 0),
+                        'total_transactions' => intval($product->total_transactions ?? 0),
+                        'has_active_lottery' => $activeLottery !== null,
+                        'lottery_status' => $activeLottery ? $activeLottery->status : null,
+                        'conversion_rate' => $this->getProductConversionRate($product->id),
+                    ];
+                } catch (\Exception $e) {
+                    \Log::warning("Erreur lors du traitement du produit {$product->id}: " . $e->getMessage());
+                    
+                    // Retourner des données par défaut en cas d'erreur
+                    return [
+                        'id' => $product->id,
+                        'title' => $product->name ?? 'Produit sans titre',
+                        'name' => $product->name ?? 'Produit sans titre',
+                        'price' => floatval($product->price ?? 0),
+                        'ticket_price' => 0,
+                        'image_url' => null,
+                        'category' => 'Non classé',
+                        'total_revenue' => floatval($product->total_revenue ?? 0),
+                        'tickets_sold' => intval($product->tickets_sold ?? 0),
+                        'total_transactions' => intval($product->total_transactions ?? 0),
+                        'has_active_lottery' => false,
+                        'lottery_status' => null,
+                        'conversion_rate' => 0,
+                    ];
+                }
             });
 
             return $this->sendResponse($productsData->toArray());
@@ -487,12 +528,17 @@ class MerchantDashboardController extends Controller
     {
         // Simplified conversion rate calculation
         $product = Product::find($productId);
-        $views = $product->views_count ?? 1;
+        $views = $product->views_count ?? 0;
         $sales = Payment::whereHas('lottery', function ($query) use ($productId) {
             $query->where('product_id', $productId);
         })
         ->where('status', 'completed')
         ->count();
+        
+        // Prevent division by zero
+        if ($views == 0) {
+            return 0;
+        }
         
         return round(($sales / $views) * 100, 2);
     }
