@@ -381,10 +381,13 @@ class Product extends Model
             if (config('koumbaya.features.auto_calculate_ticket_price', true)) {
                 $meta = $product->meta ?? [];
                 
-                if ($product->price && (!isset($meta['ticket_price']) || $meta['ticket_price'] == 0)) {
+                // Calculer le prix de ticket seulement pour les produits en mode tombola
+                if ($product->price && $product->sale_mode === 'lottery' && (!isset($meta['ticket_price']) || $meta['ticket_price'] == 0)) {
                     $meta['ticket_price'] = $product->calculateTicketPrice();
                 }
-                if (!isset($meta['min_participants'])) {
+                
+                // Définir min_participants seulement pour les tombolas
+                if ($product->sale_mode === 'lottery' && !isset($meta['min_participants'])) {
                     $meta['min_participants'] = config('koumbaya.ticket_calculation.default_tickets', 1000);
                 }
                 
@@ -395,7 +398,8 @@ class Product extends Model
         // Recalcul automatique lors de la modification du prix
         static::updating(function ($product) {
             if (config('koumbaya.features.auto_calculate_ticket_price', true)) {
-                if ($product->isDirty('price') && $product->price) {
+                // Recalculer seulement pour les produits en mode tombola
+                if ($product->isDirty('price') && $product->price && $product->sale_mode === 'lottery') {
                     $meta = $product->meta ?? [];
                     $minParticipants = $meta['min_participants'] ?? 1000;
                     $meta['ticket_price'] = $product->calculateTicketPrice($minParticipants);

@@ -181,11 +181,11 @@ class MerchantDashboardController extends Controller
                      ->where('payments.status', '=', 'completed');
             })
             ->where('products.merchant_id', $merchantId)
-            ->groupBy('products.id', 'products.title', 'products.price', 'products.ticket_price', 
-                     'products.image_url', 'products.created_at', 'products.updated_at', 
+            ->groupBy('products.id', 'products.name', 'products.price', 
+                     'products.image', 'products.created_at', 'products.updated_at', 
                      'products.merchant_id', 'products.category_id', 'products.description',
-                     'products.images', 'products.is_active', 'products.min_participants',
-                     'products.max_participants', 'products.views_count')
+                     'products.is_active', 'products.views_count', 'products.sale_mode',
+                     'products.meta')
             ->orderBy('total_revenue', 'desc')
             ->limit($limit)
             ->get();
