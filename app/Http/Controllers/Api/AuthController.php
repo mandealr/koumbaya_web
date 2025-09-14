@@ -798,22 +798,6 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * Masquer l'email pour l'affichage public
-     */
-    private function maskEmail($email)
-    {
-        $parts = explode('@', $email);
-        $localPart = $parts[0];
-        $domain = $parts[1];
-        
-        if (strlen($localPart) <= 2) {
-            return str_repeat('*', strlen($localPart)) . '@' . $domain;
-        }
-        
-        $maskedLocal = substr($localPart, 0, 2) . str_repeat('*', strlen($localPart) - 2);
-        return $maskedLocal . '@' . $domain;
-    }
 
     /**
      * Parse full name into first and last name
