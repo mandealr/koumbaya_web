@@ -50,12 +50,42 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       const response = await api.post('/auth/login', credentials)
-      const { access_token: authToken, user: userData } = response.data
+      
+      // Debug: Log de la structure complète de la réponse
+      console.log('🔍 Structure complète de la réponse API login:', response.data)
+      
+      // Gérer différentes structures de réponse API
+      let authToken, userData
+      
+      if (response.data.data) {
+        // Structure avec wrapper data
+        authToken = response.data.data.access_token || response.data.data.token
+        userData = response.data.data.user
+        console.log('📦 Structure avec wrapper data détectée')
+      } else {
+        // Structure directe
+        authToken = response.data.access_token || response.data.token
+        userData = response.data.user
+        console.log('📦 Structure directe détectée')
+      }
+      
+      console.log('🎫 Token extrait:', authToken ? 'présent' : 'absent')
+      console.log('👤 User data extrait:', userData)
+      
+      if (!authToken) {
+        throw new Error('Token d\'authentification manquant dans la réponse')
+      }
+      
+      if (!userData) {
+        throw new Error('Données utilisateur manquantes dans la réponse')
+      }
       
       token.value = authToken
       user.value = userData
       
       localStorage.setItem('auth_token', authToken)
+      
+      console.log('✅ Login store: Token et user définis avec succès')
       
       return { success: true }
     } catch (err) {
@@ -93,7 +123,24 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       const response = await api.post('/auth/register', userData)
-      const { access_token: authToken, user: newUser } = response.data
+      
+      // Debug: Log de la structure complète de la réponse
+      console.log('🔍 Structure complète de la réponse API register:', response.data)
+      
+      // Gérer différentes structures de réponse API
+      let authToken, newUser
+      
+      if (response.data.data) {
+        // Structure avec wrapper data
+        authToken = response.data.data.access_token || response.data.data.token
+        newUser = response.data.data.user
+        console.log('📦 Register: Structure avec wrapper data détectée')
+      } else {
+        // Structure directe
+        authToken = response.data.access_token || response.data.token
+        newUser = response.data.user
+        console.log('📦 Register: Structure directe détectée')
+      }
       
       token.value = authToken
       user.value = newUser
@@ -131,7 +178,21 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       const response = await api.get('/auth/me')
-      user.value = response.data.user
+      console.log('🔍 Structure réponse /auth/me:', response.data)
+      
+      // Gérer différentes structures de réponse API
+      if (response.data.data?.user) {
+        user.value = response.data.data.user
+        console.log('📦 /auth/me: Structure avec wrapper data détectée')
+      } else if (response.data.user) {
+        user.value = response.data.user
+        console.log('📦 /auth/me: Structure directe détectée')
+      } else {
+        console.warn('⚠️ Structure réponse /auth/me inattendue:', response.data)
+        user.value = null
+      }
+      
+      console.log('👤 User chargé via /auth/me:', user.value)
     } catch (err) {
       // Token invalide, déconnecter
       user.value = null
@@ -147,7 +208,21 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       const response = await api.get('/auth/me')
-      user.value = response.data.user
+      console.log('🔍 Structure réponse /auth/me:', response.data)
+      
+      // Gérer différentes structures de réponse API
+      if (response.data.data?.user) {
+        user.value = response.data.data.user
+        console.log('📦 /auth/me: Structure avec wrapper data détectée')
+      } else if (response.data.user) {
+        user.value = response.data.user
+        console.log('📦 /auth/me: Structure directe détectée')
+      } else {
+        console.warn('⚠️ Structure réponse /auth/me inattendue:', response.data)
+        user.value = null
+      }
+      
+      console.log('👤 User chargé via /auth/me:', user.value)
     } catch (err) {
       console.error('Erreur lors du rafraîchissement:', err)
     }
