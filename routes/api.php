@@ -144,6 +144,9 @@ Route::group([
         return $request->user();
     });
     
+    // Configuration produits (accessible aux marchands authentifiés)
+    Route::get('products/lottery-duration-constraints', [ProductController::class, 'getLotteryDurationConstraints']);
+    
     // Tickets (Nouveau système d'achat) - Nécessite vérification
     Route::post('tickets/purchase', [TicketController::class, 'purchase'])->middleware('verified');
     Route::get('tickets/my-tickets', [TicketController::class, 'myTickets']);
@@ -220,7 +223,6 @@ Route::group([
 ], function () {
     // Products (Marchands seulement)
     Route::get('merchant/products', [ProductController::class, 'merchantProducts']);
-    Route::get('products/lottery-duration-constraints', [ProductController::class, 'getLotteryDurationConstraints']);
     Route::post('products', [ProductController::class, 'store']);
     Route::put('products/{id}', [ProductController::class, 'update']);
     Route::post('products/{id}/create-lottery', [ProductController::class, 'createLottery']);
