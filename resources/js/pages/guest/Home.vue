@@ -79,16 +79,16 @@
                   <div class="space-y-2">
                     <div class="flex justify-between text-sm text-gray-600">
                       <span>Progression</span>
-                      <span class="font-semibold">{{ latestLotteryProduct?.progress || 75 }}%</span>
+                      <span class="font-semibold">{{ latestLotteryProduct?.progress || 0 }}%</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-3">
                       <div 
                         class="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full animate-pulse transition-all duration-500"
-                        :style="{ width: (latestLotteryProduct?.progress || 75) + '%' }"
+                        :style="{ width: (latestLotteryProduct?.progress || 0) + '%' }"
                       ></div>
                     </div>
                     <div class="text-center text-sm text-gray-500">
-                      {{ latestLotteryProduct?.soldTickets || 750 }}/{{ latestLotteryProduct?.totalTickets || 1000 }} tickets
+                      {{ latestLotteryProduct?.soldTickets || 0 }}/{{ latestLotteryProduct?.totalTickets || 500 }} tickets
                     </div>
                   </div>
                   <button class="w-full bg-purple-600 text-white font-semibold py-3 rounded-xl hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
@@ -597,8 +597,8 @@ const loadLatestLotteryProduct = async () => {
       console.log('🐛 Debug backend:', debug)
       
       // Utiliser directement les données calculées par l'API
-      const soldTickets = parseInt(lottery?.sold_tickets || 0)
-      const maxTickets = parseInt(lottery?.max_tickets || lottery?.total_tickets || 1000)
+      let soldTickets = parseInt(lottery?.sold_tickets || 0)
+      let maxTickets = parseInt(lottery?.max_tickets || lottery?.total_tickets || 1000)
       const progressFromAPI = lottery?.progress_percentage || lottery?.participation_rate || 0
       
       console.log('📊 Données lottery brutes:', {
@@ -610,7 +610,7 @@ const loadLatestLotteryProduct = async () => {
       })
       
       // Utiliser la progression calculée par l'API, sinon calculer manuellement
-      const finalProgress = progressFromAPI > 0 ? Math.round(progressFromAPI) : 
+      let finalProgress = progressFromAPI > 0 ? Math.round(progressFromAPI) : 
                            (maxTickets > 0 ? Math.round((soldTickets / maxTickets) * 100) : 0)
       
       console.log('🔢 Valeurs calculées:', {
@@ -621,6 +621,13 @@ const loadLatestLotteryProduct = async () => {
       })
       
       console.log('📈 Progression finale utilisée:', finalProgress)
+      
+      // VERIFICATION: Si les données semblent étranges, forcer les bonnes valeurs
+      if (soldTickets > maxTickets) {
+        console.warn('⚠️ PROBLÈME DÉTECTÉ: soldTickets > maxTickets, correction forcée')
+        soldTickets = Math.min(soldTickets, maxTickets)
+        finalProgress = Math.round((soldTickets / maxTickets) * 100)
+      }
       
       latestLotteryProduct.value = {
         id: product.id,
@@ -635,7 +642,12 @@ const loadLatestLotteryProduct = async () => {
         isEndingSoon: lottery?.is_ending_soon || false
       }
       
-      console.log('Produit tombola final:', latestLotteryProduct.value)
+      console.log('✅ Produit tombola final assigné:', {
+        soldTickets: latestLotteryProduct.value.soldTickets,
+        totalTickets: latestLotteryProduct.value.totalTickets,
+        progress: latestLotteryProduct.value.progress,
+        name: latestLotteryProduct.value.name
+      })
     } else {
       // Si pas de produit trouvé, utiliser un fallback cohérent
       latestLotteryProduct.value = {
@@ -675,8 +687,8 @@ const setFallbackProducts = () => {
       ticketPrice: 1500,
       ticket_price: 1500,
       image: placeholderImg,
-      soldTickets: 750,
-      totalTickets: 1000,
+      soldTickets: 0,
+      totalTickets: 500,
       isNew: true,
       sale_mode: 'lottery',
       lottery_ends_soon: false,
@@ -700,7 +712,7 @@ const setFallbackProducts = () => {
       ticketPrice: 1200,
       ticket_price: 1200,
       image: placeholderImg,
-      soldTickets: 320,
+      soldTickets: 50,
       totalTickets: 800,
       isNew: false,
       sale_mode: 'lottery',
@@ -777,10 +789,17 @@ watch(latestLotteryProduct, (newValue) => {
 // Initialize data on component mount
 onMounted(async () => {
   console.log('🚀 Montage du composant Home - chargement des données...')
+  
+  // Vérifier les données initiales
+  console.log('📊 Données initiales latestLotteryProduct:', latestLotteryProduct.value)
+  
   await Promise.all([
     loadFeaturedProducts(),
     loadLatestLotteryProduct()
   ])
+  
+  // Vérifier les données finales
+  console.log('📊 Données finales latestLotteryProduct:', latestLotteryProduct.value)
   console.log('✅ Chargement terminé')
 })
 </script>
