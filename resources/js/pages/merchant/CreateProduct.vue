@@ -740,10 +740,11 @@ const canProceed = computed(() => {
     case 1:
       return validateStep1()
     case 2:
-      // Les images sont optionnelles, mais on vérifie qu'il n'y a pas d'upload en cours
+      // Vérifier qu'au moins une image est uploadée et qu'aucun upload n'est en cours
       const imageUploadComponent = document.querySelector('.image-upload-container')
       const isUploading = imageUploadComponent?.querySelector('.animate-spin') !== null
-      return !isUploading // On peut procéder seulement si aucun upload n'est en cours
+      const hasImages = (form.imageUrls && form.imageUrls.length > 0) || (form.images && form.images.length > 0)
+      return hasImages && !isUploading // Au moins une image uploadée ET aucun upload en cours
     case 3:
       return validateStep3()
     case 4:
