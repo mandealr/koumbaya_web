@@ -596,11 +596,11 @@ const loadProduct = async () => {
     const productId = route.params.id
     
     const response = await get(`/products/${productId}`)
-    console.log('🔍 API Response structure:', response)
+    console.log('🔍 Full response:', response)
     
-    // La réponse API a la structure: {success: true, data: {product: {...}}}
-    // Le composable useApi retourne directement response.data
-    let productData = response.data?.product || response.product
+    // Le composable useApi retourne directement le contenu de data depuis l'API
+    // Donc response contient directement les données du produit
+    let productData = response
     
     console.log('📦 Product data:', productData)
     
