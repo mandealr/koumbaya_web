@@ -42,6 +42,9 @@ use App\Http\Controllers\Api\VendorProfileController;
 |
 */
 
+// ROUTE TEMPORAIRE - À SUPPRIMER APRÈS DÉPLOIEMENT CORRECT
+Route::get('products/lottery-duration-constraints', [App\Http\Controllers\Api\TemporaryConstraintsController::class, 'getLotteryDurationConstraints']);
+
 // Route publique pour les avatars
 Route::get('/avatars/{filename}', [AvatarController::class, 'show'])
     ->name('avatar.show')
