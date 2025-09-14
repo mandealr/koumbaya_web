@@ -1304,7 +1304,12 @@ class ProductController extends Controller
     {
         $user = auth()->user();
         
-        if (!$user || !$user->isMerchant()) {
+        // Si pas d'utilisateur authentifié, retourner les contraintes génériques
+        if (!$user) {
+            return $this->getGenericConstraints();
+        }
+        
+        if (!$user->isMerchant()) {
             return response()->json(['error' => 'Seuls les marchands peuvent accéder à ces informations'], 403);
         }
         
@@ -1347,6 +1352,18 @@ class ProductController extends Controller
         
         $constraints['default_duration'] = config('koumbaya.marketplace.default_lottery_duration', 30);
         
+        // Ajouter les informations sur les prix de tickets
+        $constraints['ticket_pricing'] = [
+            'min_ticket_price' => config('koumbaya.ticket_calculation.min_ticket_price', 200),
+            'max_ticket_price' => config('koumbaya.ticket_calculation.max_ticket_price', 50000),
+            'currency' => 'FCFA',
+            'rules' => [
+                'Le prix de ticket minimum est de ' . config('koumbaya.ticket_calculation.min_ticket_price', 200) . ' FCFA',
+                'Le prix est calculé automatiquement selon le prix du produit et la durée',
+                'Plus le prix du produit est élevé, plus le prix du ticket sera élevé'
+            ]
+        ];
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -1356,6 +1373,41 @@ class ProductController extends Controller
                     'is_business_seller' => $user->isBusinessSeller(),
                     'is_merchant' => $user->is_merchant
                 ]
+            ]
+        ]);
+    }
+
+    /**
+     * Retourne les contraintes génériques pour les utilisateurs non authentifiés
+     */
+    private function getGenericConstraints()
+    {
+        $constraints = [
+            'type' => 'standard',
+            'can_customize' => true,
+            'fixed_duration' => null,
+            'min_days' => 1,
+            'max_days' => 60,
+            'description' => 'Configurez la durée entre 1 et 60 jours',
+            'default_duration' => config('koumbaya.marketplace.default_lottery_duration', 30),
+            'ticket_pricing' => [
+                'min_ticket_price' => config('koumbaya.ticket_calculation.min_ticket_price', 200),
+                'max_ticket_price' => config('koumbaya.ticket_calculation.max_ticket_price', 50000),
+                'currency' => 'FCFA',
+                'rules' => [
+                    'Le prix de ticket minimum est de ' . config('koumbaya.ticket_calculation.min_ticket_price', 200) . ' FCFA',
+                    'Le prix est calculé automatiquement selon le prix du produit et la durée',
+                    'Plus le prix du produit est élevé, plus le prix du ticket sera élevé'
+                ]
+            ]
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'constraints' => $constraints,
+                'timestamp' => now()->toISOString(),
+                'version' => '1.0'
             ]
         ]);
     }

@@ -133,6 +133,9 @@ Route::group([
     Route::post('calculate-ticket-price', [TicketPriceController::class, 'calculate']);
     Route::post('ticket-price-suggestions', [TicketPriceController::class, 'suggestions']);
     Route::get('ticket-calculation-config', [TicketPriceController::class, 'config']);
+    
+    // Configuration produits (public pour les contraintes)
+    Route::get('products/lottery-duration-constraints', [ProductController::class, 'getLotteryDurationConstraints']);
 });
 
 // Routes protégées (authentification requise) avec rate limiting
@@ -144,8 +147,6 @@ Route::group([
         return $request->user();
     });
     
-    // Configuration produits (accessible aux marchands authentifiés)
-    Route::get('products/lottery-duration-constraints', [ProductController::class, 'getLotteryDurationConstraints']);
     
     // Tickets (Nouveau système d'achat) - Nécessite vérification
     Route::post('tickets/purchase', [TicketController::class, 'purchase'])->middleware('verified');
