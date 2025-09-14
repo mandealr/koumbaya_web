@@ -14,6 +14,7 @@ class Product extends Model
         'name',
         'description',
         'image',
+        'images', // Support pour array d'images
         'price',
         'currency',
         'stock_quantity',
@@ -62,6 +63,7 @@ class Product extends Model
             'is_featured' => 'boolean',
             'is_active' => 'boolean',
             'meta' => 'array',
+            'images' => 'array', // Cast pour array d'images
         ];
     }
 
@@ -153,7 +155,37 @@ class Product extends Model
      */
     public function getMainImageAttribute()
     {
+        // Priorité : images[0] puis image 
+        if ($this->images && is_array($this->images) && count($this->images) > 0) {
+            return $this->images[0];
+        }
         return $this->image;
+    }
+
+    /**
+     * Obtenir toutes les images du produit
+     */
+    public function getImagesAttribute($value)
+    {
+        // Si on a des images dans l'array, les retourner
+        if ($value && is_array(json_decode($value, true))) {
+            return json_decode($value, true);
+        }
+        
+        // Si on a des images en JSON string, les décoder
+        if ($value && is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+        
+        // Sinon, retourner l'image principale dans un array si elle existe
+        if ($this->attributes['image']) {
+            return [$this->attributes['image']];
+        }
+        
+        return [];
     }
 
     /**

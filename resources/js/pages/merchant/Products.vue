@@ -157,7 +157,7 @@
         <!-- Product Image -->
         <div class="relative h-48 bg-gray-200">
           <ProductImage
-            :src="product.main_image || product.image_url || (product.images && product.images[0]) || null"
+            :src="getProductImageSrc(product)"
             :alt="product.name"
             container-class="w-full h-full"
             image-class="w-full h-full object-cover"
@@ -745,6 +745,35 @@ const deleteProduct = async (product) => {
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('fr-FR').format(amount)
+}
+
+const getProductImageSrc = (product) => {
+  // Debug pour voir les données du produit
+  console.debug('Product image data:', {
+    main_image: product.main_image,
+    image_url: product.image_url,
+    image: product.image,
+    images: product.images
+  })
+  
+  // Priorité : main_image -> images[0] -> image_url -> image -> null
+  if (product.main_image) {
+    return product.main_image
+  }
+  
+  if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+    return product.images[0]
+  }
+  
+  if (product.image_url) {
+    return product.image_url
+  }
+  
+  if (product.image) {
+    return product.image
+  }
+  
+  return null
 }
 
 const toggleProductMenu = (productId) => {

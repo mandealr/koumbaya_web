@@ -68,7 +68,10 @@ const imageError = ref(false)
 const loading = ref(false)
 
 const imageUrl = computed(() => {
-  if (!props.src) return ''
+  if (!props.src) {
+    console.debug('ProductImage: No src provided')
+    return ''
+  }
   
   // Si c'est déjà une URL complète (http/https), la retourner telle quelle
   if (props.src.startsWith('http')) {
@@ -86,7 +89,9 @@ const imageUrl = computed(() => {
   }
   
   // Sinon, ajouter le préfixe pour les images uploadées
-  return `/storage/products/${props.src}`
+  const finalUrl = `/storage/products/${props.src}`
+  console.debug('ProductImage: Generated URL:', finalUrl)
+  return finalUrl
 })
 
 const handleImageError = () => {

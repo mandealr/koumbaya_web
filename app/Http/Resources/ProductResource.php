@@ -24,7 +24,7 @@ class ProductResource extends JsonResource
             'ticket_price' => (float) $this->ticket_price,
             'min_participants' => $this->min_participants,
             'stock_quantity' => $this->stock_quantity,
-            'images' => $this->images && is_array($this->images) ? $this->images : [],
+            'images' => $this->images ?: [],
             'image_url' => $this->image_url,
             'main_image' => $this->main_image,
             'category_id' => $this->category_id,
