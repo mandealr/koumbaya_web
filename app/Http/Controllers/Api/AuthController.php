@@ -9,7 +9,9 @@ use App\Models\User;
 use App\Models\UserWallet;
 use App\Models\UserLoginHistory;
 use App\Models\Role;
+use App\Models\AuditLog;
 use App\Services\OtpService;
+use App\Traits\ApiResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -27,6 +29,7 @@ use Illuminate\Support\Str;
  */
 class AuthController extends Controller
 {
+    use ApiResponses;
     // Les middlewares sont maintenant définis dans les routes (Laravel 11+)
 
     /**
@@ -80,7 +83,11 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->sendValidationError($validator);
+            AuditLog::logAuth('auth.register.validation_failed', null, [
+                'email' => $request->email,
+                'errors' => $validator->errors()->toArray()
+            ]);
+            return $this->validationErrorResponse($validator);
         }
 
         // TODO: Réimplémenter la vérification OTP si nécessaire
@@ -178,7 +185,13 @@ class AuthController extends Controller
         // Charger les relations nécessaires
         $user->load(['wallet', 'roles']);
 
-        return $this->sendResponse([
+        // Log succès
+        AuditLog::logAuth('auth.register.success', $user, [
+            'role' => $request->role,
+            'verification_type' => $isFlutterApp ? 'otp' : 'email_link'
+        ]);
+
+        return $this->successResponse([
             'user' => $user,
             'access_token' => $token,
             'token_type' => 'Bearer'
@@ -230,7 +243,11 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            AuditLog::logAuth('auth.login.validation_failed', null, [
+                'identifier' => $identifier,
+                'login_field' => $loginField
+            ]);
+            return $this->validationErrorResponse($validator);
         }
 
         // Préparer les credentials pour l'authentification
@@ -242,14 +259,19 @@ class AuthController extends Controller
         // Tentative d'authentification avec le guard web
         if (!Auth::guard('web')->attempt($credentials)) {
             $this->logFailedLogin($identifier, $request->ip());
-            return response()->json(['error' => 'Identifiants invalides'], 401);
+            AuditLog::logAuth('auth.login.failed', null, [
+                'identifier' => $identifier,
+                'login_field' => $loginField
+            ]);
+            return $this->errorResponse('Identifiants invalides', 401);
         }
 
         $user = User::with('roles', 'wallet')->find(Auth::guard('web')->user()->id);
 
         // Vérifier si l'utilisateur est actif
         if (!$user->is_active) {
-            return response()->json(['error' => 'Compte désactivé'], 403);
+            AuditLog::logAuth('auth.login.account_disabled', $user);
+            return $this->errorResponse('Compte désactivé', 403);
         }
 
         // Mettre à jour la dernière connexion
@@ -261,13 +283,17 @@ class AuthController extends Controller
         $token = $user->createAuthToken('login-token');
 
         $this->logUserLogin($user, $request->ip(), 'success');
+        
+        // Log succès
+        AuditLog::logAuth('auth.login.success', $user, [
+            'login_field' => $loginField
+        ]);
 
-        return response()->json([
-            'message' => 'Connexion réussie',
+        return $this->successResponse([
             'user' => $user,
             'access_token' => $token,
             'token_type' => 'Bearer'
-        ]);
+        ], 'Connexion réussie');
     }
 
     /**

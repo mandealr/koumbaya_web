@@ -24,6 +24,12 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\InputValidationMiddleware::class,
         ]);
 
+        // Middleware global pour l'API
+        $middleware->api(prepend: [
+            \App\Http\Middleware\DetectPlatformMiddleware::class,
+            \App\Http\Middleware\ApiAuditMiddleware::class,
+        ]);
+
         // Middlewares nommés
         $middleware->alias([
             'auth.sanctum' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
@@ -34,6 +40,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'validate.json' => \App\Http\Middleware\ValidateJsonMiddleware::class,
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
             'csrf' => \App\Http\Middleware\VerifyCsrfToken::class,
+            'detect.platform' => \App\Http\Middleware\DetectPlatformMiddleware::class,
+            'api.audit' => \App\Http\Middleware\ApiAuditMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
