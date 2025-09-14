@@ -590,9 +590,11 @@ const loadLatestLotteryProduct = async () => {
     if (response && response.success && response.data) {
       const product = response.data.product
       const lottery = response.data.lottery
+      const debug = response.data.debug
       
       console.log('Données produit:', product)
       console.log('Données lottery:', lottery)
+      console.log('🐛 Debug backend:', debug)
       
       // Utiliser directement les données calculées par l'API
       const soldTickets = parseInt(lottery?.sold_tickets || 0)
@@ -611,6 +613,13 @@ const loadLatestLotteryProduct = async () => {
       const finalProgress = progressFromAPI > 0 ? Math.round(progressFromAPI) : 
                            (maxTickets > 0 ? Math.round((soldTickets / maxTickets) * 100) : 0)
       
+      console.log('🔢 Valeurs calculées:', {
+        soldTickets,
+        maxTickets,
+        progressFromAPI,
+        finalProgress
+      })
+      
       console.log('📈 Progression finale utilisée:', finalProgress)
       
       latestLotteryProduct.value = {
@@ -628,30 +637,30 @@ const loadLatestLotteryProduct = async () => {
       
       console.log('Produit tombola final:', latestLotteryProduct.value)
     } else {
-      // Si pas de produit trouvé, utiliser un fallback
+      // Si pas de produit trouvé, utiliser un fallback cohérent
       latestLotteryProduct.value = {
         id: 'fallback',
         name: 'iPhone 15 Pro Max',
         value: 1299000,
         ticketPrice: 1500,
         image: placeholderImg,
-        soldTickets: 750,
-        totalTickets: 1000,
-        progress: 75
+        soldTickets: 0,
+        totalTickets: 500,
+        progress: 0
       }
     }
   } catch (error) {
     console.error('Erreur lors du chargement du dernier produit tombola:', error)
-    // Fallback
+    // Fallback cohérent
     latestLotteryProduct.value = {
       id: 'fallback',
       name: 'iPhone 15 Pro Max',
       value: 1299000,
       ticketPrice: 1500,
       image: placeholderImg,
-      soldTickets: 750,
-      totalTickets: 1000,
-      progress: 75
+      soldTickets: 0,
+      totalTickets: 500,
+      progress: 0
     }
   }
 }

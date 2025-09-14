@@ -995,7 +995,28 @@ class ProductController extends Controller
 
             // Synchroniser les données de tombola SEULEMENT si activeLottery existe
             if ($product->activeLottery) {
+                // Vérifier et corriger sold_tickets si nécessaire
+                $realSoldTickets = $product->activeLottery->paidTickets()->count();
+                if ($realSoldTickets != $product->activeLottery->sold_tickets) {
+                    \Log::info("Synchronisation tickets pour lottery {$product->activeLottery->id}: {$product->activeLottery->sold_tickets} -> {$realSoldTickets}");
+                    $product->activeLottery->update(['sold_tickets' => $realSoldTickets]);
+                    $product->activeLottery->refresh();
+                }
+                
                 $product->activeLottery->append(['remaining_tickets', 'progress_percentage', 'time_remaining', 'participation_rate', 'is_ending_soon']);
+            }
+
+            // Debug des données before return
+            $lotteryDebug = null;
+            if ($product->activeLottery) {
+                $lotteryDebug = [
+                    'id' => $product->activeLottery->id,
+                    'sold_tickets' => $product->activeLottery->sold_tickets,
+                    'max_tickets' => $product->activeLottery->max_tickets,
+                    'progress_percentage' => $product->activeLottery->progress_percentage,
+                    'real_paid_tickets_count' => $product->activeLottery->paidTickets()->count(),
+                ];
+                \Log::info('Latest lottery debug:', $lotteryDebug);
             }
 
             return response()->json([
@@ -1003,7 +1024,8 @@ class ProductController extends Controller
                 'data' => [
                     'product' => new ProductResource($product),
                     'lottery' => $product->activeLottery ? new LotteryResource($product->activeLottery) : null
-                ]
+                ],
+                'debug' => $lotteryDebug // Temporaire pour debug
             ]);
         } catch (\Exception $e) {
             \Log::error('Erreur dans latestLottery: ' . $e->getMessage());
