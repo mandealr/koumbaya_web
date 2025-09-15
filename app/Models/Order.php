@@ -86,6 +86,11 @@ class Order extends Model
         return $this->hasMany(Payment::class, 'order_id');
     }
 
+    public function tickets()
+    {
+        return $this->hasMany(LotteryTicket::class, 'order_id');
+    }
+
     /**
      * Scopes
      */

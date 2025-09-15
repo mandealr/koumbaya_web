@@ -46,31 +46,17 @@ export function useCustomerDashboard() {
   // API calls
   const loadDashboardStats = async () => {
     try {
-      const response = await get('/tickets/my-tickets')
+      // Utiliser l'endpoint des vraies statistiques
+      const response = await get('/orders/stats')
       
       if (response && response.success) {
-        const tickets = Array.isArray(response.data) ? response.data : []
-        
-        // Calculate stats from tickets
-        const uniqueLotteries = new Set()
-        let totalSpent = 0
-        let prizesWon = 0
-        
-        tickets.forEach(ticket => {
-          if (ticket.lottery_id) {
-            uniqueLotteries.add(ticket.lottery_id)
-          }
-          totalSpent += parseFloat(ticket.amount || 0)
-          if (ticket.status === 'won') {
-            prizesWon++
-          }
-        })
+        const stats = response.data
         
         rawStats.value = {
-          ticketsBought: tickets.length,
-          lotteriesParticipated: uniqueLotteries.size,
-          totalSpent,
-          prizesWon
+          ticketsBought: stats.total_tickets_purchased || 0,
+          lotteriesParticipated: stats.lottery_orders || 0,
+          totalSpent: stats.total_amount_spent || 0,
+          prizesWon: stats.winning_tickets || 0
         }
       }
     } catch (err) {
@@ -87,20 +73,31 @@ export function useCustomerDashboard() {
   
   const loadRecentTickets = async () => {
     try {
-      const response = await get('/tickets/my-tickets?limit=5&order=desc')
+      // L'API de tickets supporte la pagination, donc on récupère la première page avec 5 éléments
+      const response = await get('/tickets/my-tickets')
       
       if (response && response.success && Array.isArray(response.data)) {
-        recentTickets.value = response.data.map(ticket => ({
+        // Prendre seulement les 5 premiers tickets (les plus récents)
+        const ticketsData = response.data.slice(0, 5)
+        
+        recentTickets.value = ticketsData.map(ticket => ({
           id: ticket.id,
+          ticket_number: ticket.ticket_number,
           product: {
-            id: ticket.product?.id || ticket.lottery?.product?.id,
-            title: ticket.product?.name || ticket.lottery?.product?.name || 'Produit inconnu',
-            image: ticket.product?.image_url || ticket.lottery?.product?.image_url || '/images/products/placeholder.jpg'
+            id: ticket.lottery?.product?.id,
+            title: ticket.lottery?.product?.name || 'Produit inconnu',
+            image: ticket.lottery?.product?.image_url || ticket.lottery?.product?.image || '/images/products/placeholder.jpg'
           },
-          quantity: ticket.quantity || 1,
-          total_price: formatCurrency(ticket.amount || 0),
-          status: ticket.status || 'active',
-          purchased_at: new Date(ticket.created_at)
+          quantity: 1, // Un ticket = une unité
+          total_price: formatCurrency(ticket.price || 0),
+          status: ticket.status || 'reserved',
+          purchased_at: new Date(ticket.purchased_at || ticket.created_at),
+          lottery: {
+            id: ticket.lottery?.id,
+            lottery_number: ticket.lottery?.lottery_number,
+            title: ticket.lottery?.title,
+            draw_date: ticket.lottery?.draw_date
+          }
         }))
       } else {
         // Si pas de données valides, initialiser avec un tableau vide

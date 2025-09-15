@@ -98,92 +98,95 @@
       </div>
     </div>
 
-    <!-- Tickets List -->
-    <div v-if="loading" class="text-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-      <p class="mt-4 text-gray-600">Chargement de vos tickets...</p>
-    </div>
+    <!-- Table Controls -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+      <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+        <div class="flex items-center space-x-4">
+          <span class="text-sm text-gray-700">Afficher</span>
+          <select 
+            :value="perPage"
+            @change="changePerPage(parseInt($event.target.value))"
+            class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+          <span class="text-sm text-gray-700">entrées</span>
+        </div>
+        <div v-if="total > 0" class="text-sm text-gray-700">
+          Affichage de {{ from }} à {{ to }} sur {{ total }} tickets
+        </div>
+      </div>
 
-    <div v-else-if="filteredTickets.length === 0" class="text-center py-12">
-      <TicketIcon class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-      <h3 class="text-lg font-medium text-gray-900 mb-2">
-        {{ filteredTickets.length === 0 && !filters.search && !filters.status && !filters.period ? 'Aucun ticket acheté' : 'Aucun résultat trouvé' }}
-      </h3>
-      <p class="text-gray-600 mb-4">
-        {{ filteredTickets.length === 0 && !filters.search && !filters.status && !filters.period
-          ? 'Vous n\'avez pas encore participé à des tombolas'
-          : 'Essayez de modifier vos filtres de recherche'
-        }}
-      </p>
-      <router-link
-        v-if="filteredTickets.length === 0 && !filters.search && !filters.status && !filters.period"
-        to="/customer/products"
-        class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-      >
-        Découvrir les produits
-      </router-link>
-    </div>
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p class="mt-4 text-gray-600">Chargement de vos tickets...</p>
+      </div>
 
-    <div v-else class="space-y-4">
-      <div
-        v-for="ticket in filteredTickets"
-        :key="ticket.id"
-        class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
-      >
-        <div class="p-6">
-          <div class="flex items-start space-x-4">
-            <!-- Product Image -->
-            <div class="flex-shrink-0">
-              <img
-                :src="ticket.product.image_url || ticket.product.main_image || ticket.product.image"
-                :alt="ticket.product.title"
-                class="w-20 h-20 rounded-lg object-cover"
-              />
-            </div>
+      <!-- Empty State -->
+      <div v-else-if="filteredTickets.length === 0" class="text-center py-12">
+        <TicketIcon class="w-16 h-16 text-gray-400 mx-auto mb-4" />
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          {{ filteredTickets.length === 0 && !filters.search && !filters.status && !filters.period ? 'Aucun ticket acheté' : 'Aucun résultat trouvé' }}
+        </h3>
+        <p class="text-gray-600 mb-4">
+          {{ filteredTickets.length === 0 && !filters.search && !filters.status && !filters.period
+            ? 'Vous n\'avez pas encore participé à des tombolas'
+            : 'Essayez de modifier vos filtres de recherche'
+          }}
+        </p>
+        <router-link
+          v-if="filteredTickets.length === 0 && !filters.search && !filters.status && !filters.period"
+          to="/customer/products"
+          class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Découvrir les produits
+        </router-link>
+      </div>
 
-            <!-- Ticket Info -->
-            <div class="flex-1 min-w-0">
-              <div class="flex justify-between items-start mb-2">
-                <div>
-                  <h3 class="text-lg font-semibold text-gray-900">{{ ticket.product.title }}</h3>
-                  <p class="text-sm text-gray-600">{{ ticket.product.description }}</p>
+      <!-- Data Table -->
+      <div v-else class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produit</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Numéro</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date d'achat</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tirage</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr 
+              v-for="ticket in filteredTickets" 
+              :key="ticket.id"
+              class="hover:bg-gray-50"
+            >
+              <!-- Product -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-12 w-12">
+                    <img
+                      class="h-12 w-12 rounded-lg object-cover"
+                      :src="ticket.product.image_url || ticket.product.main_image || ticket.product.image"
+                      :alt="ticket.product.title"
+                    />
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900">{{ ticket.product.title }}</div>
+                    <div class="text-sm text-gray-500 truncate max-w-xs">{{ ticket.product.description }}</div>
+                  </div>
                 </div>
-                <span :class="[
-                  'px-3 py-1 text-sm font-medium rounded-full',
-                  ticket.status === 'won' ? 'bg-blue-100 text-blue-800' :
-                  ticket.status === 'lost' ? 'bg-red-100 text-red-800' :
-                  ticket.status === 'active' ? 'bg-blue-100 text-blue-800' :
-                  ticket.status === 'reserved' ? 'bg-orange-100 text-orange-800' :
-                  ticket.status === 'paid' ? 'bg-green-100 text-green-800' :
-                  'bg-yellow-100 text-yellow-800'
-                ]">
-                  {{ getStatusLabel(ticket.status) }}
-                </span>
-              </div>
-
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <div>
-                  <p class="text-xs text-gray-500">Tickets achetés</p>
-                  <p class="text-sm font-semibold text-gray-900">{{ ticket.quantity }}</p>
-                </div>
-                <div>
-                  <p class="text-xs text-gray-500">Total payé</p>
-                  <p class="text-sm font-semibold text-gray-900">{{ formatCurrency(ticket.total_price) }}</p>
-                </div>
-                <div>
-                  <p class="text-xs text-gray-500">Date d'achat</p>
-                  <p class="text-sm font-semibold text-gray-900">{{ formatDate(ticket.purchased_at) }}</p>
-                </div>
-                <div>
-                  <p class="text-xs text-gray-500">Tirage</p>
-                  <p class="text-sm font-semibold text-gray-900">{{ formatDate(ticket.lottery.draw_date) }}</p>
-                </div>
-              </div>
-
-              <!-- Ticket Numbers -->
-              <div class="mb-4">
-                <p class="text-xs text-gray-500 mb-2">Vos numéros de tickets</p>
-                <div class="flex flex-wrap gap-2">
+              </td>
+              
+              <!-- Ticket Number -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex flex-wrap gap-1">
                   <span
                     v-for="number in ticket.ticket_numbers"
                     :key="number"
@@ -197,96 +200,166 @@
                     #{{ number }}
                   </span>
                 </div>
-              </div>
-
-              <!-- Progress Bar -->
-              <div v-if="ticket.status === 'active'" class="mb-4">
-                <div class="flex justify-between text-xs text-gray-600 mb-1">
-                  <span>Progression de la tombola</span>
-                  <span>{{ ticket.lottery.progress }}%</span>
+              </td>
+              
+              <!-- Price -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ formatCurrency(ticket.total_price) }}
+              </td>
+              
+              <!-- Status -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span :class="[
+                  'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
+                  ticket.status === 'won' ? 'bg-blue-100 text-blue-800' :
+                  ticket.status === 'lost' ? 'bg-red-100 text-red-800' :
+                  ticket.status === 'active' ? 'bg-blue-100 text-blue-800' :
+                  ticket.status === 'reserved' ? 'bg-orange-100 text-orange-800' :
+                  ticket.status === 'paid' ? 'bg-green-100 text-green-800' :
+                  'bg-yellow-100 text-yellow-800'
+                ]">
+                  {{ getStatusLabel(ticket.status) }}
+                </span>
+                
+                <!-- Win/Loss Details -->
+                <div v-if="ticket.status === 'won'" class="mt-1">
+                  <div class="flex items-center text-xs text-blue-600">
+                    <TrophyIcon class="w-3 h-3 mr-1" />
+                    <span>Gagnant #{{ ticket.winning_number }}</span>
+                  </div>
+                  <div v-if="!ticket.prize_claimed" class="mt-1">
+                    <button
+                      @click="handleClaimPrize(ticket.id)"
+                      :disabled="loading"
+                      class="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 transition-colors disabled:opacity-50"
+                    >
+                      Réclamer
+                    </button>
+                  </div>
+                  <div v-else class="mt-1">
+                    <span class="inline-flex items-center text-xs text-blue-600">
+                      <CheckCircleIcon class="w-3 h-3 mr-1" />
+                      Réclamé
+                    </span>
+                  </div>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                    :style="{ width: ticket.lottery.progress + '%' }"
-                  ></div>
+                
+                <div v-if="ticket.status === 'lost'" class="mt-1 text-xs text-red-600">
+                  Gagnant: #{{ ticket.winning_number }}
                 </div>
-              </div>
-
-              <!-- Winning Details -->
-              <div v-if="ticket.status === 'won'" class="bg-blue-50 p-4 rounded-lg mb-4">
-                <div class="flex items-center mb-2">
-                  <TrophyIcon class="w-5 h-5 text-blue-600 mr-2" />
-                  <p class="font-semibold text-blue-900">Félicitations ! Vous avez gagné !</p>
-                </div>
-                <p class="text-sm text-blue-800">Numéro gagnant: #{{ ticket.winning_number }}</p>
-                <p class="text-sm text-blue-800">Tirage effectué le {{ formatDate(ticket.lottery.draw_date) }}</p>
-                <div v-if="!ticket.prize_claimed" class="mt-3">
-                  <button
-                    @click="handleClaimPrize(ticket.id)"
-                    :disabled="loading"
-                    class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {{ loading ? 'Réclamation...' : 'Réclamer mon prix' }}
-                  </button>
-                </div>
-                <div v-else class="mt-3">
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                    <CheckCircleIcon class="w-4 h-4 mr-1" />
-                    Prix réclamé
-                  </span>
-                </div>
-              </div>
-
-              <!-- Loss Details -->
-              <div v-if="ticket.status === 'lost'" class="bg-red-50 p-4 rounded-lg mb-4">
-                <div class="flex items-center mb-2">
-                  <ExclamationCircleIcon class="w-5 h-5 text-red-600 mr-2" />
-                  <p class="font-semibold text-red-900">Pas de chance cette fois-ci</p>
-                </div>
-                <p class="text-sm text-red-800">Numéro gagnant: #{{ ticket.winning_number }}</p>
-                <p class="text-sm text-red-800">Tirage effectué le {{ formatDate(ticket.lottery.draw_date) }}</p>
-              </div>
-
-              <!-- Action Buttons -->
-              <div class="flex justify-between items-center">
-                <div class="text-sm text-gray-500">
+              </td>
+              
+              <!-- Purchase Date -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ formatDate(ticket.purchased_at) }}
+              </td>
+              
+              <!-- Draw Date -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ formatDate(ticket.lottery.draw_date) }}
+                <div class="text-xs text-gray-500">
                   {{ getRemainingTime(ticket.lottery.draw_date, ticket.status) }}
                 </div>
-                <div class="flex space-x-2">
+              </td>
+              
+              <!-- Actions -->
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex justify-end space-x-2">
                   <router-link
                     :to="`/customer/products/${ticket.product.id}`"
-                    class="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    class="text-blue-600 hover:text-blue-900"
                   >
-                    Voir le produit
+                    Voir
                   </router-link>
                   <button
                     @click="handleDownloadTicket(ticket.id)"
                     :disabled="loading"
-                    class="text-sm text-gray-600 hover:text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="text-gray-600 hover:text-gray-900 disabled:opacity-50"
                   >
-                    {{ loading ? 'Téléchargement...' : 'Télécharger' }}
+                    PDF
                   </button>
                 </div>
-              </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div v-if="!loading && filteredTickets.length > 0 && lastPage > 1" class="px-6 py-4 border-t border-gray-200 bg-white">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 flex justify-between sm:hidden">
+            <!-- Mobile pagination -->
+            <button
+              @click="previousPage"
+              :disabled="currentPage === 1"
+              class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Précédent
+            </button>
+            <button
+              @click="nextPage"
+              :disabled="currentPage === lastPage"
+              class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Suivant
+            </button>
+          </div>
+          
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Affichage de
+                <span class="font-medium">{{ from }}</span>
+                à
+                <span class="font-medium">{{ to }}</span>
+                sur
+                <span class="font-medium">{{ total }}</span>
+                résultats
+              </p>
+            </div>
+            
+            <div>
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <!-- Previous Button -->
+                <button
+                  @click="previousPage"
+                  :disabled="currentPage === 1"
+                  class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span class="sr-only">Précédent</span>
+                  <ChevronLeftIcon class="h-5 w-5" />
+                </button>
+                
+                <!-- Page Numbers -->
+                <button
+                  v-for="page in getPageNumbers()"
+                  :key="page"
+                  @click="goToPage(page)"
+                  :class="[
+                    'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
+                    page === currentPage
+                      ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                      : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                  ]"
+                >
+                  {{ page }}
+                </button>
+                
+                <!-- Next Button -->
+                <button
+                  @click="nextPage"
+                  :disabled="currentPage === lastPage"
+                  class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span class="sr-only">Suivant</span>
+                  <ChevronRightIcon class="h-5 w-5" />
+                </button>
+              </nav>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Load More -->
-    <div v-if="!loading && filteredTickets.length > 0 && hasMore" class="text-center mt-8">
-      <button
-        @click="loadMore"
-        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-blue-50 hover:bg-blue-100"
-      >
-        Charger plus de tickets
-        <ArrowDownIcon class="ml-2 w-5 h-5" />
-      </button>
-    </div>
-  </div>
-</template>
+      </div>\n    </div>\n  </div>\n</template>
 
 <script setup>
 import { onMounted } from 'vue'
@@ -297,7 +370,9 @@ import {
   ClockIcon,
   CheckCircleIcon,
   ExclamationCircleIcon,
-  ArrowDownIcon
+  ArrowDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from '@heroicons/vue/24/outline'
 import { useMyTickets } from '@/composables/useMyTickets'
 
@@ -308,6 +383,12 @@ const {
   filters,
   
   // Pagination
+  currentPage,
+  lastPage,
+  total,
+  from,
+  to,
+  perPage,
   hasMore,
   
   // State
@@ -320,6 +401,11 @@ const {
   claimPrize,
   downloadTicket,
   resetFilters,
+  goToPage,
+  changePerPage,
+  nextPage,
+  previousPage,
+  getPageNumbers,
   
   // Utilities
   formatCurrency,

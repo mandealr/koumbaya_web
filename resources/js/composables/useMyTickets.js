@@ -18,6 +18,9 @@ export function useMyTickets() {
   const hasMore = ref(true)
   const perPage = ref(10)
   const total = ref(0)
+  const lastPage = ref(1)
+  const from = ref(0)
+  const to = ref(0)
   
   // Filters
   const filters = ref({
@@ -155,6 +158,9 @@ export function useMyTickets() {
         // Update pagination
         currentPage.value = pagination.current_page || page
         total.value = pagination.total || transformedTickets.length
+        lastPage.value = pagination.last_page || 1
+        from.value = pagination.from || 0
+        to.value = pagination.to || transformedTickets.length
         hasMore.value = pagination.current_page < pagination.last_page
         
         // Calculate stats
@@ -170,6 +176,49 @@ export function useMyTickets() {
     if (hasMore.value && !loading.value) {
       await loadTickets(currentPage.value + 1, true)
     }
+  }
+
+  const goToPage = async (page) => {
+    if (page >= 1 && page <= lastPage.value && page !== currentPage.value && !loading.value) {
+      await loadTickets(page, false)
+    }
+  }
+
+  const changePerPage = async (newPerPage) => {
+    perPage.value = newPerPage
+    currentPage.value = 1
+    await loadTickets(1, false)
+  }
+
+  const nextPage = async () => {
+    if (currentPage.value < lastPage.value) {
+      await goToPage(currentPage.value + 1)
+    }
+  }
+
+  const previousPage = async () => {
+    if (currentPage.value > 1) {
+      await goToPage(currentPage.value - 1)
+    }
+  }
+
+  const getPageNumbers = () => {
+    const pages = []
+    const maxVisible = 5
+    const half = Math.floor(maxVisible / 2)
+    
+    let start = Math.max(1, currentPage.value - half)
+    let end = Math.min(lastPage.value, start + maxVisible - 1)
+    
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1)
+    }
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i)
+    }
+    
+    return pages
   }
   
   const refreshTickets = async () => {
@@ -346,6 +395,10 @@ export function useMyTickets() {
     currentPage,
     hasMore,
     total,
+    lastPage,
+    from,
+    to,
+    perPage,
     
     // State
     loading,
@@ -359,6 +412,11 @@ export function useMyTickets() {
     downloadTicket,
     resetFilters,
     applyFilters,
+    goToPage,
+    changePerPage,
+    nextPage,
+    previousPage,
+    getPageNumbers,
     
     // Utilities
     formatCurrency,
