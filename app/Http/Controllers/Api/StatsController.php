@@ -433,36 +433,41 @@ class StatsController extends Controller
             ->orderBy('date')
             ->get();
             
-        // Top produits par nombre de tickets vendus
+        // Top produits par nombre de tickets vendus - approche simplifiée
         $topProducts = Product::where('merchant_id', $user->id)
             ->withSum(['orders as revenue' => function($query) use ($startDate) {
                 $query->where('status', 'paid')
                       ->where('created_at', '>=', $startDate);
             }], 'total_amount')
-            ->withSum(['orders as tickets_sold' => function($query) use ($startDate) {
-                $query->where('status', 'paid')
-                      ->where('created_at', '>=', $startDate);
-            }], 'ticket_count')
             ->withCount(['orders as order_count' => function($query) use ($startDate) {
                 $query->where('status', 'paid')
                       ->where('created_at', '>=', $startDate);
             }])
-            ->orderBy('tickets_sold', 'desc')
-            ->limit(10)
             ->get(['id', 'name', 'price', 'image'])
             ->map(function($product) {
+                // Compter les tickets via les commandes liées
+                $ticketsCount = DB::table('lottery_tickets')
+                    ->join('orders', 'lottery_tickets.order_id', '=', 'orders.id')
+                    ->where('orders.product_id', $product->id)
+                    ->where('orders.status', 'paid')
+                    ->where('lottery_tickets.status', 'paid')
+                    ->count();
+                    
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
                     'price' => $product->price,
                     'image_url' => $product->image,
-                    'revenue' => $product->revenue ?? 0,
-                    'order_count' => $product->order_count ?? 0,
-                    'tickets_sold' => $product->tickets_sold ?? 0,
-                    'sales' => $product->tickets_sold ?? 0, // Pour la compatibilité avec le frontend
+                    'revenue' => (float) ($product->revenue ?? 0),
+                    'order_count' => (int) ($product->order_count ?? 0),
+                    'tickets_sold' => $ticketsCount,
+                    'sales' => $ticketsCount, // Pour la compatibilité avec le frontend
                     'growth' => 0 // Calcul de croissance si nécessaire
                 ];
-            });
+            })
+            ->sortByDesc('tickets_sold')
+            ->take(10)
+            ->values();
             
         // Statistiques de conversion
         $conversionStats = Product::where('merchant_id', $user->id)
