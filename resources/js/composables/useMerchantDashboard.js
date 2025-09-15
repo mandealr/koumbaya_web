@@ -35,32 +35,42 @@ export function useMerchantDashboard() {
   // Computed stats for dashboard cards
   const stats = computed(() => [
     {
-      label: 'Produits actifs',
-      value: dashboardStats.value.products.active.toString(),
-      total: `/ ${dashboardStats.value.products.total}`,
-      color: 'bg-blue-500',
-      icon: 'CubeIcon'
+      label: 'Revenus du mois',
+      value: formatCurrency(dashboardStats.value.revenue?.monthly || 0),
+      change: 0,
+      icon: 'CurrencyDollarIcon',
+      color: 'bg-[#0099cc]'
     },
     {
       label: 'Commandes',
-      value: dashboardStats.value.orders.total.toString(),
-      color: 'bg-green-500',
-      icon: 'ShoppingBagIcon'
+      value: dashboardStats.value.orders?.total || 0,
+      change: 0,
+      icon: 'ShoppingBagIcon',
+      color: 'bg-blue-500'
     },
     {
-      label: 'Revenus total',
-      value: formatCurrency(dashboardStats.value.revenue.total),
-      color: 'bg-yellow-500',
-      icon: 'CurrencyDollarIcon'
+      label: 'Produits actifs',
+      value: dashboardStats.value.products?.active || 0,
+      change: 0,
+      icon: 'GiftIcon',
+      color: 'bg-yellow-500'
     },
     {
-      label: 'Tombolas actives',
-      value: dashboardStats.value.lotteries.active.toString(),
-      total: `/ ${dashboardStats.value.lotteries.total}`,
-      color: 'bg-purple-500',
-      icon: 'TicketIcon'
+      label: 'Clients',
+      value: dashboardStats.value.customers?.total || 0,
+      change: 0,
+      icon: 'UsersIcon',
+      color: 'bg-purple-500'
     }
   ])
+  
+  // Summary for salesSummary compatibility
+  const summary = computed(() => ({
+    total_revenue: dashboardStats.value.revenue?.total || 0,
+    total_orders: dashboardStats.value.orders?.total || 0,
+    avg_order_value: dashboardStats.value.orders?.total > 0 ? 
+      (dashboardStats.value.revenue?.total || 0) / dashboardStats.value.orders.total : 0
+  }))
   
   // API calls
   const loadDashboardStats = async () => {
@@ -143,6 +153,7 @@ export function useMerchantDashboard() {
   return {
     // Data
     stats,
+    summary,
     dashboardStats,
     recentOrders,
     recentLotteries,

@@ -99,10 +99,10 @@ class StatsController extends Controller
         $user = Auth::user();
         
         // Statistiques des produits
-        $productStats = Product::where('user_id', $user->id)
+        $productStats = Product::where('merchant_id', $user->id)
             ->selectRaw('
                 COUNT(*) as total_products,
-                SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active_products,
+                SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active_products,
                 SUM(views_count) as total_views
             ')
             ->first();
@@ -110,7 +110,7 @@ class StatsController extends Controller
         // Statistiques des commandes
         $orderStats = Order::where('type', 'lottery')
             ->whereHas('product', function($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('merchant_id', $user->id);
             })
             ->where('status', 'paid')
             ->selectRaw('
@@ -121,7 +121,7 @@ class StatsController extends Controller
             
         // Statistiques des tombolas
         $lotteryStats = Lottery::whereHas('product', function($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('merchant_id', $user->id);
             })
             ->selectRaw('
                 COUNT(*) as total_lotteries,
@@ -134,7 +134,7 @@ class StatsController extends Controller
         // Revenus par période
         $monthlyRevenue = Order::where('type', 'lottery')
             ->whereHas('product', function($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('merchant_id', $user->id);
             })
             ->where('status', 'paid')
             ->where('paid_at', '>=', now()->subMonth())
@@ -142,7 +142,7 @@ class StatsController extends Controller
             
         $weeklyRevenue = Order::where('type', 'lottery')
             ->whereHas('product', function($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('merchant_id', $user->id);
             })
             ->where('status', 'paid')
             ->where('paid_at', '>=', now()->subWeek())
@@ -183,26 +183,39 @@ class StatsController extends Controller
         $user = Auth::user();
         $productId = $request->input('product_id');
         
-        $query = Product::where('user_id', $user->id);
+        $query = Product::where('merchant_id', $user->id);
         
         if ($productId) {
             $query->where('id', $productId);
         }
         
+        // Pour sales_count, nous devons compter les commandes
         $stats = $query->selectRaw('
             COUNT(*) as total_products,
-            SUM(views_count) as total_views,
-            SUM(sales_count) as total_sales,
-            AVG(CASE WHEN views_count > 0 THEN (sales_count / views_count) * 100 ELSE 0 END) as avg_conversion_rate
+            SUM(views_count) as total_views
         ')
         ->first();
         
-        // Top performing products
-        $topProducts = Product::where('user_id', $user->id)
-            ->where('sales_count', '>', 0)
-            ->orderBy('sales_count', 'desc')
+        // Calculer le total de ventes via les commandes
+        $salesData = Order::whereHas('product', function($q) use ($user) {
+                $q->where('merchant_id', $user->id);
+            })
+            ->where('status', 'paid')
+            ->selectRaw('COUNT(*) as total_sales')
+            ->first();
+            
+        // Top performing products basé sur les revenus
+        $topProducts = Product::where('merchant_id', $user->id)
+            ->withCount(['orders as order_count' => function($query) {
+                $query->where('status', 'paid');
+            }])
+            ->withSum(['orders as revenue' => function($query) {
+                $query->where('status', 'paid');
+            }], 'total_amount')
+            ->having('order_count', '>', 0)
+            ->orderBy('revenue', 'desc')
             ->take(5)
-            ->get(['id', 'name', 'sales_count', 'views_count', 'price']);
+            ->get(['id', 'name', 'views_count', 'price']);
             
         return response()->json([
             'success' => true,
@@ -210,18 +223,19 @@ class StatsController extends Controller
                 'summary' => [
                     'total_products' => (int) ($stats->total_products ?? 0),
                     'total_views' => (int) ($stats->total_views ?? 0),
-                    'total_sales' => (int) ($stats->total_sales ?? 0),
-                    'avg_conversion_rate' => round((float) ($stats->avg_conversion_rate ?? 0), 2)
+                    'total_sales' => (int) ($salesData->total_sales ?? 0),
+                    'avg_conversion_rate' => $stats->total_views > 0 ? 
+                        round(($salesData->total_sales / $stats->total_views) * 100, 2) : 0
                 ],
                 'top_products' => $topProducts->map(function($product) {
                     return [
                         'id' => $product->id,
                         'name' => $product->name,
-                        'sales' => $product->sales_count,
+                        'sales' => $product->order_count,
                         'views' => $product->views_count,
                         'conversion_rate' => $product->views_count > 0 ? 
-                            round(($product->sales_count / $product->views_count) * 100, 2) : 0,
-                        'revenue' => $product->sales_count * $product->price
+                            round(($product->order_count / $product->views_count) * 100, 2) : 0,
+                        'revenue' => $product->revenue ?? 0
                     ];
                 })
             ]
@@ -238,7 +252,7 @@ class StatsController extends Controller
         // Statistiques des commandes par statut
         $orderStats = Order::where('type', 'lottery')
             ->whereHas('product', function($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('merchant_id', $user->id);
             })
             ->selectRaw('
                 COUNT(*) as total_orders,
@@ -253,7 +267,7 @@ class StatsController extends Controller
         // Commandes récentes
         $recentOrders = Order::where('type', 'lottery')
             ->whereHas('product', function($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('merchant_id', $user->id);
             })
             ->with(['product', 'user'])
             ->orderBy('created_at', 'desc')
@@ -274,7 +288,7 @@ class StatsController extends Controller
         // Revenus par mois (12 derniers mois)
         $monthlyRevenue = Order::where('type', 'lottery')
             ->whereHas('product', function($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('merchant_id', $user->id);
             })
             ->where('status', 'paid')
             ->where('paid_at', '>=', now()->subYear())
@@ -310,7 +324,7 @@ class StatsController extends Controller
         
         // Statistiques des tombolas
         $lotteryStats = Lottery::whereHas('product', function($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('merchant_id', $user->id);
             })
             ->selectRaw('
                 COUNT(*) as total_lotteries,
@@ -319,27 +333,26 @@ class StatsController extends Controller
                 SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed_lotteries,
                 SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled_lotteries,
                 SUM(sold_tickets) as total_tickets_sold,
-                SUM(total_tickets) as total_tickets_available,
-                AVG(CASE WHEN status = "completed" THEN (sold_tickets / total_tickets) * 100 ELSE NULL END) as avg_completion_rate
+                SUM(max_tickets) as total_tickets_available,
+                AVG(CASE WHEN status = "completed" AND max_tickets > 0 THEN (sold_tickets / max_tickets) * 100 ELSE NULL END) as avg_completion_rate
             ')
             ->first();
             
         // Tombolas actives avec possibilité de tirage
         $drawableLotteries = Lottery::whereHas('product', function($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('merchant_id', $user->id);
             })
             ->where('status', 'active')
-            ->where('is_drawn', false)
+            ->whereNull('winning_ticket_number') // Pas encore tirée
             ->where(function($q) {
                 $q->where('draw_date', '<=', now())
-                  ->orWhereRaw('sold_tickets >= total_tickets')
                   ->orWhereRaw('sold_tickets >= max_tickets');
             })
             ->count();
             
         // Performance des tombolas récentes
         $recentLotteries = Lottery::whereHas('product', function($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('merchant_id', $user->id);
             })
             ->with(['product'])
             ->orderBy('created_at', 'desc')
@@ -352,9 +365,9 @@ class StatsController extends Controller
                     'product_name' => $lottery->product->name,
                     'status' => $lottery->status,
                     'sold_tickets' => $lottery->sold_tickets ?? 0,
-                    'total_tickets' => $lottery->total_tickets ?? $lottery->max_tickets ?? 0,
-                    'completion_rate' => $lottery->total_tickets > 0 ? 
-                        round(($lottery->sold_tickets / $lottery->total_tickets) * 100, 2) : 0,
+                    'total_tickets' => $lottery->max_tickets ?? 0,
+                    'completion_rate' => $lottery->max_tickets > 0 ? 
+                        round(($lottery->sold_tickets / $lottery->max_tickets) * 100, 2) : 0,
                     'draw_date' => $lottery->draw_date,
                     'created_at' => $lottery->created_at
                 ];
@@ -399,7 +412,7 @@ class StatsController extends Controller
         // Revenus par jour pour la période
         $dailyRevenue = Order::where('type', 'lottery')
             ->whereHas('product', function($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('merchant_id', $user->id);
             })
             ->where('status', 'paid')
             ->where('paid_at', '>=', $startDate)
@@ -409,7 +422,7 @@ class StatsController extends Controller
             ->get();
             
         // Top produits par revenus
-        $topProducts = Product::where('user_id', $user->id)
+        $topProducts = Product::where('merchant_id', $user->id)
             ->withSum(['orders as revenue' => function($query) use ($startDate) {
                 $query->where('status', 'paid')
                       ->where('paid_at', '>=', $startDate);
@@ -420,26 +433,31 @@ class StatsController extends Controller
             }])
             ->orderBy('revenue', 'desc')
             ->limit(10)
-            ->get(['id', 'name', 'price', 'image_url'])
+            ->get(['id', 'name', 'price', 'image'])
             ->map(function($product) {
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
                     'price' => $product->price,
-                    'image_url' => $product->image_url,
+                    'image_url' => $product->image,
                     'revenue' => $product->revenue ?? 0,
                     'order_count' => $product->order_count ?? 0
                 ];
             });
             
         // Statistiques de conversion
-        $conversionStats = Product::where('user_id', $user->id)
+        $conversionStats = Product::where('merchant_id', $user->id)
             ->selectRaw('
-                SUM(views_count) as total_views,
-                SUM(sales_count) as total_sales,
-                AVG(CASE WHEN views_count > 0 THEN (sales_count / views_count) * 100 ELSE 0 END) as avg_conversion_rate
+                SUM(views_count) as total_views
             ')
             ->first();
+            
+        // Calculer le total de ventes via les commandes
+        $totalSales = Order::whereHas('product', function($q) use ($user) {
+                $q->where('merchant_id', $user->id);
+            })
+            ->where('status', 'paid')
+            ->count();
             
         return response()->json([
             'success' => true,
@@ -449,8 +467,9 @@ class StatsController extends Controller
                 'top_products' => $topProducts,
                 'conversion' => [
                     'total_views' => (int) ($conversionStats->total_views ?? 0),
-                    'total_sales' => (int) ($conversionStats->total_sales ?? 0),
-                    'avg_conversion_rate' => (float) ($conversionStats->avg_conversion_rate ?? 0)
+                    'total_sales' => (int) $totalSales,
+                    'avg_conversion_rate' => $conversionStats->total_views > 0 ? 
+                        round(($totalSales / $conversionStats->total_views) * 100, 2) : 0
                 ]
             ]
         ]);
@@ -478,11 +497,11 @@ class StatsController extends Controller
                 'lottery_number' => $lottery->lottery_number,
                 'title' => $lottery->title,
                 'sold_tickets' => $lottery->sold_tickets,
-                'total_tickets' => $lottery->total_tickets ?? $lottery->max_tickets,
+                'total_tickets' => $lottery->max_tickets,
                 'ticket_price' => $lottery->ticket_price,
-                'draw_date' => $lottery->draw_date ?? $lottery->end_date,
-                'progress' => $lottery->total_tickets > 0 ? 
-                    round(($lottery->sold_tickets / $lottery->total_tickets) * 100, 2) : 0,
+                'draw_date' => $lottery->draw_date,
+                'progress' => $lottery->max_tickets > 0 ? 
+                    round(($lottery->sold_tickets / $lottery->max_tickets) * 100, 2) : 0,
                 'time_remaining' => $lottery->time_remaining ?? null,
                 'product' => [
                     'id' => $lottery->product->id,
@@ -524,7 +543,7 @@ class StatsController extends Controller
             
         // Total products
         $totalProducts = Product::count();
-        $activeProducts = Product::where('status', 'active')->count();
+        $activeProducts = Product::where('is_active', 1)->count();
         
         // Total lotteries
         $totalLotteries = Lottery::count();
