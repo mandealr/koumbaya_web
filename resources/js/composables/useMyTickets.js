@@ -12,6 +12,7 @@ export function useMyTickets() {
     totalSpent: 0,
     activeTickets: 0
   })
+  const statsLoading = ref(false)
   
   // Pagination
   const currentPage = ref(1)
@@ -163,8 +164,8 @@ export function useMyTickets() {
         to.value = pagination.to || transformedTickets.length
         hasMore.value = pagination.current_page < pagination.last_page
         
-        // Calculate stats
-        calculateStats()
+        // Load stats from dedicated endpoint
+        await loadStats()
       }
     } catch (err) {
       console.error('Erreur lors du chargement des tickets:', err)
@@ -227,19 +228,43 @@ export function useMyTickets() {
   }
   
   const calculateStats = () => {
-    const totalTickets = tickets.value.length
-    const prizesWon = tickets.value.filter(t => t.status === 'won').length
-    const totalSpent = tickets.value.reduce((sum, ticket) => {
-      const amount = parseFloat(ticket.total_price) || 0
-      return sum + amount
-    }, 0)
-    const activeTickets = tickets.value.filter(t => t.status === 'active' || t.status === 'paid').length
-    
-    stats.value = {
-      totalTickets,
-      prizesWon,
-      totalSpent,
-      activeTickets
+    // This is now deprecated - we use the dedicated stats endpoint
+    // Keep for backward compatibility
+  }
+  
+  const loadStats = async () => {
+    try {
+      statsLoading.value = true
+      const response = await get('/stats/customer/tickets')
+      
+      if (response && response.success) {
+        const data = response.data
+        stats.value = {
+          totalTickets: data.total_tickets || 0,
+          prizesWon: data.prizes_won || 0,
+          totalSpent: data.total_spent || 0,
+          activeTickets: data.active_tickets || 0
+        }
+      }
+    } catch (err) {
+      console.error('Erreur lors du chargement des statistiques:', err)
+      // Fallback to calculating from loaded tickets
+      const totalTickets = tickets.value.length
+      const prizesWon = tickets.value.filter(t => t.status === 'won').length
+      const totalSpent = tickets.value.reduce((sum, ticket) => {
+        const amount = parseFloat(ticket.total_price) || 0
+        return sum + amount
+      }, 0)
+      const activeTickets = tickets.value.filter(t => t.status === 'active' || t.status === 'paid').length
+      
+      stats.value = {
+        totalTickets,
+        prizesWon,
+        totalSpent,
+        activeTickets
+      }
+    } finally {
+      statsLoading.value = false
     }
   }
   
@@ -403,6 +428,7 @@ export function useMyTickets() {
     // State
     loading,
     error,
+    statsLoading,
     
     // Methods
     loadTickets,
@@ -417,6 +443,7 @@ export function useMyTickets() {
     nextPage,
     previousPage,
     getPageNumbers,
+    loadStats,
     
     // Utilities
     formatCurrency,

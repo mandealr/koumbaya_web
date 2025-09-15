@@ -46,17 +46,17 @@ export function useCustomerDashboard() {
   // API calls
   const loadDashboardStats = async () => {
     try {
-      // Utiliser l'endpoint des vraies statistiques
-      const response = await get('/orders/stats')
+      // Utiliser le nouvel endpoint dédié aux statistiques
+      const response = await get('/stats/customer/dashboard')
       
       if (response && response.success) {
         const stats = response.data
         
         rawStats.value = {
-          ticketsBought: stats.total_tickets_purchased || 0,
-          lotteriesParticipated: stats.lottery_orders || 0,
-          totalSpent: stats.total_amount_spent || 0,
-          prizesWon: stats.winning_tickets || 0
+          ticketsBought: stats.total_tickets || 0,
+          lotteriesParticipated: stats.lotteries_participated || 0,
+          totalSpent: stats.total_spent || 0,
+          prizesWon: stats.prizes_won || 0
         }
       }
     } catch (err) {

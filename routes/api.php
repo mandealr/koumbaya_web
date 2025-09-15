@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\PaymentTrackingController;
 use App\Http\Controllers\Api\AvatarController;
 use App\Http\Controllers\Api\MerchantOrderController;
 use App\Http\Controllers\Api\VendorProfileController;
+use App\Http\Controllers\Api\StatsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -215,6 +216,12 @@ Route::group([
         Route::get('/search', [PaymentTrackingController::class, 'search']);
         Route::get('/{paymentId}', [PaymentTrackingController::class, 'show']);
     });
+    
+    // Statistics API
+    Route::prefix('stats')->group(function () {
+        Route::get('/customer/dashboard', [StatsController::class, 'customerDashboard']);
+        Route::get('/customer/tickets', [StatsController::class, 'customerTickets']);
+    });
 });
 
 // Routes Marchands seulement avec rate limiting strict + vérification obligatoire
@@ -273,6 +280,12 @@ Route::group([
     
     // Transaction management
     Route::put('transactions/{id}/status', [MerchantDashboardController::class, 'updateTransactionStatus']);
+    
+    // Merchant Statistics API
+    Route::prefix('stats')->group(function () {
+        Route::get('/merchant/dashboard', [StatsController::class, 'merchantDashboard']);
+        Route::get('/merchant/products', [StatsController::class, 'merchantProducts']);
+    });
 });
 
 // Routes Admin avec rate limiting strict
@@ -375,6 +388,9 @@ Route::group([
         Route::post('/image', [AdminProfileController::class, 'uploadImage']);
         Route::get('/activity-log/export', [AdminProfileController::class, 'exportActivityLog']);
     });
+    
+    // Platform Statistics (Admin only)
+    Route::get('/stats/platform', [StatsController::class, 'platformStats']);
 });
 
 // User profile routes

@@ -359,7 +359,10 @@
             </div>
           </div>
         </div>
-      </div>\n    </div>\n  </div>\n</template>
+      </div>
+    </div>
+  </div>
+</template>
 
 <script setup>
 import { onMounted } from 'vue'
