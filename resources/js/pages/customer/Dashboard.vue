@@ -192,6 +192,9 @@
                       :style="{ width: lottery.progress + '%' }"
                     ></div>
                   </div>
+                  <p class="text-xs text-gray-500 mt-1">
+                    {{ lottery.sold_tickets }} / {{ lottery.total_tickets }} tickets vendus
+                  </p>
                 </div>
 
                 <div class="flex justify-between items-center">

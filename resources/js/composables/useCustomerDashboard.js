@@ -112,7 +112,8 @@ export function useCustomerDashboard() {
   
   const loadActiveLotteries = async () => {
     try {
-      const response = await get('/lotteries/active?limit=6')
+      // Utiliser le nouvel endpoint pour récupérer les tombolas populaires
+      const response = await get('/stats/lotteries/popular?limit=6')
       
       if (response && response.success && Array.isArray(response.data)) {
         activeLotteries.value = response.data.map(lottery => ({
@@ -120,18 +121,20 @@ export function useCustomerDashboard() {
           product: {
             id: lottery.product?.id,
             title: lottery.product?.name || 'Produit inconnu',
-            price: formatCurrency(lottery.product?.price || 0),
-            image: lottery.product?.image_url || lottery.product?.main_image || '/images/products/placeholder.jpg'
+            price: formatCurrency(lottery.ticket_price || 0),
+            image: lottery.product?.image_url || '/images/products/placeholder.jpg'
           },
-          progress: Math.round((lottery.sold_tickets / lottery.total_tickets) * 100) || 0,
-          draw_date: new Date(lottery.end_date)
+          progress: lottery.progress || 0,
+          draw_date: new Date(lottery.draw_date),
+          sold_tickets: lottery.sold_tickets,
+          total_tickets: lottery.total_tickets
         }))
       } else {
         // Si pas de données valides, initialiser avec un tableau vide
         activeLotteries.value = []
       }
     } catch (err) {
-      console.error('Erreur lors du chargement des tombolas actives:', err)
+      console.error('Erreur lors du chargement des tombolas populaires:', err)
       // Fallback data
       activeLotteries.value = []
     }

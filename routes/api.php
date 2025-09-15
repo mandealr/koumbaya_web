@@ -221,6 +221,7 @@ Route::group([
     Route::prefix('stats')->group(function () {
         Route::get('/customer/dashboard', [StatsController::class, 'customerDashboard']);
         Route::get('/customer/tickets', [StatsController::class, 'customerTickets']);
+        Route::get('/lotteries/popular', [StatsController::class, 'popularLotteries']);
     });
 });
 

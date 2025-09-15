@@ -229,6 +229,53 @@ class StatsController extends Controller
     }
     
     /**
+     * Get popular active lotteries
+     */
+    public function popularLotteries(Request $request)
+    {
+        $limit = $request->input('limit', 5);
+        
+        // Récupérer les tombolas actives triées par nombre de tickets vendus
+        $popularLotteries = Lottery::where('status', 'active')
+            ->with(['product.category', 'product.merchant'])
+            ->orderBy('sold_tickets', 'desc')
+            ->orderBy('created_at', 'desc') // En cas d'égalité, prendre les plus récentes
+            ->limit($limit)
+            ->get();
+            
+        // Transformer les données pour le frontend
+        $lotteries = $popularLotteries->map(function($lottery) {
+            return [
+                'id' => $lottery->id,
+                'lottery_number' => $lottery->lottery_number,
+                'title' => $lottery->title,
+                'sold_tickets' => $lottery->sold_tickets,
+                'total_tickets' => $lottery->total_tickets ?? $lottery->max_tickets,
+                'ticket_price' => $lottery->ticket_price,
+                'draw_date' => $lottery->draw_date ?? $lottery->end_date,
+                'progress' => $lottery->total_tickets > 0 ? 
+                    round(($lottery->sold_tickets / $lottery->total_tickets) * 100, 2) : 0,
+                'time_remaining' => $lottery->time_remaining ?? null,
+                'product' => [
+                    'id' => $lottery->product->id,
+                    'name' => trim(str_replace(["\r\n", "\r", "\n"], ' ', $lottery->product->name)),
+                    'price' => $lottery->product->price,
+                    'image_url' => $lottery->product->image_url ?? $lottery->product->main_image ?? $lottery->product->image,
+                    'category' => $lottery->product->category ? [
+                        'id' => $lottery->product->category->id,
+                        'name' => $lottery->product->category->name
+                    ] : null
+                ]
+            ];
+        });
+        
+        return response()->json([
+            'success' => true,
+            'data' => $lotteries
+        ]);
+    }
+    
+    /**
      * Get platform-wide statistics (admin only)
      */
     public function platformStats(Request $request)
