@@ -124,7 +124,7 @@ class MerchantDashboardController extends Controller
         ->whereHas('lottery.product', function ($query) use ($merchantId) {
             $query->where('merchant_id', $merchantId);
         })
-        ->where('status', 'completed')
+        ->whereIn('status', ['completed', 'paid'])
         ->where('paid_at', '>=', $startDate)
         ->groupBy('date')
         ->orderBy('date')
@@ -451,7 +451,7 @@ class MerchantDashboardController extends Controller
             'summary' => [
                 'total_lotteries' => $lotteries->count(),
                 'active_lotteries' => $lotteries->where('status', 'active')->count(),
-                'completed_lotteries' => $lotteries->where('status', 'completed')->count(),
+                'completed_lotteries' => $lotteries->whereIn('status', ['completed', 'paid'])->count(),
                 'avg_completion_rate' => round($lotteries->avg('completion_rate'), 2),
             ]
         ]);
@@ -465,7 +465,7 @@ class MerchantDashboardController extends Controller
         return Payment::whereHas('lottery.product', function ($query) use ($merchantId) {
             $query->where('merchant_id', $merchantId);
         })
-        ->where('status', 'completed')
+        ->whereIn('status', ['completed', 'paid'])
         ->sum('amount') ?: 0;
     }
 
@@ -474,7 +474,7 @@ class MerchantDashboardController extends Controller
         return Payment::whereHas('lottery.product', function ($query) use ($merchantId) {
             $query->where('merchant_id', $merchantId);
         })
-        ->where('status', 'completed')
+        ->whereIn('status', ['completed', 'paid'])
         ->count() ?: 0;
     }
 
@@ -483,7 +483,7 @@ class MerchantDashboardController extends Controller
         return Payment::whereHas('lottery.product', function ($query) use ($merchantId) {
             $query->where('merchant_id', $merchantId);
         })
-        ->where('status', 'completed')
+        ->whereIn('status', ['completed', 'paid'])
         ->whereBetween('paid_at', [
             Carbon::now()->startOfMonth(),
             Carbon::now()->endOfMonth()
@@ -496,7 +496,7 @@ class MerchantDashboardController extends Controller
         return Payment::whereHas('lottery.product', function ($query) use ($merchantId) {
             $query->where('merchant_id', $merchantId);
         })
-        ->where('status', 'completed')
+        ->whereIn('status', ['completed', 'paid'])
         ->whereBetween('paid_at', [
             Carbon::now()->subMonth()->startOfMonth(),
             Carbon::now()->subMonth()->endOfMonth()
@@ -532,7 +532,7 @@ class MerchantDashboardController extends Controller
         $sales = Payment::whereHas('lottery', function ($query) use ($productId) {
             $query->where('product_id', $productId);
         })
-        ->where('status', 'completed')
+        ->whereIn('status', ['completed', 'paid'])
         ->count();
         
         // Prevent division by zero
@@ -680,7 +680,7 @@ class MerchantDashboardController extends Controller
             'total' => (clone $baseStatsQuery)->count(),
             'active' => (clone $baseStatsQuery)->where('status', 'active')->count(),
             'pending' => (clone $baseStatsQuery)->where('status', 'pending')->count(),
-            'completed' => (clone $baseStatsQuery)->where('status', 'completed')->count(),
+            'completed' => (clone $baseStatsQuery)->whereIn('status', ['completed', 'paid'])->count(),
             'cancelled' => (clone $baseStatsQuery)->where('status', 'cancelled')->count(),
         ];
 
@@ -760,7 +760,7 @@ class MerchantDashboardController extends Controller
             'total' => (clone $baseStatsQuery)->count(),
             'active' => (clone $baseStatsQuery)->where('status', 'active')->count(),
             'pending' => (clone $baseStatsQuery)->where('status', 'pending')->count(),
-            'completed' => (clone $baseStatsQuery)->where('status', 'completed')->count(),
+            'completed' => (clone $baseStatsQuery)->whereIn('status', ['completed', 'paid'])->count(),
             'cancelled' => (clone $baseStatsQuery)->where('status', 'cancelled')->count(),
         ];
 
