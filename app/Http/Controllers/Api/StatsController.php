@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\LotteryTicket;
 use App\Models\Lottery;
 use App\Models\Product;
+use App\Models\Payment;
 
 class StatsController extends Controller
 {
@@ -261,50 +262,49 @@ class StatsController extends Controller
     {
         $user = Auth::user();
         
-        // Statistiques des commandes par statut
-        $orderStats = Order::where('type', 'lottery')
-            ->whereHas('product', function($query) use ($user) {
+        // Utiliser le modèle Payment au lieu d'Order
+        
+        // Statistiques des paiements par statut
+        $orderStats = Payment::whereHas('lottery.product', function($query) use ($user) {
                 $query->where('merchant_id', $user->id);
             })
             ->selectRaw('
                 COUNT(*) as total_orders,
-                SUM(CASE WHEN status = "paid" THEN 1 ELSE 0 END) as paid_orders,
+                SUM(CASE WHEN status IN ("paid", "completed") THEN 1 ELSE 0 END) as paid_orders,
                 SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending_orders,
                 SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled_orders,
-                SUM(CASE WHEN status = "paid" THEN total_amount ELSE 0 END) as total_revenue,
-                AVG(CASE WHEN status = "paid" THEN total_amount ELSE NULL END) as avg_order_value
+                SUM(CASE WHEN status IN ("paid", "completed") THEN amount ELSE 0 END) as total_revenue,
+                AVG(CASE WHEN status IN ("paid", "completed") THEN amount ELSE NULL END) as avg_order_value
             ')
             ->first();
             
-        // Commandes récentes
-        $recentOrders = Order::where('type', 'lottery')
-            ->whereHas('product', function($query) use ($user) {
+        // Commandes récentes (paiements)
+        $recentOrders = Payment::whereHas('lottery.product', function($query) use ($user) {
                 $query->where('merchant_id', $user->id);
             })
-            ->with(['product', 'user'])
+            ->with(['user', 'lottery.product'])
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get()
-            ->map(function($order) {
+            ->map(function($payment) {
                 return [
-                    'id' => $order->id,
-                    'order_number' => $order->order_number,
-                    'user_name' => $order->user->first_name . ' ' . $order->user->last_name,
-                    'product_name' => $order->product->name,
-                    'amount' => $order->total_amount,
-                    'status' => $order->status,
-                    'created_at' => $order->created_at
+                    'id' => $payment->id,
+                    'order_number' => $payment->transaction_id ?? 'PAY-' . $payment->id,
+                    'user_name' => ($payment->user ? $payment->user->first_name . ' ' . $payment->user->last_name : 'Utilisateur inconnu'),
+                    'product_name' => $payment->lottery->product->name ?? 'Produit inconnu',
+                    'amount' => $payment->amount,
+                    'status' => $payment->status,
+                    'created_at' => $payment->created_at
                 ];
             });
             
         // Revenus par mois (12 derniers mois)
-        $monthlyRevenue = Order::where('type', 'lottery')
-            ->whereHas('product', function($query) use ($user) {
+        $monthlyRevenue = Payment::whereHas('lottery.product', function($query) use ($user) {
                 $query->where('merchant_id', $user->id);
             })
-            ->where('status', 'paid')
+            ->whereIn('status', ['paid', 'completed'])
             ->where('paid_at', '>=', now()->subYear())
-            ->selectRaw('MONTH(paid_at) as month, YEAR(paid_at) as year, SUM(total_amount) as revenue')
+            ->selectRaw('MONTH(paid_at) as month, YEAR(paid_at) as year, SUM(amount) as revenue')
             ->groupBy('year', 'month')
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
