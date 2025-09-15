@@ -244,12 +244,14 @@ class TicketController extends Controller
     public function myTickets(Request $request)
     {
         $query = LotteryTicket::where('user_id', auth()->id())
-            ->with(['lottery.product', 'payment'])
-            ->whereIn('status', ['paid', 'reserved']); // Inclure les tickets payés et réservés
+            ->with(['lottery.product', 'payment']);
 
         // Filtrer par statut si spécifié
-        if ($request->has('status')) {
+        if ($request->has('status') && $request->status !== '') {
             $query->where('status', $request->status);
+        } else {
+            // Par défaut, afficher uniquement les tickets payés (pas les réservés/abandonnés)
+            $query->where('status', 'paid');
         }
 
         if ($request->has('lottery_id')) {
@@ -277,8 +279,8 @@ class TicketController extends Controller
                 'lottery' => $ticket->lottery ? [
                     'id' => $ticket->lottery->id,
                     'lottery_number' => $ticket->lottery->lottery_number,
-                    'title' => $ticket->lottery->title,
-                    'description' => $ticket->lottery->description,
+                    'title' => trim(str_replace(["\r\n", "\r", "\n"], ' ', $ticket->lottery->title)),
+                    'description' => trim(str_replace(["\r\n", "\r", "\n"], ' ', $ticket->lottery->description)),
                     'ticket_price' => $ticket->lottery->ticket_price,
                     'max_tickets' => $ticket->lottery->max_tickets,
                     'sold_tickets' => $ticket->lottery->sold_tickets,
@@ -288,8 +290,8 @@ class TicketController extends Controller
                     'winner_ticket_number' => $ticket->lottery->winner_ticket_number,
                     'product' => $ticket->lottery->product ? [
                         'id' => $ticket->lottery->product->id,
-                        'name' => $ticket->lottery->product->name,
-                        'description' => $ticket->lottery->product->description,
+                        'name' => trim(str_replace(["\r\n", "\r", "\n"], ' ', $ticket->lottery->product->name)),
+                        'description' => trim(str_replace(["\r\n", "\r", "\n"], ' ', $ticket->lottery->product->description)),
                         'image' => $ticket->lottery->product->image,
                         'image_url' => $ticket->lottery->product->image_url,
                         'price' => $ticket->lottery->product->price,

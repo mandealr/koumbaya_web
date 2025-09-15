@@ -127,14 +127,14 @@ export function useMyTickets() {
           id: ticket.id,
           product: {
             id: ticket.lottery?.product?.id,
-            title: ticket.lottery?.product?.name || 'Produit inconnu',
-            description: ticket.lottery?.product?.description || '',
+            title: (ticket.lottery?.product?.name || 'Produit inconnu').replace(/[\r\n]+/g, ' ').trim(),
+            description: (ticket.lottery?.product?.description || '').replace(/[\r\n]+/g, ' ').trim(),
             image_url: ticket.lottery?.product?.image_url || ticket.lottery?.product?.image,
             image: ticket.lottery?.product?.image_url || ticket.lottery?.product?.image || '/images/products/placeholder.jpg'
           },
           lottery: {
             id: ticket.lottery?.id,
-            title: ticket.lottery?.title,
+            title: (ticket.lottery?.title || '').replace(/[\r\n]+/g, ' ').trim(),
             draw_date: ticket.lottery?.draw_date ? new Date(ticket.lottery.draw_date) : null,
             end_date: ticket.lottery?.end_date ? new Date(ticket.lottery.end_date) : null,
             progress: ticket.lottery ? Math.round((ticket.lottery.sold_tickets / ticket.lottery.max_tickets) * 100) : 0,
@@ -233,7 +233,7 @@ export function useMyTickets() {
       const amount = parseFloat(ticket.total_price) || 0
       return sum + amount
     }, 0)
-    const activeTickets = tickets.value.filter(t => t.status === 'active' || t.status === 'pending').length
+    const activeTickets = tickets.value.filter(t => t.status === 'active' || t.status === 'paid').length
     
     stats.value = {
       totalTickets,
