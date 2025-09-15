@@ -21,32 +21,32 @@ export function useMerchantProducts() {
       const response = await get('/stats/merchant/products')
       
       if (response && response.success) {
-        const stats = response.data.stats
+        const stats = response.data.summary || response.data.stats || {}
         productStats.value = [
           { 
             label: 'Produits actifs', 
-            value: stats.active_products.toString(), 
+            value: stats.active_products?.toString() || stats.total_products?.toString() || '0', 
             change: stats.active_products_change || 0, 
             color: 'bg-blue-500', 
             icon: 'GiftIcon' 
           },
           { 
             label: 'Total revenus', 
-            value: formatCurrency(stats.total_revenue), 
+            value: formatCurrency(stats.total_revenue || 0), 
             change: stats.revenue_change || 0, 
             color: 'bg-green-500', 
             icon: 'CurrencyDollarIcon' 
           },
           { 
             label: 'Vues totales', 
-            value: stats.total_views.toString(), 
+            value: (stats.total_views || 0).toString(), 
             change: stats.views_change || 0, 
             color: 'bg-purple-500', 
             icon: 'EyeIcon' 
           },
           { 
             label: 'Taux conversion', 
-            value: (stats.conversion_rate || 0).toFixed(1) + '%', 
+            value: (stats.avg_conversion_rate || stats.conversion_rate || 0).toFixed(1) + '%', 
             change: stats.conversion_change || 0, 
             color: 'bg-yellow-500', 
             icon: 'ChartBarIcon' 

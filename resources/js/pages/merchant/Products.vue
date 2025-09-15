@@ -33,7 +33,7 @@
             'p-3 rounded-xl',
             stat.color
           ]">
-            <component :is="stat.icon" class="w-6 h-6 text-white" />
+            <component :is="getStatIcon(stat.icon)" class="w-6 h-6 text-white" />
           </div>
         </div>
         <div class="mt-4 pt-4 border-t border-gray-100">
@@ -152,7 +152,7 @@
       <div
         v-for="product in filteredProducts"
         :key="product.id"
-        class="bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200 hover:scale-[1.02]"
+        class="bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200 hover:scale-[1.02] relative"
       >
         <!-- Product Image -->
         <div class="relative h-48 bg-gray-200">
@@ -264,7 +264,7 @@
               Modifier
             </button>
 
-            <div class="relative z-10">
+            <div class="relative z-50">
               <button
                 @click="toggleProductMenu(product.id)"
                 :data-product-id="product.id"
@@ -276,7 +276,7 @@
               <div
                 v-if="showProductMenu === product.id"
                 data-dropdown-menu
-                class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-[9999]"
+                class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-[99999]"
               >
                 <button
                   @click="duplicateProduct(product)"
@@ -293,7 +293,7 @@
                   Analytiques
                 </button>
                 <button
-                  v-if="['draft', 'active'].includes(product.status)"
+                  v-if="canDeleteProduct(product)"
                   @click="deleteProduct(product)"
                   class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-b-lg"
                 >
@@ -582,7 +582,7 @@ const loadProducts = async () => {
         ticket_price: parseFloat(product.ticket_price || 0),
         price: parseFloat(product.price || 0),
         progress: product.lottery ?
-          Math.round(((product.lottery.sold_tickets || 0) / (product.lottery.total_tickets || 1)) * 100) : 0
+          Math.round(((product.lottery.sold_tickets || 0) / (product.lottery.max_tickets || 1)) * 100) : 0
       }))
     } else {
       products.value = []
@@ -738,6 +738,46 @@ const getProductImageSrc = (product) => {
 
 const toggleProductMenu = (productId) => {
   showProductMenu.value = showProductMenu.value === productId ? null : productId
+}
+
+// Helper pour les icônes des stats
+const getStatIcon = (iconName) => {
+  const icons = {
+    GiftIcon,
+    CurrencyDollarIcon,
+    EyeIcon,
+    ChartBarIcon,
+    ShoppingBagIcon
+  }
+  return icons[iconName] || GiftIcon
+}
+
+// Vérifier si un produit peut être supprimé
+const canDeleteProduct = (product) => {
+  // Ne peut pas supprimer si le statut n'est pas draft ou active
+  if (!['draft', 'active'].includes(product.status)) {
+    return false
+  }
+  
+  // Pour les produits tombola : vérifier s'il y a des tickets vendus
+  if (product.sale_mode === 'lottery' && product.lottery) {
+    const soldTickets = product.lottery.sold_tickets || 0
+    if (soldTickets > 0) {
+      return false
+    }
+  }
+  
+  // Pour les produits de vente directe : vérifier s'il y a des commandes payées
+  // Cette information devrait être fournie par l'API, mais pour l'instant on suppose
+  // qu'on ne peut pas supprimer si le produit a des ventes (sales_count > 0)
+  if (product.sale_mode === 'direct') {
+    const salesCount = product.sales_count || product.order_count || 0
+    if (salesCount > 0) {
+      return false
+    }
+  }
+  
+  return true
 }
 
 // Close menu when clicking outside
