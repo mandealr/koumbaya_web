@@ -55,11 +55,17 @@ class ProcessLotteryDraws extends Command
             $this->warn('Running in DRY RUN mode - no changes will be made');
         }
 
-        // Get eligible lotteries
+        // Get eligible lotteries (either date reached OR all tickets sold)
         $query = Lottery::with(['product', 'paidTickets'])
             ->where('status', 'active')
             ->where('is_drawn', false)
-            ->where('draw_date', '<=', now());
+            ->where(function($q) {
+                // Date reached
+                $q->where('draw_date', '<=', now())
+                // OR all tickets sold (check via raw SQL for performance)
+                ->orWhereRaw('sold_tickets >= total_tickets')
+                ->orWhereRaw('sold_tickets >= max_tickets');
+            });
 
         // If specific lotteries are requested
         if (!empty($specificLotteries)) {
@@ -109,11 +115,22 @@ class ProcessLotteryDraws extends Command
     protected function processLottery(Lottery $lottery, bool $isDryRun, int &$successCount, int &$failCount, int &$skippedCount)
     {
         $this->info("\nProcessing lottery: {$lottery->lottery_number}");
-        $this->info("Product: {$lottery->product->title}");
+        $this->info("Product: {$lottery->product->name}");
         
         // Get paid tickets count
         $paidTicketsCount = $lottery->paidTickets()->count();
+        $totalTickets = $lottery->total_tickets ?? $lottery->max_tickets ?? 0;
         $minParticipants = $lottery->product->min_participants ?? 300;
+        
+        // Determine draw type
+        $allTicketsSold = $paidTicketsCount >= $totalTickets && $totalTickets > 0;
+        $dateReached = now() >= $lottery->draw_date;
+        
+        if ($allTicketsSold && !$dateReached) {
+            $this->info("Draw type: MANUAL (All tickets sold: $paidTicketsCount/$totalTickets)");
+        } else if ($dateReached) {
+            $this->info("Draw type: AUTOMATIC (Date reached: " . $lottery->draw_date . ")");
+        }
         
         $this->info("Participants: $paidTicketsCount / $minParticipants minimum required");
 
@@ -160,7 +177,7 @@ class ProcessLotteryDraws extends Command
                 'draw_date' => now(),
                 'is_drawn' => true,
                 'status' => 'completed',
-                'draw_proof' => $this->generateDrawProof($lottery, $paidTickets, $winningTicket)
+                'draw_proof' => $this->generateDrawProof($lottery, $paidTickets, $winningTicket, $allTicketsSold ?? false, $dateReached ?? false)
             ]);
 
             // Update product status
@@ -199,19 +216,33 @@ class ProcessLotteryDraws extends Command
     /**
      * Generate draw proof data
      */
-    protected function generateDrawProof(Lottery $lottery, $paidTickets, $winningTicket)
+    protected function generateDrawProof(Lottery $lottery, $paidTickets, $winningTicket, $allTicketsSold = false, $dateReached = false)
     {
+        // Determine draw trigger reason
+        $drawTrigger = 'automated_cron';
+        $drawReason = 'scheduled_date_reached';
+        
+        if ($allTicketsSold && !$dateReached) {
+            $drawReason = 'all_tickets_sold';
+        } else if ($dateReached) {
+            $drawReason = 'scheduled_date_reached';
+        }
+        
         return json_encode([
             'draw_method' => 'automatic_system_draw',
             'draw_algorithm' => 'secure_random_with_entropy',
+            'draw_reason' => $drawReason,
+            'all_tickets_sold' => $allTicketsSold,
+            'date_reached' => $dateReached,
             'total_participants' => $paidTickets->count(),
-            'total_tickets' => $paidTickets->count(), // This refers to tickets sold, not max_tickets
+            'total_tickets_sold' => $paidTickets->count(),
+            'max_tickets_available' => $lottery->total_tickets ?? $lottery->max_tickets,
             'winning_ticket' => $winningTicket->ticket_number,
             'timestamp' => now()->toISOString(),
             'system_time' => microtime(true),
             'lottery_hash' => hash('sha256', $lottery->id . $lottery->lottery_number),
             'participants_hash' => hash('sha256', $paidTickets->pluck('id')->join(',')),
-            'draw_triggered_by' => 'automated_cron',
+            'draw_triggered_by' => $drawTrigger,
             'server_info' => [
                 'hostname' => gethostname(),
                 'php_version' => PHP_VERSION,

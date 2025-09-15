@@ -26,6 +26,13 @@ class Kernel extends ConsoleKernel
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/lottery-draws.log'));
 
+        // Check for completed lotteries (all tickets sold) every 30 minutes
+        $schedule->command('lottery:draw')
+            ->everyThirtyMinutes()
+            ->withoutOverlapping()
+            ->runInBackground()
+            ->appendOutputTo(storage_path('logs/lottery-draws-frequent.log'));
+
         // Process automatic refunds daily at 3 AM
         $schedule->command('refunds:process')
             ->dailyAt('03:00')

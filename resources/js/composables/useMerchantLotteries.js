@@ -200,10 +200,21 @@ export function useMerchantLotteries() {
 
   // Vérifier si une tombola peut être tirée
   const canDrawLottery = (lottery) => {
-    return lottery.status === 'active' && 
-           !lottery.is_drawn && 
-           lottery.can_draw === true &&
-           new Date(lottery.end_date) <= new Date()
+    // Vérifications de base
+    if (lottery.status !== 'active' || lottery.is_drawn) {
+      return false
+    }
+    
+    // Calcul des tickets vendus vs total
+    const soldTickets = lottery.sold_tickets || 0
+    const totalTickets = lottery.total_tickets || lottery.max_tickets || 0
+    const allTicketsSold = soldTickets >= totalTickets && totalTickets > 0
+    
+    // Date de fin atteinte
+    const endDateReached = new Date(lottery.end_date) <= new Date()
+    
+    // Peut tirer si : tous les tickets sont vendus OU date de fin atteinte
+    return allTicketsSold || endDateReached
   }
 
   // Obtenir le statut formaté d'une tombola
@@ -234,6 +245,39 @@ export function useMerchantLotteries() {
     return `${minutes}min`
   }
 
+  // Déterminer le type de tirage disponible
+  const getDrawType = (lottery) => {
+    if (lottery.status !== 'active' || lottery.is_drawn) {
+      return null
+    }
+    
+    const soldTickets = lottery.sold_tickets || 0
+    const totalTickets = lottery.total_tickets || lottery.max_tickets || 0
+    const allTicketsSold = soldTickets >= totalTickets && totalTickets > 0
+    const endDateReached = new Date(lottery.end_date) <= new Date()
+    
+    if (allTicketsSold && !endDateReached) {
+      return 'manual' // Tirage manuel disponible (quota atteint)
+    } else if (endDateReached) {
+      return 'automatic' // Tirage automatique (date atteinte)
+    }
+    
+    return null // Pas encore de tirage possible
+  }
+
+  // Obtenir le message de tirage
+  const getDrawMessage = (lottery) => {
+    const drawType = getDrawType(lottery)
+    
+    if (drawType === 'manual') {
+      return 'Tirage manuel disponible (quota atteint)'
+    } else if (drawType === 'automatic') {
+      return 'Tirage automatique (date atteinte)'
+    }
+    
+    return null
+  }
+
   return {
     // État
     lotteries: filteredLotteries,
@@ -255,6 +299,8 @@ export function useMerchantLotteries() {
     // Utilitaires
     canDrawLottery,
     getFormattedStatus,
-    getTimeRemaining
+    getTimeRemaining,
+    getDrawType,
+    getDrawMessage
   }
 }

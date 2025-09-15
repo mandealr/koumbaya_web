@@ -199,6 +199,11 @@
                   </div>
                 </div>
                 
+                <!-- Message de tirage -->
+                <div v-if="getDrawMessage(lottery)" class="mt-3 px-3 py-2 rounded-lg text-sm" :class="getDrawType(lottery) === 'manual' ? 'bg-orange-50 text-orange-800' : 'bg-blue-50 text-blue-800'">
+                  {{ getDrawMessage(lottery) }}
+                </div>
+
                 <!-- Actions -->
                 <div class="flex gap-2 mt-4">
                   <router-link 
@@ -212,9 +217,15 @@
                     v-if="canDrawLottery(lottery)"
                     @click="performDraw(lottery)"
                     :disabled="drawingLottery === lottery.id"
-                    class="flex-1 px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 transition-colors"
+                    :class="[
+                      'flex-1 px-3 py-2 text-sm rounded-md transition-colors text-white',
+                      getDrawType(lottery) === 'manual' 
+                        ? 'bg-orange-600 hover:bg-orange-700' 
+                        : 'bg-green-600 hover:bg-green-700',
+                      drawingLottery === lottery.id ? 'disabled:bg-gray-400' : ''
+                    ]"
                   >
-                    {{ drawingLottery === lottery.id ? 'Tirage...' : 'Effectuer le tirage' }}
+                    {{ drawingLottery === lottery.id ? 'Tirage...' : (getDrawType(lottery) === 'manual' ? 'Tirage manuel' : 'Effectuer le tirage') }}
                   </button>
                 </div>
               </div>
@@ -318,7 +329,9 @@ const {
   changePage,
   canDrawLottery,
   getFormattedStatus,
-  getTimeRemaining
+  getTimeRemaining,
+  getDrawType,
+  getDrawMessage
 } = useMerchantLotteries()
 
 // État local pour l'interface
