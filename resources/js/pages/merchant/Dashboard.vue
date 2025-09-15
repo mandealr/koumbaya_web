@@ -64,7 +64,7 @@
             'p-4 rounded-xl',
             stat.color
           ]">
-            <component :is="stat.icon" class="w-8 h-8 text-white" />
+            <component :is="getStatIcon(stat.icon)" class="w-8 h-8 text-white" />
           </div>
         </div>
         <div class="mt-4 pt-4 border-t border-gray-100">
@@ -274,6 +274,17 @@ const getOrderStatusLabel = (status) => {
     'awaiting_payment': 'En attente de paiement'
   }
   return labels[status] || status
+}
+
+const getStatIcon = (iconName) => {
+  const icons = {
+    CurrencyDollarIcon,
+    ShoppingBagIcon,
+    GiftIcon,
+    UsersIcon,
+    ChartBarIcon
+  }
+  return icons[iconName] || GiftIcon
 }
 
 onMounted(async () => {

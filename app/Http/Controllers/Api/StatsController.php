@@ -137,7 +137,7 @@ class StatsController extends Controller
                 $query->where('merchant_id', $user->id);
             })
             ->where('status', 'paid')
-            ->where('paid_at', '>=', now()->subMonth())
+            ->where('created_at', '>=', now()->subMonth())
             ->sum('total_amount');
             
         $weeklyRevenue = Order::where('type', 'lottery')
@@ -145,8 +145,17 @@ class StatsController extends Controller
                 $query->where('merchant_id', $user->id);
             })
             ->where('status', 'paid')
-            ->where('paid_at', '>=', now()->subWeek())
+            ->where('created_at', '>=', now()->subWeek())
             ->sum('total_amount');
+            
+        // Compter les clients uniques
+        $uniqueCustomers = Order::where('type', 'lottery')
+            ->whereHas('product', function($query) use ($user) {
+                $query->where('merchant_id', $user->id);
+            })
+            ->where('status', 'paid')
+            ->distinct('user_id')
+            ->count('user_id');
             
         return response()->json([
             'success' => true,
@@ -165,6 +174,9 @@ class StatsController extends Controller
                     'active' => (int) ($lotteryStats->active_lotteries ?? 0),
                     'completed' => (int) ($lotteryStats->completed_lotteries ?? 0),
                     'total_tickets_sold' => (int) ($lotteryStats->total_tickets_sold ?? 0)
+                ],
+                'customers' => [
+                    'total' => (int) $uniqueCustomers
                 ],
                 'revenue' => [
                     'monthly' => (float) $monthlyRevenue,
@@ -421,17 +433,21 @@ class StatsController extends Controller
             ->orderBy('date')
             ->get();
             
-        // Top produits par revenus
+        // Top produits par nombre de tickets vendus
         $topProducts = Product::where('merchant_id', $user->id)
             ->withSum(['orders as revenue' => function($query) use ($startDate) {
                 $query->where('status', 'paid')
-                      ->where('paid_at', '>=', $startDate);
+                      ->where('created_at', '>=', $startDate);
             }], 'total_amount')
+            ->withSum(['orders as tickets_sold' => function($query) use ($startDate) {
+                $query->where('status', 'paid')
+                      ->where('created_at', '>=', $startDate);
+            }], 'ticket_count')
             ->withCount(['orders as order_count' => function($query) use ($startDate) {
                 $query->where('status', 'paid')
-                      ->where('paid_at', '>=', $startDate);
+                      ->where('created_at', '>=', $startDate);
             }])
-            ->orderBy('revenue', 'desc')
+            ->orderBy('tickets_sold', 'desc')
             ->limit(10)
             ->get(['id', 'name', 'price', 'image'])
             ->map(function($product) {
@@ -441,7 +457,10 @@ class StatsController extends Controller
                     'price' => $product->price,
                     'image_url' => $product->image,
                     'revenue' => $product->revenue ?? 0,
-                    'order_count' => $product->order_count ?? 0
+                    'order_count' => $product->order_count ?? 0,
+                    'tickets_sold' => $product->tickets_sold ?? 0,
+                    'sales' => $product->tickets_sold ?? 0, // Pour la compatibilité avec le frontend
+                    'growth' => 0 // Calcul de croissance si nécessaire
                 ];
             });
             

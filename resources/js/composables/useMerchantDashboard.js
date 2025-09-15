@@ -32,7 +32,7 @@ export function useMerchantDashboard() {
   const recentLotteries = ref([])
   const topProducts = ref([])
   
-  // Computed stats for dashboard cards
+  // Computed stats for dashboard cards (using icon components directly)
   const stats = computed(() => [
     {
       label: 'Revenus du mois',
@@ -99,10 +99,12 @@ export function useMerchantDashboard() {
         recentLotteries.value = lotteriesResponse.data.recent_lotteries || []
       }
       
-      // Load top products
+      // Load top products - trié par tickets vendus
       const analyticsResponse = await get('/stats/merchant/analytics?period=30d')
       if (analyticsResponse && analyticsResponse.success) {
-        topProducts.value = analyticsResponse.data.top_products || []
+        // Trier par nombre de tickets vendus (order_count) décroissant
+        const products = analyticsResponse.data.top_products || []
+        topProducts.value = products.sort((a, b) => (b.order_count || 0) - (a.order_count || 0))
       }
     } catch (err) {
       console.error('Erreur lors du chargement des données récentes:', err)
