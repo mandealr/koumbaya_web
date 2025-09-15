@@ -4,144 +4,121 @@ import { useApi } from './api'
 export function useMerchantOrders() {
   const { get, post, put, loading, error } = useApi()
   
+  // Reactive data
   const orders = ref([])
-  const stats = ref({
-    total_orders: 0,
-    revenue: 0,
-    pending: 0,
-    conversion_rate: 0
-  })
   const products = ref([])
+  const orderStats = ref([
+    { label: 'Total commandes', value: '0', change: 0, color: 'bg-blue-500', icon: 'ShoppingBagIcon' },
+    { label: 'Revenus total', value: '0 FCFA', change: 0, color: 'bg-green-500', icon: 'CurrencyDollarIcon' },
+    { label: 'En attente', value: '0', change: 0, color: 'bg-yellow-500', icon: 'ClockIcon' },
+    { label: 'Terminées', value: '0', change: 0, color: 'bg-green-500', icon: 'CheckIcon' }
+  ])
   
-  // Charger les statistiques
+  const recentOrders = ref([])
+  const monthlyRevenue = ref([])
+  
+  // Load statistics
   const loadStats = async () => {
     try {
-      const response = await get('/merchant/dashboard/stats')
-      if (response && response.data) {
-        // Adapter les stats aux besoins de la page Orders
-        stats.value = {
-          total_orders: parseInt(response.data.tickets_sold || 0),
-          revenue: parseFloat(response.data.total_sales || 0),
-          pending: parseInt(response.data.pending_orders || 0),
-          conversion_rate: parseFloat(response.data.conversion_rate || 0)
-        }
+      const response = await get('/stats/merchant/orders')
+      
+      if (response && response.success) {
+        const stats = response.data.stats
+        orderStats.value = [
+          { 
+            label: 'Total commandes', 
+            value: stats.total_orders.toString(), 
+            change: stats.total_orders_change || 0, 
+            color: 'bg-blue-500', 
+            icon: 'ShoppingBagIcon' 
+          },
+          { 
+            label: 'Revenus total', 
+            value: formatCurrency(stats.total_revenue), 
+            change: stats.revenue_change || 0, 
+            color: 'bg-green-500', 
+            icon: 'CurrencyDollarIcon' 
+          },
+          { 
+            label: 'En attente', 
+            value: stats.pending_orders.toString(), 
+            change: stats.pending_change || 0, 
+            color: 'bg-yellow-500', 
+            icon: 'ClockIcon' 
+          },
+          { 
+            label: 'Terminées', 
+            value: stats.paid_orders.toString(), 
+            change: stats.paid_change || 0, 
+            color: 'bg-green-500', 
+            icon: 'CheckIcon' 
+          }
+        ]
+        recentOrders.value = response.data.recent_orders || []
+        monthlyRevenue.value = response.data.monthly_revenue || []
       }
-      return response
     } catch (err) {
-      console.error('Erreur lors du chargement des stats:', err)
-      // Valeurs par défaut en cas d'erreur
-      stats.value = {
-        total_orders: 0,
-        revenue: 0,
-        pending: 0,
-        conversion_rate: 0
-      }
-      throw err
+      console.error('Erreur lors du chargement des statistiques de commandes:', err)
     }
   }
   
-  // Charger les commandes/transactions
+  // Load orders with filters
   const loadOrders = async (filters = {}) => {
     try {
-      const params = new URLSearchParams()
-      
-      // Ajouter les filtres si présents
-      if (filters.search) params.append('search', filters.search)
-      if (filters.status) params.append('status', filters.status)
-      if (filters.product) params.append('product_id', filters.product)
-      if (filters.startDate) params.append('date_from', filters.startDate)
-      if (filters.endDate) params.append('date_to', filters.endDate)
-      if (filters.limit) params.append('per_page', filters.limit)
-      
-      const queryString = params.toString()
-      const url = `/merchant/orders${queryString ? '?' + queryString : ''}`
-      
-      const response = await get(url)
-      if (response && response.data && response.data.data && Array.isArray(response.data.data)) {
-        // Utiliser les vraies commandes avec has_winning_ticket
-        orders.value = response.data.data.map(order => ({
-          id: order.id,
-          order_number: order.order_number,
-          customer_name: order.customer_name,
-          customer_email: order.customer_email,
-          product_name: order.product_name,
-          product_image: order.product_image,
-          tickets_count: order.tickets_count,
-          ticket_numbers: order.ticket_numbers || [],
-          ticket_price: order.ticket_price,
-          total_amount: order.total_amount,
-          currency: 'FCFA',
-          payment_method: order.payment_method,
-          status: order.status,
-          type: order.type,
-          has_winning_ticket: order.has_winning_ticket || false,
-          created_at: order.created_at,
-          updated_at: order.updated_at,
-          lottery: order.lottery
-        }))
-      } else {
-        orders.value = []
+      const params = { 
+        page: 1,
+        per_page: 50,
+        ...filters 
       }
-      return response
+      const response = await get('/merchant/orders', { params })
+      
+      if (response && response.success) {
+        orders.value = response.data.data || response.data || []
+      }
     } catch (err) {
       console.error('Erreur lors du chargement des commandes:', err)
       orders.value = []
-      throw err
     }
   }
   
-  // Charger les produits du marchand
+  // Load products for filter
   const loadProducts = async () => {
     try {
-      const response = await get('/merchant/dashboard/top-products?limit=100')
-      if (response && response.data && Array.isArray(response.data)) {
-        products.value = response.data.map(product => ({
-          id: product.id,
-          name: product.title || product.name || 'Produit sans nom'
-        }))
-      } else {
-        products.value = []
+      const response = await get('/merchant/products', { params: { per_page: 100 } })
+      
+      if (response && response.success) {
+        products.value = response.data.data || response.data || []
       }
-      return response
     } catch (err) {
       console.error('Erreur lors du chargement des produits:', err)
       products.value = []
-      throw err
     }
   }
   
-  // Mettre à jour le statut d'une commande
-  const updateOrderStatus = async (orderId, status) => {
+  // Order actions
+  const confirmOrder = async (order) => {
     try {
-      const response = await put(`/transactions/${orderId}/status`, { status })
-      if (response.success) {
-        // Mettre à jour la commande localement
-        const orderIndex = orders.value.findIndex(o => o.id === orderId)
-        if (orderIndex !== -1) {
-          orders.value[orderIndex].status = status
-        }
-      }
+      const response = await put(`/orders/${order.order_number}/confirm`)
       return response
     } catch (err) {
-      console.error('Erreur lors de la mise à jour du statut:', err)
+      console.error('Erreur lors de la confirmation:', err)
       throw err
     }
   }
   
-  // Confirmer une commande
-  const confirmOrder = async (order) => {
-    return updateOrderStatus(order.id, 'confirmed')
-  }
-  
-  // Annuler une commande
   const cancelOrder = async (order) => {
-    return updateOrderStatus(order.id, 'cancelled')
+    try {
+      const response = await put(`/orders/${order.order_number}/cancel`)
+      return response
+    } catch (err) {
+      console.error('Erreur lors de l\'annulation:', err)
+      throw err
+    }
   }
   
-  // Exporter les commandes
   const exportOrders = async (format = 'csv') => {
     try {
-      const response = await get(`/merchant/dashboard/export-orders?format=${format}`)
+      const response = await get(`/merchant/orders/export?format=${format}`)
       return response
     } catch (err) {
       console.error('Erreur lors de l\'export:', err)
@@ -149,72 +126,136 @@ export function useMerchantOrders() {
     }
   }
   
-  // Calculer les statistiques des commandes filtrées
-  const orderStats = computed(() => {
-    const now = new Date()
-    const lastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-    
-    // Commandes de la semaine en cours
-    const thisWeekOrders = orders.value.filter(order => 
-      new Date(order.created_at) >= lastWeek
-    )
-    
-    // Calcul des changements par rapport à la semaine précédente
-    const calculateChange = (currentValue) => {
-      // Si pas de données actuelles, retourner 0
-      if (!currentValue || currentValue === 0) {
-        return 0
-      }
-      // TODO: Implémenter une vraie comparaison avec les données de la semaine précédente
-      // Pour l'instant, retourner 0 au lieu de valeurs aléatoires
-      return 0
+  // Computed stats for cards compatibility
+  const stats = computed(() => [
+    {
+      label: 'Total commandes',
+      value: orderStats.value[0]?.value || '0',
+      color: 'bg-blue-500',
+      icon: 'ShoppingBagIcon'
+    },
+    {
+      label: 'Revenus total',
+      value: orderStats.value[1]?.value || '0 FCFA',
+      color: 'bg-green-500',
+      icon: 'CurrencyDollarIcon'
+    },
+    {
+      label: 'En attente',
+      value: orderStats.value[2]?.value || '0',
+      color: 'bg-yellow-500',
+      icon: 'ClockIcon'
+    },
+    {
+      label: 'Terminées',
+      value: orderStats.value[3]?.value || '0',
+      color: 'bg-green-500',
+      icon: 'CheckIcon'
     }
-    
-    return [
-      {
-        label: 'Total commandes',
-        value: (stats.value.total_orders || 0).toString(),
-        change: calculateChange(stats.value.total_orders),
-        icon: 'ShoppingBagIcon',
-        color: 'bg-[#0099cc]'
-      },
-      {
-        label: 'Revenus',
-        value: Math.floor(stats.value.revenue || 0).toLocaleString(),
-        change: calculateChange(stats.value.revenue),
-        icon: 'CurrencyDollarIcon',
-        color: 'bg-blue-500'
-      },
-      {
-        label: 'En attente',
-        value: (stats.value.pending || 0).toString(),
-        change: calculateChange(stats.value.pending),
-        icon: 'ClockIcon',
-        color: 'bg-yellow-500'
-      },
-      {
-        label: 'Taux conversion',
-        value: `${stats.value.conversion_rate || 0}%`,
-        change: calculateChange(stats.value.conversion_rate),
-        icon: 'CheckIcon',
-        color: 'bg-purple-500'
-      }
+  ])
+  
+  // Status distribution for chart
+  const statusDistribution = computed(() => [
+    {
+      name: 'Payées',
+      value: parseInt(orderStats.value[3]?.value || '0'),
+      color: '#10B981'
+    },
+    {
+      name: 'En attente',
+      value: parseInt(orderStats.value[2]?.value || '0'),
+      color: '#F59E0B'
+    },
+    {
+      name: 'Annulées',
+      value: 0, // Add if available in stats
+      color: '#EF4444'
+    }
+  ])
+  
+  // Load order stats (alias for compatibility)
+  const loadOrderStats = loadStats
+  
+  // Helper functions
+  const formatCurrency = (amount) => {
+    const num = parseFloat(amount) || 0
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M FCFA'
+    }
+    if (num >= 1000) {
+      return (num / 1000).toFixed(0) + 'k FCFA'
+    }
+    return num.toLocaleString('fr-FR') + ' FCFA'
+  }
+  
+  const formatDate = (date) => {
+    return new Intl.DateTimeFormat('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(new Date(date))
+  }
+  
+  const getStatusLabel = (status) => {
+    const statusLabels = {
+      'paid': 'Payée',
+      'pending': 'En attente',
+      'cancelled': 'Annulée',
+      'failed': 'Échouée',
+      'refunded': 'Remboursée'
+    }
+    return statusLabels[status] || status
+  }
+  
+  const getStatusColor = (status) => {
+    const statusColors = {
+      'paid': 'bg-green-100 text-green-800',
+      'pending': 'bg-yellow-100 text-yellow-800',
+      'cancelled': 'bg-red-100 text-red-800',
+      'failed': 'bg-red-100 text-red-800',
+      'refunded': 'bg-gray-100 text-gray-800'
+    }
+    return statusColors[status] || 'bg-gray-100 text-gray-800'
+  }
+  
+  const formatMonthYear = (month, year) => {
+    const monthNames = [
+      'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun',
+      'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'
     ]
-  })
+    return `${monthNames[month - 1]} ${year}`
+  }
   
   return {
+    // Data
     orders,
-    stats,
     products,
     orderStats,
+    stats,
+    recentOrders,
+    monthlyRevenue,
+    statusDistribution,
+    
+    // State
     loading,
     error,
+    
+    // Methods
     loadStats,
     loadOrders,
     loadProducts,
-    updateOrderStatus,
+    loadOrderStats,
     confirmOrder,
     cancelOrder,
-    exportOrders
+    exportOrders,
+    
+    // Utilities
+    formatCurrency,
+    formatDate,
+    getStatusLabel,
+    getStatusColor,
+    formatMonthYear
   }
 }

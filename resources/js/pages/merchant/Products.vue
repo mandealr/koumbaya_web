@@ -425,6 +425,7 @@ import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import ProductImage from '@/components/common/ProductImage.vue'
 import { useApi } from '@/composables/api'
+import { useMerchantProducts } from '@/composables/useMerchantProducts'
 import {
   PlusIcon,
   MagnifyingGlassIcon,
@@ -446,7 +447,17 @@ import {
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
-const { get, post, put, delete: del, loading, error } = useApi()
+const { get, post, put, delete: del, loading: apiLoading, error } = useApi()
+
+// Composables
+const {
+  productStats,
+  categories,
+  loading: statsLoading,
+  loadProductStats,
+  loadCategories,
+  formatCurrency
+} = useMerchantProducts()
 
 // State
 const showProductModal = ref(false)
@@ -461,9 +472,10 @@ const filters = reactive({
   sortBy: 'date_desc'
 })
 
-const categories = ref([])
-const productStats = ref([])
 const products = ref([])
+
+// Computed for loading state
+const loading = computed(() => apiLoading.value || statsLoading.value)
 
 // Computed
 const filteredProducts = computed(() => {
@@ -580,57 +592,7 @@ const loadProducts = async () => {
   }
 }
 
-const loadCategories = async () => {
-  try {
-    const response = await get('/categories')
-    if (response && response.categories) {
-      categories.value = response.categories
-    }
-  } catch (error) {
-    console.error('Error loading categories:', error)
-  }
-}
-
-const loadProductStats = async () => {
-  try {
-    const response = await get('/merchant/dashboard/stats')
-    if (response && response.data) {
-      const data = response.data
-      productStats.value = [
-        {
-          label: 'Produits actifs',
-          value: data.active_products || 0,
-          change: data.products_change || 0,
-          icon: GiftIcon,
-          color: 'bg-[#0099cc]'
-        },
-        {
-          label: 'Total koumbich',
-          value: formatCurrency(data.total_revenue || 0),
-          change: data.revenue_change || 0,
-          icon: CurrencyDollarIcon,
-          color: 'bg-blue-500'
-        },
-        {
-          label: 'Tickets vendus',
-          value: data.tickets_sold || 0,
-          change: data.tickets_change || 0,
-          icon: ShoppingBagIcon,
-          color: 'bg-purple-500'
-        },
-        {
-          label: 'Taux succès',
-          value: (data.success_rate || 0) + '%',
-          change: data.success_change || 0,
-          icon: CheckCircleIcon,
-          color: 'bg-yellow-500'
-        }
-      ]
-    }
-  } catch (error) {
-    console.error('Error loading product stats:', error)
-  }
-}
+// Categories and stats are now loaded via composables
 
 const publishProduct = async (product) => {
   const actionText = product.sale_mode === 'lottery' ? 'tombola' : 'produit'
@@ -743,9 +705,7 @@ const deleteProduct = async (product) => {
   }
 }
 
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('fr-FR').format(amount)
-}
+// formatCurrency is now provided by the composable
 
 const getProductImageSrc = (product) => {
   // Debug pour voir les données du produit

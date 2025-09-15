@@ -286,6 +286,9 @@ Route::group([
     Route::prefix('stats')->group(function () {
         Route::get('/merchant/dashboard', [StatsController::class, 'merchantDashboard']);
         Route::get('/merchant/products', [StatsController::class, 'merchantProducts']);
+        Route::get('/merchant/orders', [StatsController::class, 'merchantOrders']);
+        Route::get('/merchant/lotteries', [StatsController::class, 'merchantLotteries']);
+        Route::get('/merchant/analytics', [StatsController::class, 'merchantAnalytics']);
     });
 });
 

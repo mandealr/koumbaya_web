@@ -301,6 +301,27 @@ export function useMerchantLotteries() {
     getFormattedStatus,
     getTimeRemaining,
     getDrawType,
-    getDrawMessage
+    getDrawMessage,
+    
+    // Stats
+    loadLotteryStats: async () => {
+      try {
+        const response = await get('/stats/merchant/lotteries')
+        if (response && response.success) {
+          // Update stats if needed
+          const lotteryStats = response.data.stats
+          stats.value = {
+            total: lotteryStats.total_lotteries,
+            active: lotteryStats.active_lotteries,
+            pending: lotteryStats.pending_lotteries,
+            completed: lotteryStats.completed_lotteries,
+            cancelled: lotteryStats.cancelled_lotteries
+          }
+          return response.data
+        }
+      } catch (err) {
+        console.error('Erreur lors du chargement des stats tombolas:', err)
+      }
+    }
   }
 }

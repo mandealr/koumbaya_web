@@ -300,8 +300,21 @@ const loadAnalytics = async () => {
 
 const loadStats = async () => {
   try {
-    const response = await get('/merchant/dashboard/stats', { params: filterParams.value })
-    stats.value = response
+    const response = await get('/stats/merchant/dashboard', { params: filterParams.value })
+    if (response && response.success) {
+      const data = response.data
+      stats.value = {
+        total_revenue: data.revenue.total,
+        monthly_sales: data.orders.total,
+        active_products: data.products.active,
+        conversion_rate: data.products.total_views > 0 ? 
+          (data.orders.total / data.products.total_views * 100) : 0,
+        revenue_change: 0, // Calculate from comparison data if needed
+        sales_change: 0,
+        products_change: 0,
+        conversion_change: 0
+      }
+    }
   } catch (err) {
     console.error('Erreur lors du chargement des stats:', err)
     stats.value = {}
@@ -310,8 +323,14 @@ const loadStats = async () => {
 
 const loadSalesChart = async () => {
   try {
-    const response = await get('/merchant/dashboard/sales-chart', { params: filterParams.value })
-    salesChart.value = response.data || []
+    const response = await get('/stats/merchant/analytics', { params: filterParams.value })
+    if (response && response.success) {
+      salesChart.value = response.data.daily_revenue.map(day => ({
+        date: day.date,
+        sales: day.orders,
+        revenue: day.revenue
+      }))
+    }
   } catch (err) {
     console.error('Erreur lors du chargement du graphique des ventes:', err)
     salesChart.value = []
@@ -320,8 +339,15 @@ const loadSalesChart = async () => {
 
 const loadTopProducts = async () => {
   try {
-    const response = await get('/merchant/dashboard/top-products', { params: filterParams.value })
-    topProducts.value = response.data || []
+    const response = await get('/stats/merchant/analytics', { params: filterParams.value })
+    if (response && response.success) {
+      topProducts.value = response.data.top_products.map(product => ({
+        ...product,
+        sales: product.order_count,
+        total_revenue: product.revenue,
+        performance_change: 0 // Calculate from historical data if needed
+      }))
+    }
   } catch (err) {
     console.error('Erreur lors du chargement des top produits:', err)
     topProducts.value = []
@@ -330,8 +356,16 @@ const loadTopProducts = async () => {
 
 const loadLotteryPerformance = async () => {
   try {
-    const response = await get('/merchant/dashboard/lottery-performance', { params: filterParams.value })
-    lotteryPerformance.value = response.data || []
+    const response = await get('/stats/merchant/lotteries', { params: filterParams.value })
+    if (response && response.success) {
+      lotteryPerformance.value = response.data.recent_lotteries.map(lottery => ({
+        id: lottery.id,
+        name: lottery.product_name,
+        tickets_sold: lottery.sold_tickets,
+        revenue: lottery.sold_tickets * 1000, // Estimate based on ticket price
+        performance_change: lottery.completion_rate - 50 // Simple calculation
+      }))
+    }
   } catch (err) {
     console.error('Erreur lors du chargement de la performance des tombolas:', err)
     lotteryPerformance.value = []

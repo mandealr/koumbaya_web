@@ -229,6 +229,234 @@ class StatsController extends Controller
     }
     
     /**
+     * Get merchant orders statistics
+     */
+    public function merchantOrders(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Statistiques des commandes par statut
+        $orderStats = Order::where('type', 'lottery')
+            ->whereHas('product', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->selectRaw('
+                COUNT(*) as total_orders,
+                SUM(CASE WHEN status = "paid" THEN 1 ELSE 0 END) as paid_orders,
+                SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending_orders,
+                SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled_orders,
+                SUM(CASE WHEN status = "paid" THEN total_amount ELSE 0 END) as total_revenue,
+                AVG(CASE WHEN status = "paid" THEN total_amount ELSE NULL END) as avg_order_value
+            ')
+            ->first();
+            
+        // Commandes récentes
+        $recentOrders = Order::where('type', 'lottery')
+            ->whereHas('product', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->with(['product', 'user'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function($order) {
+                return [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'user_name' => $order->user->first_name . ' ' . $order->user->last_name,
+                    'product_name' => $order->product->name,
+                    'amount' => $order->total_amount,
+                    'status' => $order->status,
+                    'created_at' => $order->created_at
+                ];
+            });
+            
+        // Revenus par mois (12 derniers mois)
+        $monthlyRevenue = Order::where('type', 'lottery')
+            ->whereHas('product', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->where('status', 'paid')
+            ->where('paid_at', '>=', now()->subYear())
+            ->selectRaw('MONTH(paid_at) as month, YEAR(paid_at) as year, SUM(total_amount) as revenue')
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->get();
+            
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'stats' => [
+                    'total_orders' => (int) ($orderStats->total_orders ?? 0),
+                    'paid_orders' => (int) ($orderStats->paid_orders ?? 0),
+                    'pending_orders' => (int) ($orderStats->pending_orders ?? 0),
+                    'cancelled_orders' => (int) ($orderStats->cancelled_orders ?? 0),
+                    'total_revenue' => (float) ($orderStats->total_revenue ?? 0),
+                    'avg_order_value' => (float) ($orderStats->avg_order_value ?? 0)
+                ],
+                'recent_orders' => $recentOrders,
+                'monthly_revenue' => $monthlyRevenue
+            ]
+        ]);
+    }
+    
+    /**
+     * Get merchant lotteries statistics
+     */
+    public function merchantLotteries(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Statistiques des tombolas
+        $lotteryStats = Lottery::whereHas('product', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->selectRaw('
+                COUNT(*) as total_lotteries,
+                SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active_lotteries,
+                SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending_lotteries,
+                SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed_lotteries,
+                SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled_lotteries,
+                SUM(sold_tickets) as total_tickets_sold,
+                SUM(total_tickets) as total_tickets_available,
+                AVG(CASE WHEN status = "completed" THEN (sold_tickets / total_tickets) * 100 ELSE NULL END) as avg_completion_rate
+            ')
+            ->first();
+            
+        // Tombolas actives avec possibilité de tirage
+        $drawableLotteries = Lottery::whereHas('product', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->where('status', 'active')
+            ->where('is_drawn', false)
+            ->where(function($q) {
+                $q->where('draw_date', '<=', now())
+                  ->orWhereRaw('sold_tickets >= total_tickets')
+                  ->orWhereRaw('sold_tickets >= max_tickets');
+            })
+            ->count();
+            
+        // Performance des tombolas récentes
+        $recentLotteries = Lottery::whereHas('product', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->with(['product'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function($lottery) {
+                return [
+                    'id' => $lottery->id,
+                    'lottery_number' => $lottery->lottery_number,
+                    'product_name' => $lottery->product->name,
+                    'status' => $lottery->status,
+                    'sold_tickets' => $lottery->sold_tickets ?? 0,
+                    'total_tickets' => $lottery->total_tickets ?? $lottery->max_tickets ?? 0,
+                    'completion_rate' => $lottery->total_tickets > 0 ? 
+                        round(($lottery->sold_tickets / $lottery->total_tickets) * 100, 2) : 0,
+                    'draw_date' => $lottery->draw_date,
+                    'created_at' => $lottery->created_at
+                ];
+            });
+            
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'stats' => [
+                    'total_lotteries' => (int) ($lotteryStats->total_lotteries ?? 0),
+                    'active_lotteries' => (int) ($lotteryStats->active_lotteries ?? 0),
+                    'pending_lotteries' => (int) ($lotteryStats->pending_lotteries ?? 0),
+                    'completed_lotteries' => (int) ($lotteryStats->completed_lotteries ?? 0),
+                    'cancelled_lotteries' => (int) ($lotteryStats->cancelled_lotteries ?? 0),
+                    'total_tickets_sold' => (int) ($lotteryStats->total_tickets_sold ?? 0),
+                    'total_tickets_available' => (int) ($lotteryStats->total_tickets_available ?? 0),
+                    'avg_completion_rate' => (float) ($lotteryStats->avg_completion_rate ?? 0),
+                    'drawable_lotteries' => $drawableLotteries
+                ],
+                'recent_lotteries' => $recentLotteries
+            ]
+        ]);
+    }
+    
+    /**
+     * Get comprehensive merchant analytics
+     */
+    public function merchantAnalytics(Request $request)
+    {
+        $user = Auth::user();
+        $period = $request->input('period', '30d'); // 7d, 30d, 90d, 1y
+        
+        // Calculer la date de début selon la période
+        $startDate = match($period) {
+            '7d' => now()->subDays(7),
+            '30d' => now()->subDays(30),
+            '90d' => now()->subDays(90),
+            '1y' => now()->subYear(),
+            default => now()->subDays(30)
+        };
+        
+        // Revenus par jour pour la période
+        $dailyRevenue = Order::where('type', 'lottery')
+            ->whereHas('product', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->where('status', 'paid')
+            ->where('paid_at', '>=', $startDate)
+            ->selectRaw('DATE(paid_at) as date, SUM(total_amount) as revenue, COUNT(*) as orders')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+            
+        // Top produits par revenus
+        $topProducts = Product::where('user_id', $user->id)
+            ->withSum(['orders as revenue' => function($query) use ($startDate) {
+                $query->where('status', 'paid')
+                      ->where('paid_at', '>=', $startDate);
+            }], 'total_amount')
+            ->withCount(['orders as order_count' => function($query) use ($startDate) {
+                $query->where('status', 'paid')
+                      ->where('paid_at', '>=', $startDate);
+            }])
+            ->orderBy('revenue', 'desc')
+            ->limit(10)
+            ->get(['id', 'name', 'price', 'image_url'])
+            ->map(function($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price' => $product->price,
+                    'image_url' => $product->image_url,
+                    'revenue' => $product->revenue ?? 0,
+                    'order_count' => $product->order_count ?? 0
+                ];
+            });
+            
+        // Statistiques de conversion
+        $conversionStats = Product::where('user_id', $user->id)
+            ->selectRaw('
+                SUM(views_count) as total_views,
+                SUM(sales_count) as total_sales,
+                AVG(CASE WHEN views_count > 0 THEN (sales_count / views_count) * 100 ELSE 0 END) as avg_conversion_rate
+            ')
+            ->first();
+            
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'period' => $period,
+                'daily_revenue' => $dailyRevenue,
+                'top_products' => $topProducts,
+                'conversion' => [
+                    'total_views' => (int) ($conversionStats->total_views ?? 0),
+                    'total_sales' => (int) ($conversionStats->total_sales ?? 0),
+                    'avg_conversion_rate' => (float) ($conversionStats->avg_conversion_rate ?? 0)
+                ]
+            ]
+        ]);
+    }
+    
+    /**
      * Get popular active lotteries
      */
     public function popularLotteries(Request $request)

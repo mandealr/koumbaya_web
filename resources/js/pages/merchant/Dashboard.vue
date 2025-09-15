@@ -223,7 +223,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useApi } from '@/composables/api'
+import { useMerchantDashboard } from '@/composables/useMerchantDashboard'
 import ProductImage from '@/components/common/ProductImage.vue'
 import {
   PlusIcon,
@@ -237,128 +237,46 @@ import {
   TruckIcon
 } from '@heroicons/vue/24/outline'
 
-// API
-const { get, loading, error } = useApi()
+// Composables
+const {
+  stats,
+  recentOrders,
+  topProducts,
+  summary,
+  loading,
+  error,
+  loadDashboardData,
+  formatCurrency
+} = useMerchantDashboard()
 
 // Reactive data
 const selectedPeriod = ref('30j')
-const stats = ref([])
-const salesSummary = ref({})
-const recentOrders = ref([])
-const topProducts = ref([])
 
-// API Functions
-const loadDashboardStats = async () => {
-  try {
-    const response = await get('/merchant/dashboard/stats')
-    if (response && response.data) {
-      const data = response.data
-      
-      stats.value = [
-        {
-          label: 'Revenus du mois',
-          value: formatPrice(data.monthly_revenue || 0),
-          change: data.revenue_change || 0,
-          icon: CurrencyDollarIcon,
-          color: 'bg-[#0099cc]'
-        },
-        {
-          label: 'Commandes',
-          value: data.total_orders || 0,
-          change: data.orders_change || 0,
-          icon: ShoppingBagIcon,
-          color: 'bg-blue-500'
-        },
-        {
-          label: 'Produits actifs',
-          value: data.active_products || 0,
-          change: data.products_change || 0,
-          icon: GiftIcon,
-          color: 'bg-yellow-500'
-        },
-        {
-          label: 'Clients',
-          value: data.total_customers || 0,
-          change: data.customers_change || 0,
-          icon: UsersIcon,
-          color: 'bg-purple-500'
-        }
-      ]
+// Computed
+const salesSummary = computed(() => ({
+  totalSales: summary.value.total_revenue || 0,
+  totalOrders: summary.value.total_orders || 0,
+  avgOrder: summary.value.avg_order_value || 0
+}))
 
-      salesSummary.value = {
-        totalSales: data.total_sales || 0,
-        totalOrders: data.total_orders || 0,
-        avgOrder: data.average_order || 0
-      }
-    }
-  } catch (err) {
-    console.error('Erreur lors du chargement des statistiques:', err)
-  }
-}
-
-const loadRecentOrders = async () => {
-  try {
-    const response = await get('/merchant/dashboard/recent-transactions')
-    if (response && response.data && Array.isArray(response.data)) {
-      recentOrders.value = response.data.map(order => ({
-        id: order.id,
-        product_name: order.product?.title || order.product?.name || 'Produit inconnu',
-        customer_name: (order.user?.name || 
-                       (order.user?.first_name + ' ' + order.user?.last_name) || 
-                       'Client inconnu').trim(),
-        amount: parseFloat(order.amount || 0),
-        status: order.status || 'pending',
-        created_at: order.created_at ? new Date(order.created_at) : new Date()
-      }))
-    } else {
-      recentOrders.value = []
-    }
-  } catch (err) {
-    console.error('Erreur lors du chargement des commandes récentes:', err)
-    recentOrders.value = []
-  }
-}
-
-const loadTopProducts = async () => {
-  try {
-    const response = await get('/merchant/dashboard/top-products')
-    if (response && response.data && Array.isArray(response.data)) {
-      topProducts.value = response.data.map(product => ({
-        id: product.id,
-        name: product.title || product.name || 'Produit sans nom',
-        sales: product.tickets_sold || product.sales_count || 0,
-        growth: product.growth_percentage || 0,
-        image: product.image_url || product.image || '/images/products/placeholder.jpg'
-      }))
-    } else {
-      topProducts.value = []
-    }
-  } catch (err) {
-    console.error('Erreur lors du chargement des produits populaires:', err)
-    topProducts.value = []
-  }
-}
-
+// Methods
 const formatPrice = (price) => {
   return new Intl.NumberFormat('fr-FR').format(price)
 }
 
-// Methods
 const getOrderStatusLabel = (status) => {
   const labels = {
     'completed': 'Terminé',
     'pending': 'En attente',
     'processing': 'En cours',
-    'cancelled': 'Annulé'
+    'cancelled': 'Annulé',
+    'paid': 'Payé',
+    'awaiting_payment': 'En attente de paiement'
   }
   return labels[status] || status
 }
 
 onMounted(async () => {
-  await Promise.all([
-    loadDashboardStats(),
-    loadRecentOrders(),
-    loadTopProducts()
-  ])
+  await loadDashboardData()
 })
 </script>
