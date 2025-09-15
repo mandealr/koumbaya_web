@@ -2,6 +2,7 @@
   <div 
     class="group cursor-pointer overflow-hidden bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
     :class="{'ring-2 ring-purple-500': product.sale_mode === 'lottery', 'ring-2 ring-[#0099cc]': product.sale_mode === 'direct'}"
+    @click="$emit('view-product', product)"
   >
     <!-- Image avec badges -->
     <div class="relative overflow-hidden h-48">
@@ -112,7 +113,7 @@
 
       <!-- Bouton d'action -->
       <button 
-        @click="$emit('view-product', product)"
+        @click.stop="$emit('view-product', product)"
         class="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 btn-responsive btn-wrap-mobile group-hover:shadow-md"
         :class="product.sale_mode === 'lottery' 
           ? 'bg-purple-600 hover:bg-purple-700 text-white' 
