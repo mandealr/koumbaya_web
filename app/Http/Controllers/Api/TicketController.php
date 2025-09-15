@@ -41,9 +41,9 @@ class TicketController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"lottery_id","quantity","phone_number","total_amount"},
+     *             required={"lottery_id","quantity","total_amount"},
      *             @OA\Property(property="lottery_id", type="integer", example=1),
-     *             @OA\Property(property="quantity", type="integer", example=2),
+     *             @OA\Property(property="quantity", type="integer", example=5, minimum=1, maximum=500),
      *             @OA\Property(property="phone_number", type="string", example="074123456"),
      *             @OA\Property(property="total_amount", type="number", example=5000)
      *         )
@@ -66,8 +66,18 @@ class TicketController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'lottery_id' => 'required|exists:lotteries,id',
-            'quantity' => 'required|integer|min:1|max:10',
+            'quantity' => 'required|integer|min:1|max:500',
             'total_amount' => 'required|numeric|min:100',
+        ], [
+            'lottery_id.required' => 'L\'identifiant de la tombola est requis.',
+            'lottery_id.exists' => 'Cette tombola n\'existe pas ou n\'est plus disponible.',
+            'quantity.required' => 'Le nombre de tickets est requis.',
+            'quantity.integer' => 'Le nombre de tickets doit être un nombre entier.',
+            'quantity.min' => 'Vous devez acheter au moins 1 ticket.',
+            'quantity.max' => 'Vous ne pouvez pas acheter plus de 500 tickets à la fois.',
+            'total_amount.required' => 'Le montant total est requis.',
+            'total_amount.numeric' => 'Le montant total doit être un nombre valide.',
+            'total_amount.min' => 'Le montant minimum est de 100 FCFA.',
         ]);
 
         if ($validator->fails()) {
@@ -79,18 +89,33 @@ class TicketController extends Controller
 
         // Vérifications de validité
         if (!$lottery->canPurchaseTicket()) {
-            return $this->sendError('Cette tombola n\'est plus disponible à l\'achat.');
+            return $this->sendError(
+                'Cette tombola n\'est plus disponible à l\'achat. ' .
+                'Elle pourrait être expirée, suspendue ou le tirage déjà effectué.',
+                422
+            );
         }
 
         // Vérifier le prix total
         $expectedAmount = $lottery->ticket_price * $request->quantity;
         if (abs($request->total_amount - $expectedAmount) > 0.01) {
-            return $this->sendError('Le montant total ne correspond pas au prix des tickets.');
+            return $this->sendError(
+                "Le montant total ne correspond pas au prix des tickets. " .
+                "Montant attendu : " . number_format($expectedAmount, 0, ',', ' ') . " FCFA " .
+                "pour {$request->quantity} ticket(s) à " . number_format($lottery->ticket_price, 0, ',', ' ') . " FCFA chacun.",
+                422
+            );
         }
 
         // Vérifier la disponibilité des tickets
-        if ($lottery->sold_tickets + $request->quantity > $lottery->total_tickets) {
-            return $this->sendError('Pas assez de tickets disponibles.');
+        $remainingTickets = $lottery->total_tickets - $lottery->sold_tickets;
+        if ($request->quantity > $remainingTickets) {
+            return $this->sendError(
+                "Pas assez de tickets disponibles. " .
+                "Il reste seulement {$remainingTickets} ticket(s) disponible(s) " .
+                "sur un total de {$lottery->total_tickets}.",
+                422
+            );
         }
 
         DB::beginTransaction();
@@ -164,7 +189,20 @@ class TicketController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            return $this->sendError('Erreur lors de la création de la commande: ' . $e->getMessage());
+            \Log::error('Erreur lors de l\'achat de tickets', [
+                'user_id' => $user->id,
+                'lottery_id' => $lottery->id,
+                'quantity' => $request->quantity,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return $this->sendError(
+                'Une erreur technique est survenue lors de la création de votre commande. ' .
+                'Veuillez réessayer dans quelques instants. Si le problème persiste, ' .
+                'contactez notre support client.',
+                500
+            );
         }
     }
 
@@ -331,7 +369,17 @@ class TicketController extends Controller
             ->findOrFail($id);
 
         if ($ticket->status !== 'reserved') {
-            return $this->sendError('Ce ticket ne peut pas être annulé.');
+            $statusMessages = [
+                'paid' => 'Ce ticket a déjà été payé et ne peut plus être annulé.',
+                'cancelled' => 'Ce ticket a déjà été annulé.',
+                'expired' => 'Ce ticket a expiré et ne peut plus être annulé.',
+                'used' => 'Ce ticket a déjà été utilisé.'
+            ];
+            
+            $message = $statusMessages[$ticket->status] ?? 
+                       'Ce ticket ne peut pas être annulé car son statut est : ' . $ticket->status;
+            
+            return $this->sendError($message, 422);
         }
 
         DB::beginTransaction();
@@ -350,7 +398,18 @@ class TicketController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            return $this->sendError('Erreur lors de l\'annulation: ' . $e->getMessage());
+            \Log::error('Erreur lors de l\'annulation de ticket', [
+                'user_id' => auth()->id(),
+                'ticket_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return $this->sendError(
+                'Une erreur technique est survenue lors de l\'annulation de votre ticket. ' .
+                'Veuillez réessayer dans quelques instants.',
+                500
+            );
         }
     }
 }
