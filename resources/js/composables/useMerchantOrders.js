@@ -73,7 +73,7 @@ export function useMerchantOrders() {
       const response = await get('/merchant/orders', { params })
       
       if (response && response.success) {
-        orders.value = response.data.data || response.data || []
+        orders.value = response.data || []
       }
     } catch (err) {
       console.error('Erreur lors du chargement des commandes:', err)
