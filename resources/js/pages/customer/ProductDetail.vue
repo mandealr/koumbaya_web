@@ -144,11 +144,12 @@
 
             <button
               @click="purchaseTickets"
-              :disabled="purchasing || product.status !== 'active'"
+              :disabled="purchasing || product.status !== 'active' || isLotterySoldOut"
               class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <span v-if="purchasing">Achat en cours...</span>
               <span v-else-if="product.status !== 'active'">Tombola terminée</span>
+              <span v-else-if="isLotterySoldOut">Tous les tickets sont vendus</span>
               <span v-else>Acheter {{ ticketQuantity }} ticket{{ ticketQuantity > 1 ? 's' : '' }}</span>
             </button>
           </div>
@@ -327,6 +328,15 @@ const calculateProgress = () => {
   const total = lottery.total_tickets || 1
   return Math.round((sold / total) * 100)
 }
+
+const isLotterySoldOut = computed(() => {
+  if (!product.value) return false
+  const lottery = product.value.lottery || product.value.active_lottery
+  if (!lottery) return false
+  const sold = lottery.sold_tickets || 0
+  const total = lottery.total_tickets || lottery.max_tickets || 0
+  return sold >= total
+})
 
 const formatPrice = (price) => {
   if (price === null || price === undefined || isNaN(price)) {

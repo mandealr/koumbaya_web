@@ -113,6 +113,7 @@
 
       <!-- Bouton d'action -->
       <button 
+        v-if="!isLotterySoldOut"
         @click.stop="$emit('view-product', product)"
         class="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 btn-responsive btn-wrap-mobile group-hover:shadow-md"
         :class="product.sale_mode === 'lottery' 
@@ -121,6 +122,15 @@
       >
         <ShoppingBagIcon class="w-5 h-5 mr-2 flex-shrink-0" />
         {{ product.sale_mode === 'lottery' ? 'Participer à la tombola' : 'Acheter maintenant' }}
+      </button>
+      
+      <!-- Bouton Complet pour tombola -->
+      <button 
+        v-else
+        disabled
+        class="w-full py-3 px-4 rounded-lg font-medium bg-gray-400 text-white cursor-not-allowed"
+      >
+        Tombola complète
       </button>
     </div>
   </div>
@@ -159,6 +169,15 @@ const calculateProgress = (product) => {
   const total = product.active_lottery.total_tickets || 1
   return Math.round((sold / total) * 100)
 }
+
+const isLotterySoldOut = computed(() => {
+  if (props.product.sale_mode !== 'lottery' || !props.product.active_lottery) {
+    return false
+  }
+  const sold = props.product.active_lottery.sold_tickets || 0
+  const total = props.product.active_lottery.total_tickets || props.product.active_lottery.max_tickets || 0
+  return sold >= total
+})
 </script>
 
 <style scoped>

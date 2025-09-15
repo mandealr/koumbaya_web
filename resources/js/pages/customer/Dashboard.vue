@@ -202,11 +202,18 @@
                     Tirage le {{ formatDate(lottery.draw_date) }}
                   </span>
                   <router-link
+                    v-if="lottery.sold_tickets < lottery.total_tickets"
                     :to="`/customer/products/${lottery.product.id}`"
                     class="text-sm bg-[#0099cc] text-white px-3 py-1 rounded-md hover:bg-blue-700 transition-colors"
                   >
                     Participer
                   </router-link>
+                  <span
+                    v-else
+                    class="text-sm bg-gray-400 text-white px-3 py-1 rounded-md"
+                  >
+                    Complet
+                  </span>
                 </div>
               </div>
             </div>
