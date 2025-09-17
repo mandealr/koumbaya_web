@@ -181,12 +181,14 @@ class Lottery extends Model
             return false;
         }
         
-        $minParticipants = $this->product->min_participants ?? 300;
+        $minParticipants = $this->product->min_participants ?? 1;
+        $allTicketsSold = $this->sold_tickets >= $this->max_tickets;
+        $endDateReached = $this->end_date <= now();
         
         return $this->sold_tickets >= $minParticipants && 
                $this->status === 'active' && 
                !$this->is_drawn &&
-               $this->end_date <= now(); // Peut être tirée seulement après la fin
+               ($endDateReached || $allTicketsSold); // Peut être tirée après la fin OU si tous les tickets sont vendus
     }
 
     /**

@@ -110,14 +110,15 @@ class LotteryDrawService
             return ['eligible' => false, 'reason' => 'Lottery is not active'];
         }
         
-        // End date check
-        if ($lottery->end_date > now()) {
-            return ['eligible' => false, 'reason' => 'Lottery end date not reached'];
+        // End date check - Allow manual draw if all tickets are sold
+        $allTicketsSold = $lottery->sold_tickets >= $lottery->max_tickets;
+        if ($lottery->end_date > now() && !$allTicketsSold) {
+            return ['eligible' => false, 'reason' => 'Lottery end date not reached and not all tickets are sold'];
         }
         
         // Minimum participants check
         $paidTicketsCount = $lottery->paidTickets()->count();
-        $minParticipants = $lottery->product->min_participants ?? 300;
+        $minParticipants = $lottery->product->min_participants ?? 1;
         
         if ($paidTicketsCount < $minParticipants) {
             return [

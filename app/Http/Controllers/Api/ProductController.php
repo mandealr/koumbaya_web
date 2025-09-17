@@ -635,9 +635,20 @@ class ProductController extends Controller
         $perPage = min($request->get('per_page', 15), 50);
 
         $query = Product::where('merchant_id', $user->id)
-            ->with(['category', 'lotteries' => function($q) {
-                $q->where('status', 'active')->orderBy('created_at', 'desc');
-            }]);
+            ->with([
+                'category', 
+                'lotteries' => function($q) {
+                    $q->orderBy('created_at', 'desc');
+                },
+                'orders' => function($q) {
+                    $q->whereIn('status', ['paid', 'fulfilled']);
+                }
+            ])
+            ->withCount([
+                'orders as paid_orders_count' => function($q) {
+                    $q->whereIn('status', ['paid', 'fulfilled']);
+                }
+            ]);
 
         // Apply filters
         if ($request->filled('search')) {
@@ -666,24 +677,43 @@ class ProductController extends Controller
 
         $products = $query->paginate($perPage);
 
-        // Transform products to include lottery progression data
+        // Transform products to include lottery progression data and revenue info
         $transformedProducts = $products->getCollection()->map(function ($product) {
             $productData = $product->toArray();
             
             // Add lottery progression data
             if ($product->sale_mode === 'lottery' && $product->lotteries->count() > 0) {
-                $lottery = $product->lotteries->first(); // Most recent active lottery
+                $lottery = $product->lotteries->first(); // Most recent lottery
+                $productData['lottery'] = [
+                    'id' => $lottery->id,
+                    'sold_tickets' => $lottery->sold_tickets ?? 0,
+                    'max_tickets' => $lottery->max_tickets ?? 0,
+                    'ticket_price' => $lottery->ticket_price ?? 0,
+                    'status' => $lottery->status
+                ];
                 $productData['lottery_progression'] = [
                     'sold_tickets' => $lottery->sold_tickets ?? 0,
                     'max_tickets' => $lottery->max_tickets ?? 0,
                     'progress_percentage' => $lottery->max_tickets > 0 ? 
                         round(($lottery->sold_tickets / $lottery->max_tickets) * 100, 1) : 0,
-                    'ticket_price' => $lottery->ticket_price ?? 0,
-                    'status' => $lottery->status
                 ];
+                
+                // Calculate revenue for lottery
+                $productData['revenue'] = ($lottery->sold_tickets ?? 0) * ($lottery->ticket_price ?? 0);
             } else {
+                $productData['lottery'] = null;
                 $productData['lottery_progression'] = null;
+                
+                // Calculate revenue for direct sales from orders
+                $productData['revenue'] = $product->orders->sum('total_amount');
             }
+            
+            // Add sales information for deletion logic
+            $productData['paid_orders_count'] = $product->paid_orders_count ?? 0;
+            $productData['can_delete'] = $product->paid_orders_count == 0 && 
+                                       ($product->sale_mode !== 'lottery' || 
+                                        !$product->lotteries->first() || 
+                                        $product->lotteries->first()->sold_tickets == 0);
             
             return $productData;
         });

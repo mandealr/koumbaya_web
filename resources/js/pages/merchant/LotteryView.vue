@@ -370,7 +370,7 @@
 
     <!-- Modals -->
     <LotteryDrawModal
-      v-if="showDrawModal"
+      :show="showDrawModal"
       :lottery="lottery"
       @close="showDrawModal = false"
       @drawn="onLotteryDrawn"
@@ -471,45 +471,92 @@ const roi = computed(() => {
 })
 
 const timeRemaining = computed(() => {
-  const now = new Date()
-  const endDate = new Date(lottery.value.end_date)
-  const diffMs = endDate - now
+  if (!lottery.value.end_date) return 'Non définie'
+  
+  try {
+    const now = new Date()
+    const endDate = new Date(lottery.value.end_date)
+    
+    // Vérifier si la date est valide
+    if (isNaN(endDate.getTime())) return 'Date invalide'
+    
+    const diffMs = endDate - now
 
-  if (diffMs <= 0) return 'Terminée'
+    if (diffMs <= 0) return 'Terminée'
 
-  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-  const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
 
-  if (days > 0) return `${days}j ${hours}h`
-  return `${hours}h`
+    if (days > 0) return `${days}j ${hours}h`
+    return `${hours}h`
+  } catch (error) {
+    console.error('Error calculating time remaining:', error)
+    return 'Erreur de calcul'
+  }
 })
 
 const daysRemaining = computed(() => {
-  const now = new Date()
-  const endDate = new Date(lottery.value.end_date)
-  const diffMs = endDate - now
+  if (!lottery.value.end_date) return 0
+  
+  try {
+    const now = new Date()
+    const endDate = new Date(lottery.value.end_date)
+    
+    // Vérifier si la date est valide
+    if (isNaN(endDate.getTime())) return 0
+    
+    const diffMs = endDate - now
 
-  if (diffMs <= 0) return 0
-  return Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+    if (diffMs <= 0) return 0
+    return Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+  } catch (error) {
+    console.error('Error calculating days remaining:', error)
+    return 0
+  }
 })
 
 const canDraw = computed(() => {
-  // Peut tirer si : status active, pas de gagnant encore, et soit tous les tickets vendus soit la date de tirage atteinte
-  return lottery.value.status === 'active' && 
-         !lottery.value.winning_ticket_number &&
-         (lottery.value.sold_tickets >= lottery.value.max_tickets || 
-          (lottery.value.draw_date && new Date(lottery.value.draw_date) <= new Date()))
+  try {
+    // Peut tirer si : status active, pas de gagnant encore, et soit tous les tickets vendus soit la date de tirage atteinte
+    const isActive = lottery.value.status === 'active'
+    const hasNoWinner = !lottery.value.winning_ticket_number
+    const allTicketsSold = lottery.value.sold_tickets >= lottery.value.max_tickets
+    
+    let drawDateReached = false
+    if (lottery.value.draw_date) {
+      const drawDate = new Date(lottery.value.draw_date)
+      if (!isNaN(drawDate.getTime())) {
+        drawDateReached = drawDate <= new Date()
+      }
+    }
+    
+    return isActive && hasNoWinner && (allTicketsSold || drawDateReached)
+  } catch (error) {
+    console.error('Error calculating canDraw:', error)
+    return false
+  }
 })
 
 const canDrawManually = computed(() => {
-  // Peut faire un tirage manuel anticipé si : status active, pas de gagnant, tous les tickets vendus MAIS la date n'est pas encore atteinte
-  const allTicketsSold = lottery.value.sold_tickets >= lottery.value.max_tickets
-  const dateNotReached = lottery.value.draw_date && new Date(lottery.value.draw_date) > new Date()
-  
-  return lottery.value.status === 'active' && 
-         !lottery.value.winning_ticket_number &&
-         allTicketsSold &&
-         dateNotReached
+  try {
+    // Peut faire un tirage manuel anticipé si : status active, pas de gagnant, tous les tickets vendus MAIS la date n'est pas encore atteinte
+    const isActive = lottery.value.status === 'active'
+    const hasNoWinner = !lottery.value.winning_ticket_number
+    const allTicketsSold = lottery.value.sold_tickets >= lottery.value.max_tickets
+    
+    let dateNotReached = false
+    if (lottery.value.draw_date) {
+      const drawDate = new Date(lottery.value.draw_date)
+      if (!isNaN(drawDate.getTime())) {
+        dateNotReached = drawDate > new Date()
+      }
+    }
+    
+    return isActive && hasNoWinner && allTicketsSold && dateNotReached
+  } catch (error) {
+    console.error('Error calculating canDrawManually:', error)
+    return false
+  }
 })
 
 // Methods
@@ -532,13 +579,23 @@ const formatCurrency = (amount) => {
 }
 
 const formatDate = (dateString) => {
-  return new Intl.DateTimeFormat('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(new Date(dateString))
+  if (!dateString) return 'Non définie'
+  
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return 'Date invalide'
+    
+    return new Intl.DateTimeFormat('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date)
+  } catch (error) {
+    console.error('Error formatting date:', error)
+    return 'Erreur de format'
+  }
 }
 
 const shareOrLottery = () => {
@@ -565,8 +622,10 @@ const pauseLottery = () => {
 
 const initiateManualDraw = () => {
   const remainingDays = daysRemaining.value
+  const drawDateFormatted = lottery.value.draw_date ? formatDate(lottery.value.draw_date) : 'Non définie'
+  
   const confirmMessage = `Tous les tickets sont vendus ! Voulez-vous effectuer le tirage maintenant ?\n\n` +
-    `⏰ Date prévue : ${formatDate(lottery.value.draw_date)}\n` +
+    `⏰ Date prévue : ${drawDateFormatted}\n` +
     `📅 Tirage anticipé de ${remainingDays} jour${remainingDays > 1 ? 's' : ''}\n\n` +
     `Cette action est irréversible.`
   
@@ -575,10 +634,33 @@ const initiateManualDraw = () => {
   }
 }
 
-const onLotteryDrawn = () => {
-  showDrawModal.value = false
-  // Recharger les données de la tombola
-  loadLotteryData()
+const onLotteryDrawn = (drawResult) => {
+  console.log('Tirage terminé:', drawResult)
+  
+  // Mettre à jour les données de la tombola
+  if (drawResult && drawResult.success && drawResult.lottery) {
+    // Mettre à jour l'objet lottery avec les nouvelles données
+    lottery.value = {
+      ...lottery.value,
+      ...drawResult.lottery,
+      status: 'completed',
+      is_drawn: true,
+      winner_user_id: drawResult.winning_ticket?.user_id,
+      winner_ticket_number: drawResult.winning_ticket?.ticket_number,
+      winner: drawResult.winning_ticket?.user,
+      draw_date: new Date().toISOString()
+    }
+  }
+  
+  // Recharger les données complètes de la tombola pour être sûr
+  setTimeout(() => {
+    loadLotteryData()
+  }, 1000)
+  
+  // Fermer le modal après un délai pour laisser voir le résultat
+  setTimeout(() => {
+    showDrawModal.value = false
+  }, 3000)
 }
 
 const onLotteryExtended = () => {

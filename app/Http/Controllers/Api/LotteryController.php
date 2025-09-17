@@ -494,24 +494,71 @@ class LotteryController extends Controller
 
         // Vérifier les permissions (propriétaire du produit ou admin)
         if ($lottery->product->merchant_id !== $user->id && !$user->isAdmin()) {
-            return response()->json(['error' => 'Non autorisé'], 403);
+            return response()->json(['error' => 'Non autorisé - Vous n\'êtes pas le propriétaire de cette tombola'], 403);
+        }
+
+        // Vérifications de sécurité supplémentaires
+        if ($lottery->is_drawn) {
+            return response()->json(['error' => 'Cette tombola a déjà été tirée'], 422);
+        }
+
+        if ($lottery->status !== 'active') {
+            return response()->json(['error' => 'Cette tombola n\'est pas active'], 422);
+        }
+
+        // Vérifier les conditions de tirage
+        $paidTicketsCount = $lottery->paidTickets()->count();
+        if ($paidTicketsCount === 0) {
+            return response()->json(['error' => 'Aucun ticket payé trouvé pour cette tombola'], 422);
+        }
+
+        $minParticipants = $lottery->product->min_participants ?? 1;
+        if ($paidTicketsCount < $minParticipants) {
+            return response()->json([
+                'error' => "Nombre insuffisant de participants ($paidTicketsCount/$minParticipants)"
+            ], 422);
         }
 
         // Utiliser le nouveau service de tirage
         $result = $this->drawService->performDraw($lottery, [
             'method' => 'manual',
-            'initiated_by' => 'user_' . $user->id
+            'initiated_by' => 'user_' . $user->id,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent()
         ]);
 
         if ($result['success']) {
+            // Log successful draw
+            \Log::info('Lottery draw completed successfully', [
+                'lottery_id' => $lottery->id,
+                'lottery_number' => $lottery->lottery_number,
+                'user_id' => $user->id,
+                'winner_id' => $result['data']['winning_ticket']->user_id,
+                'winner_ticket' => $result['data']['winning_ticket']->ticket_number,
+                'participants' => $paidTicketsCount,
+                'ip_address' => request()->ip()
+            ]);
+
             return response()->json([
+                'success' => true,
                 'message' => $result['message'],
                 'lottery' => $result['data']['lottery'],
                 'winning_ticket' => $result['data']['winning_ticket'],
                 'verification_hash' => $result['data']['verification_hash']
             ]);
         } else {
+            // Log failed draw
+            \Log::warning('Lottery draw failed', [
+                'lottery_id' => $lottery->id,
+                'lottery_number' => $lottery->lottery_number,
+                'user_id' => $user->id,
+                'error' => $result['message'],
+                'participants' => $paidTicketsCount,
+                'ip_address' => request()->ip()
+            ]);
+
             return response()->json([
+                'success' => false,
                 'error' => $result['message'],
                 'details' => $result['data'] ?? null
             ], 422);

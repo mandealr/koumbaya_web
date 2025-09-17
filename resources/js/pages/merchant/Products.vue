@@ -205,19 +205,19 @@
             <div v-else-if="product.sale_mode === 'lottery'">
               <div class="flex justify-between text-sm">
                 <span class="text-gray-600">Progression</span>
-                <span class="font-medium">{{ product.lottery?.sold_tickets || 0 }}/{{ product.lottery?.max_tickets || 0 }}</span>
+                <span class="font-medium">{{ getLotteryProgression(product).sold }}/{{ getLotteryProgression(product).max }}</span>
               </div>
 
               <div class="w-full bg-gray-200 rounded-full h-2">
                 <div
                   class="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-500"
-                  :style="{ width: product.progress + '%' }"
+                  :style="{ width: getLotteryProgression(product).percentage + '%' }"
                 ></div>
               </div>
 
               <div class="flex justify-between text-xs text-gray-500">
-                <span>{{ product.progress }}% vendu</span>
-                <span v-if="product.end_date">Fin: {{ formatDate(product.end_date) }}</span>
+                <span>{{ getLotteryProgression(product).percentage }}% vendu</span>
+                <span v-if="product.lottery?.draw_date">Fin: {{ formatDate(product.lottery.draw_date) }}</span>
               </div>
             </div>
           </div>
@@ -226,10 +226,10 @@
           <div class="grid grid-cols-2 gap-4 mb-4 text-center">
             <div class="bg-green-50 p-3 rounded-lg">
               <p class="text-green-700 font-semibold text-lg">{{ formatAmount(product.revenue || 0) }}</p>
-              <p class="text-green-600 text-xs">Koumbich</p>
+              <p class="text-green-600 text-xs">Revenus</p>
             </div>
             <div class="bg-blue-50 p-3 rounded-lg">
-              <p v-if="product.sale_mode === 'lottery'" class="text-blue-700 font-semibold text-lg">{{ formatAmount(product.ticket_price || 0) }}</p>
+              <p v-if="product.sale_mode === 'lottery'" class="text-blue-700 font-semibold text-lg">{{ formatAmount(product.lottery?.ticket_price || 0) }}</p>
               <p v-else class="text-blue-700 font-semibold text-lg">{{ product.stock_quantity || 0 }}</p>
               <p v-if="product.sale_mode === 'lottery'" class="text-blue-600 text-xs">Prix/ticket</p>
               <p v-else class="text-blue-600 text-xs">Stock</p>
@@ -264,7 +264,7 @@
               Modifier
             </button>
 
-            <div class="relative" style="z-index: 100000;">
+            <div class="relative">
               <button
                 @click="toggleProductMenu(product.id)"
                 :data-product-id="product.id"
@@ -277,7 +277,7 @@
                 v-if="showProductMenu === product.id"
                 data-dropdown-menu
                 class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200"
-                style="z-index: 99999;"
+                style="z-index: 999999; position: fixed;"
               >
                 <button
                   @click="duplicateProduct(product)"
@@ -583,18 +583,20 @@ const loadProducts = async () => {
           name: product.name,
           lottery: product.lottery,
           lottery_progression: product.lottery_progression,
-          sale_mode: product.sale_mode
+          sale_mode: product.sale_mode,
+          revenue: product.revenue,
+          can_delete: product.can_delete
         })
         
         return {
           ...product,
           lottery: product.lottery || null,
+          lottery_progression: product.lottery_progression || null,
           ticket_price: parseFloat(product.ticket_price || 0),
           price: parseFloat(product.price || 0),
-          // Utiliser lottery_progression depuis l'API si disponible, sinon calculer
-          progress: product.lottery_progression?.progress_percentage || 
-            (product.lottery ? 
-              Math.round(((product.lottery.sold_tickets || 0) / (product.lottery.max_tickets || 1)) * 100) : 0)
+          revenue: product.revenue || 0,
+          can_delete: product.can_delete,
+          paid_orders_count: product.paid_orders_count || 0
         }
       })
     } else {
@@ -767,6 +769,12 @@ const getStatIcon = (iconName) => {
 
 // Vérifier si un produit peut être supprimé
 const canDeleteProduct = (product) => {
+  // Utiliser la logique du backend si disponible
+  if (product.can_delete !== undefined) {
+    return product.can_delete
+  }
+  
+  // Fallback sur l'ancienne logique
   // Ne peut pas supprimer si le statut n'est pas draft ou active
   if (!['draft', 'active'].includes(product.status)) {
     return false
@@ -781,16 +789,34 @@ const canDeleteProduct = (product) => {
   }
   
   // Pour les produits de vente directe : vérifier s'il y a des commandes payées
-  // Cette information devrait être fournie par l'API, mais pour l'instant on suppose
-  // qu'on ne peut pas supprimer si le produit a des ventes (sales_count > 0)
   if (product.sale_mode === 'direct') {
-    const salesCount = product.sales_count || product.order_count || 0
-    if (salesCount > 0) {
+    const paidOrdersCount = product.paid_orders_count || 0
+    if (paidOrdersCount > 0) {
       return false
     }
   }
   
   return true
+}
+
+// Obtenir la progression de la tombola
+const getLotteryProgression = (product) => {
+  if (product.sale_mode !== 'lottery') {
+    return { sold: 0, max: 0, percentage: 0 }
+  }
+  
+  // Utiliser lottery_progression si disponible, sinon lottery
+  const progression = product.lottery_progression || product.lottery
+  
+  if (!progression) {
+    return { sold: 0, max: 0, percentage: 0 }
+  }
+  
+  const sold = progression.sold_tickets || 0
+  const max = progression.max_tickets || 0
+  const percentage = max > 0 ? Math.round((sold / max) * 100) : 0
+  
+  return { sold, max, percentage }
 }
 
 // Close menu when clicking outside
