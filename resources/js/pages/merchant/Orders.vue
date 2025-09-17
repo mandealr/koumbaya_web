@@ -211,7 +211,7 @@
                 <div class="flex items-center space-x-2">
                   <div>
                     <div class="text-sm text-gray-900">{{ order.tickets_count || 0 }} tickets</div>
-                    <div class="text-sm text-gray-500">N° {{ (order.ticket_numbers || []).join(', ') }}</div>
+                    <div class="text-sm text-gray-500">{{ order.tickets_count || 0 }} ticket{{ (order.tickets_count || 0) > 1 ? 's' : '' }} acheté{{ (order.tickets_count || 0) > 1 ? 's' : '' }}</div>
                   </div>
                   <div v-if="order.type === 'lottery'" class="ml-2">
                     <span v-if="order.has_winning_ticket" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -360,18 +360,12 @@
           <div>
             <h4 class="text-md font-semibold text-gray-900 mb-3">Tickets achetés</h4>
             <div class="bg-gray-50 p-4 rounded-lg">
-              <p class="text-sm text-gray-700 mb-2">
-                <strong>{{ selectedOrder.tickets_count || 0 }} tickets</strong> pour {{ selectedOrder.product_name || 'Produit inconnu' }}
+              <p class="text-sm text-gray-700">
+                <strong>{{ selectedOrder.tickets_count || 0 }} ticket{{ (selectedOrder.tickets_count || 0) > 1 ? 's' : '' }}</strong> acheté{{ (selectedOrder.tickets_count || 0) > 1 ? 's' : '' }} pour {{ selectedOrder.product_name || 'Produit inconnu' }}
               </p>
-              <div class="flex flex-wrap gap-2">
-                <span
-                  v-for="number in (selectedOrder.ticket_numbers || [])"
-                  :key="number"
-                  class="inline-block bg-[#0099cc] text-white px-2 py-1 rounded text-xs font-mono"
-                >
-                  #{{ number }}
-                </span>
-              </div>
+              <p class="text-xs text-gray-500 mt-1">
+                Prix unitaire : {{ (selectedOrder.ticket_price || 0).toLocaleString() }} FCFA/ticket
+              </p>
             </div>
           </div>
         </div>
