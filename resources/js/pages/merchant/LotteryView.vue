@@ -157,14 +157,25 @@
             <div class="space-y-4">
               <div>
                 <div class="flex justify-between items-center mb-2">
-                  <span class="text-sm font-medium text-gray-700">Objectif de participation</span>
-                  <span class="text-sm text-gray-500">{{ lottery.participants_count }} / {{ lottery.max_participants || '∞' }}</span>
+                  <span class="text-sm font-medium text-gray-700">Objectif de tickets</span>
+                  <span class="text-sm text-gray-500">{{ lottery.sold_tickets }} / {{ lottery.max_tickets }}</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2">
                   <div
                     class="bg-blue-600 h-2 rounded-full transition-all duration-300"
                     :style="{ width: participationProgress + '%' }"
                   ></div>
+                </div>
+              </div>
+
+              <!-- Participants uniques -->
+              <div>
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm font-medium text-gray-700">Participants uniques</span>
+                  <span class="text-sm text-gray-500">{{ lottery.participants_count }} personnes</span>
+                </div>
+                <div class="text-xs text-gray-600">
+                  Moyenne: {{ lottery.participants_count > 0 ? (lottery.sold_tickets / lottery.participants_count).toFixed(1) : 0 }} tickets/personne
                 </div>
               </div>
 
@@ -185,7 +196,7 @@
             <div class="mt-6 grid grid-cols-3 gap-4 text-center">
               <div class="p-4 bg-blue-50 rounded-lg">
                 <p class="text-2xl font-bold text-blue-600">{{ participationProgress }}%</p>
-                <p class="text-sm text-blue-600">Participation</p>
+                <p class="text-sm text-blue-600">Tickets vendus</p>
               </div>
               <div class="p-4 bg-blue-50 rounded-lg">
                 <p class="text-2xl font-bold text-blue-600">{{ conversionRate }}%</p>
@@ -401,13 +412,7 @@ const lottery = ref({
   progress_percentage: 0
 })
 
-const recentParticipants = ref([
-  { id: 1, name: 'Jean Dupont', participated_at: '2024-11-15T14:30:00', tickets_count: 2 },
-  { id: 2, name: 'Marie Martin', participated_at: '2024-11-15T13:45:00', tickets_count: 1 },
-  { id: 3, name: 'Paul Durant', participated_at: '2024-11-15T12:20:00', tickets_count: 3 },
-  { id: 4, name: 'Sophie Leroy', participated_at: '2024-11-15T11:15:00', tickets_count: 1 },
-  { id: 5, name: 'Pierre Moreau', participated_at: '2024-11-15T10:30:00', tickets_count: 2 }
-])
+const recentParticipants = ref([])
 
 const showDrawModal = ref(false)
 const showExtendModal = ref(false)
@@ -541,6 +546,51 @@ const loadLotteryData = async () => {
     if (response?.lottery) {
       const lotteryData = response.lottery
       
+      // Debug: Log des données pour identifier le problème
+      console.log('LotteryData:', lotteryData)
+      console.log('Available keys:', Object.keys(lotteryData))
+      
+      // Calculer les participants uniques à partir des tickets payés
+      const uniqueParticipants = new Set()
+      const paidTickets = lotteryData.paid_tickets || lotteryData.paidTickets || lotteryData.tickets || []
+      
+      console.log('PaidTickets:', paidTickets)
+      console.log('PaidTickets length:', paidTickets.length)
+      
+      paidTickets.forEach(ticket => {
+        if (ticket.user?.id) {
+          uniqueParticipants.add(ticket.user.id)
+        }
+      })
+      
+      const participantsCount = uniqueParticipants.size
+      const totalRevenue = (lotteryData.sold_tickets || 0) * (lotteryData.ticket_price || 0)
+      
+      // Créer la liste des participants récents avec leurs tickets
+      const participantsMap = new Map()
+      paidTickets.forEach(ticket => {
+        if (ticket.user?.id) {
+          const userId = ticket.user.id
+          const userName = `${ticket.user.first_name || ''} ${ticket.user.last_name || ''}`.trim()
+          
+          if (participantsMap.has(userId)) {
+            participantsMap.get(userId).tickets_count++
+          } else {
+            participantsMap.set(userId, {
+              id: userId,
+              name: userName || 'Utilisateur anonyme',
+              participated_at: ticket.created_at || new Date().toISOString(),
+              tickets_count: 1
+            })
+          }
+        }
+      })
+      
+      // Trier par date de participation (plus récents en premier) et prendre les 5 premiers
+      const sortedParticipants = Array.from(participantsMap.values())
+        .sort((a, b) => new Date(b.participated_at) - new Date(a.participated_at))
+        .slice(0, 5)
+      
       // Mapper les données de l'API vers notre structure
       lottery.value = {
         ...lottery.value,
@@ -549,19 +599,21 @@ const loadLotteryData = async () => {
         description: lotteryData.description || '',
         status: lotteryData.status,
         lottery_number: lotteryData.lottery_number,
-        ticket_price: lotteryData.ticket_price,
-        max_tickets: lotteryData.max_tickets,
-        sold_tickets: lotteryData.sold_tickets,
-        progress_percentage: lotteryData.progress_percentage,
+        ticket_price: lotteryData.ticket_price || 0,
+        max_tickets: lotteryData.max_tickets || 0,
+        sold_tickets: lotteryData.sold_tickets || 0,
+        progress_percentage: lotteryData.progress_percentage || 0,
         draw_date: lotteryData.draw_date,
         created_at: lotteryData.created_at,
         
-        // Données calculées
-        tickets_sold: lotteryData.sold_tickets,
-        participants_count: lotteryData.participants_count || 0,
-        total_revenue: lotteryData.sold_tickets * lotteryData.ticket_price,
-        max_participants: lotteryData.max_tickets,
+        // Données calculées corrigées
+        tickets_sold: lotteryData.sold_tickets || 0,
+        participants_count: participantsCount,
+        total_revenue: totalRevenue,
+        max_participants: lotteryData.max_tickets || 0,
         end_date: lotteryData.draw_date,
+        revenue_target: lotteryData.revenue_target || null,
+        views_count: lotteryData.views_count || 0,
         
         // Données du produit
         product: lotteryData.product,
@@ -573,6 +625,9 @@ const loadLotteryData = async () => {
         winner: lotteryData.winner || null,
         winning_ticket_number: lotteryData.winning_ticket_number || null
       }
+      
+      // Mettre à jour la liste des participants récents avec les vraies données
+      recentParticipants.value = sortedParticipants
     }
   } catch (error) {
     console.error('Erreur lors du chargement de la tombola:', error)
