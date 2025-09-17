@@ -210,6 +210,22 @@
           </div>
         </div>
 
+        <!-- Alerte tirage anticipé -->
+        <div v-if="canDrawManually" class="bg-green-50 border border-green-200 rounded-xl p-4">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+              <GiftIcon class="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <h4 class="text-md font-semibold text-green-800">Tirage possible !</h4>
+              <p class="text-sm text-green-600">
+                Tous les tickets sont vendus ({{ lottery.sold_tickets }}/{{ lottery.max_tickets }}). 
+                Vous pouvez effectuer le tirage maintenant dans "Actions rapides".
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- Gagnant (si tirage effectué) -->
         <div v-if="lottery.winner" class="bg-white rounded-xl shadow-sm border">
           <div class="px-6 py-4 border-b border-gray-200">
@@ -249,7 +265,7 @@
 
           <div class="p-6 space-y-3">
             <button
-              @click="shareLottery"
+              @click="shareOrLottery"
               class="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               <ShareIcon class="w-4 h-4 mr-2" />
@@ -262,6 +278,15 @@
             >
               <DocumentArrowDownIcon class="w-4 h-4 mr-2" />
               Télécharger le rapport
+            </button>
+
+            <button
+              v-if="canDrawManually"
+              @click="initiateManualDraw"
+              class="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
+              <GiftIcon class="w-4 h-4 mr-2" />
+              Effectuer le tirage maintenant
             </button>
 
             <button
@@ -476,6 +501,17 @@ const canDraw = computed(() => {
           (lottery.value.draw_date && new Date(lottery.value.draw_date) <= new Date()))
 })
 
+const canDrawManually = computed(() => {
+  // Peut faire un tirage manuel anticipé si : status active, pas de gagnant, tous les tickets vendus MAIS la date n'est pas encore atteinte
+  const allTicketsSold = lottery.value.sold_tickets >= lottery.value.max_tickets
+  const dateNotReached = lottery.value.draw_date && new Date(lottery.value.draw_date) > new Date()
+  
+  return lottery.value.status === 'active' && 
+         !lottery.value.winning_ticket_number &&
+         allTicketsSold &&
+         dateNotReached
+})
+
 // Methods
 const getStatusText = (status) => {
   const statusMap = {
@@ -524,6 +560,18 @@ const pauseLottery = () => {
   // TODO: Implémenter la mise en pause
   if (window.$toast) {
     window.$toast.info('Mise en pause de la tombola...', '⏸️ Pause')
+  }
+}
+
+const initiateManualDraw = () => {
+  const remainingDays = daysRemaining.value
+  const confirmMessage = `Tous les tickets sont vendus ! Voulez-vous effectuer le tirage maintenant ?\n\n` +
+    `⏰ Date prévue : ${formatDate(lottery.value.draw_date)}\n` +
+    `📅 Tirage anticipé de ${remainingDays} jour${remainingDays > 1 ? 's' : ''}\n\n` +
+    `Cette action est irréversible.`
+  
+  if (confirm(confirmMessage)) {
+    showDrawModal.value = true
   }
 }
 

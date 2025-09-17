@@ -437,10 +437,24 @@ class MerchantOrderController extends Controller
             $ticketPrice = $order->product->price;
         }
         
-        // Get ticket numbers
+        // Get ticket numbers and calculate ticket count
         $ticketNumbers = [];
-        if ($order->tickets) {
+        $ticketsCount = 0;
+        
+        if ($order->tickets && $order->tickets->count() > 0) {
+            // Si des tickets existent, les utiliser
             $ticketNumbers = $order->tickets->pluck('ticket_number')->toArray();
+            $ticketsCount = $order->tickets->count();
+        } else if ($order->type === 'lottery' && $ticketPrice > 0) {
+            // Pour les commandes de tombola, calculer le nombre de tickets basé sur le montant
+            $ticketsCount = intval($order->total_amount / $ticketPrice);
+            
+            // Générer des numéros de tickets factices pour l'affichage si aucun ticket réel n'existe
+            if (empty($ticketNumbers) && $ticketsCount > 0) {
+                for ($i = 1; $i <= $ticketsCount; $i++) {
+                    $ticketNumbers[] = 'T-' . str_pad($i, 3, '0', STR_PAD_LEFT);
+                }
+            }
         }
         
         return [
@@ -465,8 +479,19 @@ class MerchantOrderController extends Controller
             'ticket_price' => $ticketPrice,
             
             // Ticket data
-            'tickets_count' => $order->tickets ? $order->tickets->count() : 0,
+            'tickets_count' => $ticketsCount,
             'ticket_numbers' => $ticketNumbers,
+            
+            // Debug info (temporaire)
+            'debug_ticket_calculation' => [
+                'order_type' => $order->type,
+                'total_amount' => $order->total_amount,
+                'ticket_price' => $ticketPrice,
+                'calculated_tickets' => $ticketPrice > 0 ? intval($order->total_amount / $ticketPrice) : 0,
+                'real_tickets_count' => $order->tickets ? $order->tickets->count() : 0,
+                'has_lottery' => $order->lottery ? true : false,
+                'lottery_ticket_price' => $order->lottery?->ticket_price ?? null,
+            ],
             
             // Nested structures for API completeness
             'customer' => [
