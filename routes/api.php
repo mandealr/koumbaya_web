@@ -49,9 +49,9 @@ Route::get('/avatars/{filename}', [AvatarController::class, 'show'])
     ->name('avatar.show')
     ->where('filename', '.*');
 
-// Routes d'authentification publiques avec rate limiting strict
+// Routes d'authentification publiques avec rate limiting modéré
 Route::group([
-    'middleware' => ['throttle.api:30,1'],
+    'middleware' => ['throttle.api:100,1'],
     'prefix' => 'auth'
 ], function () {
     Route::post('login', [AuthController::class, 'login']);
@@ -66,9 +66,9 @@ Route::group([
     Route::get('{provider}/callback', [AuthController::class, 'handleProviderCallback']);
 });
 
-// Routes d'authentification pour utilisateurs connectés avec rate limiting permissif
+// Routes d'authentification pour utilisateurs connectés avec rate limiting très permissif
 Route::group([
-    'middleware' => ['auth:sanctum', 'throttle.api:300,1'],
+    'middleware' => ['auth:sanctum', 'throttle.api:1000,1'],
     'prefix' => 'auth'
 ], function () {
     Route::post('logout', [AuthController::class, 'logout']);
@@ -76,9 +76,9 @@ Route::group([
     Route::get('me', [AuthController::class, 'me']);
 });
 
-// Routes publiques (sans authentification) avec rate limiting modéré
+// Routes publiques (sans authentification) avec rate limiting permissif
 Route::group([
-    'middleware' => ['throttle.api:120,1']
+    'middleware' => ['throttle.api:1000,1']
 ], function () {
     // Categories
     Route::get('categories', [CategoryController::class, 'index']);
@@ -145,9 +145,9 @@ Route::group([
     Route::get('ticket-calculation-config', [TicketPriceController::class, 'config']);
 });
 
-// Routes protégées (authentification requise) avec rate limiting
+// Routes protégées (authentification requise) avec rate limiting permissif
 Route::group([
-    'middleware' => ['auth:sanctum', 'throttle.api:200,1']
+    'middleware' => ['auth:sanctum', 'throttle.api:1000,1']
 ], function () {
     // Dashboard utilisateur
     Route::get('user', function (Request $request) {
@@ -232,9 +232,9 @@ Route::group([
     });
 });
 
-// Routes Marchands seulement avec rate limiting strict + vérification obligatoire
+// Routes Marchands seulement avec rate limiting permissif + vérification obligatoire
 Route::group([
-    'middleware' => ['auth:sanctum', 'merchant', 'verified', 'throttle.api:500,1']
+    'middleware' => ['auth:sanctum', 'merchant', 'verified', 'throttle.api:2000,1']
 ], function () {
     // Products (Marchands seulement)
     Route::get('merchant/products', [ProductController::class, 'merchantProducts']);
@@ -299,9 +299,9 @@ Route::group([
     });
 });
 
-// Routes Admin avec rate limiting strict
+// Routes Admin avec rate limiting permissif
 Route::group([
-    'middleware' => ['auth:sanctum', 'admin', 'throttle.api:200,1'],
+    'middleware' => ['auth:sanctum', 'admin', 'throttle.api:1000,1'],
     'prefix' => 'admin'
 ], function () {
     // Admin Dashboard
