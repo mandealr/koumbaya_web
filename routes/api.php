@@ -60,10 +60,6 @@ Route::group([
     Route::get('verify-email/{token}', [AuthController::class, 'verifyAccountByUrl']);
     Route::post('resend-verification', [AuthController::class, 'resendVerificationEmail']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
-    
-    // Social Authentication Routes
-    Route::get('{provider}', [AuthController::class, 'redirectToProvider']);
-    Route::get('{provider}/callback', [AuthController::class, 'handleProviderCallback']);
 });
 
 // Routes d'authentification pour utilisateurs connectés avec rate limiting très permissif
@@ -419,3 +415,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/sessions/{id}/revoke', [UserProfileController::class, 'revokeSession']);
 });
 
+// Routes d'authentification sociales - IMPORTANT: placées à la fin pour éviter les conflits avec auth/me
+Route::group([
+    'middleware' => ['throttle.api:100,1'],
+    'prefix' => 'auth'
+], function () {
+    // Social Authentication Routes - Ces routes avec wildcards doivent être en dernier
+    Route::get('{provider}', [AuthController::class, 'redirectToProvider']);
+    Route::get('{provider}/callback', [AuthController::class, 'handleProviderCallback']);
+});
