@@ -49,7 +49,7 @@ Route::get('/avatars/{filename}', [AvatarController::class, 'show'])
     ->name('avatar.show')
     ->where('filename', '.*');
 
-// Routes d'authentification avec rate limiting
+// Routes d'authentification publiques avec rate limiting strict
 Route::group([
     'middleware' => ['throttle.api:30,1'],
     'prefix' => 'auth'
@@ -60,13 +60,20 @@ Route::group([
     Route::get('verify-email/{token}', [AuthController::class, 'verifyAccountByUrl']);
     Route::post('resend-verification', [AuthController::class, 'resendVerificationEmail']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
-    Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-    Route::post('refresh', [AuthController::class, 'refresh'])->middleware('auth:sanctum');
-    Route::get('me', [AuthController::class, 'me'])->middleware('auth:sanctum');
     
     // Social Authentication Routes
     Route::get('{provider}', [AuthController::class, 'redirectToProvider']);
     Route::get('{provider}/callback', [AuthController::class, 'handleProviderCallback']);
+});
+
+// Routes d'authentification pour utilisateurs connectés avec rate limiting permissif
+Route::group([
+    'middleware' => ['auth:sanctum', 'throttle.api:300,1'],
+    'prefix' => 'auth'
+], function () {
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
+    Route::get('me', [AuthController::class, 'me']);
 });
 
 // Routes publiques (sans authentification) avec rate limiting modéré
