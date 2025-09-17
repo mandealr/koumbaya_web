@@ -377,23 +377,28 @@ const { get, post } = useApi()
 // Data
 const lottery = ref({
   id: route.params.id,
-  title: 'iPhone 15 Pro Max 256GB',
-  description: 'Tentez de gagner le dernier iPhone 15 Pro Max dans sa version 256GB, couleur Titane Naturel. Un smartphone révolutionnaire avec une caméra professionnelle.',
-  status: 'active',
-  product_value: 1599000,
-  ticket_price: 5000,
-  category: 'Électronique',
-  participants_count: 156,
-  tickets_sold: 203,
-  total_revenue: 1015000,
-  max_participants: 300,
-  revenue_target: 1500000,
-  end_date: '2024-12-25T23:59:59',
-  created_at: '2024-11-01T10:00:00',
-  views_count: 1250,
-  product_image: '/images/products/iphone-15-pro.jpg',
+  title: '',
+  description: '',
+  status: '',
+  product_value: 0,
+  ticket_price: 0,
+  category: '',
+  participants_count: 0,
+  tickets_sold: 0,
+  total_revenue: 0,
+  max_participants: 0,
+  revenue_target: 0,
+  end_date: '',
+  created_at: '',
+  views_count: 0,
+  product_image: '',
   winner: null,
-  draw_date: null
+  draw_date: null,
+  product: null,
+  lottery_number: '',
+  max_tickets: 0,
+  sold_tickets: 0,
+  progress_percentage: 0
 })
 
 const recentParticipants = ref([
@@ -410,8 +415,8 @@ const showEditModal = ref(false)
 
 // Computed
 const participationProgress = computed(() => {
-  if (!lottery.value.max_participants) return 0
-  return Math.min((lottery.value.participants_count / lottery.value.max_participants) * 100, 100)
+  if (!lottery.value.max_tickets) return 0
+  return Math.min((lottery.value.sold_tickets / lottery.value.max_tickets) * 100, 100)
 })
 
 const revenueProgress = computed(() => {
@@ -459,7 +464,11 @@ const daysRemaining = computed(() => {
 })
 
 const canDraw = computed(() => {
-  return lottery.value.participants_count >= 10 // Minimum 10 participants pour effectuer un tirage
+  // Peut tirer si : status active, pas de gagnant encore, et soit tous les tickets vendus soit la date de tirage atteinte
+  return lottery.value.status === 'active' && 
+         !lottery.value.winning_ticket_number &&
+         (lottery.value.sold_tickets >= lottery.value.max_tickets || 
+          (lottery.value.draw_date && new Date(lottery.value.draw_date) <= new Date()))
 })
 
 // Methods
@@ -527,13 +536,49 @@ const onLotteryExtended = () => {
 
 const loadLotteryData = async () => {
   try {
-    // TODO: Charger les vraies données depuis l'API
-    const response = await get(`/merchant/lotteries/${route.params.id}`)
-    if (response?.data) {
-      lottery.value = { ...lottery.value, ...response.data }
+    // Charger les vraies données depuis l'API
+    const response = await get(`/lotteries/${route.params.id}`)
+    if (response?.lottery) {
+      const lotteryData = response.lottery
+      
+      // Mapper les données de l'API vers notre structure
+      lottery.value = {
+        ...lottery.value,
+        id: lotteryData.id,
+        title: lotteryData.title,
+        description: lotteryData.description || '',
+        status: lotteryData.status,
+        lottery_number: lotteryData.lottery_number,
+        ticket_price: lotteryData.ticket_price,
+        max_tickets: lotteryData.max_tickets,
+        sold_tickets: lotteryData.sold_tickets,
+        progress_percentage: lotteryData.progress_percentage,
+        draw_date: lotteryData.draw_date,
+        created_at: lotteryData.created_at,
+        
+        // Données calculées
+        tickets_sold: lotteryData.sold_tickets,
+        participants_count: lotteryData.participants_count || 0,
+        total_revenue: lotteryData.sold_tickets * lotteryData.ticket_price,
+        max_participants: lotteryData.max_tickets,
+        end_date: lotteryData.draw_date,
+        
+        // Données du produit
+        product: lotteryData.product,
+        product_value: lotteryData.product?.price || 0,
+        category: lotteryData.product?.category?.name || '',
+        product_image: lotteryData.product?.image_url || lotteryData.product?.image || '',
+        
+        // Données gagnant
+        winner: lotteryData.winner || null,
+        winning_ticket_number: lotteryData.winning_ticket_number || null
+      }
     }
   } catch (error) {
     console.error('Erreur lors du chargement de la tombola:', error)
+    if (window.$toast) {
+      window.$toast.error('Erreur lors du chargement des données de la tombola')
+    }
   }
 }
 

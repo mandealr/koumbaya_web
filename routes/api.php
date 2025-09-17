@@ -227,7 +227,7 @@ Route::group([
 
 // Routes Marchands seulement avec rate limiting strict + vérification obligatoire
 Route::group([
-    'middleware' => ['auth:sanctum', 'merchant', 'verified', 'throttle.api:100,1']
+    'middleware' => ['auth:sanctum', 'merchant', 'verified', 'throttle.api:500,1']
 ], function () {
     // Products (Marchands seulement)
     Route::get('merchant/products', [ProductController::class, 'merchantProducts']);
