@@ -151,15 +151,27 @@ class MerchantOrderController extends Controller
         $perPage = min($request->get('per_page', 15), 100);
 
         // Base query - récupérer les commandes des produits du marchand
+        // Support for both direct sales and lottery orders
         $query = Order::with([
-            'user:id,name,email,phone',
+            'user:id,first_name,last_name,email,phone',
             'product:id,name,image,merchant_id',
-            'lottery:id,lottery_number,title',
+            'lottery:id,lottery_number,title,product_id',
+            'lottery.product:id,name,image,merchant_id',
             'payments:id,order_id,amount,status,payment_method',
             'tickets:id,ticket_number,is_winner'
         ])
-        ->whereHas('product', function ($q) use ($merchantId) {
-            $q->where('merchant_id', $merchantId);
+        ->where(function ($q) use ($merchantId) {
+            // Direct product orders
+            $q->whereHas('product', function ($subQ) use ($merchantId) {
+                $subQ->where('merchant_id', $merchantId);
+            })
+            // OR lottery orders
+            ->orWhere(function ($subQ) use ($merchantId) {
+                $subQ->where('type', 'lottery')
+                    ->whereHas('lottery.product', function ($lotteryQ) use ($merchantId) {
+                        $lotteryQ->where('merchant_id', $merchantId);
+                    });
+            });
         });
 
         // Filtres par date
@@ -297,7 +309,7 @@ class MerchantOrderController extends Controller
         
         // Même logique de filtrage que l'index mais sans pagination
         $query = Order::with([
-            'user:id,name,email,phone',
+            'user:id,first_name,last_name,email,phone',
             'product:id,name,merchant_id',
             'lottery:id,lottery_number,title',
             'payments',
@@ -426,15 +438,11 @@ class MerchantOrderController extends Controller
             'paid_at' => $order->paid_at,
             'fulfilled_at' => $order->fulfilled_at,
             'customer' => [
-                'name' => $order->user?->name ?? 'Client anonyme',
+                'name' => $order->user ? ($order->user->first_name . ' ' . $order->user->last_name) : 'Client anonyme',
                 'email' => $order->user?->email ?? '',
                 'phone' => $order->user?->phone ?? '',
             ],
-            'product' => $order->product ? [
-                'id' => $order->product->id,
-                'name' => $order->product->name,
-                'image' => $order->product->image,
-            ] : null,
+            'product' => $this->getOrderProduct($order),
             'lottery' => $order->lottery ? [
                 'id' => $order->lottery->id,
                 'lottery_number' => $order->lottery->lottery_number,
@@ -452,13 +460,49 @@ class MerchantOrderController extends Controller
     }
 
     /**
+     * Get product data for an order (direct or via lottery)
+     */
+    private function getOrderProduct(Order $order): ?array
+    {
+        // Direct product order
+        if ($order->product) {
+            return [
+                'id' => $order->product->id,
+                'name' => $order->product->name,
+                'image' => $order->product->image,
+            ];
+        }
+        
+        // Lottery order - get product via lottery
+        if ($order->lottery && $order->lottery->product) {
+            return [
+                'id' => $order->lottery->product->id,
+                'name' => $order->lottery->product->name,
+                'image' => $order->lottery->product->image,
+            ];
+        }
+        
+        return null;
+    }
+
+    /**
      * Calculer le résumé des commandes
      */
     private function calculateOrdersSummary(int $merchantId, Request $request): array
     {
-        // Base query pour les calculs de résumé
-        $baseQuery = Order::whereHas('product', function ($q) use ($merchantId) {
-            $q->where('merchant_id', $merchantId);
+        // Base query pour les calculs de résumé - Support lottery and direct orders
+        $baseQuery = Order::where(function ($q) use ($merchantId) {
+            // Direct product orders
+            $q->whereHas('product', function ($subQ) use ($merchantId) {
+                $subQ->where('merchant_id', $merchantId);
+            })
+            // OR lottery orders
+            ->orWhere(function ($subQ) use ($merchantId) {
+                $subQ->where('type', 'lottery')
+                    ->whereHas('lottery.product', function ($lotteryQ) use ($merchantId) {
+                        $lotteryQ->where('merchant_id', $merchantId);
+                    });
+            });
         });
 
         // Appliquer les mêmes filtres que la requête principale

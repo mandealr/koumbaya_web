@@ -248,6 +248,14 @@ class StatsController extends Controller
             ->take(5)
             ->values();
             
+        // Calculer le total des revenus
+        $totalRevenue = Order::where('type', 'lottery')
+            ->whereHas('lottery.product', function($q) use ($user) {
+                $q->where('merchant_id', $user->id);
+            })
+            ->whereIn('status', ['paid', 'fulfilled'])
+            ->sum('total_amount');
+            
         return response()->json([
             'success' => true,
             'data' => [
@@ -255,6 +263,7 @@ class StatsController extends Controller
                     'total_products' => (int) ($stats->total_products ?? 0),
                     'total_views' => (int) ($stats->total_views ?? 0),
                     'total_sales' => (int) ($salesData->total_sales ?? 0),
+                    'total_revenue' => (float) $totalRevenue,
                     'avg_conversion_rate' => $stats->total_views > 0 ? 
                         round(($salesData->total_sales / $stats->total_views) * 100, 2) : 0
                 ],

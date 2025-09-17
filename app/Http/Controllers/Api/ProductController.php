@@ -635,7 +635,9 @@ class ProductController extends Controller
         $perPage = min($request->get('per_page', 15), 50);
 
         $query = Product::where('merchant_id', $user->id)
-            ->with(['category', 'activeLottery']);
+            ->with(['category', 'lotteries' => function($q) {
+                $q->where('status', 'active')->orderBy('created_at', 'desc');
+            }]);
 
         // Apply filters
         if ($request->filled('search')) {
@@ -664,8 +666,30 @@ class ProductController extends Controller
 
         $products = $query->paginate($perPage);
 
+        // Transform products to include lottery progression data
+        $transformedProducts = $products->getCollection()->map(function ($product) {
+            $productData = $product->toArray();
+            
+            // Add lottery progression data
+            if ($product->sale_mode === 'lottery' && $product->lotteries->count() > 0) {
+                $lottery = $product->lotteries->first(); // Most recent active lottery
+                $productData['lottery_progression'] = [
+                    'sold_tickets' => $lottery->sold_tickets ?? 0,
+                    'max_tickets' => $lottery->max_tickets ?? 0,
+                    'progress_percentage' => $lottery->max_tickets > 0 ? 
+                        round(($lottery->sold_tickets / $lottery->max_tickets) * 100, 1) : 0,
+                    'ticket_price' => $lottery->ticket_price ?? 0,
+                    'status' => $lottery->status
+                ];
+            } else {
+                $productData['lottery_progression'] = null;
+            }
+            
+            return $productData;
+        });
+
         return response()->json([
-            'data' => $products->items(),
+            'data' => $transformedProducts,
             'pagination' => [
                 'current_page' => $products->currentPage(),
                 'last_page' => $products->lastPage(),
