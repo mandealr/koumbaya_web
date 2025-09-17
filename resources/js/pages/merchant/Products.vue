@@ -205,7 +205,7 @@
             <div v-else-if="product.sale_mode === 'lottery'">
               <div class="flex justify-between text-sm">
                 <span class="text-gray-600">Progression</span>
-                <span class="font-medium">{{ product.sold_tickets || 0 }}/{{ product.total_tickets || 0 }}</span>
+                <span class="font-medium">{{ product.lottery?.sold_tickets || 0 }}/{{ product.lottery?.max_tickets || 0 }}</span>
               </div>
 
               <div class="w-full bg-gray-200 rounded-full h-2">
@@ -264,7 +264,7 @@
               Modifier
             </button>
 
-            <div class="relative z-50">
+            <div class="relative" style="z-index: 100000;">
               <button
                 @click="toggleProductMenu(product.id)"
                 :data-product-id="product.id"
@@ -276,7 +276,8 @@
               <div
                 v-if="showProductMenu === product.id"
                 data-dropdown-menu
-                class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-[99999]"
+                class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200"
+                style="z-index: 99999;"
               >
                 <button
                   @click="duplicateProduct(product)"
@@ -567,23 +568,35 @@ const editProduct = (product) => {
 const loadProducts = async () => {
   try {
     const params = new URLSearchParams()
-    params.append('my_products', '1') // Filter for current merchant's products
     if (filters.search) params.append('search', filters.search)
     if (filters.category) params.append('category_id', filters.category)
     if (filters.status) params.append('status', filters.status)
     if (filters.saleMode) params.append('sale_mode', filters.saleMode)
     if (filters.sortBy) params.append('sort_by', filters.sortBy)
 
-    const response = await get(`/products?${params.toString()}`)
-    if (response && response.data && response.data.products && Array.isArray(response.data.products)) {
-      products.value = response.data.products.map(product => ({
-        ...product,
-        lottery: product.lottery || null,
-        ticket_price: parseFloat(product.ticket_price || 0),
-        price: parseFloat(product.price || 0),
-        progress: product.lottery ?
-          Math.round(((product.lottery.sold_tickets || 0) / (product.lottery.max_tickets || 1)) * 100) : 0
-      }))
+    const response = await get(`/merchant/products?${params.toString()}`)
+    console.log('Products API Response:', response)
+    if (response && response.data && Array.isArray(response.data)) {
+      products.value = response.data.map(product => {
+        console.log('Product mapping:', {
+          id: product.id,
+          name: product.name,
+          lottery: product.lottery,
+          lottery_progression: product.lottery_progression,
+          sale_mode: product.sale_mode
+        })
+        
+        return {
+          ...product,
+          lottery: product.lottery || null,
+          ticket_price: parseFloat(product.ticket_price || 0),
+          price: parseFloat(product.price || 0),
+          // Utiliser lottery_progression depuis l'API si disponible, sinon calculer
+          progress: product.lottery_progression?.progress_percentage || 
+            (product.lottery ? 
+              Math.round(((product.lottery.sold_tickets || 0) / (product.lottery.max_tickets || 1)) * 100) : 0)
+        }
+      })
     } else {
       products.value = []
     }
