@@ -202,7 +202,7 @@
                   <img class="h-12 w-12 rounded-lg object-cover" :src="order.product_image" :alt="order.product_name" />
                   <div class="ml-3">
                     <div class="text-sm font-medium text-gray-900">{{ order.product_name }}</div>
-                    <div class="text-sm text-gray-500">{{ order.ticket_price.toLocaleString() }} FCFA/ticket</div>
+                    <div class="text-sm text-gray-500">{{ (order.ticket_price || 0).toLocaleString() }} FCFA/ticket</div>
                   </div>
                 </div>
               </td>
@@ -210,8 +210,8 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center space-x-2">
                   <div>
-                    <div class="text-sm text-gray-900">{{ order.tickets_count }} tickets</div>
-                    <div class="text-sm text-gray-500">N° {{ order.ticket_numbers.join(', ') }}</div>
+                    <div class="text-sm text-gray-900">{{ order.tickets_count || 0 }} tickets</div>
+                    <div class="text-sm text-gray-500">N° {{ (order.ticket_numbers || []).join(', ') }}</div>
                   </div>
                   <div v-if="order.type === 'lottery'" class="ml-2">
                     <span v-if="order.has_winning_ticket" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -225,7 +225,7 @@
               </td>
 
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-semibold text-gray-900">{{ order.total_amount.toLocaleString() }} FCFA</div>
+                <div class="text-sm font-semibold text-gray-900">{{ (order.total_amount || 0).toLocaleString() }} FCFA</div>
                 <div class="text-sm text-gray-500">{{ order.currency }}</div>
               </td>
 
@@ -335,7 +335,7 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Montant</label>
-              <p class="text-sm text-gray-900 font-semibold">{{ selectedOrder.total_amount.toLocaleString() }} FCFA</p>
+              <p class="text-sm text-gray-900 font-semibold">{{ (selectedOrder.total_amount || 0).toLocaleString() }} FCFA</p>
             </div>
           </div>
 
@@ -361,11 +361,11 @@
             <h4 class="text-md font-semibold text-gray-900 mb-3">Tickets achetés</h4>
             <div class="bg-gray-50 p-4 rounded-lg">
               <p class="text-sm text-gray-700 mb-2">
-                <strong>{{ selectedOrder.tickets_count }} tickets</strong> pour {{ selectedOrder.product_name }}
+                <strong>{{ selectedOrder.tickets_count || 0 }} tickets</strong> pour {{ selectedOrder.product_name || 'Produit inconnu' }}
               </p>
               <div class="flex flex-wrap gap-2">
                 <span
-                  v-for="number in selectedOrder.ticket_numbers"
+                  v-for="number in (selectedOrder.ticket_numbers || [])"
                   :key="number"
                   class="inline-block bg-[#0099cc] text-white px-2 py-1 rounded text-xs font-mono"
                 >

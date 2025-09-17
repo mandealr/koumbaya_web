@@ -154,9 +154,9 @@ class MerchantOrderController extends Controller
         // Support for both direct sales and lottery orders
         $query = Order::with([
             'user:id,first_name,last_name,email,phone',
-            'product:id,name,image,merchant_id',
-            'lottery:id,lottery_number,title,product_id',
-            'lottery.product:id,name,image,merchant_id',
+            'product:id,name,image,merchant_id,price',
+            'lottery:id,lottery_number,title,product_id,ticket_price',
+            'lottery.product:id,name,image,merchant_id,price',
             'payments:id,order_id,amount,status,payment_method',
             'tickets:id,ticket_number,is_winner'
         ])
@@ -427,29 +427,60 @@ class MerchantOrderController extends Controller
      */
     private function formatOrderForMerchant(Order $order): array
     {
+        $product = $this->getOrderProduct($order);
+        $ticketPrice = 0;
+        
+        // Get ticket price from lottery or product
+        if ($order->lottery && $order->lottery->ticket_price) {
+            $ticketPrice = $order->lottery->ticket_price;
+        } elseif ($order->product && $order->product->price) {
+            $ticketPrice = $order->product->price;
+        }
+        
+        // Get ticket numbers
+        $ticketNumbers = [];
+        if ($order->tickets) {
+            $ticketNumbers = $order->tickets->pluck('ticket_number')->toArray();
+        }
+        
         return [
             'id' => $order->id,
             'order_number' => $order->order_number,
             'type' => $order->type,
             'status' => $order->status,
-            'total_amount' => $order->total_amount,
-            'currency' => $order->currency,
+            'total_amount' => $order->total_amount ?? 0,
+            'currency' => $order->currency ?? 'XAF',
             'created_at' => $order->created_at,
             'paid_at' => $order->paid_at,
             'fulfilled_at' => $order->fulfilled_at,
+            
+            // Customer data (flat structure for frontend compatibility)
+            'customer_name' => $order->user ? ($order->user->first_name . ' ' . $order->user->last_name) : 'Client anonyme',
+            'customer_email' => $order->user?->email ?? '',
+            'customer_phone' => $order->user?->phone ?? '',
+            
+            // Product data (flat structure for frontend compatibility)
+            'product_name' => $product ? $product['name'] : 'Produit inconnu',
+            'product_image' => $product ? $product['image'] : '',
+            'ticket_price' => $ticketPrice,
+            
+            // Ticket data
+            'tickets_count' => $order->tickets ? $order->tickets->count() : 0,
+            'ticket_numbers' => $ticketNumbers,
+            
+            // Nested structures for API completeness
             'customer' => [
                 'name' => $order->user ? ($order->user->first_name . ' ' . $order->user->last_name) : 'Client anonyme',
                 'email' => $order->user?->email ?? '',
                 'phone' => $order->user?->phone ?? '',
             ],
-            'product' => $this->getOrderProduct($order),
+            'product' => $product,
             'lottery' => $order->lottery ? [
                 'id' => $order->lottery->id,
                 'lottery_number' => $order->lottery->lottery_number,
                 'title' => $order->lottery->title,
             ] : null,
             'payments_count' => $order->payments ? $order->payments->count() : 0,
-            'tickets_count' => $order->tickets ? $order->tickets->count() : 0,
             'latest_payment_status' => $order->payments && $order->payments->count() > 0 
                 ? $order->payments->sortByDesc('created_at')->first()->status 
                 : null,
