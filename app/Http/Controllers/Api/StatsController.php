@@ -113,7 +113,7 @@ class StatsController extends Controller
             ->whereHas('product', function($query) use ($user) {
                 $query->where('merchant_id', $user->id);
             })
-            ->where('status', 'paid')
+            ->whereIn('status', ['paid', 'fulfilled'])
             ->selectRaw('
                 COUNT(*) as total_orders,
                 SUM(total_amount) as total_revenue
@@ -137,7 +137,7 @@ class StatsController extends Controller
             ->whereHas('product', function($query) use ($user) {
                 $query->where('merchant_id', $user->id);
             })
-            ->where('status', 'paid')
+            ->whereIn('status', ['paid', 'fulfilled'])
             ->where('created_at', '>=', now()->subMonth())
             ->sum('total_amount');
             
@@ -145,7 +145,7 @@ class StatsController extends Controller
             ->whereHas('product', function($query) use ($user) {
                 $query->where('merchant_id', $user->id);
             })
-            ->where('status', 'paid')
+            ->whereIn('status', ['paid', 'fulfilled'])
             ->where('created_at', '>=', now()->subWeek())
             ->sum('total_amount');
             
@@ -154,7 +154,7 @@ class StatsController extends Controller
             ->whereHas('product', function($query) use ($user) {
                 $query->where('merchant_id', $user->id);
             })
-            ->where('status', 'paid')
+            ->whereIn('status', ['paid', 'fulfilled'])
             ->distinct('user_id')
             ->count('user_id');
             
@@ -262,49 +262,50 @@ class StatsController extends Controller
     {
         $user = Auth::user();
         
-        // Utiliser le modèle Payment au lieu d'Order
-        
-        // Statistiques des paiements par statut
-        $orderStats = Payment::whereHas('lottery.product', function($query) use ($user) {
+        // Statistiques des commandes
+        $orderStats = Order::where('type', 'lottery')
+            ->whereHas('product', function($query) use ($user) {
                 $query->where('merchant_id', $user->id);
             })
             ->selectRaw('
                 COUNT(*) as total_orders,
-                SUM(CASE WHEN status IN ("paid", "completed") THEN 1 ELSE 0 END) as paid_orders,
-                SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending_orders,
-                SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled_orders,
-                SUM(CASE WHEN status IN ("paid", "completed") THEN amount ELSE 0 END) as total_revenue,
-                AVG(CASE WHEN status IN ("paid", "completed") THEN amount ELSE NULL END) as avg_order_value
+                SUM(CASE WHEN status IN ("paid", "fulfilled") THEN 1 ELSE 0 END) as paid_orders,
+                SUM(CASE WHEN status IN ("pending", "awaiting_payment") THEN 1 ELSE 0 END) as pending_orders,
+                SUM(CASE WHEN status IN ("cancelled", "failed") THEN 1 ELSE 0 END) as cancelled_orders,
+                SUM(CASE WHEN status IN ("paid", "fulfilled") THEN total_amount ELSE 0 END) as total_revenue,
+                AVG(CASE WHEN status IN ("paid", "fulfilled") THEN total_amount ELSE NULL END) as avg_order_value
             ')
             ->first();
             
-        // Commandes récentes (paiements)
-        $recentOrders = Payment::whereHas('lottery.product', function($query) use ($user) {
+        // Commandes récentes
+        $recentOrders = Order::where('type', 'lottery')
+            ->whereHas('product', function($query) use ($user) {
                 $query->where('merchant_id', $user->id);
             })
-            ->with(['user', 'lottery.product'])
+            ->with(['user', 'product'])
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get()
-            ->map(function($payment) {
+            ->map(function($order) {
                 return [
-                    'id' => $payment->id,
-                    'order_number' => $payment->transaction_id ?? 'PAY-' . $payment->id,
-                    'user_name' => ($payment->user ? $payment->user->first_name . ' ' . $payment->user->last_name : 'Utilisateur inconnu'),
-                    'product_name' => $payment->lottery->product->name ?? 'Produit inconnu',
-                    'amount' => $payment->amount,
-                    'status' => $payment->status,
-                    'created_at' => $payment->created_at
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'user_name' => ($order->user ? $order->user->first_name . ' ' . $order->user->last_name : 'Utilisateur inconnu'),
+                    'product_name' => $order->product->name ?? 'Produit inconnu',
+                    'amount' => $order->total_amount,
+                    'status' => $order->status,
+                    'created_at' => $order->created_at
                 ];
             });
             
         // Revenus par mois (12 derniers mois)
-        $monthlyRevenue = Payment::whereHas('lottery.product', function($query) use ($user) {
+        $monthlyRevenue = Order::where('type', 'lottery')
+            ->whereHas('product', function($query) use ($user) {
                 $query->where('merchant_id', $user->id);
             })
-            ->whereIn('status', ['paid', 'completed'])
+            ->whereIn('status', ['paid', 'fulfilled'])
             ->where('paid_at', '>=', now()->subYear())
-            ->selectRaw('MONTH(paid_at) as month, YEAR(paid_at) as year, SUM(amount) as revenue')
+            ->selectRaw('MONTH(paid_at) as month, YEAR(paid_at) as year, SUM(total_amount) as revenue')
             ->groupBy('year', 'month')
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
@@ -436,20 +437,21 @@ class StatsController extends Controller
         // Top produits par nombre de tickets vendus - approche simplifiée
         $topProducts = Product::where('merchant_id', $user->id)
             ->withSum(['orders as revenue' => function($query) use ($startDate) {
-                $query->where('status', 'paid')
+                $query->whereIn('status', ['paid', 'fulfilled'])
                       ->where('created_at', '>=', $startDate);
             }], 'total_amount')
             ->withCount(['orders as order_count' => function($query) use ($startDate) {
-                $query->where('status', 'paid')
+                $query->whereIn('status', ['paid', 'fulfilled'])
                       ->where('created_at', '>=', $startDate);
             }])
             ->get(['id', 'name', 'price', 'image'])
-            ->map(function($product) {
-                // Compter les tickets via les commandes liées
+            ->map(function($product) use ($startDate) {
+                // Compter les tickets via les commandes liées pour la période
                 $ticketsCount = DB::table('lottery_tickets')
                     ->join('orders', 'lottery_tickets.order_id', '=', 'orders.id')
                     ->where('orders.product_id', $product->id)
-                    ->where('orders.status', 'paid')
+                    ->whereIn('orders.status', ['paid', 'fulfilled'])
+                    ->where('orders.created_at', '>=', $startDate)
                     ->where('lottery_tickets.status', 'paid')
                     ->count();
                     
