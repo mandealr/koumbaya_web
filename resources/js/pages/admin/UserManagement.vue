@@ -167,17 +167,24 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
                   <button
+                    v-if="canEditUser(user)"
                     @click="editUser(user)"
                     class="text-blue-600 hover:text-blue-900"
                   >
                     Modifier
                   </button>
+                  <span v-else class="text-gray-400 cursor-not-allowed">Modifier</span>
+                  
                   <button
+                    v-if="canToggleUserStatus(user)"
                     @click="toggleUserStatus(user)"
-                    :class="user.is_active ? 'text-red-600 hover:text-red-900' : 'text-blue-600 hover:text-blue-900'"
+                    :class="user.is_active ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'"
                   >
                     {{ user.is_active ? 'Désactiver' : 'Activer' }}
                   </button>
+                  <span v-else class="text-gray-400 cursor-not-allowed">
+                    {{ user.is_active ? 'Désactiver' : 'Activer' }}
+                  </span>
                 </div>
               </td>
             </tr>
@@ -335,6 +342,116 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de modification d'utilisateur -->
+    <div v-if="showEditModal" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-lg w-full max-w-2xl shadow-xl">
+        <div class="flex items-center justify-between p-6 border-b">
+          <h2 class="text-xl font-semibold text-gray-900">Modifier l'utilisateur</h2>
+          <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600">
+            <XMarkIcon class="w-6 h-6" />
+          </button>
+        </div>
+
+        <form @submit.prevent="updateUser" class="p-6 space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Prénom *</label>
+              <input
+                v-model="editUserForm.first_name"
+                type="text"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Jean"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
+              <input
+                v-model="editUserForm.last_name"
+                type="text"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Dupont"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+            <input
+              v-model="editUserForm.email"
+              type="email"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="user@koumbaya.com"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone *</label>
+            <PhoneInput
+              v-model="editUserForm.phone"
+              placeholder="Numéro de téléphone"
+              @phone-change="onEditPhoneChange"
+              class="w-full"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Rôle *</label>
+            <select
+              v-model="editUserForm.role"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Sélectionner un rôle</option>
+              <option v-for="role in adminRoles" :key="role.value" :value="role.value">
+                {{ role.label }}
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label class="flex items-center">
+              <input
+                v-model="editUserForm.is_active"
+                type="checkbox"
+                class="mr-2 rounded text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm text-gray-700">Compte actif</span>
+            </label>
+          </div>
+
+          <!-- Messages d'erreur -->
+          <div v-if="editError" class="bg-red-50 border border-red-200 rounded-md p-4">
+            <p class="text-sm text-red-800">{{ editError }}</p>
+          </div>
+        </form>
+
+        <div class="flex justify-end gap-3 px-6 py-4 bg-gray-50 rounded-b-lg">
+          <button
+            @click="closeEditModal"
+            type="button"
+            class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            Annuler
+          </button>
+          <button
+            @click="updateUser"
+            :disabled="updatingUser"
+            type="button"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
+          >
+            <span v-if="!updatingUser">Modifier l'utilisateur</span>
+            <span v-else class="flex items-center">
+              <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+              Modification...
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -355,29 +472,60 @@ const isSuperAdmin = computed(() => {
 
 // Vérifier si l'utilisateur peut créer d'autres utilisateurs (Admin ou Super Admin)
 const canCreateUsers = computed(() => {
-  // Debug temporaire
-  console.log('UserManagement - Debug roles:', {
-    user: authStore.user,
-    roles: authStore.user?.roles,
-    hasRoleSuperAdmin: authStore.hasRole('Super Admin'),
-    hasRoleAdmin: authStore.hasRole('Admin'),
-    isAdmin: authStore.isAdmin,
-    isManager: authStore.isManager
-  })
-  
   return authStore.hasRole('Super Admin') || authStore.hasRole('Admin')
 })
+
+// Vérifier si l'utilisateur peut être modifié
+const canEditUser = (user) => {
+  const currentUser = authStore.user
+  if (!currentUser) return false
+  
+  // Super Admin peut tout modifier
+  if (authStore.hasRole('Super Admin')) return true
+  
+  // Admin régulier ne peut pas modifier Super Admin ou autres Admin
+  if (authStore.hasRole('Admin')) {
+    const userRole = user.primary_role
+    return !['Super Admin', 'Admin'].includes(userRole)
+  }
+  
+  return false
+}
+
+// Vérifier si le statut de l'utilisateur peut être modifié
+const canToggleUserStatus = (user) => {
+  const currentUser = authStore.user
+  if (!currentUser) return false
+  
+  // Ne peut pas modifier son propre statut
+  if (user.id === currentUser.id) return false
+  
+  // Super Admin peut tout modifier
+  if (authStore.hasRole('Super Admin')) return true
+  
+  // Admin régulier ne peut pas modifier Super Admin ou autres Admin
+  if (authStore.hasRole('Admin')) {
+    const userRole = user.primary_role
+    return !['Super Admin', 'Admin'].includes(userRole)
+  }
+  
+  return false
+}
 
 const users = ref([])
 const loading = ref(false)
 const showCreateModal = ref(false)
+const showEditModal = ref(false)
 const currentPage = ref(1)
 const itemsPerPage = ref(20)
 const totalUsers = ref(0)
 const availableRoles = ref([])
 const adminRoles = ref([])
 const creatingAdmin = ref(false)
+const updatingUser = ref(false)
 const createError = ref('')
+const editError = ref('')
+const selectedUser = ref(null)
 
 const filters = reactive({
   search: '',
@@ -386,6 +534,16 @@ const filters = reactive({
 })
 
 const newAdmin = reactive({
+  first_name: '',
+  last_name: '',
+  email: '',
+  phone: '',
+  role: '',
+  is_active: true
+})
+
+const editUserForm = reactive({
+  id: null,
   first_name: '',
   last_name: '',
   email: '',
@@ -448,7 +606,27 @@ const resetFilters = () => {
 }
 
 const editUser = (user) => {
-  console.log('Éditer utilisateur:', user)
+  selectedUser.value = user
+  
+  // Pré-remplir le formulaire avec les données de l'utilisateur
+  editUserForm.id = user.id
+  editUserForm.first_name = user.first_name
+  editUserForm.last_name = user.last_name
+  editUserForm.email = user.email
+  editUserForm.phone = user.phone
+  editUserForm.role = user.primary_role || (user.roles && user.roles.length > 0 ? user.roles[0] : '')
+  editUserForm.is_active = user.is_active
+  
+  // Effacer les erreurs précédentes
+  editError.value = ''
+  
+  // Charger les rôles si pas encore fait
+  if (canCreateUsers.value && adminRoles.value.length === 0) {
+    loadAdminRoles()
+  }
+  
+  // Afficher le modal
+  showEditModal.value = true
 }
 
 const toggleUserStatus = async (user) => {
@@ -522,10 +700,16 @@ const loadAdminRoles = async () => {
   }
 }
 
-// Gérer le changement de téléphone
+// Gérer le changement de téléphone pour création
 const onPhoneChange = (phoneData) => {
   console.log('Phone changed:', phoneData)
   newAdmin.phone = phoneData.fullNumber // Utilise le numéro complet international
+}
+
+// Gérer le changement de téléphone pour modification
+const onEditPhoneChange = (phoneData) => {
+  console.log('Edit phone changed:', phoneData)
+  editUserForm.phone = phoneData.fullNumber // Utilise le numéro complet international
 }
 
 // Créer un nouvel admin
@@ -559,11 +743,53 @@ const createAdmin = async () => {
   }
 }
 
+// Mettre à jour un utilisateur
+const updateUser = async () => {
+  // Validation
+  if (!editUserForm.first_name || !editUserForm.last_name || !editUserForm.email ||
+      !editUserForm.phone || !editUserForm.role) {
+    editError.value = 'Veuillez remplir tous les champs obligatoires'
+    return
+  }
+
+  updatingUser.value = true
+  editError.value = ''
+
+  try {
+    const response = await post(`/admin/users/${editUserForm.id}`, {
+      ...editUserForm,
+      _method: 'PUT' // Pour Laravel, utiliser PUT via POST
+    })
+    
+    if (response && response.success) {
+      showEditModal.value = false
+      await loadUsers() // Recharger la liste
+      resetEditUserForm()
+
+      if (window.$toast) {
+        window.$toast.success('Utilisateur modifié avec succès', 'Succès')
+      }
+    }
+  } catch (error) {
+    console.error('Erreur lors de la modification:', error)
+    editError.value = error.response?.data?.message || 'Erreur lors de la modification de l\'utilisateur'
+  } finally {
+    updatingUser.value = false
+  }
+}
+
 // Fermer le modal de création
 const closeCreateModal = () => {
   showCreateModal.value = false
   resetNewAdminForm()
   createError.value = ''
+}
+
+// Fermer le modal de modification
+const closeEditModal = () => {
+  showEditModal.value = false
+  resetEditUserForm()
+  editError.value = ''
 }
 
 // Réinitialiser le formulaire
@@ -574,6 +800,18 @@ const resetNewAdminForm = () => {
   newAdmin.phone = ''
   newAdmin.role = ''
   newAdmin.is_active = true
+}
+
+// Réinitialiser le formulaire de modification
+const resetEditUserForm = () => {
+  editUserForm.id = null
+  editUserForm.first_name = ''
+  editUserForm.last_name = ''
+  editUserForm.email = ''
+  editUserForm.phone = ''
+  editUserForm.role = ''
+  editUserForm.is_active = true
+  selectedUser.value = null
 }
 
 // Obtenir la description du rôle sélectionné

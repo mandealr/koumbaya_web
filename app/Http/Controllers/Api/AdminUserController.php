@@ -210,7 +210,27 @@ class AdminUserController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $currentUser = auth()->user();
         $user = User::findOrFail($id);
+        
+        // Vérifier que l'utilisateur actuel est au moins Admin
+        if (!$currentUser->isAdmin() && !$currentUser->isSuperAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès refusé'
+            ], 403);
+        }
+        
+        // Empêcher la modification de comptes Super Admin par des admins réguliers
+        if ($currentUser->isAdmin() && !$currentUser->isSuperAdmin()) {
+            $userRoles = $user->roles->pluck('name')->toArray();
+            if (in_array('Super Admin', $userRoles) || in_array('Admin', $userRoles)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous ne pouvez pas modifier ce type d\'utilisateur'
+                ], 403);
+            }
+        }
 
         $validator = Validator::make($request->all(), [
             'first_name' => 'string|max:255',
@@ -257,7 +277,36 @@ class AdminUserController extends Controller
      */
     public function toggleStatus($id)
     {
+        $currentUser = auth()->user();
         $user = User::findOrFail($id);
+        
+        // Vérifier que l'utilisateur actuel est au moins Admin
+        if (!$currentUser->isAdmin() && !$currentUser->isSuperAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès refusé'
+            ], 403);
+        }
+        
+        // Empêcher la désactivation de comptes Super Admin par des admins réguliers
+        if ($currentUser->isAdmin() && !$currentUser->isSuperAdmin()) {
+            $userRoles = $user->roles->pluck('name')->toArray();
+            if (in_array('Super Admin', $userRoles) || in_array('Admin', $userRoles)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous ne pouvez pas modifier le statut de ce type d\'utilisateur'
+                ], 403);
+            }
+        }
+        
+        // Empêcher l'auto-désactivation
+        if ($user->id === $currentUser->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous ne pouvez pas modifier votre propre statut'
+            ], 403);
+        }
+        
         $user->is_active = !$user->is_active;
         $user->save();
 
