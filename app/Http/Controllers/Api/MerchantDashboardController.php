@@ -237,15 +237,8 @@ class MerchantDashboardController extends Controller
                         $ticketPrice = $meta['ticket_price'] ?? 0;
                     }
 
-                    // Récupérer l'image de façon sécurisée
-                    $imageUrl = null;
-                    if ($product->image) {
-                        if (str_starts_with($product->image, 'http') || str_starts_with($product->image, '/')) {
-                            $imageUrl = $product->image;
-                        } else {
-                            $imageUrl = "/storage/products/{$product->image}";
-                        }
-                    }
+                    // Utiliser l'accesseur image_url du modèle Product qui gère la conversion automatique
+                    $imageUrl = $product->image_url;
 
                     return [
                         'id' => $product->id,

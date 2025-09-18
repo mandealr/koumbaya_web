@@ -88,9 +88,24 @@ const imageUrl = computed(() => {
     return props.src
   }
   
-  // Sinon, ajouter le préfixe pour les images uploadées
-  const finalUrl = `/storage/products/${props.src}`
-  console.debug('ProductImage: Generated URL:', finalUrl)
+  // Sinon, construire l'URL avec notre nouvelle route API
+  // Format attendu : products/YYYY/MM/filename.ext
+  const pathParts = props.src.split('/')
+  if (pathParts.length >= 3) {
+    const [folder, year, month, filename] = pathParts
+    if (folder === 'products' && year && month && filename) {
+      const finalUrl = `/api/products/images/${year}/${month}/${filename}`
+      console.debug('ProductImage: Generated API URL:', finalUrl)
+      return finalUrl
+    }
+  }
+  
+  // Fallback: essayer de construire avec la date actuelle
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const finalUrl = `/api/products/images/${year}/${month}/${props.src}`
+  console.debug('ProductImage: Generated fallback API URL:', finalUrl)
   return finalUrl
 })
 

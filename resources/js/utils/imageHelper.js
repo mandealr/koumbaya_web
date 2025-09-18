@@ -29,8 +29,21 @@ export function getProductImageUrl(product, fallback = '/images/products/placeho
     return imageSource;
   }
   
-  // Sinon, construire l'URL avec le préfixe storage
-  return `/storage/products/${imageSource}`;
+  // Sinon, construire l'URL avec notre nouvelle route API
+  // Format attendu : products/YYYY/MM/filename.ext
+  const pathParts = imageSource.split('/');
+  if (pathParts.length >= 3) {
+    const [folder, year, month, filename] = pathParts;
+    if (folder === 'products' && year && month && filename) {
+      return `/api/products/images/${year}/${month}/${filename}`;
+    }
+  }
+  
+  // Fallback: essayer de construire avec la date actuelle
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  return `/api/products/images/${year}/${month}/${imageSource}`;
 }
 
 /**
