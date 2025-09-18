@@ -143,7 +143,7 @@ class AdminProductController extends Controller
                 'category',
                 'merchant.roles',
                 'lotteries' => function ($query) {
-                    $query->with(['winner', 'drawHistory'])
+                    $query->with(['winner'])
                           ->orderBy('created_at', 'desc');
                 }
             ])
