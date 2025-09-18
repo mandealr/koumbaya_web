@@ -353,74 +353,213 @@
           </button>
         </div>
 
-        <form @submit.prevent="updateUser" class="p-6 space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Prénom *</label>
+        <form @submit.prevent="updateUser" class="p-6 space-y-4 max-h-96 overflow-y-auto">
+          <!-- Informations de base -->
+          <div class="border-b border-gray-200 pb-4">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Informations personnelles</h3>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Prénom *</label>
+                <input
+                  v-model="editUserForm.first_name"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Jean"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
+                <input
+                  v-model="editUserForm.last_name"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Dupont"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                <input
+                  v-model="editUserForm.email"
+                  type="email"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="user@koumbaya.com"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone *</label>
+                <PhoneInput
+                  v-model="editUserForm.phone"
+                  placeholder="Numéro de téléphone"
+                  @phone-change="onEditPhoneChange"
+                  class="w-full"
+                />
+              </div>
+            </div>
+
+            <div v-if="!isAdminUser(selectedUser)" class="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Date de naissance</label>
+                <input
+                  v-model="editUserForm.date_of_birth"
+                  type="date"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Genre</label>
+                <select
+                  v-model="editUserForm.gender"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Sélectionner</option>
+                  <option value="male">Homme</option>
+                  <option value="female">Femme</option>
+                  <option value="other">Autre</option>
+                </select>
+              </div>
+            </div>
+
+            <div v-if="!isAdminUser(selectedUser)" class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Ville</label>
+                <input
+                  v-model="editUserForm.city"
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Libreville"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Adresse</label>
+                <input
+                  v-model="editUserForm.address"
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Adresse complète"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Informations business (pour les marchands) -->
+          <div v-if="!isAdminUser(selectedUser) && ['Business', 'Business Enterprise', 'Business Individual'].includes(editUserForm.role)" 
+               class="border-b border-gray-200 pb-4">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Informations business</h3>
+            
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nom de l'entreprise</label>
               <input
-                v-model="editUserForm.first_name"
+                v-model="editUserForm.business_name"
                 type="text"
-                required
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Jean"
+                placeholder="Nom de votre entreprise"
               />
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
+
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Email business</label>
               <input
-                v-model="editUserForm.last_name"
-                type="text"
-                required
+                v-model="editUserForm.business_email"
+                type="email"
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Dupont"
+                placeholder="contact@entreprise.com"
               />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Description de l'entreprise</label>
+              <textarea
+                v-model="editUserForm.business_description"
+                rows="3"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Décrivez votre activité..."
+              ></textarea>
             </div>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-            <input
-              v-model="editUserForm.email"
-              type="email"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="user@koumbaya.com"
-            />
+          <!-- Bio (pour utilisateurs non-admin) -->
+          <div v-if="!isAdminUser(selectedUser)" class="border-b border-gray-200 pb-4">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Autres informations</h3>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Biographie</label>
+              <textarea
+                v-model="editUserForm.bio"
+                rows="3"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Parlez-nous de vous..."
+              ></textarea>
+            </div>
           </div>
 
+          <!-- Paramètres et rôle -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone *</label>
-            <PhoneInput
-              v-model="editUserForm.phone"
-              placeholder="Numéro de téléphone"
-              @phone-change="onEditPhoneChange"
-              class="w-full"
-            />
-          </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Paramètres du compte</h3>
+            
+            <!-- Rôle (seulement pour les utilisateurs admin) -->
+            <div v-if="isAdminUser(selectedUser)" class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Rôle *</label>
+              <select
+                v-model="editUserForm.role"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Sélectionner un rôle</option>
+                <option v-for="role in adminRoles" :key="role.value" :value="role.value">
+                  {{ role.label }}
+                </option>
+              </select>
+            </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Rôle *</label>
-            <select
-              v-model="editUserForm.role"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Sélectionner un rôle</option>
-              <option v-for="role in adminRoles" :key="role.value" :value="role.value">
-                {{ role.label }}
-              </option>
-            </select>
-          </div>
+            <!-- Statut actif -->
+            <div class="mb-4">
+              <label class="flex items-center">
+                <input
+                  v-model="editUserForm.is_active"
+                  type="checkbox"
+                  class="mr-2 rounded text-blue-600 focus:ring-blue-500"
+                />
+                <span class="text-sm text-gray-700">Compte actif</span>
+              </label>
+            </div>
 
-          <div>
-            <label class="flex items-center">
-              <input
-                v-model="editUserForm.is_active"
-                type="checkbox"
-                class="mr-2 rounded text-blue-600 focus:ring-blue-500"
-              />
-              <span class="text-sm text-gray-700">Compte actif</span>
-            </label>
+            <!-- Préférences de notifications (pour utilisateurs non-admin) -->
+            <div v-if="!isAdminUser(selectedUser)">
+              <h4 class="text-md font-medium text-gray-900 mb-3">Préférences de notifications</h4>
+              <div class="space-y-2">
+                <label class="flex items-center">
+                  <input
+                    v-model="editUserForm.email_notifications"
+                    type="checkbox"
+                    class="mr-2 rounded text-blue-600 focus:ring-blue-500"
+                  />
+                  <span class="text-sm text-gray-700">Notifications email</span>
+                </label>
+                <label class="flex items-center">
+                  <input
+                    v-model="editUserForm.sms_notifications"
+                    type="checkbox"
+                    class="mr-2 rounded text-blue-600 focus:ring-blue-500"
+                  />
+                  <span class="text-sm text-gray-700">Notifications SMS</span>
+                </label>
+                <label class="flex items-center">
+                  <input
+                    v-model="editUserForm.push_notifications"
+                    type="checkbox"
+                    class="mr-2 rounded text-blue-600 focus:ring-blue-500"
+                  />
+                  <span class="text-sm text-gray-700">Notifications push</span>
+                </label>
+              </div>
+            </div>
           </div>
 
           <!-- Messages d'erreur -->
@@ -512,6 +651,12 @@ const canToggleUserStatus = (user) => {
   return false
 }
 
+// Vérifier si un utilisateur est de type admin
+const isAdminUser = (user) => {
+  const adminRoles = ['Super Admin', 'Admin', 'Agent', 'Agent Back Office']
+  return adminRoles.includes(user.primary_role)
+}
+
 const users = ref([])
 const loading = ref(false)
 const showCreateModal = ref(false)
@@ -549,7 +694,21 @@ const editUserForm = reactive({
   email: '',
   phone: '',
   role: '',
-  is_active: true
+  is_active: true,
+  // Champs pour utilisateurs non-admin
+  business_name: '',
+  business_email: '',
+  business_description: '',
+  city: '',
+  address: '',
+  date_of_birth: '',
+  gender: '',
+  bio: '',
+  country_id: null,
+  language_id: null,
+  email_notifications: true,
+  sms_notifications: true,
+  push_notifications: true
 })
 
 // Watch for filter changes and reload
@@ -608,14 +767,29 @@ const resetFilters = () => {
 const editUser = (user) => {
   selectedUser.value = user
   
-  // Pré-remplir le formulaire avec les données de l'utilisateur
+  // Pré-remplir le formulaire avec les données de base
   editUserForm.id = user.id
-  editUserForm.first_name = user.first_name
-  editUserForm.last_name = user.last_name
-  editUserForm.email = user.email
-  editUserForm.phone = user.phone
+  editUserForm.first_name = user.first_name || ''
+  editUserForm.last_name = user.last_name || ''
+  editUserForm.email = user.email || ''
+  editUserForm.phone = user.phone || ''
   editUserForm.role = user.primary_role || (user.roles && user.roles.length > 0 ? user.roles[0] : '')
   editUserForm.is_active = user.is_active
+  
+  // Charger les champs supplémentaires pour les utilisateurs non-admin
+  editUserForm.business_name = user.business_name || ''
+  editUserForm.business_email = user.business_email || ''
+  editUserForm.business_description = user.business_description || ''
+  editUserForm.city = user.city || ''
+  editUserForm.address = user.address || ''
+  editUserForm.date_of_birth = user.date_of_birth || ''
+  editUserForm.gender = user.gender || ''
+  editUserForm.bio = user.bio || ''
+  editUserForm.country_id = user.country_id || null
+  editUserForm.language_id = user.language_id || null
+  editUserForm.email_notifications = user.email_notifications !== false
+  editUserForm.sms_notifications = user.sms_notifications !== false
+  editUserForm.push_notifications = user.push_notifications !== false
   
   // Effacer les erreurs précédentes
   editError.value = ''
@@ -745,10 +919,15 @@ const createAdmin = async () => {
 
 // Mettre à jour un utilisateur
 const updateUser = async () => {
-  // Validation
-  if (!editUserForm.first_name || !editUserForm.last_name || !editUserForm.email ||
-      !editUserForm.phone || !editUserForm.role) {
+  // Validation de base
+  if (!editUserForm.first_name || !editUserForm.last_name || !editUserForm.email || !editUserForm.phone) {
     editError.value = 'Veuillez remplir tous les champs obligatoires'
+    return
+  }
+
+  // Validation du rôle seulement pour les utilisateurs admin
+  if (isAdminUser(selectedUser.value) && !editUserForm.role) {
+    editError.value = 'Veuillez sélectionner un rôle'
     return
   }
 
@@ -811,6 +990,19 @@ const resetEditUserForm = () => {
   editUserForm.phone = ''
   editUserForm.role = ''
   editUserForm.is_active = true
+  editUserForm.business_name = ''
+  editUserForm.business_email = ''
+  editUserForm.business_description = ''
+  editUserForm.city = ''
+  editUserForm.address = ''
+  editUserForm.date_of_birth = ''
+  editUserForm.gender = ''
+  editUserForm.bio = ''
+  editUserForm.country_id = null
+  editUserForm.language_id = null
+  editUserForm.email_notifications = true
+  editUserForm.sms_notifications = true
+  editUserForm.push_notifications = true
   selectedUser.value = null
 }
 

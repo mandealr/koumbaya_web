@@ -238,8 +238,22 @@ class AdminUserController extends Controller
             'email' => 'string|email|unique:users,email,' . $id,
             'phone' => 'string|unique:users,phone,' . $id,
             'password' => 'nullable|string|min:8',
-            'role' => 'string|exists:roles,name',
-            'is_active' => 'boolean'
+            'role' => 'nullable|string|exists:roles,name',
+            'is_active' => 'boolean',
+            // Champs supplémentaires pour utilisateurs non-admin
+            'business_name' => 'nullable|string|max:255',
+            'business_email' => 'nullable|email|max:255',
+            'business_description' => 'nullable|string|max:1000',
+            'city' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:500',
+            'date_of_birth' => 'nullable|date',
+            'gender' => 'nullable|in:male,female,other',
+            'bio' => 'nullable|string|max:1000',
+            'country_id' => 'nullable|integer|exists:countries,id',
+            'language_id' => 'nullable|integer|exists:languages,id',
+            'email_notifications' => 'boolean',
+            'sms_notifications' => 'boolean',
+            'push_notifications' => 'boolean'
         ]);
 
         if ($validator->fails()) {
@@ -249,7 +263,13 @@ class AdminUserController extends Controller
             ], 422);
         }
 
-        $updateData = $request->only(['first_name', 'last_name', 'email', 'phone', 'is_active']);
+        $updateData = $request->only([
+            'first_name', 'last_name', 'email', 'phone', 'is_active',
+            'business_name', 'business_email', 'business_description',
+            'city', 'address', 'date_of_birth', 'gender', 'bio',
+            'country_id', 'language_id',
+            'email_notifications', 'sms_notifications', 'push_notifications'
+        ]);
         
         if ($request->filled('password')) {
             $updateData['password'] = Hash::make($request->password);
