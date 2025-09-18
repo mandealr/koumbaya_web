@@ -1009,10 +1009,10 @@ class OrderTrackingController extends Controller
             ], 400);
         }
 
-        // Autoriser seulement les transitions paid ↔ shipping
+        // Autoriser seulement les transitions paid ↔ fulfilled
         $allowedTransitions = [
-            OrderStatus::PAID->value => [OrderStatus::SHIPPING->value],
-            OrderStatus::SHIPPING->value => [OrderStatus::PAID->value]
+            OrderStatus::PAID->value => [OrderStatus::FULFILLED->value],
+            OrderStatus::FULFILLED->value => [OrderStatus::PAID->value]
         ];
         
         if (!isset($allowedTransitions[$order->status]) || 

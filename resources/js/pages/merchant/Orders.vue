@@ -249,14 +249,14 @@
                   >
                     <EyeIcon class="w-4 h-4" />
                   </button>
-                  <div v-if="order.status === 'paid' || order.status === 'shipping'" class="relative">
+                  <div v-if="order.status === 'paid' || order.status === 'fulfilled'" class="relative">
                     <select 
                       @change="changeOrderStatus(order, $event.target.value)"
                       class="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
                       :value="order.status"
                     >
                       <option value="paid">Payé</option>
-                      <option value="shipping">En cours de livraison</option>
+                      <option value="fulfilled">En cours de livraison</option>
                     </select>
                   </div>
                   <button
@@ -606,7 +606,7 @@ const changeOrderStatus = async (order, newStatus) => {
   
   const statusLabels = {
     'paid': 'payé',
-    'shipping': 'en cours de livraison'
+    'fulfilled': 'en cours de livraison'
   }
   
   if (confirm(`Marquer la commande ${order.order_number} comme ${statusLabels[newStatus]} ?`)) {
