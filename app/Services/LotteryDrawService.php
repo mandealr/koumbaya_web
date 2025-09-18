@@ -197,18 +197,52 @@ class LotteryDrawService
             $combinedHash = hash('sha256', $combinedHash . $i);
         }
         
-        // Take first 16 chars and convert to decimal
-        $hashNumber = hexdec(substr($combinedHash, 0, 16));
+        // Take first 8 chars and convert to decimal to avoid overflow
+        $hashSubstring = substr($combinedHash, 0, 8);
+        $hashNumber = hexdec($hashSubstring);
+        
+        // Ensure we have a valid number
+        if ($hashNumber === 0) {
+            $hashNumber = 1;
+        }
         
         // Get index
         $winningIndex = $hashNumber % $totalTickets;
         
+        // Ensure index is valid
+        $winningIndex = max(0, min($winningIndex, $totalTickets - 1));
+        
+        // Log detailed debug information
+        \Log::info('SelectWinner: Debug info', [
+            'total_tickets' => $totalTickets,
+            'hash_substring' => $hashSubstring,
+            'hash_number' => $hashNumber,
+            'winning_index' => $winningIndex,
+            'seed' => $seed,
+            'combined_hash' => $combinedHash,
+            'tickets_sample' => $tickets->take(3)->pluck(['id', 'ticket_number', 'user_id']),
+            'tickets_count_after_values' => $tickets->values()->count()
+        ]);
+        
         // Get the winning ticket with validation
-        $winningTicket = $tickets->values()->get($winningIndex);
+        $ticketsArray = $tickets->values();
+        $winningTicket = $ticketsArray->get($winningIndex);
         
         if (!$winningTicket) {
+            \Log::error('SelectWinner: Failed to get winning ticket', [
+                'winning_index' => $winningIndex,
+                'total_tickets' => $totalTickets,
+                'tickets_keys' => $ticketsArray->keys()->toArray(),
+                'available_indices' => range(0, $ticketsArray->count() - 1)
+            ]);
             throw new \RuntimeException('Erreur lors de la sélection du gagnant');
         }
+        
+        \Log::info('SelectWinner: Winner selected successfully', [
+            'winning_ticket_id' => $winningTicket->id,
+            'winning_ticket_number' => $winningTicket->ticket_number,
+            'winner_user_id' => $winningTicket->user_id
+        ]);
         
         return $winningTicket;
     }
