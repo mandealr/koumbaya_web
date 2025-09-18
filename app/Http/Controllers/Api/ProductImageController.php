@@ -71,8 +71,8 @@ class ProductImageController extends Controller
                 throw new \Exception('Erreur lors de la sauvegarde du fichier');
             }
 
-            // Construire l'URL publique
-            $url = Storage::disk('public')->url($fullPath);
+            // Construire l'URL publique (relative au domaine)
+            $url = '/storage/' . $fullPath;
             
             // Informations sur le fichier
             $fileInfo = [
@@ -153,7 +153,7 @@ class ProductImageController extends Controller
                             'filename' => $filename,
                             'original_name' => $uploadedFile->getClientOriginalName(),
                             'path' => $path,
-                            'url' => Storage::disk('public')->url($path),
+                            'url' => '/storage/' . $path,
                             'size' => Storage::disk('public')->size($path),
                             'mime_type' => $uploadedFile->getMimeType()
                         ];

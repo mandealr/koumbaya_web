@@ -204,12 +204,22 @@ class Product extends Model
             return $mainImage;
         }
         
+        // Si c'est un chemin qui commence par /storage/, l'utiliser tel quel  
+        if (str_starts_with($mainImage, '/storage/')) {
+            return $mainImage;
+        }
+        
         // Si c'est un chemin qui commence par /, l'utiliser tel quel  
         if (str_starts_with($mainImage, '/')) {
             return $mainImage;
         }
         
-        // Sinon, construire l'URL avec le préfixe storage
+        // Si ça commence par "products/", ajouter le préfixe /storage/
+        if (str_starts_with($mainImage, 'products/')) {
+            return "/storage/{$mainImage}";
+        }
+        
+        // Sinon, construire l'URL avec le préfixe storage/products
         return "/storage/products/{$mainImage}";
     }
 
