@@ -198,12 +198,21 @@ class AdminOrderController extends Controller
         $stats = [
             // Statistiques globales
             'total_orders' => Order::count(),
-            'total_amount' => Order::whereIn('orders.status', ['paid', 'fulfilled'])
-                ->where('orders.type', 'lottery')
-                ->join('lotteries', 'orders.lottery_id', '=', 'lotteries.id')
-                ->join('products', 'lotteries.product_id', '=', 'products.id')
-                ->selectRaw('SUM(orders.total_amount - products.price) as koumbaya_margin')
-                ->value('koumbaya_margin') ?: 0,
+            'total_amount' => DB::select("
+                SELECT SUM(total_paid - product_price) as koumbaya_margin
+                FROM (
+                    SELECT 
+                        products.id as product_id,
+                        products.price as product_price,
+                        SUM(orders.total_amount) as total_paid
+                    FROM orders 
+                    INNER JOIN lotteries ON orders.lottery_id = lotteries.id
+                    INNER JOIN products ON lotteries.product_id = products.id
+                    WHERE orders.status IN ('paid', 'fulfilled') 
+                    AND orders.type = 'lottery'
+                    GROUP BY products.id, products.price
+                ) as product_totals
+            ")[0]->koumbaya_margin ?: 0,
             
             // Par statut
             'pending_orders' => Order::where('status', OrderStatus::PENDING->value)->count(),
