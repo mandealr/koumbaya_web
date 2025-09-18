@@ -341,6 +341,16 @@ Route::group([
         Route::post('/{id}/reject', [AdminRefundController::class, 'reject']);
     });
     
+    // Admin Products Management
+    Route::prefix('products')->controller(App\Http\Controllers\Api\AdminProductController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::get('/stats', 'getStats');
+        Route::get('/{id}', 'show');
+        Route::put('/{id}', 'update');
+        Route::patch('/{id}/status', 'updateStatus');
+        Route::delete('/{id}', 'destroy');
+    });
+    
     // Admin Lotteries Management
     Route::prefix('lotteries')->controller(App\Http\Controllers\Api\AdminLotteryController::class)->group(function () {
         Route::get('/', 'index');

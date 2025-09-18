@@ -129,24 +129,108 @@ class AdminProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::with([
-            'category', 
-            'merchant', 
-            'lotteries',
-            'lotteryTickets'
-        ])->findOrFail($id);
+        $currentUser = auth()->user();
+        
+        // Vérifier que l'utilisateur est au moins Admin
+        if (!$currentUser->isAdmin() && !$currentUser->isSuperAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès refusé'
+            ], 403);
+        }
+
+        $product = Product::withTrashed()
+            ->with([
+                'category',
+                'user.roles',
+                'lotteries' => function ($query) {
+                    $query->with(['winner', 'drawHistory'])
+                          ->orderBy('created_at', 'desc');
+                }
+            ])
+            ->find($id);
+
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Produit non trouvé'
+            ], 404);
+        }
+
+        // Calculate detailed stats
+        $totalTicketsSold = $product->lotteries->sum('sold_tickets');
+        $totalRevenue = $product->lotteries->sum(function ($lottery) {
+            return $lottery->sold_tickets * $lottery->ticket_price;
+        });
 
         $stats = [
-            'total_lotteries' => $product->lotteries()->count(),
-            'completed_lotteries' => $product->completedLotteries()->count(),
-            'total_tickets_sold' => $product->lotteryTickets()->where('status', 'paid')->count(),
-            'total_revenue' => $product->transactions()->where('status', 'completed')->sum('amount')
+            'total_lotteries' => $product->lotteries->count(),
+            'active_lotteries' => $product->lotteries->where('status', 'active')->count(),
+            'completed_lotteries' => $product->lotteries->where('status', 'completed')->count(),
+            'cancelled_lotteries' => $product->lotteries->where('status', 'cancelled')->count(),
+            'total_tickets_sold' => $totalTicketsSold,
+            'total_revenue' => $totalRevenue,
+            'views_count' => $product->views_count ?? 0,
+        ];
+
+        // Format product data
+        $productData = [
+            'id' => $product->id,
+            'name' => $product->name,
+            'description' => $product->description,
+            'price' => $product->price,
+            'quantity' => $product->quantity,
+            'status' => $product->status ?? ($product->is_active ? 'active' : 'inactive'),
+            'type' => $product->type ?? 'physical',
+            'sale_mode' => $product->sale_mode,
+            'image_url' => $product->image_url,
+            'main_image' => $product->main_image,
+            'images' => $product->images,
+            'views_count' => $product->views_count ?? 0,
+            'is_active' => $product->is_active,
+            'is_featured' => $product->is_featured,
+            'created_at' => $product->created_at,
+            'updated_at' => $product->updated_at,
+            'deleted_at' => $product->deleted_at,
+            'user' => [
+                'id' => $product->user->id,
+                'first_name' => $product->user->first_name,
+                'last_name' => $product->user->last_name,
+                'email' => $product->user->email,
+                'phone' => $product->user->phone,
+                'is_active' => $product->user->is_active,
+                'roles' => $product->user->roles->pluck('name')->toArray(),
+            ],
+            'category' => $product->category ? [
+                'id' => $product->category->id,
+                'name' => $product->category->name,
+            ] : null,
+            'lotteries' => $product->lotteries->map(function ($lottery) {
+                return [
+                    'id' => $lottery->id,
+                    'title' => $lottery->title,
+                    'description' => $lottery->description,
+                    'lottery_number' => $lottery->lottery_number,
+                    'status' => $lottery->status,
+                    'max_tickets' => $lottery->max_tickets,
+                    'sold_tickets' => $lottery->sold_tickets,
+                    'ticket_price' => $lottery->ticket_price,
+                    'draw_date' => $lottery->draw_date,
+                    'created_at' => $lottery->created_at,
+                    'winner' => $lottery->winner ? [
+                        'id' => $lottery->winner->id,
+                        'first_name' => $lottery->winner->first_name,
+                        'last_name' => $lottery->winner->last_name,
+                    ] : null,
+                    'winning_ticket_number' => $lottery->winning_ticket_number,
+                ];
+            }),
         ];
 
         return response()->json([
             'success' => true,
             'data' => [
-                'product' => $product,
+                'product' => $productData,
                 'stats' => $stats
             ]
         ]);
@@ -244,6 +328,91 @@ class AdminProductController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Produit supprimé avec succès'
+        ]);
+    }
+
+    /**
+     * Update product status
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $currentUser = auth()->user();
+        
+        // Vérifier que l'utilisateur est au moins Admin
+        if (!$currentUser->isAdmin() && !$currentUser->isSuperAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès refusé'
+            ], 403);
+        }
+
+        $product = Product::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|string|in:active,inactive,out_of_stock'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Si on désactive un produit avec une tombola active
+        if ($request->status === 'inactive' && $product->has_active_lottery) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Impossible de désactiver un produit avec une tombola active'
+            ], 422);
+        }
+
+        $product->update([
+            'status' => $request->status,
+            'is_active' => $request->status === 'active'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Statut du produit mis à jour avec succès',
+            'data' => ['product' => $product]
+        ]);
+    }
+
+    /**
+     * Get product statistics for admin dashboard
+     */
+    public function getStats()
+    {
+        $currentUser = auth()->user();
+        
+        // Vérifier que l'utilisateur est au moins Admin
+        if (!$currentUser->isAdmin() && !$currentUser->isSuperAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès refusé'
+            ], 403);
+        }
+
+        $stats = [
+            'total_products' => Product::count(),
+            'active_products' => Product::where('is_active', true)->count(),
+            'inactive_products' => Product::where('is_active', false)->count(),
+            'deleted_products' => Product::onlyTrashed()->count(),
+            'featured_products' => Product::where('is_featured', true)->count(),
+            'lottery_products' => Product::where('sale_mode', 'lottery')->count(),
+            'direct_products' => Product::where('sale_mode', 'direct')->count(),
+            'total_lotteries' => Lottery::count(),
+            'active_lotteries' => Lottery::where('status', 'active')->count(),
+            'total_revenue' => Lottery::join('lottery_tickets', 'lotteries.id', '=', 'lottery_tickets.lottery_id')
+                ->where('lottery_tickets.status', 'paid')
+                ->sum(\DB::raw('lotteries.ticket_price')),
+            'total_tickets_sold' => \App\Models\LotteryTicket::where('status', 'paid')->count(),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $stats
         ]);
     }
 

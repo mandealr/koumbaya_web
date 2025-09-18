@@ -341,6 +341,11 @@ const routes = [
         component: ProductManagement
       },
       {
+        path: 'products/:id',
+        name: 'admin.product.detail',
+        component: () => import('@/pages/admin/ProductDetail.vue')
+      },
+      {
         path: 'lotteries',
         name: 'admin.lotteries',
         component: LotteryManagement
