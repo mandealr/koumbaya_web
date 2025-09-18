@@ -198,8 +198,8 @@ class AdminOrderController extends Controller
         $stats = [
             // Statistiques globales
             'total_orders' => Order::count(),
-            'total_amount' => Order::whereIn('status', ['paid', 'fulfilled'])
-                ->where('type', 'lottery')
+            'total_amount' => Order::whereIn('orders.status', ['paid', 'fulfilled'])
+                ->where('orders.type', 'lottery')
                 ->join('lotteries', 'orders.lottery_id', '=', 'lotteries.id')
                 ->join('products', 'lotteries.product_id', '=', 'products.id')
                 ->selectRaw('SUM(orders.total_amount - products.price) as koumbaya_margin')
