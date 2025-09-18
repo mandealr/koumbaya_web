@@ -15,8 +15,19 @@ export const useAuthStore = defineStore('auth', () => {
   
   // Role helper function
   const hasRole = (roleName) => {
-    return user.value?.roles && Array.isArray(user.value.roles) &&
-           user.value.roles.some(role => role.name === roleName)
+    if (!user.value?.roles || !Array.isArray(user.value.roles)) {
+      return false
+    }
+    
+    // Support pour les deux formats: tableau de strings ou tableau d'objets avec property 'name'
+    return user.value.roles.some(role => {
+      if (typeof role === 'string') {
+        return role === roleName
+      } else if (role && typeof role === 'object' && role.name) {
+        return role.name === roleName
+      }
+      return false
+    })
   }
   
   const isManager = computed(() => {

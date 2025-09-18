@@ -349,12 +349,23 @@ const { get, post } = useApi()
 const authStore = useAuthStore()
 
 // Vérifier si l'utilisateur est SuperAdmin
-const isSuperAdmin = computed(() => authStore.user?.roles?.includes('Super Admin'))
+const isSuperAdmin = computed(() => {
+  return authStore.hasRole('Super Admin')
+})
 
 // Vérifier si l'utilisateur peut créer d'autres utilisateurs (Admin ou Super Admin)
 const canCreateUsers = computed(() => {
-  const userRoles = authStore.user?.roles || []
-  return userRoles.includes('Super Admin') || userRoles.includes('Admin')
+  // Debug temporaire
+  console.log('UserManagement - Debug roles:', {
+    user: authStore.user,
+    roles: authStore.user?.roles,
+    hasRoleSuperAdmin: authStore.hasRole('Super Admin'),
+    hasRoleAdmin: authStore.hasRole('Admin'),
+    isAdmin: authStore.isAdmin,
+    isManager: authStore.isManager
+  })
+  
+  return authStore.hasRole('Super Admin') || authStore.hasRole('Admin')
 })
 
 const users = ref([])
