@@ -249,7 +249,7 @@
                   >
                     <EyeIcon class="w-4 h-4" />
                   </button>
-                  <div v-if="order.status === 'paid'" class="relative">
+                  <div v-if="order.status === 'paid' || order.status === 'shipping'" class="relative">
                     <select 
                       @change="changeOrderStatus(order, $event.target.value)"
                       class="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
@@ -257,17 +257,8 @@
                     >
                       <option value="paid">Payé</option>
                       <option value="shipping">En cours de livraison</option>
-                      <option value="fulfilled">Livré</option>
                     </select>
                   </div>
-                  <button
-                    v-else-if="order.status === 'shipping'"
-                    @click="markAsFulfilled(order)"
-                    class="text-green-600 hover:text-green-800 transition-colors"
-                    title="Marquer comme livré"
-                  >
-                    <CheckCircleIcon class="w-4 h-4" />
-                  </button>
                   <button
                     v-if="order.status === 'pending'"
                     @click="confirmOrder(order)"
@@ -615,8 +606,7 @@ const changeOrderStatus = async (order, newStatus) => {
   
   const statusLabels = {
     'paid': 'payé',
-    'shipping': 'en cours de livraison', 
-    'fulfilled': 'livré'
+    'shipping': 'en cours de livraison'
   }
   
   if (confirm(`Marquer la commande ${order.order_number} comme ${statusLabels[newStatus]} ?`)) {
@@ -629,14 +619,6 @@ const changeOrderStatus = async (order, newStatus) => {
       toast.error('Erreur lors du changement de statut')
     }
   }
-}
-
-const markAsFulfilled = async (order) => {
-  await changeOrderStatus(order, 'fulfilled')
-}
-
-const markAsShipping = async (order) => {
-  await changeOrderStatus(order, 'shipping')
 }
 
 const refreshOrders = async () => {

@@ -951,7 +951,7 @@ class OrderTrackingController extends Controller
         $user = Auth::user();
         
         // Vérifier que l'utilisateur est un marchand
-        if (!$user->can_sell) {
+        if (!$user->hasRole('merchant')) {
             return response()->json([
                 'success' => false,
                 'message' => 'Accès refusé. Seuls les marchands peuvent modifier le statut des commandes.'
@@ -960,10 +960,10 @@ class OrderTrackingController extends Controller
 
         // Pour les marchands, récupérer les commandes liées à leurs produits
         $order = Order::whereHas('product', function($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('merchant_id', $user->id);
             })
             ->orWhereHas('lottery.product', function($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('merchant_id', $user->id);
             })
             ->where('order_number', $orderNumber)
             ->first();
@@ -1009,11 +1009,17 @@ class OrderTrackingController extends Controller
             ], 400);
         }
 
-        // Pour l'instant, seul le passage de "paid" à "shipping" est autorisé
-        if (!($currentOrderStatus === OrderStatus::PAID && $newOrderStatus === OrderStatus::SHIPPING)) {
+        // Autoriser seulement les transitions paid ↔ shipping
+        $allowedTransitions = [
+            OrderStatus::PAID->value => [OrderStatus::SHIPPING->value],
+            OrderStatus::SHIPPING->value => [OrderStatus::PAID->value]
+        ];
+        
+        if (!isset($allowedTransitions[$order->status]) || 
+            !in_array($newStatus, $allowedTransitions[$order->status])) {
             return response()->json([
                 'success' => false,
-                'message' => 'Transition de statut non autorisée. Seul le passage de "payé" à "en cours de livraison" est permis.'
+                'message' => 'Transition de statut non autorisée. Seules les transitions entre "payé" et "en cours de livraison" sont permises.'
             ], 400);
         }
 
