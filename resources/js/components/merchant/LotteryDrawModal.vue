@@ -19,7 +19,7 @@
             leave-from-class="opacity-100"
             leave-to-class="opacity-0"
           >
-            <div v-if="show" data-modal-backdrop class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="!isDrawing && close()"></div>
+            <div v-if="show" data-modal-backdrop class="fixed inset-0  bg-black/40 transition-opacity" @click="!isDrawing && close()"></div>
           </transition>
 
           <!-- Modal -->
@@ -244,21 +244,21 @@ const performDraw = async () => {
 
   isDrawing.value = true
   drawResult.value = null
-  
+
   try {
     // Messages de progression
     drawingMessage.value = 'Vérification des conditions...'
     await new Promise(resolve => setTimeout(resolve, 500))
-    
+
     drawingMessage.value = 'Récupération des tickets éligibles...'
     await new Promise(resolve => setTimeout(resolve, 500))
-    
+
     drawingMessage.value = 'Sélection aléatoire du gagnant...'
     await new Promise(resolve => setTimeout(resolve, 1000))
-    
+
     // Appel à l'API
     const response = await post(`/lotteries/${props.lottery.id}/draw`)
-    
+
     if (response.success !== false) {
       drawResult.value = {
         success: true,
@@ -266,9 +266,9 @@ const performDraw = async () => {
         winning_ticket: response.winning_ticket,
         verification_hash: response.verification_hash
       }
-      
+
       drawingMessage.value = 'Tirage terminé avec succès !'
-      
+
       // Notifier le parent
       emit('drawn', drawResult.value)
     } else {
