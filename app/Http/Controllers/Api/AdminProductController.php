@@ -141,7 +141,7 @@ class AdminProductController extends Controller
 
         $product = Product::with([
                 'category',
-                'user.roles',
+                'merchant.roles',
                 'lotteries' => function ($query) {
                     $query->with(['winner', 'drawHistory'])
                           ->orderBy('created_at', 'desc');
@@ -191,13 +191,13 @@ class AdminProductController extends Controller
             'created_at' => $product->created_at,
             'updated_at' => $product->updated_at,
             'user' => [
-                'id' => $product->user->id,
-                'first_name' => $product->user->first_name,
-                'last_name' => $product->user->last_name,
-                'email' => $product->user->email,
-                'phone' => $product->user->phone,
-                'is_active' => $product->user->is_active,
-                'roles' => $product->user->roles->pluck('name')->toArray(),
+                'id' => $product->merchant->id,
+                'first_name' => $product->merchant->first_name,
+                'last_name' => $product->merchant->last_name,
+                'email' => $product->merchant->email,
+                'phone' => $product->merchant->phone,
+                'is_active' => $product->merchant->is_active,
+                'roles' => $product->merchant->roles->pluck('name')->toArray(),
             ],
             'category' => $product->category ? [
                 'id' => $product->category->id,
