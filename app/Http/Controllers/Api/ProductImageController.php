@@ -22,7 +22,8 @@ class ProductImageController extends Controller
             // Fallback si ImageManager ne peut pas être instancié
             $this->imageManager = null;
         }
-        $this->middleware(['auth:sanctum']);
+        // Auth uniquement pour upload et delete, pas pour serve
+        $this->middleware(['auth:sanctum'])->except(['serve']);
     }
 
     /**
