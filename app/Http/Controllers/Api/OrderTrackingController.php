@@ -951,7 +951,7 @@ class OrderTrackingController extends Controller
         $user = Auth::user();
         
         // Vérifier que l'utilisateur est un marchand
-        if (!$user->hasRole('merchant')) {
+        if (!$user->hasRole('Business Enterprise')) {
             return response()->json([
                 'success' => false,
                 'message' => 'Accès refusé. Seuls les marchands peuvent modifier le statut des commandes.'
