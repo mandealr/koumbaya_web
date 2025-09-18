@@ -91,8 +91,12 @@ class ProductImageController extends Controller
                 'file_size' => Storage::disk('public')->size($fullPath)
             ]);
 
-            // Construire l'URL publique (relative au domaine)
-            $url = '/storage/' . $fullPath;
+            // Construire l'URL via notre route API
+            $pathParts = explode('/', $fullPath); // products/2025/09/filename.jpg
+            $year = $pathParts[1];
+            $month = $pathParts[2]; 
+            $filename = $pathParts[3];
+            $url = config('app.url') . "/api/products/images/{$year}/{$month}/{$filename}";
             
             // Informations sur le fichier
             $fileInfo = [
@@ -171,12 +175,18 @@ class ProductImageController extends Controller
                     $saved = Storage::disk('public')->put($fullPath, $processedImage);
                     
                     if ($saved !== false && Storage::disk('public')->exists($fullPath)) {
+                        // Construire l'URL via notre route API
+                        $pathParts = explode('/', $fullPath); // products/2025/09/filename.jpg
+                        $year = $pathParts[1];
+                        $month = $pathParts[2]; 
+                        $filenamePart = $pathParts[3];
+                        
                         $uploadedImages[] = [
                             'index' => $index,
                             'filename' => $filename,
                             'original_name' => $uploadedFile->getClientOriginalName(),
                             'path' => $fullPath,
-                            'url' => '/storage/' . $fullPath,
+                            'url' => config('app.url') . "/api/products/images/{$year}/{$month}/{$filenamePart}",
                             'size' => Storage::disk('public')->size($fullPath),
                             'mime_type' => $uploadedFile->getMimeType()
                         ];
@@ -338,6 +348,36 @@ class ProductImageController extends Controller
             ]);
             
             return file_get_contents($uploadedFile->getRealPath());
+        }
+    }
+
+    /**
+     * Servir une image de produit
+     */
+    public function serve($year, $month, $filename)
+    {
+        try {
+            $path = "products/{$year}/{$month}/{$filename}";
+            
+            if (!Storage::disk('public')->exists($path)) {
+                return response()->json(['error' => 'Image not found'], 404);
+            }
+            
+            $file = Storage::disk('public')->get($path);
+            $mimeType = Storage::disk('public')->mimeType($path);
+            
+            return response($file)
+                ->header('Content-Type', $mimeType)
+                ->header('Cache-Control', 'public, max-age=31536000') // 1 an de cache
+                ->header('Expires', gmdate('D, d M Y H:i:s \G\M\T', time() + 31536000));
+                
+        } catch (\Exception $e) {
+            \Log::error('Error serving image', [
+                'path' => $path ?? null,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json(['error' => 'Error serving image'], 500);
         }
     }
 }

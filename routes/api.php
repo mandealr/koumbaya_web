@@ -192,6 +192,10 @@ Route::group([
         Route::delete('/', [App\Http\Controllers\Api\ProductImageController::class, 'delete']);
     });
     
+    // Route pour servir les images de produits
+    Route::get('products/images/{year}/{month}/{filename}', [App\Http\Controllers\Api\ProductImageController::class, 'serve'])
+        ->where(['year' => '[0-9]{4}', 'month' => '[0-9]{2}', 'filename' => '.*']);
+    
     // Refunds
     Route::prefix('refunds')->group(function () {
         Route::get('/', [RefundController::class, 'index']);
