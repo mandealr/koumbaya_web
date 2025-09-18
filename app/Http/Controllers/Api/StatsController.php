@@ -307,18 +307,25 @@ class StatsController extends Controller
             ')
             ->first();
             
-        // Calculer le CA total pour Koumbaya (marge = montant payé - valeur produit)
-        $totalRevenue = Order::where('type', 'lottery')
-            ->whereHas('lottery.product', function($query) use ($user) {
-                $query->where('merchant_id', $user->id);
-            })
-            ->whereIn('status', ['paid', 'fulfilled'])
-            ->join('lotteries', 'orders.lottery_id', '=', 'lotteries.id')
-            ->join('products', 'lotteries.product_id', '=', 'products.id')
-            ->selectRaw('SUM(orders.total_amount - products.price) as koumbaya_margin')
-            ->value('koumbaya_margin');
-            
-        $totalRevenue = $totalRevenue ?? 0;
+        // Calculer le CA total pour Koumbaya (somme par produit puis marge)
+        $totalRevenue = DB::select("
+            SELECT SUM(total_paid - product_price) as koumbaya_margin
+            FROM (
+                SELECT 
+                    products.id as product_id,
+                    products.price as product_price,
+                    SUM(orders.total_amount) as total_paid
+                FROM orders 
+                INNER JOIN lotteries ON orders.lottery_id = lotteries.id
+                INNER JOIN products ON lotteries.product_id = products.id
+                WHERE orders.status IN ('paid', 'fulfilled') 
+                AND orders.type = 'lottery'
+                AND products.merchant_id = ?
+                GROUP BY products.id, products.price
+            ) as product_totals
+        ", [$user->id]);
+        
+        $totalRevenue = $totalRevenue[0]->koumbaya_margin ?? 0;
             
         // Commandes récentes
         $recentOrders = Order::where('type', 'lottery')
