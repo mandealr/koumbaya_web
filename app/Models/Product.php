@@ -159,14 +159,14 @@ class Product extends Model
         $image = $this->attributes['image'] ?? null;
         $images = $this->images;
         
-        // Debug temporaire (commenté en production)
-        // \Log::info('getMainImageAttribute Debug', [
-        //     'product_id' => $this->id,
-        //     'image' => $image,
-        //     'images' => $images,
-        //     'images_type' => gettype($images),
-        //     'images_count' => is_array($images) ? count($images) : 0
-        // ]);
+        // Debug temporaire
+        \Log::info('getMainImageAttribute Debug', [
+            'product_id' => $this->id,
+            'image' => $image,
+            'images' => $images,
+            'images_type' => gettype($images),
+            'images_count' => is_array($images) ? count($images) : 0
+        ]);
         
         // Priorité 1: champ image
         if ($image) {
@@ -214,12 +214,12 @@ class Product extends Model
     {
         $mainImage = $this->main_image;
         
-        // Debug temporaire (commenté en production)
-        // \Log::info('getImageUrlAttribute Debug', [
-        //     'product_id' => $this->id,
-        //     'main_image' => $mainImage,
-        //     'main_image_type' => gettype($mainImage)
-        // ]);
+        // Debug temporaire
+        \Log::info('getImageUrlAttribute Debug', [
+            'product_id' => $this->id,
+            'main_image' => $mainImage,
+            'main_image_type' => gettype($mainImage)
+        ]);
         
         if (!$mainImage) {
             return null;

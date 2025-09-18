@@ -564,6 +564,15 @@ class ProductController extends Controller
 
         // Prepare product data
         $images = $request->images ?? [];
+        
+        // Debug temporaire
+        \Log::info('ProductController: Creating product with images', [
+            'images_received' => $images,
+            'images_type' => gettype($images),
+            'images_count' => is_array($images) ? count($images) : 0,
+            'first_image' => is_array($images) && count($images) > 0 ? $images[0] : null
+        ]);
+        
         $productData = [
             'name' => $request->name,
             'slug' => Str::slug($request->name) . '-' . time(),
