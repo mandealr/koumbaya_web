@@ -42,6 +42,7 @@
           Effectuer le tirage
         </button>
         <button
+          v-if="lottery.status !== 'completed'"
           @click="showEditModal = true"
           class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center whitespace-nowrap"
         >
