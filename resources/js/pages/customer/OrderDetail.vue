@@ -225,11 +225,11 @@
               </div>
               
               <!-- Winner Info -->
-              <div v-if="order.lottery.winner_ticket_number" class="mt-3 p-3 bg-green-100 rounded-lg">
+              <div v-if="order.lottery.winning_ticket_number" class="mt-3 p-3 bg-green-100 rounded-lg">
                 <div class="flex items-center">
                   <TrophyIcon class="w-5 h-5 text-green-600 mr-2" />
                   <span class="text-sm font-medium text-green-800">
-                    Billet gagnant: {{ order.lottery.winner_ticket_number }}
+                    Billet gagnant: {{ order.lottery.winning_ticket_number }}
                   </span>
                 </div>
               </div>

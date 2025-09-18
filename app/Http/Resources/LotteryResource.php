@@ -34,7 +34,7 @@ class LotteryResource extends JsonResource
             'time_remaining' => $this->time_remaining,
             'is_ending_soon' => $this->is_ending_soon,
             'winner_user_id' => $this->winner_user_id,
-            'winner_ticket_number' => $this->winner_ticket_number,
+            'winner_ticket_number' => $this->winning_ticket_number,
             'total_revenue' => $this->getTotalRevenue(),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

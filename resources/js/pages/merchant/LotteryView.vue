@@ -637,7 +637,7 @@ const onLotteryDrawn = (drawResult) => {
       status: 'completed',
       is_drawn: true,
       winner_user_id: drawResult.winning_ticket?.user_id,
-      winner_ticket_number: drawResult.winning_ticket?.ticket_number,
+      winning_ticket_number: drawResult.winning_ticket?.ticket_number,
       winner: drawResult.winning_ticket?.user,
       draw_date: new Date().toISOString()
     }

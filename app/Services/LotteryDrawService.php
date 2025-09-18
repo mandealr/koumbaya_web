@@ -78,11 +78,10 @@ class LotteryDrawService
             // Update lottery
             $lottery->update([
                 'winner_user_id' => $winningTicket->user_id,
-                'winner_ticket_number' => $winningTicket->ticket_number,
+                'winning_ticket_number' => $winningTicket->ticket_number,
                 'draw_date' => now(),
-                'is_drawn' => true,
                 'status' => 'completed',
-                'draw_proof' => $this->generateDrawProof($lottery, $paidTickets, $winningTicket, $drawSeed, $drawHistory)
+                'draw_process_info' => $this->generateDrawProof($lottery, $paidTickets, $winningTicket, $drawSeed, $drawHistory)
             ]);
             
             // Update product status
@@ -398,13 +397,13 @@ class LotteryDrawService
         // Recalculate winner
         $recalculatedWinner = $this->selectWinnerWithVerifiableRandom($paidTickets, $seed);
         
-        $isValid = $recalculatedWinner->ticket_number === $lottery->winner_ticket_number;
+        $isValid = $recalculatedWinner->ticket_number === $lottery->winning_ticket_number;
         
         return [
             'valid' => $isValid,
             'message' => $isValid ? 'Draw verified successfully' : 'Draw verification failed',
             'data' => [
-                'recorded_winner' => $lottery->winner_ticket_number,
+                'recorded_winner' => $lottery->winning_ticket_number,
                 'calculated_winner' => $recalculatedWinner->ticket_number,
                 'seed' => $seed,
                 'participants' => $paidTickets->count()
