@@ -308,6 +308,53 @@
       </div>
     </div>
 
+    <!-- Status Change Confirmation Modal -->
+    <div v-if="showStatusModal" class="fixed inset-0 bg-black/40 overflow-y-auto h-full w-full z-50">
+      <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-xl bg-white">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-lg font-semibold text-gray-900">Confirmer le changement</h3>
+          <button @click="closeStatusModal" class="text-gray-400 hover:text-gray-600">
+            <XMarkIcon class="w-6 h-6" />
+          </button>
+        </div>
+
+        <div v-if="pendingStatusChange" class="space-y-4">
+          <div class="text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full" 
+                 :class="getModalIconClass(pendingStatusChange)">
+              <component :is="getModalIcon(pendingStatusChange)" class="h-6 w-6" />
+            </div>
+            <div class="mt-3 text-center">
+              <p class="text-lg font-medium text-gray-900">
+                {{ getModalTitle(pendingStatusChange) }}
+              </p>
+              <p class="mt-2 text-sm text-gray-500">
+                {{ getModalMessage(pendingStatusChange) }}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex space-x-3 justify-end">
+            <button
+              @click="closeStatusModal"
+              class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+            >
+              Annuler
+            </button>
+            <button
+              @click="confirmStatusChange"
+              :disabled="statusChangeLoading"
+              :class="getConfirmButtonClass(pendingStatusChange)"
+              class="px-4 py-2 text-white rounded-lg transition-colors disabled:opacity-50"
+            >
+              <span v-if="statusChangeLoading">{{ getLoadingText(pendingStatusChange) }}</span>
+              <span v-else>{{ getConfirmText(pendingStatusChange) }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Order Details Modal -->
     <div v-if="showOrderModal" class="fixed inset-0 bg-black/40 overflow-y-auto h-full w-full z-50">
       <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-xl bg-white">
@@ -432,7 +479,10 @@ const toast = useToast()
 
 // State
 const showOrderModal = ref(false)
+const showStatusModal = ref(false)
 const selectedOrder = ref(null)
+const pendingStatusChange = ref(null)
+const statusChangeLoading = ref(false)
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 const isRefreshing = ref(false)
@@ -573,52 +623,136 @@ const closeOrderModal = () => {
   selectedOrder.value = null
 }
 
-const confirmOrder = async (order) => {
-  if (confirm(`Confirmer la commande ${order.order_number} ?`)) {
-    try {
-      await confirmOrderApi(order)
-      toast.success('Commande confirmée avec succès !')
-      closeOrderModal()
-      // Recharger les commandes
-      await loadFilteredOrders()
-    } catch (error) {
-      toast.error('Erreur lors de la confirmation')
-    }
+const confirmOrder = (order) => {
+  pendingStatusChange.value = {
+    order,
+    action: 'confirm',
+    title: 'Confirmer la commande',
+    message: `Voulez-vous confirmer la commande ${order.order_number} ?`,
+    confirmText: 'Confirmer',
+    confirmClass: 'bg-green-600 hover:bg-green-700'
   }
+  showStatusModal.value = true
 }
 
-const cancelOrder = async (order) => {
-  if (confirm(`Annuler la commande ${order.order_number} ? Cette action est irréversible.`)) {
-    try {
-      await cancelOrderApi(order)
-      toast.success('Commande annulée')
-      closeOrderModal()
-      // Recharger les commandes
-      await loadFilteredOrders()
-    } catch (error) {
-      toast.error('Erreur lors de l\'annulation')
-    }
+const cancelOrder = (order) => {
+  pendingStatusChange.value = {
+    order,
+    action: 'cancel',
+    title: 'Annuler la commande',
+    message: `Voulez-vous annuler la commande ${order.order_number} ? Cette action est irréversible.`,
+    confirmText: 'Annuler la commande',
+    confirmClass: 'bg-red-600 hover:bg-red-700'
   }
+  showStatusModal.value = true
 }
 
-const changeOrderStatus = async (order, newStatus) => {
+const changeOrderStatus = (order, newStatus) => {
   if (newStatus === order.status) return
   
-  const statusLabels = {
-    'paid': 'payé',
-    'fulfilled': 'en cours de livraison'
+  // Stocker les informations pour la modale
+  pendingStatusChange.value = {
+    order,
+    newStatus
   }
+  showStatusModal.value = true
+}
+
+const confirmStatusChange = async () => {
+  if (!pendingStatusChange.value) return
   
-  if (confirm(`Marquer la commande ${order.order_number} comme ${statusLabels[newStatus]} ?`)) {
-    try {
+  statusChangeLoading.value = true
+  const { order, action, newStatus } = pendingStatusChange.value
+  
+  try {
+    if (action === 'confirm') {
+      await confirmOrderApi(order)
+      toast.success('Commande confirmée avec succès !')
+    } else if (action === 'cancel') {
+      await cancelOrderApi(order)
+      toast.success('Commande annulée')
+    } else {
+      // Changement de statut
+      const statusLabels = {
+        'paid': 'payé',
+        'fulfilled': 'en cours de livraison'
+      }
       await updateOrderStatus(order.order_number, newStatus, `Statut changé vers ${statusLabels[newStatus]} par le marchand`)
       toast.success(`Commande marquée comme ${statusLabels[newStatus]}`)
-      // Recharger les commandes
-      await loadFilteredOrders()
-    } catch (error) {
+    }
+    
+    closeStatusModal()
+    closeOrderModal()
+    // Recharger les commandes
+    await loadFilteredOrders()
+  } catch (error) {
+    if (action === 'confirm') {
+      toast.error('Erreur lors de la confirmation')
+    } else if (action === 'cancel') {
+      toast.error('Erreur lors de l\'annulation')
+    } else {
       toast.error('Erreur lors du changement de statut')
     }
+  } finally {
+    statusChangeLoading.value = false
   }
+}
+
+const closeStatusModal = () => {
+  showStatusModal.value = false
+  pendingStatusChange.value = null
+  statusChangeLoading.value = false
+}
+
+const getStatusDisplayName = (status) => {
+  const statusLabels = {
+    'paid': 'Payé',
+    'fulfilled': 'En cours de livraison'
+  }
+  return statusLabels[status] || status
+}
+
+// Modal helper functions
+const getModalTitle = (pendingChange) => {
+  if (pendingChange.action === 'confirm') return 'Confirmer la commande'
+  if (pendingChange.action === 'cancel') return 'Annuler la commande'
+  return 'Changer le statut'
+}
+
+const getModalMessage = (pendingChange) => {
+  if (pendingChange.title) return pendingChange.message
+  return `Commande ${pendingChange.order.order_number} - Nouveau statut : ${getStatusDisplayName(pendingChange.newStatus)}`
+}
+
+const getModalIcon = (pendingChange) => {
+  if (pendingChange.action === 'confirm') return CheckCircleIcon
+  if (pendingChange.action === 'cancel') return XCircleIcon
+  if (pendingChange.newStatus === 'fulfilled') return TruckIcon
+  return CheckCircleIcon
+}
+
+const getModalIconClass = (pendingChange) => {
+  if (pendingChange.action === 'confirm') return 'bg-green-100 text-green-600'
+  if (pendingChange.action === 'cancel') return 'bg-red-100 text-red-600'
+  return 'bg-blue-100 text-blue-600'
+}
+
+const getConfirmButtonClass = (pendingChange) => {
+  if (pendingChange.confirmClass) return pendingChange.confirmClass
+  if (pendingChange.action === 'confirm') return 'bg-green-600 hover:bg-green-700'
+  if (pendingChange.action === 'cancel') return 'bg-red-600 hover:bg-red-700'
+  return 'bg-blue-600 hover:bg-blue-700'
+}
+
+const getConfirmText = (pendingChange) => {
+  if (pendingChange.confirmText) return pendingChange.confirmText
+  return 'Confirmer'
+}
+
+const getLoadingText = (pendingChange) => {
+  if (pendingChange.action === 'confirm') return 'Confirmation...'
+  if (pendingChange.action === 'cancel') return 'Annulation...'
+  return 'Changement...'
 }
 
 const refreshOrders = async () => {

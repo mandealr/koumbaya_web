@@ -3,7 +3,7 @@
         $statusLabels = [
             'paid' => 'Payée',
             'shipping' => 'En cours de livraison', 
-            'fulfilled' => 'Livrée',
+            'fulfilled' => 'En cours de livraison',
             'cancelled' => 'Annulée'
         ];
     @endphp
@@ -44,10 +44,10 @@
         @endcomponent
     @elseif($newStatus === 'fulfilled')
         @component('mail::panel')
-            **Commande livrée avec succès !**
+            **Votre commande est en cours de livraison !**
             
-            Votre commande a été livrée. Nous espérons que vous êtes satisfait(e) de votre achat.  
-            N'hésitez pas à nous laisser un avis !
+            Votre commande a été expédiée et sera bientôt livrée.  
+            Vous recevrez une notification dès qu'elle sera livrée.
         @endcomponent
     @elseif($newStatus === 'cancelled')
         @component('mail::panel')
