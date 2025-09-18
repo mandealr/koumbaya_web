@@ -35,8 +35,33 @@ class LotteryDrawService
 
         DB::beginTransaction();
         try {
-            // Get all paid tickets
+            // Get all paid tickets - try multiple approaches
             $paidTickets = $lottery->paidTickets()->with('user')->get();
+            
+            // If no tickets with 'paid' status, try tickets with paid orders
+            if ($paidTickets->isEmpty()) {
+                $paidTickets = $lottery->tickets()
+                    ->with('user', 'order')
+                    ->whereHas('order', function($query) {
+                        $query->where('status', 'paid');
+                    })
+                    ->get();
+            }
+            
+            // Log debug information
+            \Log::info('LotteryDrawService: Starting draw', [
+                'lottery_id' => $lottery->id,
+                'total_tickets' => $lottery->tickets()->count(),
+                'paid_tickets' => $paidTickets->count(),
+                'sold_tickets' => $lottery->sold_tickets,
+                'max_tickets' => $lottery->max_tickets,
+                'ticket_statuses' => $lottery->tickets()->pluck('status')->unique()->values()
+            ]);
+            
+            // Ensure we have paid tickets
+            if ($paidTickets->isEmpty()) {
+                throw new \InvalidArgumentException('Aucun ticket payé trouvé pour cette tombola');
+            }
             
             // Generate draw seed for transparency
             $drawSeed = $this->generateDrawSeed($lottery, $paidTickets);
@@ -160,6 +185,10 @@ class LotteryDrawService
     {
         $totalTickets = $tickets->count();
         
+        if ($totalTickets === 0) {
+            throw new \InvalidArgumentException('Aucun ticket éligible pour le tirage');
+        }
+        
         // Convert seed to number using multiple rounds
         $rounds = 3;
         $combinedHash = $seed;
@@ -174,7 +203,14 @@ class LotteryDrawService
         // Get index
         $winningIndex = $hashNumber % $totalTickets;
         
-        return $tickets->values()->get($winningIndex);
+        // Get the winning ticket with validation
+        $winningTicket = $tickets->values()->get($winningIndex);
+        
+        if (!$winningTicket) {
+            throw new \RuntimeException('Erreur lors de la sélection du gagnant');
+        }
+        
+        return $winningTicket;
     }
 
     /**
