@@ -307,8 +307,19 @@ class StatsController extends Controller
             ')
             ->first();
             
-        // Calculer le CA total pour Koumbaya (commission sur le chiffre d'affaires brut)
-        $totalRevenue = ($orderStats->gross_revenue ?? 0) * $commissionRate;
+        // Calculer le CA total pour Koumbaya basé sur la valeur des produits vendus
+        $totalRevenue = Order::where('type', 'lottery')
+            ->whereHas('lottery.product', function($query) use ($user) {
+                $query->where('merchant_id', $user->id);
+            })
+            ->whereIn('status', ['paid', 'fulfilled'])
+            ->join('lotteries', 'orders.lottery_id', '=', 'lotteries.id')
+            ->join('products', 'lotteries.product_id', '=', 'products.id')
+            ->selectRaw('SUM(products.price * orders.quantity) as product_value')
+            ->value('product_value');
+            
+        // Appliquer le taux de commission sur la valeur des produits
+        $totalRevenue = ($totalRevenue ?? 0) * $commissionRate;
             
         // Commandes récentes
         $recentOrders = Order::where('type', 'lottery')
