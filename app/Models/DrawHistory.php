@@ -11,24 +11,22 @@ class DrawHistory extends Model
 
     protected $fillable = [
         'lottery_id',
-        'winning_ticket_id',
-        'winner_user_id',
-        'total_participants',
+        'method',
+        'seed',
         'total_tickets',
-        'draw_method',
-        'initiated_by',
-        'draw_seed',
-        'verification_hash',
-        'participant_snapshot',
-        'metadata',
+        'winning_position',
+        'winning_ticket_number',
+        'winner_user_id',
+        'drawn_by',
+        'draw_data',
+        'notes',
         'drawn_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'participant_snapshot' => 'array',
-            'metadata' => 'array',
+            'draw_data' => 'array',
             'drawn_at' => 'datetime',
         ];
     }

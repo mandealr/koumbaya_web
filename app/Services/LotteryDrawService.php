@@ -218,23 +218,36 @@ class LotteryDrawService
      */
     protected function recordDrawHistory($lottery, $winningTicket, $paidTickets, $seed, $options)
     {
+        // Calculate winning position (index in the sorted array)
+        $ticketNumbers = $paidTickets->pluck('ticket_number')->sort()->values();
+        $winningPosition = $ticketNumbers->search($winningTicket->ticket_number);
+        
+        // Extract user ID from initiated_by if it contains 'user_'
+        $drawnBy = null;
+        if (isset($options['initiated_by']) && str_starts_with($options['initiated_by'], 'user_')) {
+            $drawnBy = (int) str_replace('user_', '', $options['initiated_by']);
+        }
+        
         return DrawHistory::create([
             'lottery_id' => $lottery->id,
-            'winning_ticket_id' => $winningTicket->id,
+            'method' => $options['method'] === 'manual' ? 'manual' : 'auto',
+            'seed' => $seed,
+            'total_tickets' => $paidTickets->count(),
+            'winning_position' => $winningPosition,
+            'winning_ticket_number' => $winningTicket->ticket_number,
             'winner_user_id' => $winningTicket->user_id,
-            'total_participants' => $paidTickets->count(),
-            'total_tickets' => $paidTickets->count(), // This refers to tickets sold, not max_tickets
-            'draw_method' => $options['method'] ?? 'automatic',
-            'initiated_by' => $options['initiated_by'] ?? 'system',
-            'draw_seed' => $seed,
-            'verification_hash' => hash('sha256', $lottery->id . $winningTicket->id . $seed),
-            'participant_snapshot' => $paidTickets->pluck('ticket_number')->sort()->values()->toArray(),
-            'metadata' => [
+            'drawn_by' => $drawnBy,
+            'draw_data' => [
+                'verification_hash' => hash('sha256', $lottery->id . $winningTicket->id . $seed),
+                'participant_snapshot' => $ticketNumbers->toArray(),
                 'ticket_ids' => $paidTickets->pluck('id')->sort()->values(),
                 'server_time' => microtime(true),
                 'php_version' => PHP_VERSION,
-                'server_name' => gethostname()
+                'server_name' => gethostname(),
+                'ip_address' => $options['ip_address'] ?? null,
+                'user_agent' => $options['user_agent'] ?? null
             ],
+            'notes' => 'Tirage effectué via ' . ($options['method'] === 'manual' ? 'interface marchand' : 'système automatique'),
             'drawn_at' => now()
         ]);
     }
