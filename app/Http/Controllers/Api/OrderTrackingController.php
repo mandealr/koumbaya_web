@@ -1033,8 +1033,8 @@ class OrderTrackingController extends Controller
                 $order->notes
         ]);
 
-        // Déclencher l'événement de changement de statut (temporairement désactivé - problème de config mail)
-        // \App\Events\OrderStatusChanged::dispatch($order, $previousStatus, $newOrderStatus->value);
+        // Envoyer un email de notification au client
+        $this->sendOrderStatusEmail($order, $previousStatus, $newOrderStatus->value);
 
         return response()->json([
             'success' => true,
@@ -1047,5 +1047,72 @@ class OrderTrackingController extends Controller
                 'updated_at' => $order->updated_at
             ]
         ]);
+    }
+
+    /**
+     * Envoyer un email de notification de changement de statut
+     */
+    private function sendOrderStatusEmail($order, $oldStatus, $newStatus)
+    {
+        try {
+            $statusLabels = [
+                'paid' => 'Payée',
+                'fulfilled' => 'En cours de livraison',
+                'cancelled' => 'Annulée'
+            ];
+
+            $statusLabel = $statusLabels[$newStatus] ?? $newStatus;
+            
+            $subject = "Mise à jour de votre commande {$order->order_number}";
+            
+            $message = "
+                <h2>Mise à jour de votre commande</h2>
+                
+                <p>Bonjour <strong>{$order->user->first_name}</strong>,</p>
+                
+                <p>Votre commande <strong>{$order->order_number}</strong> a été mise à jour.</p>
+                
+                <div style='background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                    <h3>Nouveau statut</h3>
+                    <p>Votre commande est maintenant : <strong>{$statusLabel}</strong></p>
+                </div>
+                
+                <h3>Détails de la commande</h3>
+                <ul>
+                    <li><strong>Numéro :</strong> {$order->order_number}</li>
+                    <li><strong>Date :</strong> {$order->created_at->format('d/m/Y à H:i')}</li>
+                    <li><strong>Montant total :</strong> " . number_format($order->total_amount, 0, ',', ' ') . " FCFA</li>
+                </ul>";
+
+            if ($newStatus === 'fulfilled') {
+                $message .= "
+                <div style='background-color: #dbeafe; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                    <h3>Votre commande est en cours de livraison !</h3>
+                    <p>Votre commande a été expédiée et sera bientôt livrée.<br>
+                    Vous recevrez une notification dès qu'elle sera livrée.</p>
+                </div>";
+            }
+
+            $message .= "
+                <hr style='margin: 30px 0;'>
+                
+                <p><strong>Besoin d'aide ?</strong> Notre équipe support est disponible à support@koumbaya.com</p>
+                
+                <p>Merci de votre confiance en Koumbaya Marketplace<br>
+                <strong>L'équipe Koumbaya Marketplace</strong></p>
+            ";
+
+            \Mail::html($message, function ($email) use ($order, $subject) {
+                $email->to($order->user->email, $order->user->first_name)
+                      ->subject($subject);
+            });
+
+        } catch (\Exception $e) {
+            // Log l'erreur mais ne pas faire échouer la requête
+            \Log::error('Erreur envoi email changement statut', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }
