@@ -214,7 +214,7 @@
     </div>
 
     <!-- Modal de création d'admin -->
-    <div v-if="showCreateModal" class="fixed inset-0 bg-gray-600 bg-opacity-40 z-50 flex items-center justify-center p-4">
+    <div v-if="showCreateModal" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
       <div class="bg-white rounded-lg w-full max-w-2xl shadow-xl">
         <div class="flex items-center justify-between p-6 border-b">
           <h2 class="text-xl font-semibold text-gray-900">{{ isSuperAdmin ? 'Créer un Administrateur' : 'Créer un Utilisateur' }}</h2>
@@ -260,25 +260,24 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone *</label>
-            <input
+            <PhoneInput
               v-model="newAdmin.phone"
-              type="tel"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="+241 70 00 00 00"
+              placeholder="Numéro de téléphone"
+              @phone-change="onPhoneChange"
+              class="w-full"
             />
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe *</label>
-            <input
-              v-model="newAdmin.password"
-              type="password"
-              required
-              minlength="8"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Minimum 8 caractères"
-            />
+          <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+              </svg>
+              <div>
+                <p class="text-sm font-medium text-blue-800">Mot de passe automatique</p>
+                <p class="text-xs text-blue-600">Un mot de passe temporaire sera généré et envoyé par email à l'utilisateur pour qu'il puisse l'initialiser.</p>
+              </div>
+            </div>
           </div>
 
           <div>
@@ -344,6 +343,7 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { PlusIcon, ArrowPathIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { useApi } from '@/composables/api'
 import { useAuthStore } from '@/stores/auth'
+import PhoneInput from '@/components/PhoneInput.vue'
 
 const { get, post } = useApi()
 const authStore = useAuthStore()
@@ -390,7 +390,6 @@ const newAdmin = reactive({
   last_name: '',
   email: '',
   phone: '',
-  password: '',
   role: '',
   is_active: true
 })
@@ -523,17 +522,18 @@ const loadAdminRoles = async () => {
   }
 }
 
+// Gérer le changement de téléphone
+const onPhoneChange = (phoneData) => {
+  console.log('Phone changed:', phoneData)
+  newAdmin.phone = phoneData.fullNumber // Utilise le numéro complet international
+}
+
 // Créer un nouvel admin
 const createAdmin = async () => {
   // Validation
   if (!newAdmin.first_name || !newAdmin.last_name || !newAdmin.email ||
-      !newAdmin.phone || !newAdmin.password || !newAdmin.role) {
+      !newAdmin.phone || !newAdmin.role) {
     createError.value = 'Veuillez remplir tous les champs obligatoires'
-    return
-  }
-
-  if (newAdmin.password.length < 8) {
-    createError.value = 'Le mot de passe doit contenir au moins 8 caractères'
     return
   }
 
@@ -572,7 +572,6 @@ const resetNewAdminForm = () => {
   newAdmin.last_name = ''
   newAdmin.email = ''
   newAdmin.phone = ''
-  newAdmin.password = ''
   newAdmin.role = ''
   newAdmin.is_active = true
 }

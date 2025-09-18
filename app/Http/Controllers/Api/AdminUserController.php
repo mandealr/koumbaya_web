@@ -8,6 +8,8 @@ use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class AdminUserController extends Controller
 {
@@ -135,7 +137,6 @@ class AdminUserController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|unique:users',
             'phone' => 'required|string|unique:users',
-            'password' => 'required|string|min:8',
             'role' => 'required|string|exists:roles,name',
             'is_active' => 'boolean'
         ]);
@@ -166,12 +167,15 @@ class AdminUserController extends Controller
             }
         }
 
+        // Générer un mot de passe temporaire aléatoire
+        $temporaryPassword = Str::random(12) . '!@#';
+
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
             'phone' => $request->phone,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($temporaryPassword),
             'is_active' => $request->is_active ?? true,
             'verified_at' => now(), // Auto-verify admin-created users
             'user_type_id' => $this->getUserTypeIdForRole($request->role)
@@ -183,9 +187,20 @@ class AdminUserController extends Controller
             $user->roles()->attach($role->id);
         }
 
+        // Envoyer l'email d'initialisation du mot de passe
+        try {
+            $this->sendPasswordInitializationEmail($user, $temporaryPassword, $request->role);
+        } catch (\Exception $e) {
+            \Log::error('Failed to send password initialization email', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $e->getMessage()
+            ]);
+        }
+
         return response()->json([
             'success' => true,
-            'message' => 'Utilisateur créé avec succès',
+            'message' => 'Utilisateur créé avec succès. Un email d\'initialisation du mot de passe a été envoyé.',
             'data' => ['user' => $user->load('roles')]
         ], 201);
     }
@@ -356,5 +371,24 @@ class AdminUserController extends Controller
         ];
 
         return $typeMap[$roleName] ?? 1; // Default to Client
+    }
+
+    /**
+     * Send password initialization email to newly created user
+     */
+    private function sendPasswordInitializationEmail(User $user, string $temporaryPassword, string $role)
+    {
+        $resetUrl = config('app.frontend_url', config('app.url')) . '/reset-password';
+        
+        Mail::send('emails.admin-user-created', [
+            'user' => $user,
+            'temporaryPassword' => $temporaryPassword,
+            'role' => $this->getRoleLabel($role),
+            'resetUrl' => $resetUrl,
+            'createdBy' => auth()->user()
+        ], function ($message) use ($user) {
+            $message->to($user->email, $user->first_name . ' ' . $user->last_name)
+                ->subject('Bienvenue sur Koumbaya - Initialisez votre mot de passe');
+        });
     }
 }
