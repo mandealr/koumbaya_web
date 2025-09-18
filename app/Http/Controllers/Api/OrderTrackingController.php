@@ -1033,8 +1033,8 @@ class OrderTrackingController extends Controller
                 $order->notes
         ]);
 
-        // Déclencher l'événement de changement de statut
-        \App\Events\OrderStatusChanged::dispatch($order, $previousStatus, $newOrderStatus->value);
+        // Déclencher l'événement de changement de statut (temporairement désactivé - problème de config mail)
+        // \App\Events\OrderStatusChanged::dispatch($order, $previousStatus, $newOrderStatus->value);
 
         return response()->json([
             'success' => true,
