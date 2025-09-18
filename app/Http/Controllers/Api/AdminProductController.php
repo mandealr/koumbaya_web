@@ -139,8 +139,7 @@ class AdminProductController extends Controller
             ], 403);
         }
 
-        $product = Product::withTrashed()
-            ->with([
+        $product = Product::with([
                 'category',
                 'user.roles',
                 'lotteries' => function ($query) {
@@ -191,7 +190,6 @@ class AdminProductController extends Controller
             'is_featured' => $product->is_featured,
             'created_at' => $product->created_at,
             'updated_at' => $product->updated_at,
-            'deleted_at' => $product->deleted_at,
             'user' => [
                 'id' => $product->user->id,
                 'first_name' => $product->user->first_name,
@@ -398,7 +396,6 @@ class AdminProductController extends Controller
             'total_products' => Product::count(),
             'active_products' => Product::where('is_active', true)->count(),
             'inactive_products' => Product::where('is_active', false)->count(),
-            'deleted_products' => Product::onlyTrashed()->count(),
             'featured_products' => Product::where('is_featured', true)->count(),
             'lottery_products' => Product::where('sale_mode', 'lottery')->count(),
             'direct_products' => Product::where('sale_mode', 'direct')->count(),

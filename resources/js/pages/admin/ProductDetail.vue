@@ -243,10 +243,6 @@
                 <p class="text-sm font-medium text-gray-500">Dernière modification</p>
                 <p class="text-sm text-gray-900">{{ formatDate(product.updated_at) }}</p>
               </div>
-              <div v-if="product.deleted_at">
-                <p class="text-sm font-medium text-gray-500">Date de suppression</p>
-                <p class="text-sm text-red-600">{{ formatDate(product.deleted_at) }}</p>
-              </div>
               <div>
                 <p class="text-sm font-medium text-gray-500">ID Produit</p>
                 <p class="text-sm font-mono text-gray-900">#{{ product.id }}</p>
@@ -277,7 +273,6 @@
               </button>
               
               <button
-                v-if="!product.deleted_at"
                 @click="deleteProduct"
                 class="w-full flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
               >
