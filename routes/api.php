@@ -243,6 +243,8 @@ Route::group([
     Route::post('lotteries/{id}/draw', [LotteryController::class, 'drawLottery']);
     Route::get('lotteries/{id}/verify-draw', [LotteryController::class, 'verifyDraw']);
     Route::get('lotteries/{id}/draw-history', [LotteryController::class, 'drawHistory']);
+    Route::post('lotteries/{id}/cancel', [App\Http\Controllers\Api\LotteryCancellationController::class, 'cancel']);
+    Route::get('lotteries/{id}/cancellation-details', [App\Http\Controllers\Api\LotteryCancellationController::class, 'getCancellationDetails']);
     
     // Merchant Dashboard
     Route::prefix('merchant/dashboard')->group(function () {

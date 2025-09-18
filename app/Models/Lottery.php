@@ -24,6 +24,10 @@ class Lottery extends Model
         'draw_process_info',
         'currency',
         'meta',
+        'cancellation_reason',
+        'cancellation_reason_type',
+        'cancelled_at',
+        'cancelled_by',
     ];
 
     protected function casts(): array
@@ -32,6 +36,7 @@ class Lottery extends Model
             'ticket_price' => 'decimal:2',
             'draw_date' => 'datetime',
             'completed_at' => 'datetime',
+            'cancelled_at' => 'datetime',
             'meta' => 'array',
         ];
     }
@@ -95,6 +100,22 @@ class Lottery extends Model
             'id', // clé locale sur lotteries
             'id' // clé locale sur payments
         );
+    }
+
+    /**
+     * Relationship with refund requests
+     */
+    public function refundRequests()
+    {
+        return $this->hasMany(RefundRequest::class);
+    }
+
+    /**
+     * Relationship with user who cancelled the lottery
+     */
+    public function cancelledBy()
+    {
+        return $this->belongsTo(User::class, 'cancelled_by');
     }
 
     /**

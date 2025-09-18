@@ -42,6 +42,14 @@
           Effectuer le tirage
         </button>
         <button
+          v-if="lottery.status === 'active'"
+          @click="showCancelModal = true"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center whitespace-nowrap"
+        >
+          <XMarkIcon class="w-4 h-4 mr-2 flex-shrink-0" />
+          Annuler
+        </button>
+        <button
           v-if="lottery.status !== 'completed'"
           @click="showEditModal = true"
           class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center whitespace-nowrap"
@@ -384,6 +392,13 @@
       @close="showExtendModal = false"
       @extended="onLotteryExtended"
     />
+    
+    <LotteryCancelModal
+      v-if="showCancelModal"
+      :lottery="lottery"
+      @close="showCancelModal = false"
+      @cancelled="onLotteryCancelled"
+    />
   </div>
 </template>
 
@@ -393,6 +408,7 @@ import { useRoute } from 'vue-router'
 import { useApi } from '@/composables/api'
 import LotteryDrawModal from '@/components/merchant/LotteryDrawModal.vue'
 import LotteryExtendModal from '@/components/merchant/LotteryExtendModal.vue'
+import LotteryCancelModal from '@/components/merchant/LotteryCancelModal.vue'
 import {
   ArrowLeftIcon,
   UsersIcon,
@@ -406,7 +422,8 @@ import {
   DocumentArrowDownIcon,
   PauseIcon,
   TrophyIcon,
-  UserIcon
+  UserIcon,
+  XMarkIcon
 } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
@@ -443,6 +460,7 @@ const recentParticipants = ref([])
 const showDrawModal = ref(false)
 const showExtendModal = ref(false)
 const showEditModal = ref(false)
+const showCancelModal = ref(false)
 
 // Computed
 const participationProgress = computed(() => {
@@ -657,6 +675,12 @@ const onLotteryDrawn = (drawResult) => {
 
 const onLotteryExtended = () => {
   showExtendModal.value = false
+  // Recharger les données de la tombola
+  loadLotteryData()
+}
+
+const onLotteryCancelled = () => {
+  showCancelModal.value = false
   // Recharger les données de la tombola
   loadLotteryData()
 }
