@@ -7,7 +7,7 @@
     </div>
 
     <!-- Statistiques -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
       <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center">
           <div class="p-3 rounded-full bg-blue-100">
@@ -32,6 +32,20 @@
           <div class="ml-4">
             <p class="text-sm font-medium text-gray-600">Payées</p>
             <p class="text-2xl font-semibold text-gray-900">{{ stats.paid_orders }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="p-3 rounded-full bg-orange-100">
+            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">En livraison</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ stats.shipping_orders || 0 }}</p>
           </div>
         </div>
       </div>
@@ -87,6 +101,7 @@
           >
             <option value="">Tous les statuts</option>
             <option value="paid">Payé</option>
+            <option value="shipping">En cours de livraison</option>
             <option value="pending">En attente</option>
             <option value="awaiting_payment">En attente de paiement</option>
             <option value="failed">Échoué</option>
@@ -176,7 +191,15 @@
                   Détails
                 </router-link>
                 <button 
-                  v-if="['paid', 'fulfilled'].includes(order.status)"
+                  v-if="(order.status === 'paid' || order.status === 'shipping') && (order.type !== 'lottery' || order.has_winning_ticket)"
+                  @click="confirmDelivery(order)"
+                  :disabled="confirmingDelivery[order.order_number]"
+                  class="bg-orange-600 text-white px-3 py-1 rounded text-sm hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {{ confirmingDelivery[order.order_number] ? 'Validation...' : 'Confirmer réception' }}
+                </button>
+                <button 
+                  v-if="['paid', 'shipping', 'fulfilled'].includes(order.status)"
                   @click="downloadInvoice(order.order_number)"
                   class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
                 >
@@ -374,14 +397,15 @@ import { useApi } from '@/composables/api'
 import { useToast } from '@/composables/useToast'
 import { TrophyIcon } from '@heroicons/vue/24/outline'
 
-const { get: apiGet } = useApi()
-const { showError } = useToast()
+const { get: apiGet, post: apiPost } = useApi()
+const { showError, showSuccess } = useToast()
 
 // État réactif
 const orders = ref([])
 const stats = ref({
   total_orders: 0,
   paid_orders: 0,
+  shipping_orders: 0,
   pending_orders: 0,
   failed_orders: 0,
   fulfilled_orders: 0,
@@ -395,6 +419,7 @@ const pagination = ref(null)
 const loading = ref(false)
 const showModal = ref(false)
 const selectedOrder = ref(null)
+const confirmingDelivery = ref({})
 
 // Filtres
 const filters = reactive({
@@ -492,6 +517,7 @@ const getStatusText = (status) => {
     'pending': 'En attente',
     'awaiting_payment': 'En attente de paiement',
     'paid': 'Payé',
+    'shipping': 'En cours de livraison',
     'failed': 'Échoué',
     'cancelled': 'Annulé',
     'fulfilled': 'Livré',
@@ -520,6 +546,7 @@ const getStatusBadgeClass = (status) => {
     'pending': 'bg-yellow-100 text-yellow-800',
     'awaiting_payment': 'bg-blue-100 text-blue-800',
     'paid': 'bg-green-100 text-green-800',
+    'shipping': 'bg-orange-100 text-orange-800',
     'failed': 'bg-red-100 text-red-800',
     'cancelled': 'bg-gray-100 text-gray-800',
     'fulfilled': 'bg-green-100 text-green-800',
@@ -563,6 +590,37 @@ const getPageNumbers = () => {
   }
   
   return pages
+}
+
+// Confirmer la réception d'une commande
+const confirmDelivery = async (order) => {
+  if (!confirm(`Confirmer la réception de la commande ${order.order_number} ?`)) {
+    return
+  }
+  
+  try {
+    confirmingDelivery.value[order.order_number] = true
+    
+    const response = await apiPost(`/orders/${order.order_number}/confirm-delivery`, {})
+    
+    if (response.success) {
+      showSuccess('Réception confirmée avec succès')
+      // Mettre à jour le statut local
+      const orderIndex = orders.value.findIndex(o => o.order_number === order.order_number)
+      if (orderIndex !== -1) {
+        orders.value[orderIndex].status = 'fulfilled'
+      }
+      // Recharger les stats
+      await loadStats()
+    } else {
+      showError(response.message || 'Erreur lors de la confirmation')
+    }
+  } catch (error) {
+    console.error('Erreur lors de la confirmation:', error)
+    showError(error.response?.data?.message || 'Erreur lors de la confirmation de réception')
+  } finally {
+    confirmingDelivery.value[order.order_number] = false
+  }
 }
 
 // Watchers

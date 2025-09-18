@@ -826,8 +826,9 @@ class OrderTrackingController extends Controller
             ], 404);
         }
 
-        // Vérifier que la commande est payée
-        if ($order->status !== OrderStatus::PAID->value) {
+        // Vérifier que la commande peut être confirmée comme reçue
+        $allowedStatuses = [OrderStatus::PAID->value, OrderStatus::SHIPPING->value];
+        if (!in_array($order->status, $allowedStatuses)) {
             $statusMessages = [
                 OrderStatus::PENDING->value => 'en attente',
                 OrderStatus::AWAITING_PAYMENT->value => 'en attente de paiement',
@@ -848,7 +849,7 @@ class OrderTrackingController extends Controller
             
             return response()->json([
                 'success' => false,
-                'message' => "Cette commande ne peut pas être marquée comme reçue. Elle est actuellement {$currentStatusText}. Seules les commandes payées peuvent être confirmées comme reçues."
+                'message' => "Cette commande ne peut pas être marquée comme reçue. Elle est actuellement {$currentStatusText}. Seules les commandes payées ou en cours de livraison peuvent être confirmées comme reçues."
             ], 400);
         }
 
