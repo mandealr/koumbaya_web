@@ -67,9 +67,29 @@ class ProductImageController extends Controller
             // Sauvegarder l'image dans le storage
             $saved = Storage::disk('public')->put($fullPath, $processedImage);
             
-            if (!$saved) {
+            if ($saved === false) {
                 throw new \Exception('Erreur lors de la sauvegarde du fichier');
             }
+            
+            // Vérifier que le fichier existe vraiment
+            if (!Storage::disk('public')->exists($fullPath)) {
+                \Log::error('File not saved properly', [
+                    'fullPath' => $fullPath,
+                    'upload_path' => $uploadPath,
+                    'filename' => $filename,
+                    'disk_root' => Storage::disk('public')->path(''),
+                    'expected_full_path' => Storage::disk('public')->path($fullPath)
+                ]);
+                throw new \Exception('Le fichier n\'a pas été sauvegardé correctement');
+            }
+            
+            // Log de succès
+            \Log::info('Image uploaded successfully', [
+                'fullPath' => $fullPath,
+                'url' => '/storage/' . $fullPath,
+                'file_exists' => Storage::disk('public')->exists($fullPath),
+                'file_size' => Storage::disk('public')->size($fullPath)
+            ]);
 
             // Construire l'URL publique (relative au domaine)
             $url = '/storage/' . $fullPath;
@@ -144,17 +164,20 @@ class ProductImageController extends Controller
                     // Traiter et optimiser l'image
                     $processedImage = $this->processImage($uploadedFile);
                     
-                    // Sauvegarder l'image dans le storage
-                    $path = Storage::disk('public')->put($uploadPath . '/' . $filename, $processedImage);
+                    // Construire le chemin complet
+                    $fullPath = $uploadPath . '/' . $filename;
                     
-                    if ($path) {
+                    // Sauvegarder l'image dans le storage
+                    $saved = Storage::disk('public')->put($fullPath, $processedImage);
+                    
+                    if ($saved !== false && Storage::disk('public')->exists($fullPath)) {
                         $uploadedImages[] = [
                             'index' => $index,
                             'filename' => $filename,
                             'original_name' => $uploadedFile->getClientOriginalName(),
-                            'path' => $path,
-                            'url' => '/storage/' . $path,
-                            'size' => Storage::disk('public')->size($path),
+                            'path' => $fullPath,
+                            'url' => '/storage/' . $fullPath,
+                            'size' => Storage::disk('public')->size($fullPath),
                             'mime_type' => $uploadedFile->getMimeType()
                         ];
                     }
