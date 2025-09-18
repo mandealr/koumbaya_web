@@ -230,23 +230,40 @@ class Product extends Model
             return $mainImage;
         }
         
-        // Si c'est un chemin qui commence par /storage/, l'utiliser tel quel  
-        if (str_starts_with($mainImage, '/storage/')) {
-            return $mainImage;
+        // Convertir les anciennes URLs /storage/ vers notre nouvelle route API
+        if (str_starts_with($mainImage, '/storage/products/')) {
+            $path = str_replace('/storage/', '', $mainImage); // products/2025/09/filename.jpg
+            $pathParts = explode('/', $path);
+            if (count($pathParts) >= 4) {
+                $year = $pathParts[1];
+                $month = $pathParts[2];
+                $filename = $pathParts[3];
+                return config('app.url') . "/api/products/images/{$year}/{$month}/{$filename}";
+            }
         }
         
-        // Si c'est un chemin qui commence par /, l'utiliser tel quel  
+        // Si c'est un chemin qui commence par /, convertir vers route API
         if (str_starts_with($mainImage, '/')) {
-            return $mainImage;
+            // Essayer d'extraire les parties du chemin
+            if (preg_match('#/storage/products/(\d{4})/(\d{2})/(.+)#', $mainImage, $matches)) {
+                return config('app.url') . "/api/products/images/{$matches[1]}/{$matches[2]}/{$matches[3]}";
+            }
+            return $mainImage; // Fallback
         }
         
-        // Si ça commence par "products/", ajouter le préfixe /storage/
+        // Si ça commence par "products/", construire URL API
         if (str_starts_with($mainImage, 'products/')) {
-            return "/storage/{$mainImage}";
+            $pathParts = explode('/', $mainImage);
+            if (count($pathParts) >= 4) {
+                $year = $pathParts[1];
+                $month = $pathParts[2];
+                $filename = $pathParts[3];
+                return config('app.url') . "/api/products/images/{$year}/{$month}/{$filename}";
+            }
         }
         
-        // Sinon, construire l'URL avec le préfixe storage/products
-        return "/storage/products/{$mainImage}";
+        // Sinon, construire l'URL avec notre route API
+        return config('app.url') . "/api/products/images/2025/09/{$mainImage}";
     }
 
     /**
