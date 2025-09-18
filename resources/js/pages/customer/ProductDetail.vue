@@ -43,9 +43,9 @@
         </div>
 
         <!-- Additional Images -->
-        <div v-if="product.gallery && product.gallery.length > 0" class="grid grid-cols-4 gap-2 mt-4">
+        <div v-if="product.images && product.images.length > 1" class="grid grid-cols-4 gap-2 mt-4">
           <ProductImage
-            v-for="(image, index) in product.gallery"
+            v-for="(image, index) in product.images"
             :key="index"
             :src="image"
             :alt="`${product.title || product.name} ${index + 1}`"

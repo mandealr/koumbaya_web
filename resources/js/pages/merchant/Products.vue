@@ -427,6 +427,7 @@ import { useRouter } from 'vue-router'
 import ProductImage from '@/components/common/ProductImage.vue'
 import { useApi } from '@/composables/api'
 import { useMerchantProducts } from '@/composables/useMerchantProducts'
+import { useProductImage } from '@/composables/useProductImage'
 import {
   PlusIcon,
   MagnifyingGlassIcon,
@@ -722,33 +723,11 @@ const deleteProduct = async (product) => {
 
 // formatCurrency is now provided by the composable
 
+// Utiliser le composable pour les images
+const { getProductImageUrlWithFallback } = useProductImage()
+
 const getProductImageSrc = (product) => {
-  // Debug pour voir les données du produit
-  console.debug('Product image data:', {
-    main_image: product.main_image,
-    image_url: product.image_url,
-    image: product.image,
-    images: product.images
-  })
-  
-  // Priorité : main_image -> images[0] -> image_url -> image -> null
-  if (product.main_image) {
-    return product.main_image
-  }
-  
-  if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-    return product.images[0]
-  }
-  
-  if (product.image_url) {
-    return product.image_url
-  }
-  
-  if (product.image) {
-    return product.image
-  }
-  
-  return null
+  return getProductImageUrlWithFallback(product, '/images/products/placeholder.jpg')
 }
 
 const toggleProductMenu = (productId) => {

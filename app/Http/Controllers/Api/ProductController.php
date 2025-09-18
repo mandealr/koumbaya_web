@@ -563,11 +563,13 @@ class ProductController extends Controller
         }
 
         // Prepare product data
+        $images = $request->images ?? [];
         $productData = [
             'name' => $request->name,
             'slug' => Str::slug($request->name) . '-' . time(),
             'description' => $request->description,
-            'images' => $request->images,
+            'images' => $images,
+            'image' => is_array($images) && count($images) > 0 ? $images[0] : null, // Image principale
             'price' => $request->price,
             'category_id' => $request->category_id,
             'merchant_id' => $user->id,

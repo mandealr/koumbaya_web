@@ -59,11 +59,11 @@
             </div>
 
             <!-- Thumbnail Gallery -->
-            <div class="grid grid-cols-4 gap-4">
-              <div v-for="n in 4" :key="n" class="relative overflow-hidden rounded-xl bg-gray-100 cursor-pointer hover:ring-2 hover:ring-[#0099cc] transition-all">
+            <div v-if="product.images && product.images.length > 1" class="grid grid-cols-4 gap-4">
+              <div v-for="(image, index) in product.images.slice(0, 4)" :key="index" class="relative overflow-hidden rounded-xl bg-gray-100 cursor-pointer hover:ring-2 hover:ring-[#0099cc] transition-all">
                 <ProductImage
-                  :src="product.image_url || product.main_image || product.image"
-                  :alt="`${product.name} - Vue ${n}`"
+                  :src="image"
+                  :alt="`${product.name} - Vue ${index + 1}`"
                   container-class="w-full h-20"
                   image-class="w-full h-full object-cover"
                 />

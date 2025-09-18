@@ -155,11 +155,30 @@ class Product extends Model
      */
     public function getMainImageAttribute()
     {
-        // Priorité : images[0] puis image 
-        if ($this->images && is_array($this->images) && count($this->images) > 0) {
-            return $this->images[0];
+        // Priorité : image puis images[0]
+        $image = $this->attributes['image'] ?? null;
+        $images = $this->images;
+        
+        // Debug temporaire (commenté en production)
+        // \Log::info('getMainImageAttribute Debug', [
+        //     'product_id' => $this->id,
+        //     'image' => $image,
+        //     'images' => $images,
+        //     'images_type' => gettype($images),
+        //     'images_count' => is_array($images) ? count($images) : 0
+        // ]);
+        
+        // Priorité 1: champ image
+        if ($image) {
+            return $image;
         }
-        return $this->image;
+        
+        // Priorité 2: premier élément du tableau images
+        if ($images && is_array($images) && count($images) > 0) {
+            return $images[0];
+        }
+        
+        return null;
     }
 
     /**
@@ -194,6 +213,13 @@ class Product extends Model
     public function getImageUrlAttribute()
     {
         $mainImage = $this->main_image;
+        
+        // Debug temporaire (commenté en production)
+        // \Log::info('getImageUrlAttribute Debug', [
+        //     'product_id' => $this->id,
+        //     'main_image' => $mainImage,
+        //     'main_image_type' => gettype($mainImage)
+        // ]);
         
         if (!$mainImage) {
             return null;

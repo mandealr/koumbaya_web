@@ -116,7 +116,7 @@
             <div class="flex space-x-6">
               <div class="flex-shrink-0">
                 <img
-                  :src="lottery.product_image || '/images/products/placeholder.jpg'"
+                  :src="lottery.product?.image_url || lottery.product?.main_image || lottery.product?.image || '/images/products/placeholder.jpg'"
                   :alt="lottery.title"
                   class="w-32 h-32 object-cover rounded-lg"
                 />
@@ -429,7 +429,6 @@ const lottery = ref({
   end_date: '',
   created_at: '',
   views_count: 0,
-  product_image: '',
   winner: null,
   draw_date: null,
   product: null,
@@ -742,7 +741,7 @@ const loadLotteryData = async () => {
         product: lotteryData.product,
         product_value: lotteryData.product?.price || 0,
         category: lotteryData.product?.category?.name || '',
-        product_image: lotteryData.product?.image_url || lotteryData.product?.image || '',
+        // product_image supprimé car on utilise directement lottery.product?.image_url dans le template
         
         // Données gagnant
         winner: lotteryData.winner || null,

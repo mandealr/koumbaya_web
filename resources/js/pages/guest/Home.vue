@@ -301,7 +301,7 @@
 
             <div class="relative mb-6 mt-4">
               <img
-                :src="product.image_url || product.main_image || product.image || '/images/products/placeholder.jpg'"
+                :src="getProductImageUrlWithFallback(product)"
                 :alt="product.name"
                 class="w-full h-48 object-cover rounded-2xl bg-gray-100 group-hover:scale-105 transition-transform duration-300"
               />
@@ -469,6 +469,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/api'
+import { useProductImage } from '@/composables/useProductImage'
 import placeholderImg from '@/assets/placeholder.jpg'
 import avatarPlaceholder from '@/assets/avatar-placeholder.jpg'
 import {
@@ -494,6 +495,7 @@ import {
 
 const router = useRouter()
 const { get, loading, error } = useApi()
+const { getProductImageUrlWithFallback } = useProductImage()
 
 // State for dynamic data
 const featuredProducts = ref([])
@@ -535,8 +537,8 @@ const loadFeaturedProducts = async () => {
           price: product.price || 0,
           ticketPrice: product.ticket_price || lottery?.ticket_price || 1000,
           ticket_price: product.ticket_price || lottery?.ticket_price || 1000,
-          image_url: product.image_url || product.main_image,
-          image: product.image_url || product.main_image || placeholderImg,
+          image_url: getProductImageUrlWithFallback(product, null),
+          image: getProductImageUrlWithFallback(product, placeholderImg),
           soldTickets: soldTickets,
           totalTickets: maxTickets,
           isNew: isNewProduct(product.created_at),
@@ -556,8 +558,8 @@ const loadFeaturedProducts = async () => {
         name: product.name || product.title,
         value: product.price || 0,
         price: product.price || 0,
-        image_url: product.image_url || product.main_image,
-        image: product.image_url || product.main_image || placeholderImg,
+        image_url: getProductImageUrlWithFallback(product, null),
+        image: getProductImageUrlWithFallback(product, placeholderImg),
         isNew: isNewProduct(product.created_at),
         sale_mode: 'direct',
         category: product.category
@@ -634,7 +636,7 @@ const loadLatestLotteryProduct = async () => {
         name: product.name || product.title,
         value: product.price || 0,
         ticketPrice: lottery?.ticket_price || product.ticket_price || 1500,
-        image: product.image_url || product.main_image || placeholderImg,
+        image: getProductImageUrlWithFallback(product, placeholderImg),
         soldTickets: soldTickets,
         totalTickets: maxTickets,
         progress: finalProgress,
