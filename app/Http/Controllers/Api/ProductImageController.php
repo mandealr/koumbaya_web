@@ -286,6 +286,20 @@ class ProductImageController extends Controller
     private function processImage($uploadedFile): string
     {
         try {
+            // Temporairement, sauvegarder le fichier original sans traitement
+            // pour diagnostiquer le problème
+            \Log::info('Processing image', [
+                'original_name' => $uploadedFile->getClientOriginalName(),
+                'size' => $uploadedFile->getSize(),
+                'mime_type' => $uploadedFile->getMimeType(),
+                'extension' => $uploadedFile->getClientOriginalExtension()
+            ]);
+            
+            // Retourner le contenu du fichier original sans traitement
+            return file_get_contents($uploadedFile->getRealPath());
+            
+            // Code de traitement commenté temporairement
+            /*
             // Si ImageManager n'est pas disponible, retourner le contenu du fichier tel quel
             if (!$this->imageManager) {
                 return file_get_contents($uploadedFile->getRealPath());
@@ -313,12 +327,14 @@ class ProductImageController extends Controller
                 default:
                     return $image->toJpeg(quality: 85)->toString();
             }
+            */
             
         } catch (\Exception $e) {
             // Si le traitement échoue, retourner le fichier original
-            \Log::warning('Erreur traitement image, utilisation fichier original', [
+            \Log::error('Erreur traitement image', [
                 'error' => $e->getMessage(),
-                'file' => $uploadedFile->getClientOriginalName()
+                'file' => $uploadedFile->getClientOriginalName(),
+                'trace' => $e->getTraceAsString()
             ]);
             
             return file_get_contents($uploadedFile->getRealPath());
