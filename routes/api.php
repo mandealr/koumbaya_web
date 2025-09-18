@@ -141,6 +141,11 @@ Route::group([
     Route::get('ticket-calculation-config', [TicketPriceController::class, 'config']);
 });
 
+// Route publique pour servir les images de produits (pas d'auth requise)
+Route::get('products/images/{year}/{month}/{filename}', [App\Http\Controllers\Api\ProductImageController::class, 'serve'])
+    ->where(['year' => '[0-9]{4}', 'month' => '[0-9]{2}', 'filename' => '.*'])
+    ->middleware(['throttle.api:200,1']); // Rate limiting léger pour les images
+
 // Routes protégées (authentification requise) avec rate limiting permissif
 Route::group([
     'middleware' => ['auth:sanctum', 'throttle.api:1000,1']
@@ -191,10 +196,6 @@ Route::group([
         Route::post('/multiple', [App\Http\Controllers\Api\ProductImageController::class, 'uploadMultiple']);
         Route::delete('/', [App\Http\Controllers\Api\ProductImageController::class, 'delete']);
     });
-    
-    // Route pour servir les images de produits
-    Route::get('products/images/{year}/{month}/{filename}', [App\Http\Controllers\Api\ProductImageController::class, 'serve'])
-        ->where(['year' => '[0-9]{4}', 'month' => '[0-9]{2}', 'filename' => '.*']);
     
     // Refunds
     Route::prefix('refunds')->group(function () {
