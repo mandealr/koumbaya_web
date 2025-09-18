@@ -58,22 +58,6 @@
         
         <div class="flex space-x-3">
           <button
-            v-if="product.status === 'active'"
-            @click="toggleProductStatus"
-            class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
-          >
-            <PauseIcon class="w-4 h-4 mr-2 inline" />
-            Désactiver
-          </button>
-          <button
-            v-if="product.status === 'inactive'"
-            @click="toggleProductStatus"
-            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-          >
-            <PlayIcon class="w-4 h-4 mr-2 inline" />
-            Activer
-          </button>
-          <button
             @click="editProduct"
             class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
@@ -257,14 +241,6 @@
             </div>
             <div class="p-6 space-y-3">
               <button
-                @click="createLottery"
-                class="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                <GiftIcon class="w-4 h-4 mr-2" />
-                Créer une tombola
-              </button>
-              
-              <button
                 @click="viewOrders"
                 class="w-full flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
               >
@@ -384,12 +360,9 @@ import {
   ExclamationTriangleIcon,
   PencilIcon,
   UserIcon,
-  GiftIcon,
   DocumentTextIcon,
   TrashIcon,
-  XMarkIcon,
-  PauseIcon,
-  PlayIcon
+  XMarkIcon
 } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
@@ -478,30 +451,6 @@ const updateProduct = async () => {
   }
 }
 
-const toggleProductStatus = async () => {
-  const newStatus = product.value.status === 'active' ? 'inactive' : 'active'
-  const action = newStatus === 'active' ? 'activer' : 'désactiver'
-  
-  if (!confirm(`Êtes-vous sûr de vouloir ${action} ce produit ?`)) {
-    return
-  }
-  
-  try {
-    const response = await patch(`/admin/products/${product.value.id}/status`, {
-      status: newStatus
-    })
-    
-    if (response.success) {
-      showSuccess(`Produit ${action === 'activer' ? 'activé' : 'désactivé'} avec succès`)
-      product.value.status = newStatus
-    } else {
-      showError(response.message || `Erreur lors de la ${action}`)
-    }
-  } catch (err) {
-    console.error('Erreur lors du changement de statut:', err)
-    showError(err.response?.data?.message || `Erreur lors de la ${action}`)
-  }
-}
 
 const deleteProduct = async () => {
   if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.')) {
@@ -522,9 +471,6 @@ const deleteProduct = async () => {
   }
 }
 
-const createLottery = () => {
-  router.push(`/admin/lotteries/create?product_id=${product.value.id}`)
-}
 
 const viewOrders = () => {
   router.push(`/admin/orders?product_id=${product.value.id}`)

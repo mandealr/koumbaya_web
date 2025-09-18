@@ -289,6 +289,9 @@ class StatsController extends Controller
     {
         $user = Auth::user();
         
+        // Récupérer le taux de commission Koumbaya
+        $commissionRate = config('koumbaya.ticket_calculation.commission_rate', 0.10);
+        
         // Statistiques des commandes
         $orderStats = Order::where('type', 'lottery')
             ->whereHas('lottery.product', function($query) use ($user) {
@@ -299,10 +302,13 @@ class StatsController extends Controller
                 SUM(CASE WHEN status IN ("paid", "fulfilled") THEN 1 ELSE 0 END) as paid_orders,
                 SUM(CASE WHEN status IN ("pending", "awaiting_payment") THEN 1 ELSE 0 END) as pending_orders,
                 SUM(CASE WHEN status IN ("cancelled", "failed") THEN 1 ELSE 0 END) as cancelled_orders,
-                SUM(CASE WHEN status IN ("paid", "fulfilled") THEN total_amount ELSE 0 END) as total_revenue,
+                SUM(CASE WHEN status IN ("paid", "fulfilled") THEN total_amount ELSE 0 END) as gross_revenue,
                 AVG(CASE WHEN status IN ("paid", "fulfilled") THEN total_amount ELSE NULL END) as avg_order_value
             ')
             ->first();
+            
+        // Calculer le CA total pour Koumbaya (commission sur le chiffre d'affaires brut)
+        $totalRevenue = ($orderStats->gross_revenue ?? 0) * $commissionRate;
             
         // Commandes récentes
         $recentOrders = Order::where('type', 'lottery')
@@ -346,7 +352,7 @@ class StatsController extends Controller
                     'paid_orders' => (int) ($orderStats->paid_orders ?? 0),
                     'pending_orders' => (int) ($orderStats->pending_orders ?? 0),
                     'cancelled_orders' => (int) ($orderStats->cancelled_orders ?? 0),
-                    'total_revenue' => (float) ($orderStats->total_revenue ?? 0),
+                    'total_revenue' => (float) $totalRevenue,
                     'avg_order_value' => (float) ($orderStats->avg_order_value ?? 0)
                 ],
                 'recent_orders' => $recentOrders,
