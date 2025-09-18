@@ -621,17 +621,8 @@ const pauseLottery = () => {
 }
 
 const initiateManualDraw = () => {
-  const remainingDays = daysRemaining.value
-  const drawDateFormatted = lottery.value.draw_date ? formatDate(lottery.value.draw_date) : 'Non définie'
-  
-  const confirmMessage = `Tous les tickets sont vendus ! Voulez-vous effectuer le tirage maintenant ?\n\n` +
-    `⏰ Date prévue : ${drawDateFormatted}\n` +
-    `📅 Tirage anticipé de ${remainingDays} jour${remainingDays > 1 ? 's' : ''}\n\n` +
-    `Cette action est irréversible.`
-  
-  if (confirm(confirmMessage)) {
-    showDrawModal.value = true
-  }
+  // Ouvrir directement le modal sans confirmation
+  showDrawModal.value = true
 }
 
 const onLotteryDrawn = (drawResult) => {
