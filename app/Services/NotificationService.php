@@ -295,6 +295,121 @@ class NotificationService
     }
     
     /**
+     * Notifier le marchand du gagnant d'une tombola
+     */
+    public function notifyMerchantOfWinner(Lottery $lottery, User $winner)
+    {
+        try {
+            // Récupérer le marchand depuis le produit
+            $merchant = $lottery->product->merchant ?? $lottery->product->user;
+            
+            if (!$merchant) {
+                Log::warning('No merchant found for lottery', ['lottery_id' => $lottery->id]);
+                return false;
+            }
+            
+            // Créer la notification en base si le modèle le supporte
+            try {
+                $notification = Notification::create([
+                    'user_id' => $merchant->id,
+                    'type' => 'lottery_merchant_winner',
+                    'title' => 'Gagnant de votre tombola',
+                    'message' => "La tombola {$lottery->lottery_number} a un gagnant : {$winner->full_name}",
+                    'data' => [
+                        'lottery_id' => $lottery->id,
+                        'winner_id' => $winner->id,
+                        'lottery_number' => $lottery->lottery_number,
+                        'winner_name' => $winner->full_name,
+                        'winning_ticket' => $lottery->winning_ticket_number
+                    ],
+                    'read_at' => null
+                ]);
+            } catch (\Exception $e) {
+                Log::warning('Could not create merchant notification in database', [
+                    'error' => $e->getMessage(),
+                    'lottery_id' => $lottery->id
+                ]);
+            }
+            
+            // Envoyer par email
+            $this->sendMerchantWinnerEmail($merchant, $lottery, $winner);
+            
+            // Envoyer par SMS si disponible
+            if ($merchant->phone) {
+                $this->sendMerchantWinnerSMS($merchant, $lottery, $winner);
+            }
+            
+            Log::info('Merchant winner notification sent', [
+                'lottery_id' => $lottery->id,
+                'merchant_id' => $merchant->id,
+                'winner_id' => $winner->id
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to send merchant winner notification', [
+                'error' => $e->getMessage(),
+                'lottery_id' => $lottery->id,
+                'winner_id' => $winner->id
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Envoyer email au marchand pour l'informer du gagnant
+     */
+    protected function sendMerchantWinnerEmail($merchant, Lottery $lottery, User $winner)
+    {
+        try {
+            Mail::send('emails.merchant-lottery-winner', [
+                'merchant' => $merchant,
+                'lottery' => $lottery,
+                'winner' => $winner,
+                'product' => $lottery->product
+            ], function ($message) use ($merchant, $lottery) {
+                $message->to($merchant->email, $merchant->full_name ?? $merchant->name)
+                        ->subject('🎉 Votre tombola a un gagnant ! - ' . $lottery->lottery_number);
+            });
+            
+            Log::info('Merchant winner email sent', [
+                'merchant_email' => $merchant->email,
+                'lottery_number' => $lottery->lottery_number
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send merchant winner email', [
+                'error' => $e->getMessage(),
+                'merchant_email' => $merchant->email,
+                'lottery_id' => $lottery->id
+            ]);
+        }
+    }
+
+    /**
+     * Envoyer SMS au marchand pour l'informer du gagnant
+     */
+    protected function sendMerchantWinnerSMS($merchant, Lottery $lottery, User $winner)
+    {
+        try {
+            $message = "🎉 Votre tombola {$lottery->lottery_number} a un gagnant ! {$winner->full_name} a remporté {$lottery->product->name}. Consultez votre dashboard pour plus de détails.";
+            
+            // Utiliser le service OTP pour envoyer le SMS
+            $this->otpService->sendSMS($merchant->phone, $message);
+            
+            Log::info('Merchant winner SMS sent', [
+                'phone' => $merchant->phone,
+                'lottery_id' => $lottery->id
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send merchant winner SMS', [
+                'error' => $e->getMessage(),
+                'phone' => $merchant->phone,
+                'lottery_id' => $lottery->id
+            ]);
+        }
+    }
+    
+    /**
      * Générer un code de vérification unique pour une tombola
      */
     protected function generateVerificationCode(Lottery $lottery)
