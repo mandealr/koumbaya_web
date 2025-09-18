@@ -265,7 +265,7 @@ class LotteryDrawService
         return DrawHistory::create([
             'lottery_id' => $lottery->id,
             'method' => $options['method'] === 'manual' ? 'manual' : 'auto',
-            'seed' => $seed,
+            'seed' => substr($seed, 0, 100), // Truncate to fit the column size
             'total_tickets' => $paidTickets->count(),
             'winning_position' => $winningPosition,
             'winning_ticket_number' => $winningTicket->ticket_number,
