@@ -8,12 +8,12 @@
         </div>
         <div class="flex gap-3">
           <button
-            v-if="isSuperAdmin"
+            v-if="canCreateUsers"
             @click="showCreateModal = true"
             class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
           >
             <PlusIcon class="w-5 h-5 mr-2" />
-            Créer un Admin
+            {{ isSuperAdmin ? 'Créer un Admin' : 'Créer un Utilisateur' }}
           </button>
           <button
             @click="loadUsers"
@@ -217,7 +217,7 @@
     <div v-if="showCreateModal" class="fixed inset-0 bg-gray-600 bg-opacity-40 z-50 flex items-center justify-center p-4">
       <div class="bg-white rounded-lg w-full max-w-2xl shadow-xl">
         <div class="flex items-center justify-between p-6 border-b">
-          <h2 class="text-xl font-semibold text-gray-900">Créer un Administrateur</h2>
+          <h2 class="text-xl font-semibold text-gray-900">{{ isSuperAdmin ? 'Créer un Administrateur' : 'Créer un Utilisateur' }}</h2>
           <button @click="closeCreateModal" class="text-gray-400 hover:text-gray-600">
             <XMarkIcon class="w-6 h-6" />
           </button>
@@ -327,7 +327,7 @@
             type="button"
             class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
           >
-            <span v-if="!creatingAdmin">Créer l'administrateur</span>
+            <span v-if="!creatingAdmin">{{ isSuperAdmin ? 'Créer l\'administrateur' : 'Créer l\'utilisateur' }}</span>
             <span v-else class="flex items-center">
               <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
               Création...
@@ -350,6 +350,12 @@ const authStore = useAuthStore()
 
 // Vérifier si l'utilisateur est SuperAdmin
 const isSuperAdmin = computed(() => authStore.user?.roles?.includes('Super Admin'))
+
+// Vérifier si l'utilisateur peut créer d'autres utilisateurs (Admin ou Super Admin)
+const canCreateUsers = computed(() => {
+  const userRoles = authStore.user?.roles || []
+  return userRoles.includes('Super Admin') || userRoles.includes('Admin')
+})
 
 const users = ref([])
 const loading = ref(false)
@@ -569,7 +575,7 @@ const getSelectedRoleDescription = () => {
 
 onMounted(() => {
   loadUsers()
-  if (isSuperAdmin.value) {
+  if (canCreateUsers.value) {
     loadAdminRoles()
   }
 })

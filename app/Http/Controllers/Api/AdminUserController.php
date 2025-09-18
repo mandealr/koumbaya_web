@@ -116,15 +116,17 @@ class AdminUserController extends Controller
     }
 
     /**
-     * Create a new user (Admin creation - SuperAdmin only)
+     * Create a new user (Admin creation - SuperAdmin and Admin can create certain roles)
      */
     public function store(Request $request)
     {
-        // Vérifier que l'utilisateur actuel est SuperAdmin
-        if (!auth()->user()->isSuperAdmin()) {
+        $currentUser = auth()->user();
+        
+        // Vérifier que l'utilisateur actuel est au moins Admin
+        if (!$currentUser->isAdmin() && !$currentUser->isSuperAdmin()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Seuls les Super Administrateurs peuvent créer des utilisateurs admin'
+                'message' => 'Accès refusé'
             ], 403);
         }
 
@@ -152,6 +154,17 @@ class AdminUserController extends Controller
                 'message' => 'La création de Super Admin n\'est pas autorisée'
             ], 403);
         }
+        
+        // Les Admins réguliers ne peuvent créer que certains rôles
+        if ($currentUser->isAdmin() && !$currentUser->isSuperAdmin()) {
+            $allowedRoles = ['Agent', 'Agent Back Office', 'Business', 'Particulier'];
+            if (!in_array($request->role, $allowedRoles)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous ne pouvez pas créer ce type d\'utilisateur'
+                ], 403);
+            }
+        }
 
         $user = User::create([
             'first_name' => $request->first_name,
@@ -161,7 +174,7 @@ class AdminUserController extends Controller
             'password' => Hash::make($request->password),
             'is_active' => $request->is_active ?? true,
             'verified_at' => now(), // Auto-verify admin-created users
-            'user_type_id' => 3 // Admin type
+            'user_type_id' => $this->getUserTypeIdForRole($request->role)
         ]);
 
         // Attach role
@@ -241,22 +254,33 @@ class AdminUserController extends Controller
     }
 
     /**
-     * Get roles available for admin creation (SuperAdmin only)
+     * Get roles available for admin creation
      */
     public function getAdminRoles()
     {
-        // Vérifier que l'utilisateur actuel est SuperAdmin
-        if (!auth()->user()->isSuperAdmin()) {
+        $currentUser = auth()->user();
+        
+        // Vérifier que l'utilisateur actuel est au moins Admin
+        if (!$currentUser->isAdmin() && !$currentUser->isSuperAdmin()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Accès refusé'
             ], 403);
         }
 
-        $roles = Role::where('active', true)
-            ->where('name', '!=', 'Super Admin') // Exclure Super Admin
-            ->whereIn('name', ['Admin', 'Agent', 'Agent Back Office']) // Seulement les rôles admin
-            ->select('name', 'description')
+        $query = Role::where('active', true)
+            ->where('name', '!=', 'Super Admin'); // Exclure Super Admin toujours
+            
+        // Super Admin peut créer tous les rôles sauf Super Admin
+        if ($currentUser->isSuperAdmin()) {
+            $query->whereIn('name', ['Admin', 'Agent', 'Agent Back Office', 'Business', 'Particulier']);
+        } 
+        // Admin régulier peut créer seulement certains rôles
+        else if ($currentUser->isAdmin()) {
+            $query->whereIn('name', ['Agent', 'Agent Back Office', 'Business', 'Particulier']);
+        }
+
+        $roles = $query->select('name', 'description')
             ->get()
             ->map(function ($role) {
                 return [
@@ -304,10 +328,33 @@ class AdminUserController extends Controller
             'Super Admin' => 'Super Administrateur',
             'Admin' => 'Administrateur',
             'Agent' => 'Agent de Support',
+            'Agent Back Office' => 'Agent Back Office', 
+            'Business Enterprise' => 'Marchand Entreprise',
+            'Business Individual' => 'Marchand Particulier',
             'Business' => 'Marchand',
             'Particulier' => 'Client'
         ];
 
         return $labels[$roleName] ?? $roleName;
+    }
+
+    /**
+     * Get the appropriate user_type_id for a role
+     */
+    private function getUserTypeIdForRole($roleName)
+    {
+        // Mapping des rôles vers les user_type_id
+        $typeMap = [
+            'Super Admin' => 3, // Admin
+            'Admin' => 3, // Admin
+            'Agent' => 3, // Admin
+            'Agent Back Office' => 3, // Admin
+            'Business Enterprise' => 2, // Business
+            'Business Individual' => 2, // Business  
+            'Business' => 2, // Business
+            'Particulier' => 1 // Client
+        ];
+
+        return $typeMap[$roleName] ?? 1; // Default to Client
     }
 }
