@@ -240,8 +240,9 @@
               <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
                 <UserIcon class="w-6 h-6 text-yellow-600" />
               </div>
-              <div>
-                <p class="font-semibold text-gray-900">{{ lottery.winner.name }}</p>
+              <div class="flex-1">
+                <p class="font-semibold text-gray-900">{{ lottery.winner.first_name }} {{ lottery.winner.last_name }}</p>
+                <p class="text-sm font-medium text-green-600">Ticket N° {{ lottery.winning_ticket_number }}</p>
                 <p class="text-sm text-gray-600">Tirage effectué le {{ formatDate(lottery.draw_date) }}</p>
               </div>
             </div>
