@@ -198,7 +198,10 @@ class AdminOrderController extends Controller
         $stats = [
             // Statistiques globales
             'total_orders' => Order::count(),
-            'total_amount' => Order::sum('total_amount'),
+            'total_amount' => Order::join('lotteries', 'orders.lottery_id', '=', 'lotteries.id')
+                ->join('products', 'lotteries.product_id', '=', 'products.id')
+                ->whereIn('orders.status', ['paid', 'fulfilled'])
+                ->sum(DB::raw('orders.total_amount - products.price')),
             
             // Par statut
             'pending_orders' => Order::where('status', OrderStatus::PENDING->value)->count(),
