@@ -296,6 +296,17 @@ Route::group([
         Route::get('/merchant/lotteries', [StatsController::class, 'merchantLotteries']);
         Route::get('/merchant/analytics', [StatsController::class, 'merchantAnalytics']);
     });
+    
+    // Merchant Payout Requests
+    Route::prefix('merchant/payout-requests')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\MerchantPayoutController::class, 'index']);
+        Route::post('/', [App\Http\Controllers\Api\MerchantPayoutController::class, 'store']);
+        Route::get('/stats', [App\Http\Controllers\Api\MerchantPayoutController::class, 'stats']);
+        Route::get('/eligible-orders', [App\Http\Controllers\Api\MerchantPayoutController::class, 'eligibleOrders']);
+        Route::get('/eligible-lotteries', [App\Http\Controllers\Api\MerchantPayoutController::class, 'eligibleLotteries']);
+        Route::get('/{id}', [App\Http\Controllers\Api\MerchantPayoutController::class, 'show']);
+        Route::delete('/{id}', [App\Http\Controllers\Api\MerchantPayoutController::class, 'cancel']);
+    });
 });
 
 // Routes Admin avec rate limiting permissif
@@ -411,6 +422,20 @@ Route::group([
     
     // Platform Statistics (Admin only)
     Route::get('/stats/platform', [StatsController::class, 'platformStats']);
+    
+    // Admin Payout Management
+    Route::prefix('payout-requests')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\AdminPayoutController::class, 'index']);
+        Route::get('/stats', [App\Http\Controllers\Api\AdminPayoutController::class, 'dashboardStats']);
+        Route::get('/merchants-with-payouts', [App\Http\Controllers\Api\AdminPayoutController::class, 'merchantsWithPayouts']);
+        Route::get('/{id}', [App\Http\Controllers\Api\AdminPayoutController::class, 'show']);
+        Route::post('/{id}/approve', [App\Http\Controllers\Api\AdminPayoutController::class, 'approve']);
+        Route::post('/{id}/reject', [App\Http\Controllers\Api\AdminPayoutController::class, 'reject']);
+        Route::post('/batch-approve', [App\Http\Controllers\Api\AdminPayoutController::class, 'batchApprove']);
+    });
+    
+    // Admin Direct Payouts
+    Route::post('/direct-payout', [App\Http\Controllers\Api\AdminPayoutController::class, 'createDirectPayout']);
 });
 
 // User profile routes
