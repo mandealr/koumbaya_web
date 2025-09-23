@@ -435,11 +435,14 @@ const relatedProducts = ref([])
 
 // Methods
 const formatPrice = (price) => {
+  const numPrice = Number(price) || 0
+  if (isNaN(numPrice)) return '0 FCFA'
+  
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
     currency: 'XAF',
     minimumFractionDigits: 0
-  }).format(price).replace('XAF', 'FCFA')
+  }).format(numPrice).replace('XAF', 'FCFA')
 }
 
 const formatDate = (date) => {
