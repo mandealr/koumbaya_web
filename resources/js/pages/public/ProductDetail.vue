@@ -597,10 +597,12 @@ const loadProduct = async () => {
     
     const response = await get(`/products/${productId}`)
     console.log('🔍 Full response:', response)
+    console.log('🔍 Response type:', typeof response)
+    console.log('🔍 Response data field:', response.data)
     
-    // Le composable useApi retourne directement le contenu de data depuis l'API
-    // Donc response contient directement les données du produit
-    let productData = response
+    // Le composable useApi retourne response.data de axios
+    // Donc si l'API retourne {success: true, data: {...}}, on a besoin de response.data
+    let productData = response.data || response
     
     console.log('📦 Product data:', productData)
     
@@ -631,6 +633,8 @@ const loadProduct = async () => {
     }
     
     console.log('Product loaded successfully:', product.value.name)
+    console.log('Product data:', JSON.stringify(product.value, null, 2))
+    console.log('hasActiveLottery:', hasActiveLottery.value)
     
     // Charger les produits similaires de la même catégorie
     if (productData.category_id) {
