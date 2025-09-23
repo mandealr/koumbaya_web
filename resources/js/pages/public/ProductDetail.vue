@@ -93,7 +93,7 @@
               <div class="text-center">
                 <div class="text-sm text-gray-600 mb-2">{{ hasActiveLottery ? 'Valeur du produit' : 'Prix' }}</div>
                 <div class="text-4xl font-bold text-[#0099cc] mb-2">
-                  {{ formatPrice(product.value) }}
+                  {{ formatPrice(product.price) }}
                 </div>
                 <div v-if="hasActiveLottery" class="text-sm text-gray-600">
                   Prix d'un ticket : <span class="font-semibold text-[#0099cc]">{{ formatPrice(product.ticketPrice) }}</span>
@@ -197,7 +197,7 @@
                 <ShoppingCartIcon class="w-5 h-5 mr-2 flex-shrink-0" />
                 <div class="flex flex-col items-center">
                   <span>{{ authStore.isAuthenticated ? 'Acheter maintenant' : 'Se connecter pour acheter' }}</span>
-                  <span class="text-sm font-medium opacity-90">{{ formatPrice(product.value) }}</span>
+                  <span class="text-sm font-medium opacity-90">{{ formatPrice(product.price) }}</span>
                 </div>
               </button>
               
@@ -358,7 +358,7 @@
                 </div>
               </div>
               <h3 class="font-semibold text-gray-900 mb-2">{{ relatedProduct.name }}</h3>
-              <div class="text-lg font-bold text-[#0099cc]">{{ formatPrice(relatedProduct.value) }}</div>
+              <div class="text-lg font-bold text-[#0099cc]">{{ formatPrice(relatedProduct.price) }}</div>
             </div>
           </div>
         </div>
@@ -578,7 +578,7 @@ const loadRelatedProducts = async (categoryId, currentProductId) => {
       .map(p => ({
         id: p.id,
         name: p.name || p.title,
-        value: p.price,
+        price: p.price,
         ticketPrice: p.ticket_price || 0,
         image: p.image_url || p.main_image || p.image || placeholderImg
       }))
@@ -618,7 +618,7 @@ const loadProduct = async () => {
       id: productData.id,
       name: productData.name || productData.title,
       description: productData.description,
-      value: productData.price,
+      price: productData.price,
       ticketPrice: productData.ticket_price || 0,
       image: productData.image_url || productData.main_image || productData.image || placeholderImg,
       category: productData.category?.name || productData.category?.slug || 'Non catégorisé',
