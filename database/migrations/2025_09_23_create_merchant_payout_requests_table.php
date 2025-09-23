@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('merchant_payout_requests', function (Blueprint $table) {
             $table->id();
             $table->string('request_number')->unique();
-            $table->foreignId('merchant_id')->constrained('users')->comment('Marchand qui demande le remboursement');
-            $table->foreignId('order_id')->nullable()->constrained();
-            $table->foreignId('lottery_id')->nullable()->constrained();
-            $table->foreignId('product_id')->nullable()->constrained();
+            $table->unsignedBigInteger('merchant_id')->comment('Marchand qui demande le remboursement');
+            $table->unsignedBigInteger('order_id')->nullable();
+            $table->unsignedBigInteger('lottery_id')->nullable();
+            $table->unsignedBigInteger('product_id')->nullable();
             
             // Détails du remboursement
             $table->enum('refund_type', [
@@ -31,7 +31,7 @@ return new class extends Migration
             $table->decimal('refund_amount', 15, 2)->comment('Montant à rembourser en FCFA');
             
             // Détails du client à rembourser
-            $table->foreignId('customer_id')->constrained('users')->comment('Client à rembourser');
+            $table->unsignedBigInteger('customer_id')->comment('Client à rembourser');
             $table->string('customer_phone')->comment('Numéro mobile money du client');
             $table->enum('payment_operator', ['airtelmoney', 'moovmoney4']);
             
@@ -45,20 +45,27 @@ return new class extends Migration
                 'failed'
             ])->default('pending');
             
-            $table->foreignId('approved_by')->nullable()->constrained('users');
+            $table->unsignedBigInteger('approved_by')->nullable();
             $table->timestamp('approved_at')->nullable();
             $table->text('admin_notes')->nullable();
             $table->text('rejection_reason')->nullable();
             
             // Lien avec le payout effectif
-            $table->foreignId('payout_id')->nullable()->constrained('payouts');
+            $table->unsignedBigInteger('payout_id')->nullable();
             
             $table->timestamps();
             
             // Index pour les performances
+            $table->index('merchant_id');
+            $table->index('order_id');
+            $table->index('lottery_id');
+            $table->index('product_id');
+            $table->index('customer_id');
+            $table->index('approved_by');
+            $table->index('payout_id');
             $table->index(['merchant_id', 'status']);
             $table->index(['status', 'created_at']);
-            $table->index('customer_id');
+            $table->index('request_number');
         });
     }
 

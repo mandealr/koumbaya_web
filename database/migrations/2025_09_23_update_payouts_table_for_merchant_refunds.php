@@ -13,11 +13,10 @@ return new class extends Migration
     {
         Schema::table('payouts', function (Blueprint $table) {
             // Ajouter une référence vers la demande de payout marchand
-            $table->foreignId('merchant_payout_request_id')
+            $table->unsignedBigInteger('merchant_payout_request_id')
                 ->nullable()
                 ->after('transfert_id')
-                ->constrained('merchant_payout_requests')
-                ->onDelete('set null');
+                ->comment('Demande de payout marchand associée');
             
             // Type de payout
             $table->enum('payout_category', ['transfer', 'merchant_refund', 'system_refund'])
@@ -25,15 +24,15 @@ return new class extends Migration
                 ->after('payout_type');
                 
             // Qui a initié le payout
-            $table->foreignId('initiated_by')
+            $table->unsignedBigInteger('initiated_by')
                 ->nullable()
                 ->after('user_id')
-                ->constrained('users')
                 ->comment('Admin ou système qui a initié le payout');
                 
             // Index pour les performances
             $table->index('payout_category');
             $table->index('merchant_payout_request_id');
+            $table->index('initiated_by');
         });
     }
 
@@ -43,8 +42,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('payouts', function (Blueprint $table) {
-            $table->dropForeign(['merchant_payout_request_id']);
-            $table->dropForeign(['initiated_by']);
+            $table->dropIndex(['payout_category']);
+            $table->dropIndex(['merchant_payout_request_id']);
+            $table->dropIndex(['initiated_by']);
             $table->dropColumn(['merchant_payout_request_id', 'payout_category', 'initiated_by']);
         });
     }
