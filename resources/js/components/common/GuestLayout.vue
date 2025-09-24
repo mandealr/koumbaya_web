@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <!-- Logo -->
-          <router-link to="/" class="flex items-center min-w-0 flex-shrink-0">
+          <router-link to="/" class="flex items-center min-w-0 flex-shrink-0" @click="handleLogoClick">
             <img 
               v-if="!logoError"
               src="/logo.png" 
@@ -72,8 +72,20 @@
                   @click="userMenuOpen = !userMenuOpen"
                   class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100"
                 >
-                  <div class="w-8 h-8 bg-[#0099cc] rounded-full flex items-center justify-center">
-                    <span class="text-sm font-medium text-white">{{ userInitials }}</span>
+                  <div class="w-8 h-8 rounded-full overflow-hidden">
+                    <img 
+                      v-if="authStore.user?.avatar_url" 
+                      :src="authStore.user.avatar_url" 
+                      :alt="authStore.user?.first_name || 'Avatar'"
+                      class="w-full h-full object-cover"
+                      @error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'"
+                    />
+                    <div 
+                      class="w-8 h-8 bg-[#0099cc] rounded-full flex items-center justify-center"
+                      :style="authStore.user?.avatar_url ? 'display: none' : 'display: flex'"
+                    >
+                      <span class="text-sm font-medium text-white">{{ userInitials }}</span>
+                    </div>
                   </div>
                   <ChevronDownIcon class="w-4 h-4 text-gray-500" />
                 </button>
@@ -272,6 +284,10 @@ const handleImageError = () => {
   logoError.value = true
 }
 
+const handleLogoClick = () => {
+  console.log('Logo clicked - navigating to home')
+}
+
 const handleClickOutside = (event) => {
   if (!event.target.closest('.relative')) {
     userMenuOpen.value = false
@@ -279,8 +295,14 @@ const handleClickOutside = (event) => {
 }
 
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
+  
+  // S'assurer que les données utilisateur sont chargées si un token existe
+  if (authStore.token && !authStore.user) {
+    console.log('🔄 Recharging user data in GuestLayout')
+    await authStore.checkAuth()
+  }
 })
 
 onUnmounted(() => {
