@@ -6,7 +6,7 @@
         <div class="flex justify-between items-center h-16">
           <!-- Logo -->
           <div class="flex items-center min-w-0 flex-shrink-0">
-            <router-link to="/customer" class="flex items-center">
+            <router-link to="/" class="flex items-center">
               <img
                 v-if="!logoError"
                 class="h-8 sm:h-10 w-auto object-contain max-w-none"
