@@ -63,24 +63,21 @@ class TestRefundLotterySeeder extends Seeder
         $product = Product::create([
             'merchant_id' => $merchant->id,
             'category_id' => $category->id,
-            'name' => 'iPhone 15 Pro Max - Test Refund',
-            'title' => 'iPhone 15 Pro Max 256GB - Test de Remboursement',
-            'description' => 'Produit test pour vérifier le système de remboursement automatique.',
-            'short_description' => 'iPhone 15 Pro Max pour test de remboursement',
+            'name' => 'iPhone 15 Pro Max 256GB - Test de Remboursement',
+            'description' => 'Produit test pour vérifier le système de remboursement automatique. Tombola nécessitant 500 participants minimum.',
             'price' => 850000, // 850,000 FCFA
             'currency' => 'XAF',
-            'quantity' => 1,
-            'status' => 'active',
+            'stock_quantity' => 1,
+            'is_active' => true,
             'is_featured' => true,
+            'sale_mode' => 'lottery',
             'meta' => json_encode([
                 'min_participants' => 500, // Nécessite 500 participants
                 'max_participants' => 1000,
                 'auto_draw' => true,
+                'test_product' => true,
             ]),
-            'images' => json_encode([
-                'https://example.com/iphone15.jpg'
-            ]),
-            'tags' => json_encode(['smartphone', 'apple', 'test']),
+            'image' => 'https://example.com/iphone15.jpg',
         ]);
 
         $this->command->info("✅ Product created: {$product->name} (Min participants: 500)");
@@ -91,9 +88,10 @@ class TestRefundLotterySeeder extends Seeder
         $lottery = Lottery::create([
             'lottery_number' => 'TEST-REFUND-' . time(),
             'title' => 'Test Refund Lottery - iPhone 15 Pro Max',
-            'description' => 'Tombola de test pour le système de remboursement - Participants insuffisants',
+            'description' => 'Tombola de test pour le système de remboursement - Participants insuffisants (100/500)',
             'product_id' => $product->id,
             'ticket_price' => 1700, // 1,700 FCFA par ticket
+            'currency' => 'XAF',
             'max_tickets' => 500,
             'sold_tickets' => 100, // Seulement 100 tickets vendus sur 500 requis
             'draw_date' => $expiryDate,
