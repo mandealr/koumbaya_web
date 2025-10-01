@@ -157,8 +157,8 @@ class TestRefundLotterySeeder extends Seeder
                 'currency' => 'XAF',
                 'payment_method' => 'mobile_money',
                 'status' => 'processed',
-                'external_transaction_id' => 'TXN-TEST-' . $i . '-' . time(),
                 'paid_at' => Carbon::now()->subDays(rand(5, 25)),
+                'transaction_id' => 'TXN-TEST-' . $i . '-' . time(),
                 'meta' => json_encode([
                     'ticket_number' => $i,
                     'test_data' => true,
