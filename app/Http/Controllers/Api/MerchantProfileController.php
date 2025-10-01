@@ -163,7 +163,7 @@ class MerchantProfileController extends Controller
     public function updateAvatar(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120' // 5MB pour correspondre au frontend
         ]);
 
         if ($validator->fails()) {
@@ -176,29 +176,58 @@ class MerchantProfileController extends Controller
 
         try {
             $user = auth()->user();
+            
+            \Log::info('Merchant avatar upload attempt', [
+                'user_id' => $user->id,
+                'file_size' => $request->file('avatar')->getSize(),
+                'mime_type' => $request->file('avatar')->getMimeType()
+            ]);
 
             // Supprimer l'ancienne photo si elle existe
-            if ($user->avatar_url && Storage::disk('public')->exists($user->avatar_url)) {
-                Storage::disk('public')->delete($user->avatar_url);
+            if ($user->avatar_url) {
+                $oldPath = str_replace('/storage/', '', $user->avatar_url);
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
             }
 
+            // Générer un nom de fichier unique
+            $file = $request->file('avatar');
+            $fileName = 'merchant_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            
             // Upload de la nouvelle photo
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $avatarPath = $file->storeAs('avatars', $fileName, 'public');
+            
+            if (!$avatarPath) {
+                throw new \Exception('Failed to store avatar file');
+            }
             
             $user->avatar_url = $avatarPath;
             $user->save();
+            
+            \Log::info('Merchant avatar upload success', [
+                'user_id' => $user->id,
+                'avatar_path' => $avatarPath,
+                'avatar_url' => $user->avatar_url
+            ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Photo de profil mise à jour avec succès',
-                'avatar_url' => Storage::url($avatarPath),
+                'avatar_url' => $user->avatar_url, // Utiliser l'accesseur du modèle
                 'user' => $user->fresh(['userType', 'roles', 'wallet'])
             ]);
 
         } catch (\Exception $e) {
+            \Log::error('Merchant avatar upload error', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors du téléchargement de la photo'
+                'message' => 'Erreur lors du téléchargement de la photo: ' . $e->getMessage()
             ], 500);
         }
     }

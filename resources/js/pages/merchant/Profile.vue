@@ -14,7 +14,7 @@
             <!-- Avatar -->
             <AvatarUpload
               :currentAvatarUrl="user?.avatar_url || getDefaultAvatar()"
-              uploadEndpoint="/user/avatar"
+              uploadEndpoint="/merchant/profile/avatar"
               fieldName="avatar"
               :altText="`Photo de profil de ${user?.first_name} ${user?.last_name}`"
               helpText="Cliquez pour modifier votre photo de profil"
@@ -327,18 +327,41 @@ const getDefaultAvatar = () => {
 }
 
 const handleAvatarSuccess = (response) => {
-  if (response.data && response.data.avatar_url) {
+  console.log('Avatar upload success:', response)
+  
+  // Rafraîchir les données utilisateur
+  const avatarUrl = response?.avatar_url || response?.data?.avatar_url || response?.response?.avatar_url
+  if (avatarUrl) {
+    // Mettre à jour l'utilisateur local
+    if (user.value) {
+      user.value.avatar_url = avatarUrl
+    }
+    
+    // Rafraîchir depuis le store
     authStore.refreshUser()
+    
     if (window.$toast) {
       window.$toast.success('Photo de profil mise à jour avec succès', '✅ Photo')
     }
+  } else {
+    console.warn('No avatar URL in response:', response)
   }
 }
 
 const handleAvatarError = (error) => {
   console.error('Erreur upload avatar:', error)
+  
+  let message = 'Erreur lors de la mise à jour de la photo'
+  
+  // Message d'erreur plus précis si disponible
+  if (error?.message) {
+    message = error.message
+  } else if (typeof error === 'string') {
+    message = error
+  }
+  
   if (window.$toast) {
-    window.$toast.error('Erreur lors de la mise à jour de la photo', '❌ Erreur')
+    window.$toast.error(message, '❌ Erreur')
   }
 }
 

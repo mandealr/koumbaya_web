@@ -158,8 +158,9 @@ const onFileSelected = (event) => {
   successMessage.value = ''
 
   // Validate file type
-  if (!file.type.startsWith('image/')) {
-    errorMessage.value = 'Veuillez sélectionner un fichier image valide.'
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+  if (!validTypes.includes(file.type)) {
+    errorMessage.value = 'Veuillez sélectionner un fichier image valide (JPG, PNG, GIF ou WEBP).'
     return
   }
 
@@ -205,23 +206,18 @@ const uploadAvatar = async () => {
     const formData = new FormData()
     formData.append(props.fieldName, selectedFile.value)
     
-    console.log('Uploading avatar:', selectedFile.value)
-    console.log('Using endpoint:', props.uploadEndpoint)
-    console.log('Field name:', props.fieldName)
-    
-    // Debug FormData
-    console.log('FormData entries:')
-    for (let pair of formData.entries()) {
-      console.log(pair[0] + ': ', pair[1])
-    }
-
-    // Test simple d'abord
-    console.log('Testing simple FormData upload...')
+    console.log('Uploading avatar to:', props.uploadEndpoint)
+    console.log('File details:', {
+      name: selectedFile.value.name,
+      size: selectedFile.value.size,
+      type: selectedFile.value.type,
+      fieldName: props.fieldName
+    })
     
     // Upload - Ne pas définir Content-Type manuellement avec FormData
     const response = await post(props.uploadEndpoint, formData)
 
-    console.log('Upload response:', response)
+    console.log('Upload successful:', response)
 
     if (response && (response.success || response.data)) {
       const avatarUrl = response.data?.avatar_url || response.avatar_url
@@ -246,6 +242,28 @@ const uploadAvatar = async () => {
     console.error('Error uploading avatar:', error)
     
     let message = 'Erreur lors de l\'upload de l\'image.'
+    
+    // Gestion spécifique des erreurs
+    if (error.response) {
+      console.error('Response error data:', error.response.data)
+      console.error('Response status:', error.response.status)
+      
+      if (error.response.status === 422 && error.response.data?.errors) {
+        // Erreurs de validation
+        const errors = error.response.data.errors
+        const firstError = Object.values(errors)[0]
+        message = Array.isArray(firstError) ? firstError[0] : firstError
+      } else if (error.response.status === 413) {
+        message = 'Le fichier est trop volumineux. Veuillez réduire sa taille.'
+      } else if (error.response.status === 401) {
+        message = 'Session expirée. Veuillez vous reconnecter.'
+      } else if (error.response.data?.message) {
+        message = error.response.data.message
+      }
+    } else if (error.request) {
+      console.error('Request error:', error.request)
+      message = 'Erreur de connexion au serveur. Vérifiez votre connexion internet.'
+    }
     
     if (error.response?.data?.message) {
       message = error.response.data.message
