@@ -70,14 +70,20 @@ class TestRefundLotterySeeder extends Seeder
             'stock_quantity' => 1,
             'is_active' => true,
             'is_featured' => true,
+            'sale_mode' => 'direct', // Créer d'abord en mode direct
+            'image' => 'https://example.com/iphone15.jpg',
+        ]);
+        
+        // Mettre à jour le produit avec les métadonnées et le mode lottery
+        $product->update([
             'sale_mode' => 'lottery',
             'meta' => json_encode([
                 'min_participants' => 500, // Nécessite 500 participants
                 'max_participants' => 1000,
+                'ticket_price' => 1700, // Prix fixe pour éviter l'auto-calcul
                 'auto_draw' => true,
                 'test_product' => true,
             ]),
-            'image' => 'https://example.com/iphone15.jpg',
         ]);
 
         $this->command->info("✅ Product created: {$product->name} (Min participants: 500)");
