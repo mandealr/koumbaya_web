@@ -8,6 +8,8 @@ use App\Models\Product;
 use App\Models\Lottery;
 use App\Models\Payment;
 use App\Models\Category;
+use App\Models\UserType;
+use App\Models\Order;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
@@ -20,7 +22,17 @@ class TestRefundLotterySeeder extends Seeder
     {
         $this->command->info('🎯 Creating test lottery for refund testing...');
 
-        // 1. Créer ou récupérer un marchand
+        // 1. Récupérer les types d'utilisateurs
+        $merchantType = UserType::where('code', 'merchant')->first();
+        $customerType = UserType::where('code', 'customer')->first();
+        
+        if (!$merchantType || !$customerType) {
+            $this->command->error('User types not found. Please run UserTypeSeeder first.');
+            $this->command->info('Run: php artisan db:seed --class=UserTypeSeeder');
+            return;
+        }
+
+        // 2. Créer ou récupérer un marchand
         $merchant = User::firstOrCreate(
             ['email' => 'merchant.test@koumbaya.com'],
             [
@@ -28,17 +40,16 @@ class TestRefundLotterySeeder extends Seeder
                 'last_name' => 'Test',
                 'phone' => '074123456',
                 'password' => Hash::make('password'),
-                'account_type' => 'merchant',
-                'can_sell' => true,
-                'can_buy' => true,
+                'user_type_id' => $merchantType->id,
                 'is_active' => true,
-                'email_verified_at' => now(),
+                'is_email_verified' => true,
+                'verified_at' => now(),
             ]
         );
 
         $this->command->info("✅ Merchant created/found: {$merchant->email}");
 
-        // 2. Créer une catégorie si nécessaire
+        // 3. Créer une catégorie si nécessaire
         $category = Category::firstOrCreate(
             ['name' => 'Test Category'],
             [
@@ -48,7 +59,7 @@ class TestRefundLotterySeeder extends Seeder
             ]
         );
 
-        // 3. Créer un produit pour la tombola
+        // 4. Créer un produit pour la tombola
         $product = Product::create([
             'merchant_id' => $merchant->id,
             'category_id' => $category->id,
@@ -74,30 +85,31 @@ class TestRefundLotterySeeder extends Seeder
 
         $this->command->info("✅ Product created: {$product->name} (Min participants: 500)");
 
-        // 4. Créer une tombola qui expire dans 2 jours (mais sera considérée comme expirée pour le test)
+        // 5. Créer une tombola qui expire dans 2 jours (mais sera considérée comme expirée pour le test)
         $expiryDate = Carbon::now()->subDays(2); // Expirée depuis 2 jours
         
         $lottery = Lottery::create([
             'lottery_number' => 'TEST-REFUND-' . time(),
+            'title' => 'Test Refund Lottery - iPhone 15 Pro Max',
+            'description' => 'Tombola de test pour le système de remboursement - Participants insuffisants',
             'product_id' => $product->id,
-            'merchant_id' => $merchant->id,
             'ticket_price' => 1700, // 1,700 FCFA par ticket
             'max_tickets' => 500,
-            'min_participants' => 500,
-            'draw_date' => $expiryDate,
-            'end_date' => $expiryDate,
-            'start_date' => Carbon::now()->subDays(30),
-            'status' => 'active', // Toujours active mais expirée
-            'description' => 'Tombola de test pour le système de remboursement - Participants insuffisants',
-            'rules' => 'Tombola de test uniquement',
             'sold_tickets' => 100, // Seulement 100 tickets vendus sur 500 requis
+            'draw_date' => $expiryDate,
+            'status' => 'active', // Toujours active mais expirée
+            'meta' => json_encode([
+                'min_participants' => 500,
+                'test_lottery' => true,
+                'created_for_refund_test' => true,
+            ]),
         ]);
 
         $this->command->info("✅ Lottery created: {$lottery->lottery_number}");
         $this->command->info("   - Expired: {$expiryDate->format('Y-m-d H:i:s')}");
         $this->command->info("   - Participants: 100/500 (insufficient)");
 
-        // 5. Créer des utilisateurs acheteurs et des paiements
+        // 6. Créer des utilisateurs acheteurs et des paiements
         $this->command->info("🎫 Creating 100 ticket purchases...");
 
         for ($i = 1; $i <= 100; $i++) {
@@ -108,28 +120,45 @@ class TestRefundLotterySeeder extends Seeder
                 'email' => "buyer{$i}.test@koumbaya.com",
                 'phone' => '077' . str_pad($i, 6, '0', STR_PAD_LEFT),
                 'password' => Hash::make('password'),
-                'account_type' => 'customer',
-                'can_sell' => false,
-                'can_buy' => true,
+                'user_type_id' => $customerType->id,
                 'is_active' => true,
-                'email_verified_at' => now(),
+                'is_email_verified' => true,
+                'verified_at' => now(),
+            ]);
+
+            // Créer une commande d'abord (requis pour les paiements)
+            $order = Order::create([
+                'order_number' => 'ORD-TEST-' . $i . '-' . time(),
+                'user_id' => $buyer->id,
+                'type' => 'lottery',
+                'lottery_id' => $lottery->id,
+                'total_amount' => 1700,
+                'currency' => 'XAF',
+                'status' => 'paid',
+                'paid_at' => Carbon::now()->subDays(rand(5, 25)),
+                'meta' => json_encode([
+                    'lottery_id' => $lottery->id,
+                    'ticket_number' => $i,
+                    'test_order' => true,
+                ]),
             ]);
 
             // Créer un paiement pour ce ticket
             Payment::create([
-                'user_id' => $buyer->id,
+                'reference' => 'REF-TEST-' . $i . '-' . time(),
+                'order_id' => $order->id,
                 'lottery_id' => $lottery->id,
+                'user_id' => $buyer->id,
                 'amount' => 1700,
                 'currency' => 'XAF',
                 'payment_method' => 'mobile_money',
-                'payment_provider' => rand(0, 1) ? 'airtel_money' : 'moov_money',
-                'status' => 'completed',
-                'transaction_id' => 'TXN-TEST-' . $i . '-' . time(),
-                'reference' => 'REF-TEST-' . $i . '-' . time(),
+                'status' => 'processed',
+                'external_transaction_id' => 'TXN-TEST-' . $i . '-' . time(),
                 'paid_at' => Carbon::now()->subDays(rand(5, 25)),
                 'meta' => json_encode([
                     'ticket_number' => $i,
                     'test_data' => true,
+                    'payment_provider' => rand(0, 1) ? 'airtel_money' : 'moov_money',
                 ]),
             ]);
 
@@ -140,7 +169,7 @@ class TestRefundLotterySeeder extends Seeder
 
         $this->command->info("✅ Created 100 ticket purchases");
 
-        // 6. Résumé des données créées
+        // 7. Résumé des données créées
         $this->command->newLine();
         $this->command->info("🎯 TEST LOTTERY CREATED SUCCESSFULLY!");
         $this->command->info("==========================================");
