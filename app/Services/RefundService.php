@@ -7,6 +7,8 @@ use App\Models\Lottery;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Notification;
+use App\Models\Payment;
+use App\Services\ShapPayoutService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -15,11 +17,16 @@ class RefundService
 {
     protected $notificationService;
     protected $otpService;
+    protected $shapPayoutService;
 
-    public function __construct(NotificationService $notificationService, OtpService $otpService)
-    {
+    public function __construct(
+        NotificationService $notificationService, 
+        OtpService $otpService,
+        ShapPayoutService $shapPayoutService
+    ) {
         $this->notificationService = $notificationService;
         $this->otpService = $otpService;
+        $this->shapPayoutService = $shapPayoutService;
     }
 
     /**
@@ -100,7 +107,8 @@ class RefundService
     }
 
     /**
-     * Vérifier et traiter les tombolas qui nécessitent des remboursements
+     * Vérifier et traiter les tombolas qui nécessitent des remboursements automatiques
+     * Les tombolas expirées sont traitées après 24h, sauf traitement manuel avant
      */
     public function checkAndProcessRefunds(): array
     {
@@ -110,8 +118,11 @@ class RefundService
             'cancelled_lotteries' => []
         ];
 
-        // 1. Tombolas expirées avec participants insuffisants
-        $expiredLotteries = Lottery::where('draw_date', '<=', now())
+        // 1. Tombolas expirées avec participants insuffisants (après délai de 24h)
+        $delayHours = config('refund.auto_rules.insufficient_participants.delay_hours', 24);
+        $refundDeadline = now()->subHours($delayHours);
+        
+        $expiredLotteries = Lottery::where('draw_date', '<=', $refundDeadline)
             ->where('status', 'active')
             ->with('product')
             ->get();
@@ -143,6 +154,87 @@ class RefundService
         }
 
         return $results;
+    }
+
+    /**
+     * Vérifier les tombolas éligibles pour un remboursement (expirées mais pas encore traitées)
+     */
+    public function getEligibleLotteriesForRefund(): array
+    {
+        // Tombolas expirées avec participants insuffisants mais pas encore remboursées
+        $expiredLotteries = Lottery::where('draw_date', '<=', now())
+            ->where('status', 'active')
+            ->with(['product', 'refunds'])
+            ->get()
+            ->filter(function ($lottery) {
+                // Vérifier les participants insuffisants
+                $minParticipants = $lottery->product->min_participants 
+                    ?? config('refund.thresholds.min_participants_default', 10);
+                
+                // Vérifier qu'aucun remboursement n'a été traité
+                $hasRefunds = $lottery->refunds()->exists();
+                
+                return $lottery->sold_tickets < $minParticipants && !$hasRefunds;
+            });
+
+        return $expiredLotteries->map(function ($lottery) {
+            $minParticipants = $lottery->product->min_participants 
+                ?? config('refund.thresholds.min_participants_default', 10);
+            
+            $delayHours = config('refund.auto_rules.insufficient_participants.delay_hours', 24);
+            $autoRefundTime = $lottery->draw_date->addHours($delayHours);
+            $canProcessManually = config('refund.auto_rules.insufficient_participants.allow_manual_before_delay', true);
+            
+            return [
+                'lottery' => $lottery,
+                'min_participants' => $minParticipants,
+                'current_participants' => $lottery->sold_tickets,
+                'auto_refund_time' => $autoRefundTime,
+                'can_process_now' => now()->gte($autoRefundTime),
+                'can_process_manually' => $canProcessManually && now()->lt($autoRefundTime),
+                'hours_until_auto' => now()->lt($autoRefundTime) ? now()->diffInHours($autoRefundTime) : 0,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Forcer le remboursement d'une tombola avant le délai automatique
+     */
+    public function forceRefundLottery(Lottery $lottery, string $reason = 'manual_force'): array
+    {
+        // Vérifier que la tombola est éligible
+        $minParticipants = $lottery->product->min_participants 
+            ?? config('refund.thresholds.min_participants_default', 10);
+            
+        if ($lottery->status !== 'active') {
+            throw new \Exception('Cette tombola n\'est pas active');
+        }
+        
+        if ($lottery->draw_date > now()) {
+            throw new \Exception('Cette tombola n\'est pas encore expirée');
+        }
+        
+        if ($lottery->sold_tickets >= $minParticipants) {
+            throw new \Exception('Cette tombola a suffisamment de participants');
+        }
+        
+        if ($lottery->refunds()->exists()) {
+            throw new \Exception('Des remboursements ont déjà été traités pour cette tombola');
+        }
+        
+        // Traiter les remboursements
+        $result = $this->processAutomaticRefunds($lottery, $reason);
+        
+        Log::info('Manual lottery refund forced', [
+            'lottery_id' => $lottery->id,
+            'lottery_number' => $lottery->lottery_number,
+            'participants' => $lottery->sold_tickets,
+            'min_participants' => $minParticipants,
+            'forced_by' => auth()->id(),
+            'result' => $result
+        ]);
+        
+        return $result;
     }
 
     /**
@@ -197,23 +289,44 @@ class RefundService
                 'timestamp' => now()->toISOString()
             ];
 
+            Log::info('SHAP Mobile Money refund processed successfully', [
+                'refund_id' => $refund->id,
+                'payout_id' => $apiResponse['payout_id'],
+                'transaction_id' => $apiResponse['transaction_id'],
+                'operator' => $operator,
+                'amount' => $refund->amount,
+                'phone' => $user->phone,
+                'status' => $apiResponse['status']
+            ]);
+
             // Marquer le remboursement comme traité
             $refund->process(null, $apiResponse);
-            $refund->complete($apiResponse);
+            if ($apiResponse['status'] === 'success') {
+                $refund->complete($apiResponse);
+            }
 
-            Log::info('Mobile Money refund processed', [
-                'refund_id' => $refund->id,
-                'user_id' => $user->id,
-                'amount' => $refund->amount,
-                'phone' => $user->phone
+            // Ajouter des notes sur le traitement
+            $refund->update([
+                'notes' => ($refund->notes ? $refund->notes . "\n" : '') . "Processed via SHAP API with operator: {$operator}"
             ]);
 
             return true;
         } catch (\Exception $e) {
-            Log::error('Mobile Money refund failed', [
+            Log::error('SHAP Mobile Money refund failed', [
                 'refund_id' => $refund->id,
-                'error' => $e->getMessage()
+                'user_phone' => $user->phone,
+                'amount' => $refund->amount,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
+
+            $refund->update([
+                'status' => 'rejected',
+                'rejection_reason' => 'SHAP API Error: ' . $e->getMessage(),
+                'rejected_at' => now(),
+                'notes' => ($refund->notes ? $refund->notes . "\n" : '') . "Failed via SHAP API: {$e->getMessage()}"
+            ]);
+
             return false;
         }
     }
@@ -265,7 +378,7 @@ class RefundService
     /**
      * Créer un remboursement manuel
      */
-    public function createManualRefund(Transaction $transaction, string $reason, User $requestedBy = null): Refund
+    public function createManualRefund(Payment $transaction, string $reason, User $requestedBy = null): Refund
     {
         $refund = Refund::createManualRefund($transaction, $reason, $requestedBy);
 

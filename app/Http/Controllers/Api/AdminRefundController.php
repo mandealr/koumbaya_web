@@ -245,6 +245,7 @@ class AdminRefundController extends Controller
         $validator = Validator::make($request->all(), [
             'lottery_id' => 'nullable|integer|exists:lotteries,id',
             'dry_run' => 'boolean',
+            'force' => 'boolean', // Forcer le traitement même avant le délai de 24h
         ]);
 
         if ($validator->fails()) {
@@ -253,6 +254,7 @@ class AdminRefundController extends Controller
 
         $lotteryId = $request->get('lottery_id');
         $dryRun = $request->boolean('dry_run');
+        $force = $request->boolean('force', false);
 
         try {
             if ($lotteryId) {
@@ -275,8 +277,13 @@ class AdminRefundController extends Controller
                     ]);
                 }
 
-                $reason = $lottery->status === 'cancelled' ? 'lottery_cancelled' : 'insufficient_participants';
-                $result = $this->refundService->processAutomaticRefunds($lottery, $reason);
+                if ($force && $lottery->status === 'active') {
+                    // Forcer le remboursement avant le délai
+                    $result = $this->refundService->forceRefundLottery($lottery, 'manual_force_admin');
+                } else {
+                    $reason = $lottery->status === 'cancelled' ? 'lottery_cancelled' : 'insufficient_participants';
+                    $result = $this->refundService->processAutomaticRefunds($lottery, $reason);
+                }
 
                 return $this->sendResponse([
                     'message' => 'Traitement terminé',
@@ -335,56 +342,62 @@ class AdminRefundController extends Controller
      */
     public function eligibleLotteries()
     {
-        // Tombolas expirées avec participants insuffisants
-        $expiredLotteries = Lottery::where('draw_date', '<=', now())
-            ->where('status', 'active')
-            ->with('product')
-            ->get()
-            ->filter(function ($lottery) {
-                $minParticipants = $lottery->product->min_participants ?? 10;
-                return $lottery->sold_tickets < $minParticipants;
-            });
+        try {
+            // Utiliser le service pour obtenir les tombolas éligibles avec statut détaillé
+            $eligibleLotteries = $this->refundService->getEligibleLotteriesForRefund();
 
-        // Tombolas annulées sans remboursements
-        $cancelledLotteries = Lottery::where('status', 'cancelled')
-            ->whereDoesntHave('refunds')
-            ->with('product')
-            ->get();
+            // Tombolas annulées sans remboursements
+            $cancelledLotteries = Lottery::where('status', 'cancelled')
+                ->whereDoesntHave('refunds')
+                ->with('product')
+                ->get();
 
-        return $this->sendResponse([
-            'expired_insufficient' => $expiredLotteries->map(function ($lottery) {
-                $minParticipants = $lottery->product->min_participants ?? 10;
-                return [
-                    'id' => $lottery->id,
-                    'lottery_number' => $lottery->lottery_number,
-                    'product_title' => $lottery->product->title,
-                    'participants' => $lottery->sold_tickets,
-                    'min_participants' => $minParticipants,
-                    'ticket_price' => $lottery->ticket_price,
-                    'estimated_refund' => $lottery->sold_tickets * $lottery->ticket_price,
-                    'end_date' => $lottery->end_date,
-                ];
-            }),
-            'cancelled' => $cancelledLotteries->map(function ($lottery) {
-                return [
-                    'id' => $lottery->id,
-                    'lottery_number' => $lottery->lottery_number,
-                    'product_title' => $lottery->product->title,
-                    'participants' => $lottery->sold_tickets,
-                    'ticket_price' => $lottery->ticket_price,
-                    'estimated_refund' => $lottery->sold_tickets * $lottery->ticket_price,
-                ];
-            }),
-            'summary' => [
-                'expired_count' => $expiredLotteries->count(),
-                'expired_estimated_refund' => $expiredLotteries->sum(function ($lottery) {
-                    return $lottery->sold_tickets * $lottery->ticket_price;
+            return $this->sendResponse([
+                'expired_insufficient' => collect($eligibleLotteries)->map(function ($item) {
+                    $lottery = $item['lottery'];
+                    return [
+                        'id' => $lottery->id,
+                        'lottery_number' => $lottery->lottery_number,
+                        'product_title' => $lottery->product->title,
+                        'participants' => $item['current_participants'],
+                        'min_participants' => $item['min_participants'],
+                        'ticket_price' => $lottery->ticket_price,
+                        'estimated_refund' => $item['current_participants'] * $lottery->ticket_price,
+                        'end_date' => $lottery->end_date,
+                        'auto_refund_time' => $item['auto_refund_time'],
+                        'can_process_now' => $item['can_process_now'],
+                        'can_process_manually' => $item['can_process_manually'],
+                        'hours_until_auto' => $item['hours_until_auto'],
+                    ];
                 }),
-                'cancelled_count' => $cancelledLotteries->count(),
-                'cancelled_estimated_refund' => $cancelledLotteries->sum(function ($lottery) {
-                    return $lottery->sold_tickets * $lottery->ticket_price;
+                'cancelled' => $cancelledLotteries->map(function ($lottery) {
+                    return [
+                        'id' => $lottery->id,
+                        'lottery_number' => $lottery->lottery_number,
+                        'product_title' => $lottery->product->title,
+                        'participants' => $lottery->sold_tickets,
+                        'ticket_price' => $lottery->ticket_price,
+                        'estimated_refund' => $lottery->sold_tickets * $lottery->ticket_price,
+                        'can_process_now' => true,
+                        'can_process_manually' => true,
+                    ];
                 }),
-            ]
-        ]);
+                'summary' => [
+                    'expired_count' => count($eligibleLotteries),
+                    'ready_for_auto' => collect($eligibleLotteries)->where('can_process_now', true)->count(),
+                    'waiting_for_delay' => collect($eligibleLotteries)->where('can_process_now', false)->count(),
+                    'manual_allowed' => collect($eligibleLotteries)->where('can_process_manually', true)->count(),
+                    'expired_estimated_refund' => collect($eligibleLotteries)->sum(function ($item) {
+                        return $item['current_participants'] * $item['lottery']->ticket_price;
+                    }),
+                    'cancelled_count' => $cancelledLotteries->count(),
+                    'cancelled_estimated_refund' => $cancelledLotteries->sum(function ($lottery) {
+                        return $lottery->sold_tickets * $lottery->ticket_price;
+                    }),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return $this->sendError('Erreur lors du chargement des tombolas éligibles', ['error' => $e->getMessage()]);
+        }
     }
 }

@@ -275,6 +275,16 @@ Route::group([
         Route::get('/business-stats', [App\Http\Controllers\Api\MerchantProfileController::class, 'businessStats']);
     });
     
+    // Merchant Refund Management
+    Route::prefix('merchant/refunds')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\MerchantRefundController::class, 'index']);
+        Route::post('/', [App\Http\Controllers\Api\MerchantRefundController::class, 'store']);
+        Route::get('/stats', [App\Http\Controllers\Api\MerchantRefundController::class, 'stats']);
+        Route::get('/eligible-transactions', [App\Http\Controllers\Api\MerchantRefundController::class, 'eligibleTransactions']);
+        Route::get('/{id}', [App\Http\Controllers\Api\MerchantRefundController::class, 'show']);
+        Route::post('/{id}/cancel', [App\Http\Controllers\Api\MerchantRefundController::class, 'cancel']);
+    });
+    
     // Vendor Profiles Management
     Route::prefix('vendor-profiles')->group(function () {
         Route::get('/', [App\Http\Controllers\Api\VendorProfileController::class, 'index']);

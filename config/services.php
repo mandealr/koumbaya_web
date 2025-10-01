@@ -37,6 +37,27 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | SHAP Payout API Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for SHAP payout API integration for refunds
+    |
+    */
+
+    'shap' => [
+        'api_id' => env('API_PAYOUT_ID'),
+        'api_secret' => env('API_PAYOUT_SECRET'),
+        'base_url_lab' => 'https://test.billing-easy.net/shap/api/v1/merchant/',
+        'base_url_prod' => 'https://staging.billing-easy.net/shap/api/v1/merchant/',
+        'timeout' => 60,
+        'operators' => [
+            'airtel_money' => 'airtelmoney',
+            'moov_money' => 'moovmoney4',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | E-Billing Configuration
     |--------------------------------------------------------------------------
     |

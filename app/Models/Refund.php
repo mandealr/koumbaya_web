@@ -206,7 +206,7 @@ class Refund extends Model
     /**
      * Static factory methods
      */
-    public static function createAutomaticRefund(Transaction $transaction, string $reason, string $type = 'automatic')
+    public static function createAutomaticRefund(Payment $transaction, string $reason, string $type = 'automatic')
     {
         $refund = self::create([
             'refund_number' => 'REF-' . time() . '-' . $transaction->id,
@@ -220,7 +220,7 @@ class Refund extends Model
             'status' => 'approved', // Auto-approve automatic refunds
             'approved_at' => now(),
             'auto_processed' => true,
-            'refund_method' => 'mobile_money', // Default refund method
+            'refund_method' => config('refund.methods.default', 'mobile_money'), // Default refund method
         ]);
 
         // Update refund number with proper ID
@@ -229,7 +229,7 @@ class Refund extends Model
         return $refund;
     }
 
-    public static function createManualRefund(Transaction $transaction, string $reason, User $requestedBy = null)
+    public static function createManualRefund(Payment $transaction, string $reason, User $requestedBy = null)
     {
         $refund = self::create([
             'refund_number' => 'REF-' . time() . '-' . $transaction->id,
@@ -242,7 +242,7 @@ class Refund extends Model
             'type' => 'manual',
             'status' => 'pending', // Manual refunds need approval
             'auto_processed' => false,
-            'refund_method' => 'mobile_money',
+            'refund_method' => config('refund.methods.default', 'mobile_money'),
         ]);
 
         // Update refund number with proper ID

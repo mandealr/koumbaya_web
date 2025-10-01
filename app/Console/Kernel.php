@@ -33,12 +33,12 @@ class Kernel extends ConsoleKernel
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/lottery-draws-frequent.log'));
 
-        // Process automatic refunds daily at 3 AM
-        $schedule->command('refunds:process')
+        // Process expired lotteries and automatic refunds daily at 3 AM
+        $schedule->command('lottery:process-expired')
             ->dailyAt('03:00')
             ->withoutOverlapping()
             ->runInBackground()
-            ->appendOutputTo(storage_path('logs/refunds.log'));
+            ->appendOutputTo(storage_path('logs/expired-lotteries.log'));
 
         // Expire old orders every 15 minutes
         $schedule->command('orders:expire-old')
