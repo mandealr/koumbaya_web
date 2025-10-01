@@ -62,7 +62,7 @@ class Payment extends Model
 
     public function refunds()
     {
-        return $this->hasMany(Refund::class, 'payment_id');
+        return $this->hasMany(Refund::class, 'transaction_id');
     }
 
     /**

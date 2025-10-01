@@ -66,10 +66,10 @@ class MerchantRefundController extends Controller
         try {
             $merchant = auth()->user();
             
-            // Récupérer les tombolas du marchand
-            $merchantLotteryIds = Lottery::where('merchant_id', $merchant->id)
-                ->pluck('id')
-                ->toArray();
+            // Récupérer les tombolas du marchand via les produits
+            $merchantLotteryIds = Lottery::whereHas('product', function ($query) use ($merchant) {
+                $query->where('merchant_id', $merchant->id);
+            })->pluck('id')->toArray();
 
             $query = Refund::whereIn('lottery_id', $merchantLotteryIds)
                 ->with(['user', 'lottery.product', 'transaction'])
@@ -142,10 +142,10 @@ class MerchantRefundController extends Controller
         try {
             $merchant = auth()->user();
             
-            // Récupérer les tombolas du marchand
-            $merchantLotteryIds = Lottery::where('merchant_id', $merchant->id)
-                ->pluck('id')
-                ->toArray();
+            // Récupérer les tombolas du marchand via les produits
+            $merchantLotteryIds = Lottery::whereHas('product', function ($query) use ($merchant) {
+                $query->where('merchant_id', $merchant->id);
+            })->pluck('id')->toArray();
 
             $refunds = Refund::whereIn('lottery_id', $merchantLotteryIds);
 
@@ -217,7 +217,7 @@ class MerchantRefundController extends Controller
             $transaction = Payment::findOrFail($request->transaction_id);
 
             // Vérifier que la transaction appartient à une tombola du marchand
-            if ($transaction->lottery->merchant_id !== $merchant->id) {
+            if ($transaction->lottery->product->merchant_id !== $merchant->id) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Vous n\'êtes pas autorisé à rembourser cette transaction'
@@ -297,7 +297,7 @@ class MerchantRefundController extends Controller
                 ->findOrFail($id);
 
             // Vérifier que le remboursement appartient à une tombola du marchand
-            if ($refund->lottery->merchant_id !== $merchant->id) {
+            if ($refund->lottery->product->merchant_id !== $merchant->id) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Remboursement non trouvé'
@@ -342,7 +342,7 @@ class MerchantRefundController extends Controller
             $refund = Refund::findOrFail($id);
 
             // Vérifier que le remboursement appartient à une tombola du marchand
-            if ($refund->lottery->merchant_id !== $merchant->id) {
+            if ($refund->lottery->product->merchant_id !== $merchant->id) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Remboursement non trouvé'
@@ -405,7 +405,7 @@ class MerchantRefundController extends Controller
             $merchant = auth()->user();
             
             // Récupérer les transactions des tombolas du marchand qui peuvent être remboursées
-            $eligibleTransactions = Payment::whereHas('lottery', function ($query) use ($merchant) {
+            $eligibleTransactions = Payment::whereHas('lottery.product', function ($query) use ($merchant) {
                 $query->where('merchant_id', $merchant->id);
             })
             ->where('status', 'completed')
