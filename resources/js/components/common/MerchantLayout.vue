@@ -186,7 +186,8 @@ import {
   UserIcon,
   ChevronDownIcon,
   ArrowRightOnRectangleIcon,
-  Bars3Icon
+  Bars3Icon,
+  CurrencyDollarIcon
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
@@ -219,6 +220,7 @@ const navigation = computed(() => {
   if (!isIndividualSeller.value) {
     baseNavigation.push(
       { name: 'Tombolas', href: '/merchant/lotteries', icon: GiftIcon },
+      { name: 'Remboursements', href: '/merchant/refunds', icon: CurrencyDollarIcon },
       { name: 'Statistiques', href: '/merchant/analytics', icon: ChartBarIcon }
     )
   }

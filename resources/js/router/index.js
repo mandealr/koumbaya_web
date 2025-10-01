@@ -436,6 +436,11 @@ const routes = [
         props: true
       },
       {
+        path: 'refunds',
+        name: 'merchant.refunds',
+        component: () => import('@/pages/merchant/Refunds.vue')
+      },
+      {
         path: 'analytics',
         name: 'merchant.analytics',
         component: () => import('@/pages/merchant/Analytics.vue')
