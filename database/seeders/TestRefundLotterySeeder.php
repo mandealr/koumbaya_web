@@ -21,6 +21,11 @@ class TestRefundLotterySeeder extends Seeder
     public function run(): void
     {
         $this->command->info('🎯 Creating test lottery for refund testing...');
+        
+        // Nettoyage optionnel des données de test précédentes
+        if ($this->command->confirm('Clean up previous test data?', false)) {
+            $this->cleanupTestData();
+        }
 
         // 1. Récupérer les types d'utilisateurs
         $merchantType = UserType::where('code', 'merchant')->first();
@@ -116,23 +121,27 @@ class TestRefundLotterySeeder extends Seeder
         // 6. Créer des utilisateurs acheteurs et des paiements
         $this->command->info("🎫 Creating 100 ticket purchases...");
 
+        $timestamp = time(); // Timestamp unique pour cette exécution
+        
         for ($i = 1; $i <= 100; $i++) {
-            // Créer un utilisateur acheteur
-            $buyer = User::create([
-                'first_name' => "Acheteur{$i}",
-                'last_name' => 'Test',
-                'email' => "buyer{$i}.test@koumbaya.com",
-                'phone' => '077' . str_pad($i, 6, '0', STR_PAD_LEFT),
-                'password' => Hash::make('password'),
-                'user_type_id' => $customerType->id,
-                'is_active' => true,
-                'is_email_verified' => true,
-                'verified_at' => now(),
-            ]);
+            // Créer un utilisateur acheteur avec email unique
+            $buyer = User::firstOrCreate(
+                ['email' => "buyer{$i}.test.{$timestamp}@koumbaya.com"],
+                [
+                    'first_name' => "Acheteur{$i}",
+                    'last_name' => 'Test',
+                    'phone' => '077' . str_pad($timestamp + $i, 6, '0', STR_PAD_LEFT),
+                    'password' => Hash::make('password'),
+                    'user_type_id' => $customerType->id,
+                    'is_active' => true,
+                    'is_email_verified' => true,
+                    'verified_at' => now(),
+                ]
+            );
 
             // Créer une commande d'abord (requis pour les paiements)
             $order = Order::create([
-                'order_number' => 'ORD-TEST-' . $i . '-' . time(),
+                'order_number' => 'ORD-TEST-' . $i . '-' . $timestamp,
                 'user_id' => $buyer->id,
                 'type' => 'lottery',
                 'lottery_id' => $lottery->id,
@@ -149,7 +158,7 @@ class TestRefundLotterySeeder extends Seeder
 
             // Créer un paiement pour ce ticket
             Payment::create([
-                'reference' => 'REF-TEST-' . $i . '-' . time(),
+                'reference' => 'REF-TEST-' . $i . '-' . $timestamp,
                 'order_id' => $order->id,
                 'lottery_id' => $lottery->id,
                 'user_id' => $buyer->id,
@@ -158,7 +167,7 @@ class TestRefundLotterySeeder extends Seeder
                 'payment_method' => 'mobile_money',
                 'status' => 'processed',
                 'paid_at' => Carbon::now()->subDays(rand(5, 25)),
-                'transaction_id' => 'TXN-TEST-' . $i . '-' . time(),
+                'transaction_id' => 'TXN-TEST-' . $i . '-' . $timestamp,
                 'meta' => json_encode([
                     'ticket_number' => $i,
                     'test_data' => true,
@@ -203,5 +212,31 @@ class TestRefundLotterySeeder extends Seeder
         $this->command->info("# Admin API endpoint for manual force:");
         $this->command->info("POST /api/admin/refunds/process-automatic");
         $this->command->info("Body: {\"lottery_id\": {$lottery->id}, \"force\": true}");
+    }
+
+    /**
+     * Nettoyer les données de test précédentes
+     */
+    private function cleanupTestData(): void
+    {
+        $this->command->info("🧹 Cleaning up previous test data...");
+        
+        // Supprimer les paiements de test
+        Payment::where('reference', 'like', 'REF-TEST-%')->delete();
+        
+        // Supprimer les commandes de test
+        Order::where('order_number', 'like', 'ORD-TEST-%')->delete();
+        
+        // Supprimer les tombolas de test
+        Lottery::where('lottery_number', 'like', 'TEST-REFUND-%')->delete();
+        
+        // Supprimer les produits de test
+        Product::where('name', 'like', '%Test de Remboursement%')->delete();
+        
+        // Supprimer les utilisateurs de test
+        User::where('email', 'like', '%.test.%@koumbaya.com')->delete();
+        User::where('email', 'like', 'buyer%.test@koumbaya.com')->delete();
+        
+        $this->command->info("✅ Test data cleaned up");
     }
 }
