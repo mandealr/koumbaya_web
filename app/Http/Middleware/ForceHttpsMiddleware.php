@@ -16,7 +16,10 @@ class ForceHttpsMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         // Vérifier si HTTPS doit être forcé
-        if (config('security.https.force_https') && !$request->isSecure()) {
+        if (config('security.https.force_https') && !$this->isSecureConnection($request)) {
+            // Log la tentative de redirection
+            $this->logHttpsRedirect($request);
+
             // Redirection vers HTTPS
             return redirect()->secure($request->getRequestUri(), 301);
         }
@@ -24,7 +27,7 @@ class ForceHttpsMiddleware
         $response = $next($request);
 
         // Ajouter les headers HTTPS/HSTS seulement si la connexion est sécurisée
-        if ($request->isSecure()) {
+        if ($this->isSecureConnection($request)) {
             $this->addSecurityHeaders($response);
         }
 
