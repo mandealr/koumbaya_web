@@ -47,10 +47,12 @@ export function useMerchantLotteries() {
 
       // Utiliser la route lottery-performance qui existe et fonctionne déjà (avec pagination elle retourne la liste)
       const response = await get('/merchant/dashboard/lottery-performance', { params: queryParams })
-      
-      if (response.success) {
-        lotteries.value = response.data.data || response.data
-        
+
+      if (response && response.data) {
+        // Gérer différents formats de réponse
+        const lotteriesData = response.data.data || response.data.lotteries || response.data
+        lotteries.value = Array.isArray(lotteriesData) ? lotteriesData : []
+
         // Mettre à jour la pagination si présente
         if (response.data.current_page) {
           pagination.value = {
@@ -62,14 +64,18 @@ export function useMerchantLotteries() {
         }
 
         // Mettre à jour les statistiques du serveur si disponibles
-        if (response.stats) {
-          stats.value = response.stats
+        if (response.data.stats || response.stats) {
+          stats.value = response.data.stats || response.stats
         } else {
           // Calculer les statistiques localement en fallback
           calculateStats()
         }
+      } else {
+        // Réponse vide ou erreur
+        lotteries.value = []
+        calculateStats()
       }
-      
+
       return response
     } catch (err) {
       console.error('Erreur lors du chargement des tombolas:', err)

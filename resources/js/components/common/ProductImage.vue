@@ -72,22 +72,44 @@ const imageUrl = computed(() => {
     console.debug('ProductImage: No src provided')
     return ''
   }
-  
-  // Si c'est déjà une URL complète (http/https), la retourner telle quelle
-  if (props.src.startsWith('http')) {
-    return props.src
-  }
-  
+
   // Si c'est du base64, l'utiliser directement
   if (props.src.startsWith('data:image/')) {
     return props.src
   }
-  
+
+  // Si c'est une URL complète vers /storage/products/, extraire le chemin et utiliser la route API
+  if (props.src.includes('/storage/products/')) {
+    const match = props.src.match(/\/storage\/products\/(\d{4})\/(\d{2})\/(.+)$/)
+    if (match) {
+      const [, year, month, filename] = match
+      const finalUrl = `/api/products/images/${year}/${month}/${filename}`
+      console.debug('ProductImage: Converted storage URL to API URL:', finalUrl)
+      return finalUrl
+    }
+  }
+
+  // Si c'est déjà une URL complète (http/https) non-storage, la retourner telle quelle
+  if (props.src.startsWith('http')) {
+    return props.src
+  }
+
+  // Si c'est un chemin relatif qui commence par /storage/products/, extraire et convertir
+  if (props.src.startsWith('/storage/products/')) {
+    const match = props.src.match(/\/storage\/products\/(\d{4})\/(\d{2})\/(.+)$/)
+    if (match) {
+      const [, year, month, filename] = match
+      const finalUrl = `/api/products/images/${year}/${month}/${filename}`
+      console.debug('ProductImage: Converted storage path to API URL:', finalUrl)
+      return finalUrl
+    }
+  }
+
   // Si c'est un chemin relatif qui commence par /, l'utiliser tel quel
   if (props.src.startsWith('/')) {
     return props.src
   }
-  
+
   // Sinon, construire l'URL avec notre nouvelle route API
   // Format attendu : products/YYYY/MM/filename.ext
   const pathParts = props.src.split('/')
@@ -99,7 +121,7 @@ const imageUrl = computed(() => {
       return finalUrl
     }
   }
-  
+
   // Fallback: essayer de construire avec la date actuelle
   const now = new Date()
   const year = now.getFullYear()
