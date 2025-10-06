@@ -4,14 +4,23 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lottery;
-use App\Models\RefundRequest;
-use App\Models\LotteryTicket;
+use App\Models\Refund;
+use App\Models\Payment;
+use App\Services\RefundService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class LotteryCancellationController extends Controller
 {
+    protected $refundService;
+
+    public function __construct(RefundService $refundService)
+    {
+        $this->refundService = $refundService;
+    }
+
     /**
      * Cancel a lottery and create refund requests
      */
@@ -59,25 +68,26 @@ class LotteryCancellationController extends Controller
         }
 
         try {
-            DB::beginTransaction();
+            // Vérifier s'il y a des transactions payées pour cette tombola
+            $paidTransactions = Payment::where('lottery_id', $lottery->id)
+                ->where('status', 'completed')
+                ->count();
 
-            // Get all paid tickets for this lottery
-            $paidTickets = LotteryTicket::where('lottery_id', $lottery->id)
-                ->where('status', 'paid')
-                ->with(['user', 'order'])
-                ->get();
+            // Mettre à jour le statut de la tombola
+            $lottery->update([
+                'status' => 'cancelled',
+                'cancellation_reason' => $request->reason,
+                'cancellation_reason_type' => $request->reason_type,
+                'cancelled_at' => now(),
+                'cancelled_by' => $user->id
+            ]);
 
-            if ($paidTickets->isEmpty()) {
-                // No paid tickets, just cancel the lottery
-                $lottery->update([
-                    'status' => 'cancelled',
-                    'cancellation_reason' => $request->reason,
-                    'cancellation_reason_type' => $request->reason_type,
-                    'cancelled_at' => now(),
-                    'cancelled_by' => $user->id
+            if ($paidTransactions === 0) {
+                // Aucun paiement, pas de remboursement nécessaire
+                Log::info('Lottery cancelled without refunds', [
+                    'lottery_id' => $lottery->id,
+                    'reason' => $request->reason
                 ]);
-
-                DB::commit();
 
                 return response()->json([
                     'success' => true,
@@ -89,79 +99,35 @@ class LotteryCancellationController extends Controller
                 ]);
             }
 
-            // Group tickets by user to calculate refund amounts
-            $refundsByUser = [];
-            foreach ($paidTickets as $ticket) {
-                $userId = $ticket->user_id;
-                if (!isset($refundsByUser[$userId])) {
-                    $refundsByUser[$userId] = [
-                        'user' => $ticket->user,
-                        'tickets_count' => 0,
-                        'total_amount' => 0,
-                        'tickets' => []
-                    ];
-                }
-                $refundsByUser[$userId]['tickets_count']++;
-                $refundsByUser[$userId]['total_amount'] += $lottery->ticket_price;
-                $refundsByUser[$userId]['tickets'][] = $ticket;
-            }
+            // Utiliser le RefundService pour traiter les remboursements automatiques
+            $refundResult = $this->refundService->processAutomaticRefunds(
+                $lottery,
+                $request->reason_type
+            );
 
-            // Create refund requests for each user
-            $refundsCreated = 0;
-            foreach ($refundsByUser as $userId => $refundData) {
-                $refundRequest = RefundRequest::create([
-                    'user_id' => $userId,
+            if ($refundResult['success']) {
+                Log::info('Lottery cancelled with refunds', [
                     'lottery_id' => $lottery->id,
-                    'amount' => $refundData['total_amount'],
-                    'reason' => 'Lottery cancellation: ' . $request->reason,
-                    'reason_type' => 'lottery_cancellation',
-                    'status' => 'pending',
-                    'requested_by' => $user->id,
-                    'tickets_count' => $refundData['tickets_count'],
-                    'phone_number' => $refundData['user']->phone,
-                    'refund_method' => 'mobile_money', // Default to mobile money
-                    'metadata' => json_encode([
-                        'lottery_id' => $lottery->id,
-                        'lottery_title' => $lottery->title,
-                        'cancellation_reason' => $request->reason,
-                        'cancellation_reason_type' => $request->reason_type,
-                        'tickets' => $refundData['tickets']->pluck('id')->toArray()
-                    ])
+                    'refunds_created' => $refundResult['participant_count'],
+                    'total_amount' => $refundResult['total_refunded']
                 ]);
 
-                // Update tickets status to cancelled
-                foreach ($refundData['tickets'] as $ticket) {
-                    $ticket->update(['status' => 'cancelled']);
-                }
-
-                $refundsCreated++;
+                return response()->json([
+                    'success' => true,
+                    'message' => "Tombola annulée avec succès. {$refundResult['participant_count']} remboursement(s) traité(s).",
+                    'data' => [
+                        'lottery' => $lottery->fresh(),
+                        'refunds_created' => $refundResult['participant_count'],
+                        'total_participants' => $refundResult['participant_count'],
+                        'total_refund_amount' => $refundResult['total_refunded']
+                    ]
+                ]);
+            } else {
+                throw new \Exception($refundResult['error'] ?? 'Erreur lors du traitement des remboursements');
             }
 
-            // Update lottery status
-            $lottery->update([
-                'status' => 'cancelled',
-                'cancellation_reason' => $request->reason,
-                'cancellation_reason_type' => $request->reason_type,
-                'cancelled_at' => now(),
-                'cancelled_by' => $user->id
-            ]);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => "Tombola annulée avec succès. {$refundsCreated} demande(s) de remboursement créée(s).",
-                'data' => [
-                    'lottery' => $lottery->fresh(),
-                    'refunds_created' => $refundsCreated,
-                    'total_participants' => count($refundsByUser),
-                    'total_refund_amount' => array_sum(array_column($refundsByUser, 'total_amount'))
-                ]
-            ]);
-
         } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error('Error cancelling lottery', [
+            Log::error('Error cancelling lottery', [
                 'lottery_id' => $lotteryId,
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
@@ -170,7 +136,7 @@ class LotteryCancellationController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Une erreur est survenue lors de l\'annulation de la tombola'
+                'message' => 'Une erreur est survenue lors de l\'annulation de la tombola: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -181,9 +147,9 @@ class LotteryCancellationController extends Controller
     public function getCancellationDetails($lotteryId)
     {
         $user = auth()->user();
-        
+
         $lottery = Lottery::findOrFail($lotteryId);
-        
+
         // Check if user owns this lottery or is admin
         if ($lottery->user_id !== $user->id && !$user->isAdmin() && !$user->isSuperAdmin()) {
             return response()->json([
@@ -199,22 +165,24 @@ class LotteryCancellationController extends Controller
             ], 400);
         }
 
-        // Get related refund requests
-        $refundRequests = RefundRequest::where('lottery_id', $lottery->id)
-            ->with(['user'])
+        // Get related refunds (using Refund model, not RefundRequest)
+        $refunds = Refund::where('lottery_id', $lottery->id)
+            ->with(['user', 'transaction'])
             ->get();
 
         return response()->json([
             'success' => true,
             'data' => [
                 'lottery' => $lottery,
-                'refund_requests' => $refundRequests,
+                'refunds' => $refunds,
                 'summary' => [
-                    'total_refunds' => $refundRequests->count(),
-                    'total_amount' => $refundRequests->sum('amount'),
-                    'pending_refunds' => $refundRequests->where('status', 'pending')->count(),
-                    'approved_refunds' => $refundRequests->where('status', 'approved')->count(),
-                    'completed_refunds' => $refundRequests->where('status', 'completed')->count()
+                    'total_refunds' => $refunds->count(),
+                    'total_amount' => $refunds->sum('amount'),
+                    'pending_refunds' => $refunds->where('status', 'pending')->count(),
+                    'approved_refunds' => $refunds->where('status', 'approved')->count(),
+                    'processed_refunds' => $refunds->where('status', 'processed')->count(),
+                    'completed_refunds' => $refunds->where('status', 'completed')->count(),
+                    'rejected_refunds' => $refunds->where('status', 'rejected')->count()
                 ]
             ]
         ]);

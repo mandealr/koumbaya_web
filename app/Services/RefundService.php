@@ -285,42 +285,67 @@ class RefundService
             $user = $refund->user;
             $transaction = $refund->transaction;
 
-            // Simuler l'envoi du remboursement via Mobile Money
-            // En production, intégrer avec l'API du fournisseur Mobile Money
+            // Valider les données utilisateur
+            if (!$user->phone) {
+                throw new \Exception('User phone number is missing');
+            }
 
-            $refundData = [
-                'amount' => $refund->amount,
+            // Détecter l'opérateur basé sur le numéro de téléphone
+            $operator = $this->shapPayoutService->detectOperatorFromPhone($user->phone);
+
+            // Valider les données du payout
+            $validationErrors = $this->shapPayoutService->validatePayoutData($user->phone, $refund->amount);
+            if (!empty($validationErrors)) {
+                throw new \Exception('Validation failed: ' . implode(', ', $validationErrors));
+            }
+
+            Log::info('Processing SHAP Mobile Money refund', [
+                'refund_id' => $refund->id,
+                'refund_number' => $refund->refund_number,
+                'user_id' => $user->id,
                 'phone' => $user->phone,
-                'reference' => $refund->refund_number,
-                'description' => 'Remboursement tombola ' . ($refund->lottery->lottery_number ?? 'N/A')
-            ];
+                'amount' => $refund->amount,
+                'operator' => $operator
+            ]);
 
-            // Simulation d'une réponse d'API réussie
-            $apiResponse = [
-                'success' => true,
-                'transaction_id' => 'MM-REF-' . time(),
-                'status' => 'completed',
-                'timestamp' => now()->toISOString()
-            ];
+            // Créer le payout via SHAP API
+            $payoutResponse = $this->shapPayoutService->createPayout(
+                $operator,
+                $user->phone,
+                $refund->amount,
+                $refund->refund_number,
+                'refund'
+            );
 
             Log::info('SHAP Mobile Money refund processed successfully', [
                 'refund_id' => $refund->id,
-                'payout_id' => $apiResponse['payout_id'],
-                'transaction_id' => $apiResponse['transaction_id'],
+                'payout_id' => $payoutResponse['payout_id'],
+                'transaction_id' => $payoutResponse['transaction_id'],
                 'operator' => $operator,
                 'amount' => $refund->amount,
                 'phone' => $user->phone,
-                'status' => $apiResponse['status']
+                'state' => $payoutResponse['state']
             ]);
 
             // Marquer le remboursement comme traité
-            $refund->process(null, $apiResponse);
-            if ($apiResponse['status'] === 'success') {
-                $refund->complete($apiResponse);
+            $refund->process(null, [
+                'shap_payout_id' => $payoutResponse['payout_id'],
+                'shap_transaction_id' => $payoutResponse['transaction_id'],
+                'operator' => $operator,
+                'state' => $payoutResponse['state'],
+                'timestamp' => now()->toISOString()
+            ]);
+
+            // Si le payout est en succès, marquer comme complété
+            if (in_array($payoutResponse['state'], ['success', 'completed'])) {
+                $refund->complete([
+                    'completed_at' => now()->toISOString()
+                ]);
             }
 
-            // Ajouter des notes sur le traitement
+            // Stocker l'ID externe pour référence
             $refund->update([
+                'external_refund_id' => $payoutResponse['payout_id'],
                 'notes' => ($refund->notes ? $refund->notes . "\n" : '') . "Processed via SHAP API with operator: {$operator}"
             ]);
 
@@ -328,7 +353,7 @@ class RefundService
         } catch (\Exception $e) {
             Log::error('SHAP Mobile Money refund failed', [
                 'refund_id' => $refund->id,
-                'user_phone' => $user->phone,
+                'user_phone' => $user->phone ?? 'N/A',
                 'amount' => $refund->amount,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()

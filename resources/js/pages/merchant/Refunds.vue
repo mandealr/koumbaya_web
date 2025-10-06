@@ -255,21 +255,19 @@
     </div>
 
     <!-- Refund Request Modal -->
-    <!-- TODO: Implement RefundRequestModal component -->
-    <!-- <RefundRequestModal
+    <RefundRequestModal
       v-if="showRefundModal"
       @close="showRefundModal = false"
       @success="handleRefundRequestSuccess"
-    /> -->
+    />
 
     <!-- Refund Detail Modal -->
-    <!-- TODO: Implement RefundDetailModal component -->
-    <!-- <RefundDetailModal
+    <RefundDetailModal
       v-if="showDetailModal && selectedRefund"
       :refund="selectedRefund"
       @close="showDetailModal = false"
       @updated="handleRefundUpdated"
-    /> -->
+    />
   </div>
 </template>
 
@@ -291,8 +289,8 @@ import {
 } from '@heroicons/vue/24/outline'
 
 // Components
-// import RefundRequestModal from '@/components/merchant/RefundRequestModal.vue'
-// import RefundDetailModal from '@/components/merchant/RefundDetailModal.vue'
+import RefundRequestModal from '@/components/merchant/RefundRequestModal.vue'
+import RefundDetailModal from '@/components/merchant/RefundDetailModal.vue'
 
 // Composables
 const { get, post, loading } = useApi()
