@@ -713,4 +713,31 @@ class AdminLotteryController extends Controller
 
         return response()->json($data);
     }
+
+    /**
+     * Get all payments for a specific lottery
+     */
+    public function getLotteryPayments($id)
+    {
+        $lottery = Lottery::with('product')->findOrFail($id);
+
+        // Récupérer tous les paiements complétés pour cette tombola
+        $payments = \App\Models\Payment::where('lottery_id', $id)
+            ->where('status', 'completed')
+            ->with('user:id,first_name,last_name,email,phone')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'payments' => $payments,
+            'lottery' => [
+                'id' => $lottery->id,
+                'lottery_number' => $lottery->lottery_number,
+                'product_title' => $lottery->product->name ?? 'N/A',
+                'ticket_price' => $lottery->ticket_price,
+                'participants' => $payments->count()
+            ]
+        ]);
+    }
 }

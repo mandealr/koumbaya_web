@@ -380,6 +380,7 @@ Route::group([
         Route::get('/', 'index');
         Route::get('/statistics', 'statistics');
         Route::get('/eligible-for-draw', 'eligibleForDraw');
+        Route::get('/{id}/payments', 'getLotteryPayments');
         Route::get('/{id}', 'show');
         Route::post('/{id}/draw', 'draw');
         Route::post('/batch-draw', 'batchDraw');

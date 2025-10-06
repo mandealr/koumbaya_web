@@ -99,12 +99,13 @@
                 <div class="text-sm">{{ lottery.participants }}/{{ lottery.min_participants }} participants</div>
               </div>
               <div class="text-right">
-                <div class="font-semibold text-orange-700">{{ formatCurrency(lottery.estimated_refund) }}</div>
+                <div class="font-semibold text-orange-700 mb-2">{{ formatCurrency(lottery.estimated_refund) }}</div>
                 <button
-                  @click="processLottery(lottery.id, false)"
-                  class="admin-btn-accent text-sm"
+                  @click="showRefundDetailsModal(lottery)"
+                  class="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium"
                 >
-                  Rembourser
+                  <BanknotesIcon class="w-4 h-4" />
+                  Voir les détails & Rembourser
                 </button>
               </div>
             </div>
@@ -129,12 +130,13 @@
                 <div class="text-sm">{{ lottery.participants }} participants</div>
               </div>
               <div class="text-right">
-                <div class="font-semibold text-red-700">{{ formatCurrency(lottery.estimated_refund) }}</div>
+                <div class="font-semibold text-red-700 mb-2">{{ formatCurrency(lottery.estimated_refund) }}</div>
                 <button
-                  @click="processLottery(lottery.id, false)"
-                  class="admin-btn-danger text-sm"
+                  @click="showRefundDetailsModal(lottery)"
+                  class="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium"
                 >
-                  Rembourser
+                  <BanknotesIcon class="w-4 h-4" />
+                  Voir les détails & Rembourser
                 </button>
               </div>
             </div>
@@ -409,12 +411,21 @@
         </div>
       </div>
     </div>
+
+    <!-- Lottery Refund Details Modal -->
+    <LotteryRefundModal
+      v-if="showRefundModal && selectedLottery"
+      :lottery="selectedLottery"
+      @close="showRefundModal = false"
+      @success="handleRefundSuccess"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useApi } from '@/composables/api'
+import LotteryRefundModal from '@/components/admin/LotteryRefundModal.vue'
 import {
   BanknotesIcon,
   XMarkIcon,
@@ -438,6 +449,8 @@ const eligibleLotteries = ref({})
 const showProcessAutomatic = ref(false)
 const refundToReject = ref(null)
 const rejectReason = ref('')
+const showRefundModal = ref(false)
+const selectedLottery = ref(null)
 
 const filters = ref({
   status: '',
@@ -551,6 +564,22 @@ const processAutomatic = async () => {
   } finally {
     processing.value = false
   }
+}
+
+const showRefundDetailsModal = (lottery) => {
+  selectedLottery.value = lottery
+  showRefundModal.value = true
+}
+
+const handleRefundSuccess = async () => {
+  showRefundModal.value = false
+  selectedLottery.value = null
+
+  await Promise.all([
+    loadRefunds(),
+    loadStats(),
+    checkEligibleLotteries()
+  ])
 }
 
 const processLottery = async (lotteryId, dryRun = false) => {
