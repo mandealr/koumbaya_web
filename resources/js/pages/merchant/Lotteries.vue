@@ -407,8 +407,12 @@ const loadCategories = async () => {
   try {
     const response = await get('/categories')
     // Gestion flexible de la structure de réponse
-    if (response?.data) {
+    if (!response) {
+      categories.value = []
+    } else if (response?.data) {
       categories.value = response.data.categories || response.data || []
+    } else if (response?.categories) {
+      categories.value = response.categories
     } else if (Array.isArray(response)) {
       categories.value = response
     } else {
