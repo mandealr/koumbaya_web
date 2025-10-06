@@ -721,55 +721,73 @@ class AdminLotteryController extends Controller
     {
         $lottery = Lottery::with('product')->findOrFail($id);
 
-        // Récupérer tous les paiements complétés pour cette tombola
-        // Le remboursement se fait par commande, pas par ticket
-        $payments = \App\Models\Payment::where('lottery_id', $id)
-            ->where('status', 'completed')
-            ->with(['order.user:id,first_name,last_name,email,phone'])
+        // Récupérer toutes les commandes payées pour cette tombola
+        // Le remboursement se fait par commande (order), basé sur le nombre de tickets achetés
+        $orders = \App\Models\Order::where('lottery_id', $id)
+            ->where('status', 'paid')
+            ->with(['user', 'tickets'])
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(function($payment) use ($lottery) {
+            ->map(function($order) use ($lottery) {
+                if (!$order->user) {
+                    return null;
+                }
+
+                // Compter le nombre de tickets payés dans cette commande
+                $ticketCount = \App\Models\LotteryTicket::where('order_id', $order->id)
+                    ->where('lottery_id', $lottery->id)
+                    ->where('status', 'paid')
+                    ->count();
+
+                if ($ticketCount == 0) {
+                    return null;
+                }
+
+                // Calculer le montant payé = nombre de tickets × prix du ticket
+                $ticketPrice = floatval($lottery->ticket_price);
+                $totalAmountPaid = $ticketCount * $ticketPrice;
+
                 // Calculer le montant à rembourser en retirant les frais Koumbaya
                 // Le prix du ticket inclut: prix_base + commission (10%) + marge (15%)
                 // Donc: ticket_price = prix_base * 1.25
-                // Remboursement = prix_base = ticket_price / 1.25
-
+                // Remboursement = prix_base = (nombre_tickets × ticket_price) / 1.25
                 $commissionRate = config('koumbaya.ticket_calculation.commission_rate', 0.10);
                 $marginRate = config('koumbaya.ticket_calculation.margin_rate', 0.15);
                 $koumbayaFeesRate = $commissionRate + $marginRate; // 0.25 (25%)
 
-                // Montant payé par le client
-                $amountPaid = floatval($payment->amount);
-
                 // Montant à rembourser (sans les frais Koumbaya)
-                $refundAmount = $amountPaid / (1 + $koumbayaFeesRate);
+                $refundAmount = $totalAmountPaid / (1 + $koumbayaFeesRate);
+
+                // Récupérer la première transaction pour la référence
+                $firstPayment = \App\Models\Payment::where('order_id', $order->id)
+                    ->where('lottery_id', $lottery->id)
+                    ->first();
 
                 return [
-                    'id' => $payment->id,
-                    'reference' => $payment->reference,
-                    'amount' => $amountPaid, // Montant total payé
+                    'id' => $order->id,
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'reference' => $firstPayment ? $firstPayment->reference : 'N/A',
+                    'amount' => $totalAmountPaid, // Montant total payé (tickets × prix)
                     'refund_amount' => round($refundAmount, 0), // Montant à rembourser (sans frais)
-                    'koumbaya_fees' => round($amountPaid - $refundAmount, 0), // Frais Koumbaya retenus
-                    'created_at' => $payment->created_at,
-                    'user' => $payment->order && $payment->order->user ? $payment->order->user : null,
-                    'order_number' => $payment->order ? $payment->order->order_number : 'N/A'
+                    'koumbaya_fees' => round($totalAmountPaid - $refundAmount, 0), // Frais Koumbaya retenus
+                    'created_at' => $order->created_at,
+                    'user' => $order->user,
+                    'ticket_count' => $ticketCount // Nombre de tickets dans cette commande
                 ];
             })
-            ->filter(function($payment) {
-                // Filtrer les paiements sans utilisateur
-                return $payment['user'] !== null;
-            })
+            ->filter()
             ->values();
 
         return response()->json([
             'success' => true,
-            'payments' => $payments,
+            'payments' => $orders, // On appelle "payments" mais ce sont des orders groupés
             'lottery' => [
                 'id' => $lottery->id,
                 'lottery_number' => $lottery->lottery_number,
                 'product_title' => $lottery->product->name ?? 'N/A',
                 'ticket_price' => $lottery->ticket_price,
-                'participants' => $payments->count()
+                'participants' => $orders->count()
             ]
         ]);
     }
