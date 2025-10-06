@@ -403,8 +403,17 @@ class MerchantDashboardController extends Controller
      */
     public function getLotteryPerformance(Request $request)
     {
+        $user = auth()->user();
         $merchantId = auth()->id();
-        
+
+        \Log::info('getLotteryPerformance called', [
+            'user_id' => $merchantId,
+            'user_role' => $user->role ?? 'unknown',
+            'is_merchant' => $user ? $user->isMerchant() : false,
+            'has_pagination' => $request->has('per_page') || $request->has('page'),
+            'params' => $request->all()
+        ]);
+
         // Si c'est une requête pour la liste des tombolas (avec pagination)
         if ($request->has('per_page') || $request->has('page')) {
             return $this->getLotteriesForList($request);

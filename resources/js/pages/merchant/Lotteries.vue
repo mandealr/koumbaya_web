@@ -346,27 +346,51 @@ const loadLotteries = async (page = 1) => {
 
     const response = await get(`/merchant/dashboard/lottery-performance?${params}`)
 
+    console.log('Response from API:', response)
+
     // Gestion flexible de la structure de réponse
-    if (response?.data) {
-      lotteries.value = response.data.lotteries || response.lotteries || response.data || []
-      // Update pagination if available
-      if (response.data.pagination || response.pagination) {
-        pagination.value = response.data.pagination || response.pagination
+    if (!response) {
+      console.warn('Response is null or undefined')
+      lotteries.value = []
+    } else if (response.data) {
+      // Structure avec data wrapper
+      lotteries.value = response.data.lotteries || response.data || []
+      if (response.data.pagination) {
+        pagination.value = response.data.pagination
       }
-    } else if (response?.lotteries) {
+    } else if (response.lotteries) {
+      // Structure directe
       lotteries.value = response.lotteries
       if (response.pagination) {
         pagination.value = response.pagination
       }
+    } else if (response.success && response.data) {
+      // Structure avec success flag
+      lotteries.value = response.data.lotteries || response.data || []
+      if (response.data.pagination) {
+        pagination.value = response.data.pagination
+      }
+    } else if (Array.isArray(response)) {
+      // Tableau direct
+      lotteries.value = response
     } else {
+      console.warn('Unrecognized response structure:', response)
       lotteries.value = []
     }
+
+    console.log('Lotteries loaded:', lotteries.value.length)
 
     // Update tab counts
     updateTabCounts()
   } catch (error) {
     console.error('Erreur lors du chargement des tombolas:', error)
+    console.error('Error details:', error.response || error.message || error)
     lotteries.value = []
+
+    // Afficher un message d'erreur à l'utilisateur si disponible
+    if (error.response?.data?.message) {
+      console.error('API Error:', error.response.data.message)
+    }
   } finally {
     loading.value = false
   }
