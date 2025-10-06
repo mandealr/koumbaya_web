@@ -41,33 +41,69 @@ class RefundService
         try {
             DB::beginTransaction();
 
-            // Récupérer toutes les transactions payées pour cette tombola
-            $paidTransactions = Payment::where('lottery_id', $lottery->id)
-                ->where('status', 'completed')
-                ->with('user')
+            // Récupérer toutes les commandes payées pour cette tombola
+            // Le remboursement se fait par commande (order), pas par paiement individuel
+            $paidOrders = \App\Models\Order::where('lottery_id', $lottery->id)
+                ->where('status', 'paid')
+                ->with(['user'])
                 ->get();
 
-            foreach ($paidTransactions as $transaction) {
-                // Vérifier si un remboursement n'existe pas déjà
-                $existingRefund = Refund::where('transaction_id', $transaction->id)->first();
+            foreach ($paidOrders as $order) {
+                if (!$order->user) {
+                    continue;
+                }
+
+                // Récupérer le premier paiement de cette commande pour la référence
+                $firstPayment = Payment::where('order_id', $order->id)
+                    ->where('lottery_id', $lottery->id)
+                    ->first();
+
+                if (!$firstPayment) {
+                    continue;
+                }
+
+                // Vérifier si un remboursement n'existe pas déjà pour cette commande
+                $existingRefund = Refund::where('transaction_id', $firstPayment->id)
+                    ->orWhere(function($query) use ($order) {
+                        $query->whereJsonContains('meta->order_id', $order->id);
+                    })
+                    ->first();
+
                 if ($existingRefund) {
                     continue;
                 }
 
-                // Calculer le montant du remboursement avec frais administratifs
-                $refundAmount = $this->calculateRefundAmount($transaction->amount, $reason);
+                // Utiliser le montant total de la commande
+                $totalAmountPaid = floatval($order->total_amount);
+
+                if ($totalAmountPaid <= 0) {
+                    continue;
+                }
+
+                // Calculer le montant à rembourser en retirant les frais Koumbaya (25%)
+                // Le prix inclut: prix_base + commission (10%) + marge (15%)
+                // Remboursement = montant_payé / 1.25
+                $commissionRate = config('koumbaya.ticket_calculation.commission_rate', 0.10);
+                $marginRate = config('koumbaya.ticket_calculation.margin_rate', 0.15);
+                $koumbayaFeesRate = $commissionRate + $marginRate; // 0.25 (25%)
+
+                $refundAmount = $totalAmountPaid / (1 + $koumbayaFeesRate);
+                $koumbayaFees = $totalAmountPaid - $refundAmount;
 
                 // Créer le remboursement automatique
-                $refund = Refund::createAutomaticRefund($transaction, $reason);
+                $refund = Refund::createAutomaticRefund($firstPayment, $reason);
 
-                // Mettre à jour le montant avec les frais déduits
+                // Mettre à jour avec le montant calculé sans les frais Koumbaya
                 $refund->update([
-                    'amount' => $refundAmount['refund_amount'],
+                    'amount' => round($refundAmount, 0),
                     'meta' => array_merge($refund->meta ?? [], [
-                        'original_amount' => $transaction->amount,
-                        'admin_fee' => $refundAmount['admin_fee'],
-                        'admin_fee_percentage' => $refundAmount['admin_fee_percentage'],
-                        'fee_applied' => $refundAmount['fee_applied'],
+                        'order_id' => $order->id,
+                        'order_number' => $order->order_number,
+                        'original_amount' => $totalAmountPaid,
+                        'koumbaya_fees' => round($koumbayaFees, 0),
+                        'koumbaya_fees_percentage' => $koumbayaFeesRate * 100,
+                        'commission_rate' => $commissionRate,
+                        'margin_rate' => $marginRate,
                     ])
                 ]);
 
