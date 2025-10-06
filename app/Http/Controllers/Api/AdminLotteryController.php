@@ -721,22 +721,34 @@ class AdminLotteryController extends Controller
     {
         $lottery = Lottery::with('product')->findOrFail($id);
 
-        // Récupérer tous les paiements complétés pour cette tombola
-        $payments = \App\Models\Payment::where('lottery_id', $id)
-            ->where('status', 'completed')
-            ->with('user:id,first_name,last_name,email,phone')
+        // Récupérer tous les tickets payés pour cette tombola avec les infos de paiement et utilisateur
+        // Un paiement peut contenir plusieurs tickets, donc on récupère les tickets individuellement
+        $tickets = LotteryTicket::where('lottery_id', $id)
+            ->where('status', 'paid')
+            ->with(['user:id,first_name,last_name,email,phone', 'payment:id,reference,amount,created_at'])
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function($ticket) use ($lottery) {
+                // Chaque ticket représente un paiement individuel du prix du ticket
+                return [
+                    'id' => $ticket->id,
+                    'reference' => $ticket->payment ? $ticket->payment->reference : 'N/A',
+                    'amount' => $lottery->ticket_price, // Le montant pour ce ticket
+                    'created_at' => $ticket->payment ? $ticket->payment->created_at : $ticket->created_at,
+                    'user' => $ticket->user,
+                    'ticket_number' => $ticket->ticket_number
+                ];
+            });
 
         return response()->json([
             'success' => true,
-            'payments' => $payments,
+            'payments' => $tickets, // On les appelle "payments" pour rester compatible avec le frontend
             'lottery' => [
                 'id' => $lottery->id,
                 'lottery_number' => $lottery->lottery_number,
                 'product_title' => $lottery->product->name ?? 'N/A',
                 'ticket_price' => $lottery->ticket_price,
-                'participants' => $payments->count()
+                'participants' => $tickets->count()
             ]
         ]);
     }
