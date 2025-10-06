@@ -419,6 +419,13 @@
       @close="showRefundModal = false"
       @success="handleRefundSuccess"
     />
+
+    <!-- Refund Detail Modal -->
+    <RefundDetailModal
+      v-if="showRefundDetailModal && selectedRefund"
+      :refund="selectedRefund"
+      @close="showRefundDetailModal = false"
+    />
   </div>
 </template>
 
@@ -426,6 +433,7 @@
 import { ref, onMounted } from 'vue'
 import { useApi } from '@/composables/api'
 import LotteryRefundModal from '@/components/admin/LotteryRefundModal.vue'
+import RefundDetailModal from '@/components/admin/RefundDetailModal.vue'
 import {
   BanknotesIcon,
   XMarkIcon,
@@ -451,6 +459,8 @@ const refundToReject = ref(null)
 const rejectReason = ref('')
 const showRefundModal = ref(false)
 const selectedLottery = ref(null)
+const showRefundDetailModal = ref(false)
+const selectedRefund = ref(null)
 
 const filters = ref({
   status: '',
@@ -694,10 +704,23 @@ const rejectRefund = async () => {
   }
 }
 
-const viewRefundDetails = (refund) => {
-  // Open details modal or navigate to details page
-  if (window.$toast) {
-    window.$toast.info('Détails du remboursement : ' + refund.refund_number, '📝 Détails')
+const viewRefundDetails = async (refund) => {
+  // Charger les détails complets du remboursement
+  try {
+    const response = await get(`/admin/refunds/${refund.id}`)
+    if (response && response.success) {
+      selectedRefund.value = response.refund || response.data
+      showRefundDetailModal.value = true
+    } else {
+      if (window.$toast) {
+        window.$toast.error('Erreur lors du chargement des détails', '✗ Erreur')
+      }
+    }
+  } catch (error) {
+    console.error('Error loading refund details:', error)
+    if (window.$toast) {
+      window.$toast.error('Erreur lors du chargement des détails', '✗ Erreur')
+    }
   }
 }
 

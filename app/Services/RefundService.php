@@ -321,17 +321,40 @@ class RefundService
             $user = $refund->user;
             $transaction = $refund->transaction;
 
-            // Valider les données utilisateur
-            if (!$user->phone) {
-                throw new \Exception('User phone number is missing');
+            // Utiliser le numéro de téléphone du paiement original (customer_phone dans meta)
+            // Si non disponible, utiliser le téléphone de l'utilisateur
+            $phoneNumber = $transaction->customer_phone ?? $user->phone;
+
+            if (!$phoneNumber) {
+                Log::error('No phone number available for refund', [
+                    'refund_id' => $refund->id,
+                    'transaction_id' => $transaction->id,
+                    'user_id' => $user->id
+                ]);
+                throw new \Exception('Numéro de téléphone manquant pour le remboursement');
             }
 
+            Log::info('Preparing Mobile Money refund', [
+                'refund_id' => $refund->id,
+                'refund_number' => $refund->refund_number,
+                'user_id' => $user->id,
+                'phone_source' => $transaction->customer_phone ? 'payment_meta' : 'user_profile',
+                'phone' => $phoneNumber,
+                'amount' => $refund->amount
+            ]);
+
             // Détecter l'opérateur basé sur le numéro de téléphone
-            $operator = $this->shapPayoutService->detectOperatorFromPhone($user->phone);
+            $operator = $this->shapPayoutService->detectOperatorFromPhone($phoneNumber);
 
             // Valider les données du payout
-            $validationErrors = $this->shapPayoutService->validatePayoutData($user->phone, $refund->amount);
+            $validationErrors = $this->shapPayoutService->validatePayoutData($phoneNumber, $refund->amount);
             if (!empty($validationErrors)) {
+                Log::error('Payout validation failed', [
+                    'refund_id' => $refund->id,
+                    'phone' => $phoneNumber,
+                    'amount' => $refund->amount,
+                    'errors' => $validationErrors
+                ]);
                 throw new \Exception('Validation failed: ' . implode(', ', $validationErrors));
             }
 
@@ -339,7 +362,7 @@ class RefundService
                 'refund_id' => $refund->id,
                 'refund_number' => $refund->refund_number,
                 'user_id' => $user->id,
-                'phone' => $user->phone,
+                'phone' => $phoneNumber,
                 'amount' => $refund->amount,
                 'operator' => $operator
             ]);
@@ -347,7 +370,7 @@ class RefundService
             // Créer le payout via SHAP API
             $payoutResponse = $this->shapPayoutService->createPayout(
                 $operator,
-                $user->phone,
+                $phoneNumber,
                 $refund->amount,
                 $refund->refund_number,
                 'refund'

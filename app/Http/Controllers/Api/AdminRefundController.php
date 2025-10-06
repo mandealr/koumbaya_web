@@ -9,6 +9,7 @@ use App\Services\RefundService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @OA\Tag(
@@ -140,7 +141,20 @@ class AdminRefundController extends Controller
         $refund = Refund::findOrFail($id);
         $admin = auth()->user();
 
+        Log::info('Admin approving refund', [
+            'refund_id' => $refund->id,
+            'refund_number' => $refund->refund_number,
+            'admin_id' => $admin->id,
+            'admin_email' => $admin->email,
+            'current_status' => $refund->status,
+            'amount' => $refund->amount
+        ]);
+
         if ($refund->status !== 'pending') {
+            Log::warning('Cannot approve refund - invalid status', [
+                'refund_id' => $refund->id,
+                'current_status' => $refund->status
+            ]);
             return $this->sendError('Seuls les remboursements en attente peuvent être approuvés', [], 422);
         }
 
@@ -156,15 +170,32 @@ class AdminRefundController extends Controller
             $success = $this->refundService->approveRefund($refund, $admin, $request->notes);
 
             if ($success) {
+                Log::info('Refund approved successfully', [
+                    'refund_id' => $refund->id,
+                    'refund_number' => $refund->refund_number,
+                    'admin_id' => $admin->id,
+                    'new_status' => $refund->fresh()->status
+                ]);
+
                 return $this->sendResponse([
                     'message' => 'Remboursement approuvé et traité avec succès',
                     'refund' => $refund->fresh()
                 ]);
             } else {
+                Log::error('Refund approval failed', [
+                    'refund_id' => $refund->id,
+                    'admin_id' => $admin->id
+                ]);
                 return $this->sendError('Erreur lors du traitement du remboursement', [], 500);
             }
 
         } catch (\Exception $e) {
+            Log::error('Exception during refund approval', [
+                'refund_id' => $refund->id,
+                'admin_id' => $admin->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return $this->sendError('Erreur lors de l\'approbation', [], 500);
         }
     }
@@ -242,6 +273,16 @@ class AdminRefundController extends Controller
      */
     public function processAutomatic(Request $request)
     {
+        $admin = auth()->user();
+
+        Log::info('Admin initiating manual refund process', [
+            'admin_id' => $admin->id,
+            'admin_email' => $admin->email,
+            'lottery_id' => $request->get('lottery_id'),
+            'dry_run' => $request->boolean('dry_run'),
+            'ip' => $request->ip()
+        ]);
+
         $validator = Validator::make($request->all(), [
             'lottery_id' => 'nullable|integer|exists:lotteries,id',
             'dry_run' => 'boolean',
@@ -260,7 +301,15 @@ class AdminRefundController extends Controller
             if ($lotteryId) {
                 // Traiter une tombola spécifique
                 $lottery = Lottery::with('product')->findOrFail($lotteryId);
-                
+
+                Log::info('Processing refunds for specific lottery', [
+                    'lottery_id' => $lottery->id,
+                    'lottery_number' => $lottery->lottery_number,
+                    'status' => $lottery->status,
+                    'admin_id' => $admin->id,
+                    'dry_run' => $dryRun
+                ]);
+
                 if ($dryRun) {
                     // Mode test - simuler le traitement
                     $minParticipants = $lottery->product->min_participants ?? 10;

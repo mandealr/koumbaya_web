@@ -65,8 +65,8 @@
                 </router-link>
               </p>
 
-              <!-- Social Login Buttons -->
-              <div class="space-y-3 mb-8">
+              <!-- Social Login Buttons - Uniquement pour les particuliers -->
+              <div v-if="form.role === 'Particulier'" class="space-y-3 mb-8">
                 <button
                   @click="loginWithFacebook"
                   class="w-full flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200 group"
@@ -88,16 +88,6 @@
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                   </svg>
                   Continuer avec Google
-                </button>
-
-                <button
-                  @click="loginWithApple"
-                  class="w-full flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200 group"
-                >
-                  <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12.017 0C8.396 0 8.025.044 8.025 2.551c0 1.983 1.396 3.329 3.396 3.329 3.329 0 3.329-2.551 3.329-2.551S14.75.044 12.017 0zm2.076 24c-1.825 0-2.631-1.078-4.076-1.078-1.513 0-2.513 1.078-4.025 1.078C3.759 24 0 18.444 0 12.861c0-5.516 3.759-9.861 8.944-9.861 1.825 0 2.631 1.078 4.076 1.078 1.513 0 2.513-1.078 4.025-1.078C19.278 3 24 7.861 24 12.861 24 18.444 19.278 24 14.093 24z"/>
-                  </svg>
-                  Continuer avec Apple
                 </button>
               </div>
 
@@ -666,15 +656,6 @@ const loginWithGoogle = async () => {
     await socialAuth.loginWithGoogle()
   } catch (error) {
     authStore.setError(error.message || 'Erreur lors de la connexion avec Google')
-  }
-}
-
-const loginWithApple = async () => {
-  try {
-    authStore.clearError()
-    await socialAuth.loginWithApple()
-  } catch (error) {
-    authStore.setError(error.message || 'Erreur lors de la connexion avec Apple')
   }
 }
 
