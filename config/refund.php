@@ -20,15 +20,42 @@ return [
     'thresholds' => [
         // Nombre minimum de participants par défaut pour les tombolas
         'min_participants_default' => env('REFUND_MIN_PARTICIPANTS_DEFAULT', 10),
-        
+
         // Seuil de secours si aucune configuration n'est trouvée
         'min_participants_fallback' => 10,
-        
+
         // Montant minimum pour un remboursement (en XAF)
         'min_refund_amount' => 100,
-        
+
         // Montant maximum pour un remboursement (en XAF)
         'max_refund_amount' => 1000000,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Frais de Remboursement
+    |--------------------------------------------------------------------------
+    */
+
+    'fees' => [
+        // Frais administratifs en pourcentage
+        'admin_fee_percentage' => env('REFUND_ADMIN_FEE_PERCENTAGE', 5),
+
+        // Frais administratifs fixes (en XAF)
+        'admin_fee_fixed' => env('REFUND_ADMIN_FEE_FIXED', 0),
+
+        // Montant minimum après frais
+        'min_amount_after_fees' => 50,
+
+        // Appliquer les frais administratifs
+        'apply_admin_fees' => env('REFUND_APPLY_ADMIN_FEES', true),
+
+        // Types de remboursements exempts de frais
+        'fee_exempt_reasons' => [
+            'technical_error',
+            'admin_decision',
+            'fraud',
+        ],
     ],
 
     /*

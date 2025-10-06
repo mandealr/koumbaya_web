@@ -185,7 +185,10 @@ Route::group([
     
     // User actions
     Route::post('/user/become-seller', [App\Http\Controllers\Api\UserController::class, 'becomeSeller']);
-    
+    Route::post('/user/profile/photo', [App\Http\Controllers\Api\UserController::class, 'updateProfilePhoto']);
+    Route::delete('/user/profile/photo', [App\Http\Controllers\Api\UserController::class, 'deleteProfilePhoto']);
+    Route::put('/user/profile', [App\Http\Controllers\Api\UserController::class, 'updateProfile']);
+
     // Product Images Upload
     Route::prefix('products/images')->group(function () {
         Route::post('/', [App\Http\Controllers\Api\ProductImageController::class, 'upload']);

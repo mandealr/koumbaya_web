@@ -51,6 +51,12 @@
         </div>
       </div>
 
+      <!-- Vendeur -->
+      <div v-if="product.merchant" class="flex items-center text-sm text-gray-600 bg-gray-50 rounded-lg px-3 py-2">
+        <UserCircleIcon class="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
+        <span class="text-gray-700 font-medium">{{ getMerchantName(product.merchant) }}</span>
+      </div>
+
       <!-- Titre et description -->
       <div class="space-y-2">
         <h3 class="koumbaya-heading-4 line-clamp-2 group-hover:text-koumbaya-primary transition-colors">
@@ -130,17 +136,18 @@
 
 <script setup>
 import { computed } from 'vue'
-import { 
-  CheckCircleIcon, 
-  ClockIcon, 
-  XCircleIcon, 
-  StarIcon, 
-  TagIcon, 
+import {
+  CheckCircleIcon,
+  ClockIcon,
+  XCircleIcon,
+  StarIcon,
+  TagIcon,
   CalendarIcon,
   EyeIcon,
   ShoppingCartIcon,
   TicketIcon,
-  ShoppingBagIcon
+  ShoppingBagIcon,
+  UserCircleIcon
 } from '@heroicons/vue/24/outline'
 import ProductImage from './ProductImage.vue'
 
@@ -189,6 +196,28 @@ const getSaleModeLabel = (saleMode) => {
     'lottery': 'Tombola'
   }
   return labels[saleMode] || labels['direct'] // Par défaut 'Direct' si non défini
+}
+
+const getMerchantName = (merchant) => {
+  if (!merchant) return 'Vendeur non spécifié'
+
+  // Si c'est un objet avec les propriétés first_name et last_name
+  if (merchant.first_name && merchant.last_name) {
+    return `${merchant.first_name} ${merchant.last_name}`
+  }
+
+  // Si c'est un objet avec company_name
+  if (merchant.company_name) {
+    return merchant.company_name
+  }
+
+  // Si c'est un objet avec name
+  if (merchant.name) {
+    return merchant.name
+  }
+
+  // Sinon retourner une valeur par défaut
+  return 'Vendeur'
 }
 
 const onViewDetails = () => {

@@ -738,10 +738,40 @@ class MerchantDashboardController extends Controller
         $perPage = min($request->get('per_page', 15), 50);
         $lotteries = $query->paginate($perPage);
 
-        // Ajouter des informations utiles
+        // Transformer les données avec les champs nécessaires
         $lotteries->getCollection()->transform(function ($lottery) {
-            $lottery->append(['time_remaining', 'participation_rate', 'is_ending_soon', 'can_draw']);
-            return $lottery;
+            // Calculer les valeurs
+            $completionRate = $lottery->max_tickets > 0
+                ? round(($lottery->sold_tickets / $lottery->max_tickets) * 100, 2)
+                : 0;
+            $totalRevenue = $lottery->sold_tickets * $lottery->ticket_price;
+            $daysRemaining = max(0, now()->diffInDays($lottery->draw_date, false));
+
+            return [
+                'id' => $lottery->id,
+                'lottery_number' => $lottery->lottery_number,
+                'title' => $lottery->title,
+                'status' => $lottery->status,
+                'ticket_price' => floatval($lottery->ticket_price),
+                'max_tickets' => intval($lottery->max_tickets),
+                'total_tickets' => intval($lottery->max_tickets), // Alias pour frontend
+                'sold_tickets' => intval($lottery->sold_tickets),
+                'completion_rate' => $completionRate,
+                'total_revenue' => $totalRevenue,
+                'draw_date' => $lottery->draw_date,
+                'end_date' => $lottery->draw_date, // Alias pour compatibilité
+                'days_remaining' => intval($daysRemaining),
+                'is_ending_soon' => $lottery->is_ending_soon ?? false,
+                'can_draw' => $lottery->can_draw ?? false,
+                'participation_rate' => $completionRate, // Alias
+                'time_remaining' => $lottery->time_remaining,
+                'product' => $lottery->product ? [
+                    'id' => $lottery->product->id,
+                    'name' => $lottery->product->name,
+                    'image' => $lottery->product->image,
+                    'image_url' => $lottery->product->image_url,
+                ] : null,
+            ];
         });
 
         // Calculer les statistiques
@@ -759,7 +789,15 @@ class MerchantDashboardController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $lotteries,
+            'lotteries' => $lotteries->items(), // Données transformées
+            'pagination' => [
+                'current_page' => $lotteries->currentPage(),
+                'last_page' => $lotteries->lastPage(),
+                'per_page' => $lotteries->perPage(),
+                'total' => $lotteries->total(),
+                'from' => $lotteries->firstItem(),
+                'to' => $lotteries->lastItem(),
+            ],
             'stats' => $stats
         ]);
     }

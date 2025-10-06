@@ -604,16 +604,35 @@ class ProductController extends Controller
         if ($request->sale_mode === 'lottery') {
             // Utiliser la nouvelle logique: l'utilisateur a fourni le nombre de tickets
             // et nous avons calculé le prix du ticket
-            
+
             // Déterminer la durée selon le type de vendeur
             $lotteryDuration = $this->getLotteryDurationForUser($user, $request->lottery_duration);
-            
+
+            // Vérifier si l'utilisateur a un abonnement premium
+            $isPremium = $this->checkPremiumStatus($user);
+
+            // Limiter le nombre de tickets à 500 pour les utilisateurs non premium
+            $maxAllowedTickets = $isPremium ? $totalTickets : min($totalTickets, 500);
+
+            if (!$isPremium && $totalTickets > 500) {
+                \Log::warning('Nombre de tickets limité à 500 (non premium)', [
+                    'user_id' => $user->id,
+                    'requested_tickets' => $totalTickets,
+                    'allowed_tickets' => $maxAllowedTickets
+                ]);
+            }
+
+            // Recalculer le prix du ticket si le nombre a été limité
+            if ($maxAllowedTickets != $totalTickets) {
+                $ticketPrice = round($product->price / $maxAllowedTickets, 0);
+            }
+
             $product->lotteries()->create([
                 'lottery_number' => 'LOT-' . strtoupper(Str::random(8)),
                 'title' => 'Tombola - ' . $product->name,
                 'description' => 'Tombola pour le produit : ' . $product->name,
                 'ticket_price' => $ticketPrice,
-                'max_tickets' => $totalTickets,
+                'max_tickets' => $maxAllowedTickets,
                 'sold_tickets' => 0,
                 'currency' => 'XAF',
                 'draw_date' => now()->addDays($lotteryDuration),
@@ -624,6 +643,9 @@ class ProductController extends Controller
                     'vendor_profile_id' => $vendor ? $vendor->id : null,
                     'duration_days' => $lotteryDuration,
                     'calculation_method' => 'tickets_to_price', // Nouvelle méthode de calcul
+                    'is_premium' => $isPremium,
+                    'original_max_tickets' => $totalTickets,
+                    'limited_to_500' => !$isPremium && $totalTickets > 500
                 ]
             ]);
         }
@@ -1359,8 +1381,23 @@ class ProductController extends Controller
     }
 
     /**
+     * Vérifie si l'utilisateur a un statut premium
+     *
+     * @param \App\Models\User $user
+     * @return bool
+     */
+    private function checkPremiumStatus($user)
+    {
+        // Vérifier si l'utilisateur a un role premium ou un abonnement actif
+        // Pour le moment, on considère les Business Enterprise comme premium
+        return $user->hasRole('Business Enterprise') ||
+               $user->hasRole('Admin') ||
+               ($user->meta && isset($user->meta['is_premium']) && $user->meta['is_premium']);
+    }
+
+    /**
      * Valide la durée de tombola selon le type de vendeur
-     * 
+     *
      * @param \App\Models\User $user
      * @param int $duration durée demandée en jours
      * @return array résultat de la validation

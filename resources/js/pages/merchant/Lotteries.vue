@@ -345,18 +345,23 @@ const loadLotteries = async (page = 1) => {
     })
 
     const response = await get(`/merchant/dashboard/lottery-performance?${params}`)
-    
+
     // Gestion flexible de la structure de réponse
     if (response?.data) {
-      lotteries.value = response.data.lotteries || response.data || []
+      lotteries.value = response.data.lotteries || response.lotteries || response.data || []
       // Update pagination if available
-      if (response.data.pagination) {
-        pagination.value = response.data.pagination
+      if (response.data.pagination || response.pagination) {
+        pagination.value = response.data.pagination || response.pagination
+      }
+    } else if (response?.lotteries) {
+      lotteries.value = response.lotteries
+      if (response.pagination) {
+        pagination.value = response.pagination
       }
     } else {
       lotteries.value = []
     }
-    
+
     // Update tab counts
     updateTabCounts()
   } catch (error) {

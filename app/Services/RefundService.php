@@ -54,8 +54,22 @@ class RefundService
                     continue;
                 }
 
+                // Calculer le montant du remboursement avec frais administratifs
+                $refundAmount = $this->calculateRefundAmount($transaction->amount, $reason);
+
                 // Créer le remboursement automatique
                 $refund = Refund::createAutomaticRefund($transaction, $reason);
+
+                // Mettre à jour le montant avec les frais déduits
+                $refund->update([
+                    'amount' => $refundAmount['refund_amount'],
+                    'meta' => array_merge($refund->meta ?? [], [
+                        'original_amount' => $transaction->amount,
+                        'admin_fee' => $refundAmount['admin_fee'],
+                        'admin_fee_percentage' => $refundAmount['admin_fee_percentage'],
+                        'fee_applied' => $refundAmount['fee_applied'],
+                    ])
+                ]);
 
                 // Traiter immédiatement le remboursement
                 $this->processRefund($refund);
@@ -608,5 +622,67 @@ class RefundService
                 'error' => $e->getMessage()
             ]);
         }
+    }
+
+    /**
+     * Calculer le montant du remboursement après déduction des frais administratifs
+     *
+     * @param float $originalAmount Montant original de la transaction
+     * @param string $reason Raison du remboursement
+     * @return array Détails du calcul
+     */
+    protected function calculateRefundAmount(float $originalAmount, string $reason): array
+    {
+        $config = config('refund.fees');
+
+        // Vérifier si les frais doivent être appliqués
+        $applyFees = $config['apply_admin_fees'] ?? true;
+        $feeExemptReasons = $config['fee_exempt_reasons'] ?? [];
+
+        // Ne pas appliquer de frais pour les raisons exemptées
+        if (!$applyFees || in_array($reason, $feeExemptReasons)) {
+            return [
+                'refund_amount' => $originalAmount,
+                'admin_fee' => 0,
+                'admin_fee_percentage' => 0,
+                'fee_applied' => false,
+            ];
+        }
+
+        // Calculer les frais administratifs
+        $adminFeePercentage = $config['admin_fee_percentage'] ?? 5;
+        $adminFeeFixed = $config['admin_fee_fixed'] ?? 0;
+
+        // Calculer les frais en pourcentage
+        $adminFee = ($originalAmount * $adminFeePercentage / 100) + $adminFeeFixed;
+
+        // Calculer le montant du remboursement
+        $refundAmount = $originalAmount - $adminFee;
+
+        // Vérifier le montant minimum après frais
+        $minAmountAfterFees = $config['min_amount_after_fees'] ?? 50;
+        if ($refundAmount < $minAmountAfterFees) {
+            // Si le montant est trop faible, rembourser le montant original sans frais
+            Log::warning('Refund amount after fees too low, refunding full amount', [
+                'original_amount' => $originalAmount,
+                'calculated_refund' => $refundAmount,
+                'min_required' => $minAmountAfterFees
+            ]);
+
+            return [
+                'refund_amount' => $originalAmount,
+                'admin_fee' => 0,
+                'admin_fee_percentage' => 0,
+                'fee_applied' => false,
+                'reason' => 'amount_too_low_for_fees',
+            ];
+        }
+
+        return [
+            'refund_amount' => round($refundAmount, 2),
+            'admin_fee' => round($adminFee, 2),
+            'admin_fee_percentage' => $adminFeePercentage,
+            'fee_applied' => true,
+        ];
     }
 }
