@@ -395,6 +395,7 @@
     
     <LotteryCancelModal
       v-if="showCancelModal"
+      :show="showCancelModal"
       :lottery="lottery"
       @close="showCancelModal = false"
       @cancelled="onLotteryCancelled"
