@@ -48,24 +48,33 @@ export function useMerchantLotteries() {
       // Utiliser la route lottery-performance qui existe et fonctionne déjà (avec pagination elle retourne la liste)
       const response = await get('/merchant/dashboard/lottery-performance', { params: queryParams })
 
-      if (response && response.data) {
+      if (response) {
         // Gérer différents formats de réponse
-        const lotteriesData = response.data.data || response.data.lotteries || response.data
+        // L'API peut retourner: response.lotteries, response.data.data, response.data.lotteries, ou response.data
+        const lotteriesData = response.lotteries || response.data?.data || response.data?.lotteries || response.data || []
         lotteries.value = Array.isArray(lotteriesData) ? lotteriesData : []
 
         // Mettre à jour la pagination si présente
-        if (response.data.current_page) {
+        const paginationData = response.pagination || response.data?.pagination || response.meta
+        if (paginationData) {
           pagination.value = {
-            current_page: response.data.current_page,
-            per_page: response.data.per_page,
-            total: response.data.total,
-            last_page: response.data.last_page
+            current_page: paginationData.current_page || 1,
+            per_page: paginationData.per_page || 15,
+            total: paginationData.total || 0,
+            last_page: paginationData.last_page || 1
           }
         }
 
         // Mettre à jour les statistiques du serveur si disponibles
-        if (response.data.stats || response.stats) {
-          stats.value = response.data.stats || response.stats
+        const statsData = response.stats || response.data?.stats
+        if (statsData) {
+          stats.value = {
+            total: statsData.total || 0,
+            active: statsData.active || 0,
+            pending: statsData.pending || 0,
+            completed: statsData.completed || 0,
+            cancelled: statsData.cancelled || 0
+          }
         } else {
           // Calculer les statistiques localement en fallback
           calculateStats()
