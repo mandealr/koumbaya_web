@@ -2,7 +2,7 @@
   <div class="fixed inset-0 z-50 overflow-y-auto">
     <div class="flex min-h-screen items-center justify-center p-4">
       <!-- Backdrop -->
-      <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="close"></div>
+      <div class="fixed inset-0  bg-black/40 transition-opacity" @click="close"></div>
 
       <!-- Modal -->
       <div class="relative bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
@@ -66,7 +66,7 @@
                 <thead class="bg-gray-50">
                   <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Référence</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Commande</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Téléphone</th>
                     <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Montant payé</th>
                     <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">À rembourser</th>
@@ -88,7 +88,7 @@
                       </div>
                     </td>
                     <td class="px-4 py-3">
-                      <p class="text-sm font-mono text-gray-900">{{ payment.reference || 'N/A' }}</p>
+                      <p class="text-sm font-mono text-gray-900">{{ payment.order_number || 'N/A' }}</p>
                       <p class="text-xs text-gray-500">{{ formatDate(payment.created_at) }}</p>
                     </td>
                     <td class="px-4 py-3">
@@ -98,9 +98,9 @@
                       <p class="text-sm font-medium text-gray-900">{{ formatCurrency(payment.amount) }}</p>
                     </td>
                     <td class="px-4 py-3 text-right">
-                      <p class="text-sm font-bold text-green-700">{{ formatCurrency(calculateRefundAmount(payment)) }}</p>
-                      <p v-if="payment.amount !== calculateRefundAmount(payment)" class="text-xs text-gray-500">
-                        -{{ formatCurrency(payment.amount - calculateRefundAmount(payment)) }} frais
+                      <p class="text-sm font-bold text-green-700">{{ formatCurrency(payment.refund_amount) }}</p>
+                      <p v-if="payment.koumbaya_fees > 0" class="text-xs text-gray-500">
+                        -{{ formatCurrency(payment.koumbaya_fees) }} frais
                       </p>
                     </td>
                   </tr>
@@ -190,7 +190,7 @@ const totalCollected = computed(() => {
 })
 
 const totalToRefund = computed(() => {
-  return payments.value.reduce((sum, payment) => sum + calculateRefundAmount(payment), 0)
+  return payments.value.reduce((sum, payment) => sum + parseFloat(payment.refund_amount || 0), 0)
 })
 
 // Methods
@@ -213,14 +213,6 @@ const loadPayments = async () => {
   } finally {
     loadingPayments.value = false
   }
-}
-
-const calculateRefundAmount = (payment) => {
-  // Le montant à rembourser = montant payé - (frais Koumbaya + marge marchand)
-  // Pour simplifier, on rembourse le prix du ticket sans les frais additionnels
-  // Normalement le ticket_price devrait être stocké dans le payment ou calculé
-  const ticketPrice = parseFloat(props.lottery.ticket_price || 0)
-  return ticketPrice
 }
 
 const confirmRefund = async () => {
