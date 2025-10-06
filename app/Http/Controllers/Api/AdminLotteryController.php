@@ -722,10 +722,10 @@ class AdminLotteryController extends Controller
         $lottery = Lottery::with('product')->findOrFail($id);
 
         // Récupérer toutes les commandes payées pour cette tombola
-        // Le remboursement se fait par commande (order), basé sur le nombre de tickets achetés
+        // Le remboursement se fait par commande (order)
         $orders = \App\Models\Order::where('lottery_id', $id)
             ->where('status', 'paid')
-            ->with(['user', 'tickets'])
+            ->with(['user'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function($order) use ($lottery) {
@@ -733,24 +733,18 @@ class AdminLotteryController extends Controller
                     return null;
                 }
 
-                // Compter le nombre de tickets payés dans cette commande
-                $ticketCount = \App\Models\LotteryTicket::where('order_id', $order->id)
-                    ->where('lottery_id', $lottery->id)
-                    ->where('status', 'paid')
-                    ->count();
+                // Utiliser le montant total de la commande
+                // Si la table tickets est vide (données de test), on se base sur order.total_amount
+                $totalAmountPaid = floatval($order->total_amount);
 
-                if ($ticketCount == 0) {
+                if ($totalAmountPaid <= 0) {
                     return null;
                 }
 
-                // Calculer le montant payé = nombre de tickets × prix du ticket
-                $ticketPrice = floatval($lottery->ticket_price);
-                $totalAmountPaid = $ticketCount * $ticketPrice;
-
                 // Calculer le montant à rembourser en retirant les frais Koumbaya
                 // Le prix du ticket inclut: prix_base + commission (10%) + marge (15%)
-                // Donc: ticket_price = prix_base * 1.25
-                // Remboursement = prix_base = (nombre_tickets × ticket_price) / 1.25
+                // Donc: montant_avec_fees = montant_base * 1.25
+                // Remboursement = montant_base = montant_payé / 1.25
                 $commissionRate = config('koumbaya.ticket_calculation.commission_rate', 0.10);
                 $marginRate = config('koumbaya.ticket_calculation.margin_rate', 0.15);
                 $koumbayaFeesRate = $commissionRate + $marginRate; // 0.25 (25%)
@@ -768,12 +762,11 @@ class AdminLotteryController extends Controller
                     'order_id' => $order->id,
                     'order_number' => $order->order_number,
                     'reference' => $firstPayment ? $firstPayment->reference : 'N/A',
-                    'amount' => $totalAmountPaid, // Montant total payé (tickets × prix)
+                    'amount' => $totalAmountPaid, // Montant total payé
                     'refund_amount' => round($refundAmount, 0), // Montant à rembourser (sans frais)
                     'koumbaya_fees' => round($totalAmountPaid - $refundAmount, 0), // Frais Koumbaya retenus
                     'created_at' => $order->created_at,
-                    'user' => $order->user,
-                    'ticket_count' => $ticketCount // Nombre de tickets dans cette commande
+                    'user' => $order->user
                 ];
             })
             ->filter()
@@ -781,7 +774,7 @@ class AdminLotteryController extends Controller
 
         return response()->json([
             'success' => true,
-            'payments' => $orders, // On appelle "payments" mais ce sont des orders groupés
+            'payments' => $orders, // On appelle "payments" mais ce sont des orders
             'lottery' => [
                 'id' => $lottery->id,
                 'lottery_number' => $lottery->lottery_number,
