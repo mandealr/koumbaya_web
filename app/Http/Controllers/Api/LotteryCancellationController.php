@@ -27,12 +27,12 @@ class LotteryCancellationController extends Controller
     public function cancel(Request $request, $lotteryId)
     {
         $user = auth()->user();
-        
-        // Find the lottery
-        $lottery = Lottery::findOrFail($lotteryId);
-        
-        // Check if user owns this lottery
-        if ($lottery->user_id !== $user->id) {
+
+        // Find the lottery with product relation
+        $lottery = Lottery::with('product')->findOrFail($lotteryId);
+
+        // Check if user owns this lottery (via product merchant_id)
+        if (!$lottery->product || $lottery->product->merchant_id !== $user->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'êtes pas autorisé à annuler cette tombola'
@@ -148,10 +148,13 @@ class LotteryCancellationController extends Controller
     {
         $user = auth()->user();
 
-        $lottery = Lottery::findOrFail($lotteryId);
+        $lottery = Lottery::with('product')->findOrFail($lotteryId);
 
-        // Check if user owns this lottery or is admin
-        if ($lottery->user_id !== $user->id && !$user->isAdmin() && !$user->isSuperAdmin()) {
+        // Check if user owns this lottery (via product merchant_id) or is admin
+        $isOwner = $lottery->product && $lottery->product->merchant_id === $user->id;
+        $isAdmin = method_exists($user, 'isAdmin') && ($user->isAdmin() || $user->isSuperAdmin());
+
+        if (!$isOwner && !$isAdmin) {
             return response()->json([
                 'success' => false,
                 'message' => 'Accès refusé'
