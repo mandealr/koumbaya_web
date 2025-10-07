@@ -568,24 +568,41 @@ class AuthController extends Controller
         }
 
         try {
+            Log::info('Social auth callback received', [
+                'provider' => $provider,
+                'has_code' => $request->has('code'),
+                'ip' => $request->ip()
+            ]);
+
             // Use stateless mode for API (no session required)
             $socialUser = Socialite::driver($provider)->stateless()->user();
-            
+
+            Log::info('Social user retrieved', [
+                'provider' => $provider,
+                'email' => $socialUser->getEmail(),
+                'name' => $socialUser->getName()
+            ]);
+
             // Check if user exists with this social ID
             $user = User::where($provider . '_id', $socialUser->getId())->first();
-            
+
             if (!$user) {
                 // Check if user exists with same email
                 $user = User::where('email', $socialUser->getEmail())->first();
-                
+
                 if ($user) {
                     // Link social account to existing user
                     $user->{$provider . '_id'} = $socialUser->getId();
                     $user->save();
+
+                    Log::info('Linked social account to existing user', [
+                        'provider' => $provider,
+                        'user_id' => $user->id
+                    ]);
                 } else {
                     // Create new user
                     $names = $this->parseName($socialUser->getName());
-                    
+
                     $user = User::create([
                         'first_name' => $names['first_name'],
                         'last_name' => $names['last_name'],
@@ -606,6 +623,11 @@ class AuthController extends Controller
                         'balance' => 0.00,
                         'currency' => 'XAF',
                     ]);
+
+                    Log::info('Created new user from social auth', [
+                        'provider' => $provider,
+                        'user_id' => $user->id
+                    ]);
                 }
             }
 
@@ -614,24 +636,34 @@ class AuthController extends Controller
 
             $this->logUserLogin($user, $request->ip(), 'success');
 
-            // Redirect to frontend with token in URL
-            $frontendUrl = config('app.frontend_url', config('app.url'));
-            $redirectUrl = $frontendUrl . '/auth/callback?token=' . $token . '&provider=' . $provider;
+            Log::info('Social auth successful, redirecting to frontend', [
+                'provider' => $provider,
+                'user_id' => $user->id
+            ]);
 
-            return redirect()->away($redirectUrl);
+            // Return HTML page that will redirect to frontend with token
+            // This avoids WAF blocking the redirect URL with parameters
+            return view('auth.social-callback', [
+                'token' => $token,
+                'provider' => $provider,
+                'frontendUrl' => config('app.url')
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Social auth callback failed', [
                 'provider' => $provider,
                 'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
 
-            // Redirect to frontend with error
-            $frontendUrl = config('app.frontend_url', config('app.url'));
-            $redirectUrl = $frontendUrl . '/auth/callback?error=' . urlencode($e->getMessage());
-
-            return redirect()->away($redirectUrl);
+            // Return HTML page with error
+            return view('auth.social-callback', [
+                'error' => $e->getMessage(),
+                'provider' => $provider,
+                'frontendUrl' => config('app.url')
+            ]);
         }
     }
 
