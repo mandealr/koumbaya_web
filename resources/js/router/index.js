@@ -371,6 +371,11 @@ const routes = [
         component: OrderManagement
       },
       {
+        path: 'vendors',
+        name: 'admin.vendors',
+        component: () => import('@/pages/admin/VendorManagement.vue')
+      },
+      {
         path: 'refunds',
         name: 'admin.refunds',
         component: RefundManagement

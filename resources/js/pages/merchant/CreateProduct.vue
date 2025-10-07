@@ -287,46 +287,30 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Nombre de tickets *
             </label>
-            <!-- Vendeur individuel : nombre de tickets fixe -->
-            <div v-if="isIndividualSeller">
+            <!-- BLOQUÉ À 500 TICKETS POUR TOUS -->
+            <div>
               <input
                 v-model="form.total_tickets"
                 type="number"
                 required
                 readonly
-                class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-100 cursor-not-allowed" style="color: #5f5f5f"
+                disabled
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-100 cursor-not-allowed text-gray-600"
               />
-              <div class="mt-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+              <div class="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <div class="flex items-start">
                   <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1 a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                     </svg>
                   </div>
                   <div class="ml-3">
-                    <p class="text-sm text-yellow-800">
-                      <strong>Profil Vendeur Individuel:</strong> Le nombre de tickets est fixé à 500 pour garantir un prix de ticket minimum de 200 FCFA.
+                    <p class="text-sm text-blue-800">
+                      <strong>Nombre fixe :</strong> Le nombre de tickets est automatiquement fixé à 500 pour garantir l'équité et maintenir des prix accessibles.
                     </p>
                   </div>
                 </div>
               </div>
-            </div>
-            <!-- Autres profils : nombre de tickets personnalisable -->
-            <div v-else>
-              <input
-                v-model="form.total_tickets"
-                type="number"
-                required
-                min="10"
-                max="10000"
-                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
-                placeholder="Ex: 400"
-                @input="calculateLotteryMetrics"
-                @blur="validateTotalTickets"
-              />
-              <p v-if="errors.total_tickets" class="mt-1 text-sm text-red-600">{{ errors.total_tickets }}</p>
-              <p v-else-if="form.total_tickets && (parseInt(form.total_tickets) < 10 || parseInt(form.total_tickets) > 10000)" class="mt-1 text-sm text-orange-600">Entre 10 et 10,000 tickets</p>
-              <p v-else class="text-sm text-gray-700 mt-1">Entre 10 et 10,000 tickets</p>
             </div>
           </div>
 
@@ -340,18 +324,19 @@
               type="number"
               required
               readonly
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-100 cursor-not-allowed" style="color: #5f5f5f"
+              disabled
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-100 cursor-not-allowed text-gray-600"
             />
-            <div class="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div class="mt-2 bg-green-50 border border-green-200 rounded-lg p-3">
               <div class="flex items-start">
                 <div class="flex-shrink-0">
-                  <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                  <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                   </svg>
                 </div>
                 <div class="ml-3">
-                  <p class="text-sm text-blue-800">
-                    <strong>Calcul automatique:</strong> Le prix du ticket est automatiquement calculé selon la formule : (Prix du produit + Commission + Marge) ÷ Nombre de tickets.
+                  <p class="text-sm text-green-800">
+                    <strong>Calcul automatique :</strong> Le prix du ticket est calculé automatiquement pour couvrir le prix du produit et les frais.
                   </p>
                 </div>
               </div>
@@ -671,7 +656,7 @@ const form = reactive({
   images: [], // Ancien système pour compatibilité
   imageUrls: [], // Nouveau système avec URLs des images uploadées
   ticket_price: '',
-  total_tickets: '', // Sera initialisé dans onMounted
+  total_tickets: 500, // BLOQUÉ À 500 TICKETS MAX
   min_tickets: '', // This will be 'min_participants' in the API
   end_date: '',
   lottery_duration: '', // Durée en jours pour les vendeurs business
@@ -686,17 +671,18 @@ watch(() => form.sale_mode, (newMode, oldMode) => {
   console.log('New mode:', newMode)
   console.log('Is individual seller:', isIndividualSeller.value)
   
-  if (newMode === 'lottery' && isIndividualSeller.value) {
-    // Forcer 500 tickets pour vendeur individuel en mode tombola
-    console.log('Forcing 500 tickets for individual seller in lottery mode')
-    form.total_tickets = '500'
+  if (newMode === 'lottery') {
+    // TOUJOURS forcer 500 tickets en mode tombola (restriction globale)
+    console.log('Forcing 500 tickets for lottery mode')
+    form.total_tickets = 500
+    form.min_tickets = 500 // Minimum = maximum = 500
   }
-  
+
   // Réinitialiser les champs spécifiques à la tombola si on passe en vente directe
   if (newMode === 'direct') {
     console.log('Switching to direct sale - clearing lottery fields')
     form.ticket_price = ''
-    form.total_tickets = ''
+    form.total_tickets = 500
     form.min_tickets = ''
     form.end_date = ''
   }
@@ -1191,15 +1177,15 @@ const handleSubmit = async () => {
     // Add lottery-specific fields only if lottery mode
     if (form.sale_mode === 'lottery') {
       productData.ticket_price = calculatedTicketPrice.value
-      productData.total_tickets = parseInt(form.total_tickets)
-      productData.min_participants = parseInt(form.min_tickets || form.total_tickets)
-      
+      productData.total_tickets = 500 // TOUJOURS 500
+      productData.min_participants = 500 // TOUJOURS 500 (même valeur que total_tickets)
+
       console.log('Adding lottery fields:', {
         ticket_price: productData.ticket_price,
         total_tickets: productData.total_tickets,
         min_participants: productData.min_participants
       })
-      
+
       // Ajouter la durée de tombola si pertinent
       if (lotteryDurationConstraints.value?.can_customize) {
         productData.lottery_duration = parseInt(form.lottery_duration)

@@ -65,8 +65,8 @@
                 </router-link>
               </p>
 
-              <!-- Social Login Buttons - Uniquement pour les particuliers -->
-              <div v-if="form.role === 'Particulier'" class="space-y-3 mb-8">
+              <!-- Social Login Buttons -->
+              <div class="space-y-3 mb-8">
                 <button
                   @click="loginWithFacebook"
                   class="w-full flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200 group"
@@ -116,8 +116,8 @@
                         <div v-if="form.role === 'Particulier'" class="w-full h-full rounded-full bg-white scale-50"></div>
                       </div>
                       <div>
-                        <h4 class="font-semibold text-gray-900">Particulier</h4>
-                        <p class="text-xs text-gray-600">Acheteur particulier</p>
+                        <h4 class="font-semibold text-gray-900">Koumbuyer</h4>
+                        <p class="text-xs text-gray-600">Acheteur Particulier</p>
                       </div>
                     </div>
                   </div>
@@ -133,8 +133,8 @@
                         <div v-if="form.role === 'Business'" class="w-full h-full rounded-full bg-white scale-50"></div>
                       </div>
                       <div>
-                        <h4 class="font-semibold text-gray-900">Business</h4>
-                        <p class="text-xs text-gray-600">Vendeur professionnel</p>
+                        <h4 class="font-semibold text-gray-900">Koumbiste</h4>
+                        <p class="text-xs text-gray-600">Vendeur Indépendant</p>
                       </div>
                     </div>
                   </div>
@@ -143,22 +143,6 @@
 
               <!-- Registration Form -->
               <form @submit.prevent="handleSubmit" class="space-y-5">
-                <!-- Business Name (shown only for business accounts) -->
-                <div v-if="form.role === 'Business'" class="transition-all duration-300">
-                  <label for="business_name" class="block text-sm font-semibold text-gray-900 mb-2">
-                    Nom de l'entreprise *
-                  </label>
-                  <input
-                    id="business_name"
-                    v-model="form.business_name"
-                    type="text"
-                    required
-                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
-                    :class="{ 'border-red-300 bg-red-50': errors.business_name }"
-                    placeholder="Ma Super Entreprise"
-                  />
-                  <p v-if="errors.business_name" class="mt-2 text-sm text-red-600">{{ errors.business_name }}</p>
-                </div>
 
                 <!-- Name Fields -->
                 <div class="grid grid-cols-2 gap-4">
@@ -270,39 +254,6 @@
                   <p v-if="countriesLoading" class="mt-1 text-sm text-gray-500">Chargement des pays...</p>
                 </div>
 
-                <!-- Location Fields - only for business accounts -->
-                <div v-if="form.role === 'Business'" class="grid grid-cols-2 gap-4 transition-all duration-300">
-                  <div>
-                    <label for="city" class="block text-sm font-semibold text-gray-900 mb-2">
-                      Ville *
-                    </label>
-                    <input
-                      id="city"
-                      v-model="form.city"
-                      type="text"
-                      :required="form.role === 'Business'"
-                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
-                      :class="{ 'border-red-300 bg-red-50': errors.city }"
-                      placeholder="Libreville"
-                    />
-                    <p v-if="errors.city" class="mt-1 text-sm text-red-600">{{ errors.city }}</p>
-                  </div>
-
-                  <div>
-                    <label for="address" class="block text-sm font-semibold text-gray-900 mb-2">
-                      Adresse
-                    </label>
-                    <input
-                      id="address"
-                      v-model="form.address"
-                      type="text"
-                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
-                      :class="{ 'border-red-300 bg-red-50': errors.address }"
-                      placeholder="123 Rue Example"
-                    />
-                    <p v-if="errors.address" class="mt-1 text-sm text-red-600">{{ errors.address }}</p>
-                  </div>
-                </div>
 
                 <!-- Password Fields -->
                 <div class="grid grid-cols-2 gap-4">
@@ -439,13 +390,10 @@ const selectedCountryCode = ref('GA') // Gabon par défaut
 
 const form = reactive({
   role: 'Particulier',
-  business_name: '',
   first_name: '',
   last_name: '',
   email: '',
   phone: '',
-  city: '',
-  address: '',
   country_id: '',
   password: '',
   password_confirmation: '',
@@ -453,14 +401,10 @@ const form = reactive({
 })
 
 const errors = reactive({
-  role: '',
-  business_name: '',
   first_name: '',
   last_name: '',
   email: '',
   phone: '',
-  city: '',
-  address: '',
   country_id: '',
   password: '',
   password_confirmation: '',
@@ -473,11 +417,6 @@ const validateForm = () => {
   })
 
   let isValid = true
-
-  if (form.role === 'Business' && !form.business_name.trim()) {
-    errors.business_name = 'Le nom de l\'entreprise est requis pour un compte business'
-    isValid = false
-  }
 
   if (!form.first_name.trim()) {
     errors.first_name = 'Le prénom est requis'
@@ -503,11 +442,6 @@ const validateForm = () => {
   } else if (!phoneValid.value && form.phone.length > 3) {
     // Ne valider le format que si il y a plus de 3 caractères saisis
     errors.phone = 'Format de téléphone invalide'
-    isValid = false
-  }
-
-  if (form.role === 'Business' && !form.city.trim()) {
-    errors.city = 'La ville est requise pour un compte business'
     isValid = false
   }
 
@@ -584,16 +518,6 @@ const handleSubmit = async () => {
     country_id: parseInt(form.country_id),
     password: form.password,
     password_confirmation: form.password_confirmation
-  }
-
-  // Ajouter ville et adresse uniquement pour les comptes business
-  if (form.role === 'Business') {
-    registrationData.city = form.city.trim()
-    registrationData.address = form.address.trim() || null
-  }
-
-  if (form.role === 'Business' && form.business_name.trim()) {
-    registrationData.business_name = form.business_name.trim()
   }
 
   const result = await authStore.register(registrationData)

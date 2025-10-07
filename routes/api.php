@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\AdminRefundController;
 use App\Http\Controllers\Api\TicketPriceController;
 use App\Http\Controllers\Api\AdminDashboardController;
 use App\Http\Controllers\Api\AdminUserController;
+use App\Http\Controllers\Api\AdminVendorController;
 use App\Http\Controllers\Api\AdminProductController;
 use App\Http\Controllers\Api\AdminPaymentController;
 use App\Http\Controllers\Api\AdminSettingsController;
@@ -352,7 +353,15 @@ Route::group([
         Route::put('/{id}', [AdminUserController::class, 'update']);
         Route::post('/{id}/toggle-status', [AdminUserController::class, 'toggleStatus']);
     });
-    
+
+    // Admin Vendors Management (Business accounts)
+    Route::prefix('vendors')->group(function () {
+        Route::get('/', [AdminVendorController::class, 'index']);
+        Route::post('/', [AdminVendorController::class, 'store']);
+        Route::put('/{id}', [AdminVendorController::class, 'update']);
+        Route::delete('/{id}', [AdminVendorController::class, 'destroy']);
+    });
+
     // Admin Products Management
     Route::prefix('products')->group(function () {
         Route::get('/', [AdminProductController::class, 'index']);

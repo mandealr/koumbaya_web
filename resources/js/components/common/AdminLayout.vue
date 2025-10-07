@@ -216,7 +216,8 @@ import {
   ChevronRightIcon,
   ChevronDownIcon,
   CurrencyDollarIcon,
-  ClipboardDocumentListIcon
+  ClipboardDocumentListIcon,
+  BuildingStorefrontIcon
 } from '@heroicons/vue/24/outline'
 
 const authStore = useAuthStore()
@@ -264,6 +265,12 @@ const menuItems = computed(() => [
     to: { name: 'admin.orders' },
     label: 'Commandes',
     icon: ClipboardDocumentListIcon
+  },
+  {
+    name: 'admin.vendors',
+    to: { name: 'admin.vendors' },
+    label: 'Vendeurs Pro',
+    icon: BuildingStorefrontIcon
   },
   {
     name: 'admin.refunds',
