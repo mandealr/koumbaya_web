@@ -84,8 +84,8 @@
 
       <!-- Instructions based on status -->
       <div v-if="paymentStatus === 'pending'" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <div class="flex items-start">
-          <InformationCircleIcon class="h-5 w-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" />
+        <div class="flex items-start gap-3">
+          <InformationCircleIcon class="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
           <div class="text-sm text-blue-700">
             <p class="font-medium mb-2">Instructions importantes :</p>
             <div class="bg-white rounded-lg p-3 mb-3 border border-blue-200">
@@ -104,8 +104,8 @@
       </div>
 
       <div v-else-if="paymentStatus === 'failed'" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-        <div class="flex items-start">
-          <ExclamationTriangleIcon class="h-5 w-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
+        <div class="flex items-start gap-3">
+          <ExclamationTriangleIcon class="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
           <div class="text-sm text-red-700">
             <p class="font-medium mb-2">Le paiement a échoué</p>
             <p class="text-xs">{{ errorMessage || 'Veuillez réessayer ou vérifier votre solde.' }}</p>
@@ -114,8 +114,8 @@
       </div>
 
       <div v-else-if="paymentStatus === 'expired'" class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
-        <div class="flex items-start">
-          <ClockIcon class="h-5 w-5 text-orange-500 mt-0.5 mr-3 flex-shrink-0" />
+        <div class="flex items-start gap-3">
+          <ClockIcon class="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
           <div class="text-sm text-orange-700">
             <p class="font-medium mb-2">Paiement expiré</p>
             <p class="text-xs">Le délai de 90 secondes est écoulé. Veuillez recommencer le processus.</p>
@@ -124,8 +124,8 @@
       </div>
 
       <div v-else-if="paymentStatus === 'success'" class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-        <div class="flex items-start">
-          <CheckCircleIcon class="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
+        <div class="flex items-start gap-3">
+          <CheckCircleIcon class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
           <div class="text-sm text-green-700">
             <p class="font-medium mb-2">Paiement confirmé !</p>
             <p class="text-xs">Votre commande a été traitée avec succès. Vous allez recevoir une confirmation par email.</p>
@@ -139,9 +139,9 @@
         <button
           v-if="paymentStatus === 'success'"
           @click="goToProfile"
-          class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center"
+          class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
         >
-          <UserIcon class="h-5 w-5 mr-2" />
+          <UserIcon class="h-5 w-5" />
           {{ getSuccessButtonText() }}
         </button>
 
@@ -152,12 +152,12 @@
           :disabled="loading"
           class="w-full py-3 px-4 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-300 text-white font-semibold rounded-lg transition-all duration-200 btn-responsive btn-wrap-mobile"
         >
-          <span v-if="loading" class="flex items-center">
-            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2 flex-shrink-0"></div>
+          <span v-if="loading" class="flex items-center gap-2">
+            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white flex-shrink-0"></div>
             Relance...
           </span>
-          <span v-else class="flex items-center">
-            <ArrowPathIcon class="h-5 w-5 mr-2 flex-shrink-0" />
+          <span v-else class="flex items-center gap-2">
+            <ArrowPathIcon class="h-5 w-5 flex-shrink-0" />
             Relancer le push USSD
           </span>
         </button>
@@ -166,9 +166,9 @@
         <button
           v-if="paymentStatus === 'failed'"
           @click="retryPayment"
-          class="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center"
+          class="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
         >
-          <ArrowPathIcon class="h-5 w-5 mr-2" />
+          <ArrowPathIcon class="h-5 w-5" />
           Réessayer le paiement
         </button>
 

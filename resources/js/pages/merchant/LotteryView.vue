@@ -28,33 +28,33 @@
         <button
           v-if="lottery.status === 'active'"
           @click="showExtendModal = true"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center whitespace-nowrap"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 whitespace-nowrap"
         >
-          <ClockIcon class="w-4 h-4 mr-2 flex-shrink-0" />
+          <ClockIcon class="w-4 h-4 flex-shrink-0" />
           Prolonger
         </button>
         <button
           v-if="lottery.status === 'active' && canDraw"
           @click="showDrawModal = true"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center whitespace-nowrap"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 whitespace-nowrap"
         >
-          <GiftIcon class="w-4 h-4 mr-2 flex-shrink-0" />
+          <GiftIcon class="w-4 h-4 flex-shrink-0" />
           Effectuer le tirage
         </button>
         <button
           v-if="lottery.status === 'active'"
           @click="showCancelModal = true"
-          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center whitespace-nowrap"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2 whitespace-nowrap"
         >
-          <XMarkIcon class="w-4 h-4 mr-2 flex-shrink-0" />
+          <XMarkIcon class="w-4 h-4 flex-shrink-0" />
           Annuler
         </button>
         <button
           v-if="lottery.status !== 'completed'"
           @click="showEditModal = true"
-          class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center whitespace-nowrap"
+          class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center gap-2 whitespace-nowrap"
         >
-          <PencilIcon class="w-4 h-4 mr-2 flex-shrink-0" />
+          <PencilIcon class="w-4 h-4 flex-shrink-0" />
           Modifier
         </button>
       </div>
@@ -276,35 +276,35 @@
           <div class="p-6 space-y-3">
             <button
               @click="shareOrLottery"
-              class="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              <ShareIcon class="w-4 h-4 mr-2" />
+              <ShareIcon class="w-4 h-4" />
               Partager la tombola
             </button>
 
             <button
               @click="downloadReport"
-              class="w-full flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+              class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
             >
-              <DocumentArrowDownIcon class="w-4 h-4 mr-2" />
+              <DocumentArrowDownIcon class="w-4 h-4" />
               Télécharger le rapport
             </button>
 
             <button
               v-if="canDrawManually"
               @click="initiateManualDraw"
-              class="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
             >
-              <GiftIcon class="w-4 h-4 mr-2" />
+              <GiftIcon class="w-4 h-4" />
               Effectuer le tirage maintenant
             </button>
 
             <button
               v-if="lottery.status === 'active'"
               @click="pauseLottery"
-              class="w-full flex items-center justify-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+              class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
             >
-              <PauseIcon class="w-4 h-4 mr-2" />
+              <PauseIcon class="w-4 h-4" />
               Mettre en pause
             </button>
           </div>

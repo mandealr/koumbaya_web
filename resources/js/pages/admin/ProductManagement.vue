@@ -8,9 +8,9 @@
       </div>
       <button
         @click="loadProducts"
-        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
       >
-        <ArrowPathIcon class="w-5 h-5 mr-2" :class="loading ? 'animate-spin' : ''" />
+        <ArrowPathIcon class="w-5 h-5" :class="loading ? 'animate-spin' : ''" />
         Actualiser
       </button>
     </div>
@@ -182,10 +182,10 @@
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     @click="viewProduct(product.id)"
-                    class="inline-flex items-center px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                    class="inline-flex items-center gap-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
                     title="Voir les détails"
                   >
-                    <EyeIcon class="w-4 h-4 mr-1" />
+                    <EyeIcon class="w-4 h-4" />
                     Voir
                   </button>
                 </td>

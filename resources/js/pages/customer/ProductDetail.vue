@@ -159,8 +159,8 @@
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Acheter ce produit</h3>
 
             <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div class="flex items-center mb-2">
-                <CheckCircleIcon class="w-5 h-5 text-[#0099cc] mr-2" />
+              <div class="flex items-center gap-2 mb-2">
+                <CheckCircleIcon class="w-5 h-5 text-[#0099cc]" />
                 <span class="font-medium text-blue-900">Achat direct disponible</span>
               </div>
               <p class="text-sm text-blue-700">
@@ -176,11 +176,11 @@
             <button
               @click="purchaseDirectly"
               :disabled="purchasing"
-              class="w-full bg-[#0099cc] text-white py-3 rounded-lg font-medium hover:bg-[#0088bb] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2 whitespace-nowrap"
+              class="w-full bg-[#0099cc] text-white py-3 rounded-lg font-medium hover:bg-[#0088bb] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap"
             >
               <span v-if="purchasing">Achat en cours...</span>
               <template v-else>
-                <ShoppingCartIcon class="w-5 h-5 mr-2 flex-shrink-0" />
+                <ShoppingCartIcon class="w-5 h-5 flex-shrink-0" />
                 <span>Acheter maintenant</span>
               </template>
             </button>
@@ -215,8 +215,8 @@
 
         <h4 class="text-md font-semibold mt-6 mb-3">Caractéristiques</h4>
         <ul v-if="product.features" class="space-y-2">
-          <li v-for="feature in product.features" :key="feature" class="flex items-center">
-            <CheckCircleIcon class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0" />
+          <li v-for="feature in product.features" :key="feature" class="flex items-center gap-2">
+            <CheckCircleIcon class="w-5 h-5 text-blue-500 flex-shrink-0" />
             <span class="text-gray-600">{{ feature }}</span>
           </li>
         </ul>

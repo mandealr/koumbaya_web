@@ -49,8 +49,8 @@
         <div class="space-y-4">
           <!-- Mobile Money -->
           <div class="space-y-3">
-            <h3 class="text-sm font-medium text-gray-700 flex items-center">
-              <PhoneIcon class="h-5 w-5 mr-2 text-blue-500" />
+            <h3 class="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <PhoneIcon class="h-5 w-5 text-blue-500" />
               Mobile Money
             </h3>
             
@@ -130,66 +130,36 @@
               </div>
             </div>
           </div>
-
-          <!-- Autres méthodes (pour plus tard) -->
-          <div class="pt-4 border-t border-gray-200">
-            <h3 class="text-sm font-medium text-gray-400 mb-3">Bientôt disponible</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 opacity-50">
-              <div class="p-4 border-2 border-gray-100 rounded-lg bg-gray-50">
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-gray-300 rounded-lg flex items-center justify-center">
-                    <CreditCardIcon class="h-6 w-6 text-gray-500" />
-                  </div>
-                  <div>
-                    <div class="font-medium text-gray-500">Carte bancaire</div>
-                    <div class="text-sm text-gray-400">Visa, Mastercard</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="p-4 border-2 border-gray-100 rounded-lg bg-gray-50">
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-gray-300 rounded-lg flex items-center justify-center">
-                    <BuildingLibraryIcon class="h-6 w-6 text-gray-500" />
-                  </div>
-                  <div>
-                    <div class="font-medium text-gray-500">Virement bancaire</div>
-                    <div class="text-sm text-gray-400">IBAN, SWIFT</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- Bouton Continuer -->
         <div class="mt-8 flex items-center justify-between">
-          <button 
-            @click="goBack" 
-            class="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+          <button
+            @click="goBack"
+            class="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
           >
-            <ArrowLeftIcon class="h-5 w-5 mr-2" />
+            <ArrowLeftIcon class="h-5 w-5" />
             Retour
           </button>
-          
-          <button 
+
+          <button
             @click="proceedToPayment"
             :disabled="!selectedMethod || loading"
-            class="bg-[#0099cc] hover:bg-[#0088bb] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold px-8 py-3 rounded-xl transition-all duration-200 flex items-center"
+            class="bg-[#0099cc] hover:bg-[#0088bb] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold px-8 py-3 rounded-xl transition-all duration-200 flex items-center gap-2"
           >
             <span v-if="loading">Traitement...</span>
-            <span v-else>
-              Continuer
-              <ArrowRightIcon class="h-5 w-5 ml-2" />
-            </span>
+            <template v-else>
+              <span>Continuer</span>
+              <ArrowRightIcon class="h-5 w-5" />
+            </template>
           </button>
         </div>
       </div>
 
       <!-- Sécurité -->
       <div class="mt-6 text-center">
-        <div class="flex items-center justify-center text-sm text-gray-500">
-          <ShieldCheckIcon class="h-5 w-5 mr-2 text-green-500" />
+        <div class="flex items-center justify-center gap-2 text-sm text-gray-500">
+          <ShieldCheckIcon class="h-5 w-5 text-green-500" />
           Paiement 100% sécurisé et chiffré
         </div>
       </div>
@@ -271,27 +241,42 @@ const formatPrice = (price) => {
 }
 
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
   // Récupérer les données de la commande depuis les query params ou le store
-  const { type, product, quantity, amount, transaction_id, order_number } = route.query
-  
+  const { type, product, quantity, amount, transaction_id, order_number, lottery_id } = route.query
+
   // Accepter soit transaction_id (ancien système) soit order_number (nouveau système)
   const orderRef = order_number || transaction_id
-  
+
   if (!orderRef) {
     router.push('/') // Rediriger si pas de commande
     return
   }
-  
+
   orderSummary.value = {
     type: type || 'ticket',
     productName: product || 'Produit',
     quantity: parseInt(quantity) || 1,
     unitPrice: parseFloat(amount) / (parseInt(quantity) || 1),
     totalAmount: parseFloat(amount) || 0,
-    image: '', // À récupérer via API
-    transactionId: transaction_id, // Garde pour compatibilité
-    orderNumber: order_number // Nouveau champ
+    image: '/images/products/placeholder.jpg',
+    transactionId: transaction_id,
+    orderNumber: order_number
+  }
+
+  // Récupérer l'image du produit si lottery_id est fourni
+  if (lottery_id) {
+    try {
+      const response = await fetch(`/api/lotteries/${lottery_id}`)
+      const data = await response.json()
+
+      if (data.success && data.lottery?.product) {
+        orderSummary.value.image = data.lottery.product.image_url || data.lottery.product.main_image || '/images/products/placeholder.jpg'
+        orderSummary.value.productName = data.lottery.product.name || data.lottery.title || orderSummary.value.productName
+      }
+    } catch (error) {
+      console.error('Error fetching lottery details:', error)
+    }
   }
 })
 </script>

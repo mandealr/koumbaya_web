@@ -13,24 +13,24 @@
       
       <!-- Badge de statut -->
       <div class="absolute top-4 right-4">
-        <span class="koumbaya-badge koumbaya-badge-success" v-if="product.status === 'active'">
-          <CheckCircleIcon class="w-3 h-3 mr-1 flex-shrink-0" />
+        <span class="koumbaya-badge koumbaya-badge-success flex items-center gap-1" v-if="product.status === 'active'">
+          <CheckCircleIcon class="w-3 h-3 flex-shrink-0" />
           Actif
         </span>
-        <span class="koumbaya-badge koumbaya-badge-warning" v-else-if="product.status === 'pending'">
-          <ClockIcon class="w-3 h-3 mr-1 flex-shrink-0" />
+        <span class="koumbaya-badge koumbaya-badge-warning flex items-center gap-1" v-else-if="product.status === 'pending'">
+          <ClockIcon class="w-3 h-3 flex-shrink-0" />
           En attente
         </span>
-        <span class="koumbaya-badge koumbaya-badge-error" v-else>
-          <XCircleIcon class="w-3 h-3 mr-1 flex-shrink-0" />
+        <span class="koumbaya-badge koumbaya-badge-error flex items-center gap-1" v-else>
+          <XCircleIcon class="w-3 h-3 flex-shrink-0" />
           Inactif
         </span>
       </div>
 
       <!-- Badge de popularité -->
       <div class="absolute top-4 left-4" v-if="product.isPopular">
-        <span class="koumbaya-badge bg-gradient-to-r from-amber-400 to-orange-500 text-white border-0">
-          <StarIcon class="w-3 h-3 mr-1 fill-current flex-shrink-0" />
+        <span class="koumbaya-badge bg-gradient-to-r from-amber-400 to-orange-500 text-white border-0 flex items-center gap-1">
+          <StarIcon class="w-3 h-3 fill-current flex-shrink-0" />
           Populaire
         </span>
       </div>
@@ -40,20 +40,20 @@
     <div class="koumbaya-card-body space-y-4">
       <!-- Catégorie et Mode de vente -->
       <div class="flex items-center justify-between">
-        <div class="flex items-center text-koumbaya-primary text-sm font-medium">
-          <TagIcon class="w-4 h-4 mr-2 flex-shrink-0" />
+        <div class="flex items-center gap-2 text-koumbaya-primary text-sm font-medium">
+          <TagIcon class="w-4 h-4 flex-shrink-0" />
           {{ product.category?.name || product.category || 'Électronique' }}
         </div>
-        <div :class="getSaleModeClass(product.sale_mode)" class="flex items-center">
-          <TicketIcon v-if="product.sale_mode === 'lottery'" class="w-3.5 h-3.5 mr-1 flex-shrink-0" />
-          <ShoppingBagIcon v-else class="w-3.5 h-3.5 mr-1 flex-shrink-0" />
+        <div :class="getSaleModeClass(product.sale_mode)" class="flex items-center gap-1">
+          <TicketIcon v-if="product.sale_mode === 'lottery'" class="w-3.5 h-3.5 flex-shrink-0" />
+          <ShoppingBagIcon v-else class="w-3.5 h-3.5 flex-shrink-0" />
           {{ getSaleModeLabel(product.sale_mode) }}
         </div>
       </div>
 
       <!-- Vendeur -->
-      <div v-if="product.merchant" class="flex items-center text-sm text-gray-600 bg-gray-50 rounded-lg px-3 py-2">
-        <UserCircleIcon class="w-4 h-4 mr-2 flex-shrink-0 text-gray-500" />
+      <div v-if="product.merchant" class="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-lg px-3 py-2">
+        <UserCircleIcon class="w-4 h-4 flex-shrink-0 text-gray-500" />
         <span class="text-gray-700 font-medium">{{ getMerchantName(product.merchant) }}</span>
       </div>
 
@@ -105,8 +105,8 @@
       </div>
 
       <!-- Date de tirage -->
-      <div class="flex items-center text-sm text-gray-600">
-        <CalendarIcon class="w-4 h-4 mr-2 flex-shrink-0" />
+      <div class="flex items-center gap-2 text-sm text-gray-600">
+        <CalendarIcon class="w-4 h-4 flex-shrink-0" />
         Tirage le {{ formatDate(product.drawDate || new Date()) }}
       </div>
     </div>
@@ -114,16 +114,16 @@
     <!-- Actions -->
     <div class="koumbaya-card-footer">
       <div class="flex gap-3">
-        <button 
+        <button
           @click="onViewDetails"
-          class="flex-1 koumbaya-btn koumbaya-btn-primary group-hover:shadow-lg transition-all duration-300"
+          class="flex-1 koumbaya-btn koumbaya-btn-primary group-hover:shadow-lg transition-all duration-300 flex items-center gap-2"
         >
           <EyeIcon class="w-4 h-4" />
           Voir détails
         </button>
-        <button 
+        <button
           @click="onQuickBuy"
-          class="koumbaya-btn koumbaya-btn-outline hover:bg-koumbaya-primary hover:text-white border-koumbaya-primary text-koumbaya-primary"
+          class="koumbaya-btn koumbaya-btn-outline hover:bg-koumbaya-primary hover:text-white border-koumbaya-primary text-koumbaya-primary flex items-center gap-2"
           :disabled="product.status !== 'active'"
         >
           <ShoppingCartIcon class="w-4 h-4" />

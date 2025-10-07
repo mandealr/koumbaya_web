@@ -70,14 +70,14 @@
                 'text-white disabled:cursor-not-allowed'
               ]"
             >
-              <span v-if="loading">
-                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Traitement...
-              </span>
-              <span v-else>
-                Payer {{ formatPrice(amount) }}
-                <ArrowRightIcon class="h-5 w-5 ml-2" />
-              </span>
+              <template v-if="loading">
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                <span>Traitement...</span>
+              </template>
+              <template v-else>
+                <span>Payer {{ formatPrice(amount) }}</span>
+                <ArrowRightIcon class="h-5 w-5" />
+              </template>
             </button>
 
             <button 
@@ -93,8 +93,8 @@
 
       <!-- Instructions -->
       <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div class="flex items-start">
-          <InformationCircleIcon class="h-5 w-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" />
+        <div class="flex items-start gap-3">
+          <InformationCircleIcon class="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
           <div class="text-sm text-blue-700">
             <p class="font-medium mb-1">Instructions de paiement :</p>
             <ul class="space-y-1 text-xs">

@@ -9,16 +9,16 @@
       <div class="flex space-x-3">
         <button
           @click="checkEligibleLotteries"
-          class="admin-btn-secondary"
+          class="admin-btn-secondary flex items-center gap-2"
         >
-          <MagnifyingGlassIcon class="w-4 h-4 mr-2" />
+          <MagnifyingGlassIcon class="w-4 h-4" />
           Vérifier les tombolas
         </button>
         <button
           @click="showProcessAutomatic = true"
-          class="admin-btn-primary"
+          class="admin-btn-primary flex items-center gap-2"
         >
-          <CogIcon class="w-4 h-4 mr-2" />
+          <CogIcon class="w-4 h-4" />
           Traiter automatique
         </button>
       </div>
@@ -83,8 +83,8 @@
       <div class="p-6">
         <!-- Expired with Insufficient Participants -->
         <div v-if="eligibleLotteries.expired_insufficient?.length" class="mb-6">
-          <h4 class="text-md font-medium text-orange-700 mb-3 flex items-center">
-            <ClockIcon class="w-4 h-4 mr-1" />
+          <h4 class="text-md font-medium text-orange-700 mb-3 flex items-center gap-1">
+            <ClockIcon class="w-4 h-4" />
             Expirées - Participants insuffisants
           </h4>
           <div class="space-y-3">
@@ -114,8 +114,8 @@
 
         <!-- Cancelled Lotteries -->
         <div v-if="eligibleLotteries.cancelled?.length">
-          <h4 class="text-md font-medium text-red-700 mb-3 flex items-center">
-            <XCircleIcon class="w-4 h-4 mr-1" />
+          <h4 class="text-md font-medium text-red-700 mb-3 flex items-center gap-1">
+            <XCircleIcon class="w-4 h-4" />
             Tombolas annulées
           </h4>
           <div class="space-y-3">
@@ -247,8 +247,8 @@
                 <div>
                   <div class="font-mono text-sm font-medium text-gray-900">{{ refund.refund_number }}</div>
                   <div class="text-sm text-gray-500">{{ refund.type }}</div>
-                  <div v-if="refund.auto_processed" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 mt-1">
-                    <CogIcon class="w-3 h-3 mr-1" />
+                  <div v-if="refund.auto_processed" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 mt-1">
+                    <CogIcon class="w-3 h-3" />
                     Auto
                   </div>
                 </div>
@@ -294,10 +294,10 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button
                   @click="viewRefundDetails(refund)"
-                  class="inline-flex items-center px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                  class="inline-flex items-center gap-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
                   title="Voir détails"
                 >
-                  <EyeIcon class="w-4 h-4 mr-1" />
+                  <EyeIcon class="w-4 h-4" />
                   Voir
                 </button>
               </td>
@@ -314,8 +314,8 @@
         <div class="relative bg-white rounded-lg max-w-md w-full">
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold flex items-center">
-                <CogIcon class="w-5 h-5 mr-2" />
+              <h3 class="text-lg font-semibold flex items-center gap-2">
+                <CogIcon class="w-5 h-5" />
                 Traitement Automatique
               </h3>
               <button @click="showProcessAutomatic = false" class="text-gray-400 hover:text-gray-600">
@@ -337,8 +337,8 @@
 
               <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                 <div class="text-sm text-yellow-800">
-                  <p class="font-medium mb-1 flex items-center">
-                    <ExclamationTriangleIcon class="w-4 h-4 mr-1" />
+                  <p class="font-medium mb-1 flex items-center gap-1">
+                    <ExclamationTriangleIcon class="w-4 h-4" />
                     Attention
                   </p>
                   <p>Cette action va traiter automatiquement tous les remboursements éligibles.</p>

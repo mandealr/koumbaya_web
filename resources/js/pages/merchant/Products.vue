@@ -9,9 +9,9 @@
       <div class="flex space-x-3">
         <router-link
           to="/merchant/products/create"
-          class="inline-flex items-center px-6 py-3 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
+          class="inline-flex items-center gap-2 px-6 py-3 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
         >
-          <PlusIcon class="w-5 h-5 mr-2" />
+          <PlusIcon class="w-5 h-5" />
           Nouvel Article
         </router-link>
       </div>
@@ -141,9 +141,9 @@
       <p class="text-gray-600 mb-6">Vous n'avez pas encore de produits. Créez votre premier produit !</p>
       <router-link
         to="/merchant/products/create"
-        class="inline-flex items-center px-6 py-3 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-xl font-semibold transition-colors"
+        class="inline-flex items-center gap-2 px-6 py-3 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-xl font-semibold transition-colors"
       >
-        <PlusIcon class="w-5 h-5 mr-2" />
+        <PlusIcon class="w-5 h-5" />
         Créer mon premier produit
       </router-link>
     </div>
@@ -240,27 +240,27 @@
           <div class="flex space-x-2">
             <button
               @click="viewProduct(product)"
-              class="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              class="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors inline-flex items-center justify-center gap-1"
             >
-              <EyeIcon class="w-4 h-4 inline mr-1" />
+              <EyeIcon class="w-4 h-4" />
               Voir
             </button>
 
             <button
               v-if="product.status === 'draft'"
               @click="publishProduct(product)"
-              class="flex-1 px-4 py-2 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-lg text-sm font-medium transition-colors"
+              class="flex-1 px-4 py-2 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-lg text-sm font-medium transition-colors inline-flex items-center justify-center gap-1"
             >
-              <RocketLaunchIcon class="w-4 h-4 inline mr-1" />
+              <RocketLaunchIcon class="w-4 h-4" />
               Publier
             </button>
 
             <button
               v-if="product.status === 'active'"
               @click="editProduct(product)"
-              class="flex-1 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm font-medium transition-colors"
+              class="flex-1 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm font-medium transition-colors inline-flex items-center justify-center gap-1"
             >
-              <PencilIcon class="w-4 h-4 inline mr-1" />
+              <PencilIcon class="w-4 h-4" />
               Modifier
             </button>
 
@@ -281,24 +281,24 @@
               >
                 <button
                   @click="duplicateProduct(product)"
-                  class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg"
+                  class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg flex items-center gap-2"
                 >
-                  <DocumentDuplicateIcon class="w-4 h-4 inline mr-2" />
+                  <DocumentDuplicateIcon class="w-4 h-4" />
                   Dupliquer
                 </button>
                 <button
                   @click="viewAnalytics(product)"
-                  class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                 >
-                  <ChartBarIcon class="w-4 h-4 inline mr-2" />
+                  <ChartBarIcon class="w-4 h-4" />
                   Analytiques
                 </button>
                 <button
                   v-if="canDeleteProduct(product)"
                   @click="deleteProduct(product)"
-                  class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-b-lg"
+                  class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-b-lg flex items-center gap-2"
                 >
-                  <TrashIcon class="w-4 h-4 inline mr-2" />
+                  <TrashIcon class="w-4 h-4" />
                   Supprimer
                 </button>
               </div>

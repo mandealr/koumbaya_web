@@ -179,9 +179,9 @@
               <button
                 v-if="hasActiveLottery"
                 @click="participateNow"
-                class="w-full bg-[#0099cc] hover:bg-[#0088bb] text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center"
+                class="w-full bg-[#0099cc] hover:bg-[#0088bb] text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
               >
-                <TicketIcon class="w-5 h-5 mr-2 flex-shrink-0" />
+                <TicketIcon class="w-5 h-5 flex-shrink-0" />
                 <div class="flex flex-col items-center">
                   <span>{{ authStore.isAuthenticated ? 'Participer maintenant' : 'Se connecter pour participer' }}</span>
                   <span class="text-sm font-medium opacity-90">{{ formatPrice(product.ticketPrice) }}</span>
@@ -192,9 +192,9 @@
               <button
                 v-else
                 @click="buyDirectly"
-                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center"
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
               >
-                <ShoppingCartIcon class="w-5 h-5 mr-2 flex-shrink-0" />
+                <ShoppingCartIcon class="w-5 h-5 flex-shrink-0" />
                 <div class="flex flex-col items-center">
                   <span>{{ authStore.isAuthenticated ? 'Acheter maintenant' : 'Se connecter pour acheter' }}</span>
                   <span class="text-sm font-medium opacity-90">{{ formatPrice(product.price) }}</span>
