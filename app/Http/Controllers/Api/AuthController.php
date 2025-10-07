@@ -625,6 +625,9 @@ class AuthController extends Controller
                         'currency' => 'XAF',
                     ]);
 
+                    // Assigner le rôle "Particulier" par défaut
+                    $user->assignRole('Particulier');
+
                     Log::info('Created new user from social auth', [
                         'provider' => $provider,
                         'user_id' => $user->id
@@ -637,9 +640,13 @@ class AuthController extends Controller
 
             $this->logUserLogin($user, $request->ip(), 'success');
 
+            // Vérifier si le profil est incomplet (pas de téléphone)
+            $needsProfileCompletion = empty($user->phone);
+
             Log::info('Social auth successful, redirecting to frontend', [
                 'provider' => $provider,
-                'user_id' => $user->id
+                'user_id' => $user->id,
+                'needs_profile_completion' => $needsProfileCompletion
             ]);
 
             // Return HTML page that will redirect to frontend with token
@@ -647,7 +654,8 @@ class AuthController extends Controller
             return view('auth.social-callback', [
                 'token' => $token,
                 'provider' => $provider,
-                'frontendUrl' => config('app.url')
+                'frontendUrl' => config('app.url'),
+                'needsProfileCompletion' => $needsProfileCompletion
             ]);
 
         } catch (\Exception $e) {

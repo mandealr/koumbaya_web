@@ -723,7 +723,7 @@ const viewRefundDetails = async (refund) => {
   try {
     const response = await get(`/admin/refunds/${refund.id}`)
     if (response && response.success) {
-      selectedRefund.value = response.refund || response.data
+      selectedRefund.value = response.data?.refund || response.refund || response.data
       showRefundDetailModal.value = true
     } else {
       if (window.$toast) {

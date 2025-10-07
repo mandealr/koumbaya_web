@@ -41,6 +41,7 @@ onMounted(async () => {
   const token = route.query.token
   const errorParam = route.query.error
   const provider = route.query.provider
+  const needsProfile = route.query.needs_profile
 
   if (errorParam) {
     error.value = errorParam
@@ -83,6 +84,17 @@ onMounted(async () => {
           `Bienvenue ${data.user.first_name || data.user.name} !`,
           '✅ Connexion réussie'
         )
+
+        // Show profile completion notice if needed
+        if (needsProfile === '1') {
+          setTimeout(() => {
+            window.$toast.info(
+              'Pensez à compléter votre profil avec votre numéro de téléphone pour une meilleure expérience.',
+              'ℹ️ Complétez votre profil',
+              { duration: 8000 }
+            )
+          }, 2000)
+        }
       }
 
       // Redirect to appropriate dashboard

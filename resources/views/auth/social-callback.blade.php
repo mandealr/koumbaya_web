@@ -128,9 +128,14 @@
             const frontendUrl = "{{ $frontendUrl }}";
             const token = "{{ $token }}";
             const provider = "{{ $provider }}";
+            const needsProfileCompletion = {{ $needsProfileCompletion ? 'true' : 'false' }};
 
             // Build redirect URL
-            const redirectUrl = `${frontendUrl}/auth/callback?token=${encodeURIComponent(token)}&provider=${encodeURIComponent(provider)}`;
+            let redirectUrl = `${frontendUrl}/auth/callback?token=${encodeURIComponent(token)}&provider=${encodeURIComponent(provider)}`;
+
+            if (needsProfileCompletion) {
+                redirectUrl += '&needs_profile=1';
+            }
 
             // Redirect immediately
             window.location.href = redirectUrl;
