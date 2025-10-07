@@ -116,6 +116,30 @@ class AdminRefundController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/admin/refunds/{id}",
+     *     tags={"Admin Refunds"},
+     *     summary="Afficher le détail d'un remboursement",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID du remboursement",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Détails du remboursement")
+     * )
+     */
+    public function show($id)
+    {
+        $refund = Refund::with(['user', 'transaction', 'lottery.product', 'processedBy', 'approvedBy'])
+            ->findOrFail($id);
+
+        return $this->sendResponse(['refund' => $refund]);
+    }
+
+    /**
      * @OA\Post(
      *     path="/api/admin/refunds/{id}/approve",
      *     tags={"Admin Refunds"},
@@ -447,6 +471,91 @@ class AdminRefundController extends Controller
             ]);
         } catch (\Exception $e) {
             return $this->sendError('Erreur lors du chargement des tombolas éligibles', ['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/admin/refunds/{id}/retry",
+     *     tags={"Admin Refunds"},
+     *     summary="Relancer un remboursement rejeté",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID du remboursement",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Remboursement relancé")
+     * )
+     */
+    public function retry($id)
+    {
+        $refund = Refund::findOrFail($id);
+        $admin = auth()->user();
+
+        Log::info('Admin retrying rejected refund', [
+            'refund_id' => $refund->id,
+            'refund_number' => $refund->refund_number,
+            'admin_id' => $admin->id,
+            'current_status' => $refund->status
+        ]);
+
+        if (!in_array($refund->status, ['rejected', 'failed'])) {
+            Log::warning('Cannot retry refund - invalid status', [
+                'refund_id' => $refund->id,
+                'current_status' => $refund->status
+            ]);
+            return $this->sendError('Seuls les remboursements rejetés ou échoués peuvent être relancés', [], 422);
+        }
+
+        try {
+            // Réinitialiser le statut à pending
+            $refund->update([
+                'status' => 'pending',
+                'rejection_reason' => null,
+                'rejected_at' => null,
+                'meta' => array_merge($refund->meta ?? [], [
+                    'retry_count' => ($refund->meta['retry_count'] ?? 0) + 1,
+                    'retried_at' => now()->toISOString(),
+                    'retried_by' => $admin->id
+                ])
+            ]);
+
+            Log::info('Refund status reset to pending for retry', [
+                'refund_id' => $refund->id,
+                'retry_count' => $refund->meta['retry_count'] ?? 1
+            ]);
+
+            // Retraiter le remboursement
+            $success = $this->refundService->approveRefund($refund->fresh(), $admin, 'Relance après rejet');
+
+            if ($success) {
+                Log::info('Refund retry successful', [
+                    'refund_id' => $refund->id,
+                    'new_status' => $refund->fresh()->status
+                ]);
+
+                return $this->sendResponse([
+                    'message' => 'Remboursement relancé avec succès',
+                    'refund' => $refund->fresh()
+                ]);
+            } else {
+                Log::error('Refund retry failed', [
+                    'refund_id' => $refund->id
+                ]);
+                return $this->sendError('Erreur lors du retraitement du remboursement', [], 500);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Exception during refund retry', [
+                'refund_id' => $refund->id,
+                'admin_id' => $admin->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return $this->sendError('Erreur lors de la relance: ' . $e->getMessage(), [], 500);
         }
     }
 }

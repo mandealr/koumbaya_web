@@ -272,6 +272,18 @@
 
         <!-- Footer -->
         <div class="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex gap-3">
+          <!-- Retry button for rejected/failed refunds -->
+          <button
+            v-if="['rejected', 'failed'].includes(refund.status)"
+            @click="retryRefund"
+            :disabled="retrying"
+            class="flex-1 px-4 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 font-medium transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            <ArrowPathIcon v-if="!retrying" class="h-5 w-5" />
+            <div v-else class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+            <span>{{ retrying ? 'Relance...' : 'Relancer le remboursement' }}</span>
+          </button>
+
           <button
             @click="close"
             class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors"
@@ -285,6 +297,8 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+import { useApi } from '@/composables/api'
 import {
   XMarkIcon,
   UserIcon,
@@ -307,11 +321,57 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'refund-updated'])
+
+// State
+const retrying = ref(false)
 
 // Methods
 const close = () => {
   emit('close')
+}
+
+const retryRefund = async () => {
+  if (!confirm('Êtes-vous sûr de vouloir relancer ce remboursement ?')) {
+    return
+  }
+
+  retrying.value = true
+
+  try {
+    const { post } = useApi()
+    const response = await post(`/admin/refunds/${props.refund.id}/retry`)
+
+    if (response.success) {
+      if (window.$toast) {
+        window.$toast.success(
+          response.message || 'Remboursement relancé avec succès',
+          '✅ Succès'
+        )
+      }
+
+      // Emit event to parent to refresh data
+      emit('refund-updated', response.refund)
+
+      // Close modal after a short delay
+      setTimeout(() => {
+        close()
+      }, 1500)
+    } else {
+      throw new Error(response.message || 'Erreur lors de la relance')
+    }
+  } catch (error) {
+    console.error('Error retrying refund:', error)
+
+    if (window.$toast) {
+      window.$toast.error(
+        error.response?.data?.message || error.message || 'Erreur lors de la relance du remboursement',
+        '🚫 Erreur'
+      )
+    }
+  } finally {
+    retrying.value = false
+  }
 }
 
 const formatCurrency = (amount) => {

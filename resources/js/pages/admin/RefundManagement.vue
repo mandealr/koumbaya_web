@@ -425,6 +425,7 @@
       v-if="showRefundDetailModal && selectedRefund"
       :refund="selectedRefund"
       @close="showRefundDetailModal = false"
+      @refund-updated="handleRefundUpdated"
     />
   </div>
 </template>
@@ -590,6 +591,19 @@ const handleRefundSuccess = async () => {
     loadStats(),
     checkEligibleLotteries()
   ])
+}
+
+const handleRefundUpdated = async (updatedRefund) => {
+  // Refresh the refund list
+  await Promise.all([
+    loadRefunds(),
+    loadStats()
+  ])
+
+  // Update the selected refund if it's still showing
+  if (selectedRefund.value && selectedRefund.value.id === updatedRefund.id) {
+    selectedRefund.value = updatedRefund
+  }
 }
 
 const processLottery = async (lotteryId, dryRun = false) => {

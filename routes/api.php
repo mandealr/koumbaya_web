@@ -365,8 +365,10 @@ Route::group([
         Route::get('/stats', [AdminRefundController::class, 'stats']);
         Route::get('/eligible-lotteries', [AdminRefundController::class, 'eligibleLotteries']);
         Route::post('/process-automatic', [AdminRefundController::class, 'processAutomatic']);
+        Route::get('/{id}', [AdminRefundController::class, 'show']);
         Route::post('/{id}/approve', [AdminRefundController::class, 'approve']);
         Route::post('/{id}/reject', [AdminRefundController::class, 'reject']);
+        Route::post('/{id}/retry', [AdminRefundController::class, 'retry']);
     });
     
     // Admin Products Management
