@@ -52,6 +52,9 @@ class ProductResource extends JsonResource
                 return [
                     'id' => $this->merchant->id,
                     'name' => $this->merchant->full_name,
+                    'first_name' => $this->merchant->first_name,
+                    'last_name' => $this->merchant->last_name,
+                    'company_name' => $this->merchant->company_name,
                     'email' => $this->merchant->email,
                 ];
             }),
