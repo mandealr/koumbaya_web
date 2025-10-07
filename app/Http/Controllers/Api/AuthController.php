@@ -533,7 +533,8 @@ class AuthController extends Controller
                 ]
             ]);
 
-            $redirect_url = Socialite::driver($provider)->redirect()->getTargetUrl();
+            // Use stateless mode for API (no session required)
+            $redirect_url = Socialite::driver($provider)->stateless()->redirect()->getTargetUrl();
 
             Log::info('Social auth redirect URL generated', [
                 'provider' => $provider,
@@ -561,13 +562,14 @@ class AuthController extends Controller
     public function handleProviderCallback($provider, Request $request)
     {
         $validProviders = ['facebook', 'google', 'apple'];
-        
+
         if (!in_array($provider, $validProviders)) {
             return response()->json(['error' => 'Provider not supported'], 400);
         }
 
         try {
-            $socialUser = Socialite::driver($provider)->user();
+            // Use stateless mode for API (no session required)
+            $socialUser = Socialite::driver($provider)->stateless()->user();
             
             // Check if user exists with this social ID
             $user = User::where($provider . '_id', $socialUser->getId())->first();
@@ -609,21 +611,27 @@ class AuthController extends Controller
 
             // Generate auth token
             $token = $user->createAuthToken('social-login-token');
-            
+
             $this->logUserLogin($user, $request->ip(), 'success');
 
-            return response()->json([
-                'message' => 'Connexion réussie',
-                'user' => $user->load('wallet'),
-                'access_token' => $token,
-                'token_type' => 'Bearer'
-            ]);
+            // Redirect to frontend with token in URL
+            $frontendUrl = config('app.frontend_url', config('app.url'));
+            $redirectUrl = $frontendUrl . '/auth/callback?token=' . $token . '&provider=' . $provider;
+
+            return redirect()->away($redirectUrl);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Authentication failed',
-                'message' => $e->getMessage()
-            ], 500);
+            Log::error('Social auth callback failed', [
+                'provider' => $provider,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect to frontend with error
+            $frontendUrl = config('app.frontend_url', config('app.url'));
+            $redirectUrl = $frontendUrl . '/auth/callback?error=' . urlencode($e->getMessage());
+
+            return redirect()->away($redirectUrl);
         }
     }
 

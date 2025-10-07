@@ -117,6 +117,11 @@ const routes = [
         meta: { requiresGuest: true }
       },
       {
+        path: 'auth/callback',
+        name: 'auth.callback',
+        component: () => import('@/pages/auth/SocialCallback.vue')
+      },
+      {
         path: 'products',
         name: 'public.products',
         component: PublicProducts
