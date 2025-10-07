@@ -292,7 +292,12 @@
 
           <!-- Social login buttons avec style amélioré -->
           <div class="grid grid-cols-2 gap-4">
-            <button class="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl shadow-sm bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 group whitespace-nowrap">
+            <button
+              @click="loginWithGoogle"
+              type="button"
+              :disabled="loading"
+              class="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl shadow-sm bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 group whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <svg class="w-5 h-5 text-gray-600 group-hover:text-gray-700 flex-shrink-0" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -302,7 +307,12 @@
               <span class="ml-2 text-sm font-medium text-gray-700">Google</span>
             </button>
 
-            <button class="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl shadow-sm bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 group whitespace-nowrap">
+            <button
+              @click="loginWithFacebook"
+              type="button"
+              :disabled="loading"
+              class="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl shadow-sm bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 group whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <svg class="w-5 h-5 text-blue-600 group-hover:text-blue-700 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
               </svg>
@@ -634,6 +644,51 @@ watch([() => form.email, () => form.password], () => {
 const clearRegistrationMessage = () => {
   registrationSuccess.value = null
   sessionStorage.removeItem('registration_success')
+}
+
+// Social login handlers
+const loginWithGoogle = async () => {
+  loading.value = true
+  try {
+    const response = await fetch('/api/auth/google/redirect')
+    const data = await response.json()
+
+    if (data.redirect_url) {
+      // Rediriger vers Google OAuth
+      window.location.href = data.redirect_url
+    } else {
+      throw new Error('Impossible de rediriger vers Google')
+    }
+  } catch (error) {
+    console.error('Erreur connexion Google:', error)
+    errors.general = 'Erreur lors de la connexion avec Google'
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la connexion avec Google', '🚫 Erreur')
+    }
+    loading.value = false
+  }
+}
+
+const loginWithFacebook = async () => {
+  loading.value = true
+  try {
+    const response = await fetch('/api/auth/facebook/redirect')
+    const data = await response.json()
+
+    if (data.redirect_url) {
+      // Rediriger vers Facebook OAuth
+      window.location.href = data.redirect_url
+    } else {
+      throw new Error('Impossible de rediriger vers Facebook')
+    }
+  } catch (error) {
+    console.error('Erreur connexion Facebook:', error)
+    errors.general = 'Erreur lors de la connexion avec Facebook'
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la connexion avec Facebook', '🚫 Erreur')
+    }
+    loading.value = false
+  }
 }
 
 // Vérifier s'il y a des données d'inscription réussie

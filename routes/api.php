@@ -60,6 +60,10 @@ Route::group([
     Route::get('verify-email/{token}', [AuthController::class, 'verifyAccountByUrl']);
     Route::post('resend-verification', [AuthController::class, 'resendVerificationEmail']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
+
+    // Social Authentication
+    Route::get('{provider}/redirect', [AuthController::class, 'redirectToProvider'])->where('provider', 'google|facebook|apple');
+    Route::get('{provider}/callback', [AuthController::class, 'handleProviderCallback'])->where('provider', 'google|facebook|apple');
 });
 
 // Routes d'authentification pour utilisateurs connectés avec rate limiting très permissif

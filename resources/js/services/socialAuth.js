@@ -12,7 +12,7 @@ export const socialAuth = {
       // For production, you would integrate with Facebook SDK
       // For now, we'll use a popup approach
       const api = useApi()
-      const response = await api.get('/auth/facebook')
+      const response = await api.get('/auth/facebook/redirect')
       if (response.redirect_url) {
         window.location.href = response.redirect_url
       }
@@ -30,7 +30,7 @@ export const socialAuth = {
       // For production, you would integrate with Google SDK
       // For now, we'll use a popup approach
       const api = useApi()
-      const response = await api.get('/auth/google')
+      const response = await api.get('/auth/google/redirect')
       if (response.redirect_url) {
         window.location.href = response.redirect_url
       }
@@ -48,7 +48,7 @@ export const socialAuth = {
       // For production, you would integrate with Apple SDK
       // For now, we'll use a popup approach
       const api = useApi()
-      const response = await api.get('/auth/apple')
+      const response = await api.get('/auth/apple/redirect')
       if (response.redirect_url) {
         window.location.href = response.redirect_url
       }
