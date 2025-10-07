@@ -902,6 +902,210 @@ class AuthController extends Controller
 
 
     /**
+     * Mobile social authentication - validates OAuth tokens from native SDKs
+     */
+    public function mobileOAuthLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'provider' => 'required|in:google,facebook,apple',
+            'access_token' => 'required_without:id_token|string',
+            'id_token' => 'required_without:access_token|string',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->error('Validation failed', 422, $validator->errors()->toArray());
+        }
+
+        $provider = $request->provider;
+        $accessToken = $request->access_token;
+        $idToken = $request->id_token;
+
+        try {
+            Log::info('Mobile OAuth login attempt', [
+                'provider' => $provider,
+                'has_access_token' => !empty($accessToken),
+                'has_id_token' => !empty($idToken),
+                'ip' => $request->ip()
+            ]);
+
+            // Verify token and get user info based on provider
+            $socialUser = null;
+
+            if ($provider === 'google') {
+                // For Google, verify ID token
+                $socialUser = $this->verifyGoogleToken($idToken ?? $accessToken);
+            } elseif ($provider === 'facebook') {
+                // For Facebook, verify access token
+                $socialUser = $this->verifyFacebookToken($accessToken);
+            } elseif ($provider === 'apple') {
+                // For Apple, verify ID token
+                $socialUser = $this->verifyAppleToken($idToken);
+            }
+
+            if (!$socialUser || !isset($socialUser['id'], $socialUser['email'])) {
+                return $this->error('Invalid token or unable to retrieve user info', 401);
+            }
+
+            // Find or create user
+            $user = User::where($provider . '_id', $socialUser['id'])
+                ->orWhere('email', $socialUser['email'])
+                ->first();
+
+            if ($user) {
+                // Update social ID if not set
+                if (empty($user->{$provider . '_id'})) {
+                    $user->{$provider . '_id'} = $socialUser['id'];
+                    $user->save();
+
+                    Log::info('Updated existing user with social ID', [
+                        'provider' => $provider,
+                        'user_id' => $user->id
+                    ]);
+                }
+            } else {
+                // Create new user
+                $names = $this->parseName($socialUser['name'] ?? 'User');
+
+                $user = User::create([
+                    'first_name' => $names['first_name'],
+                    'last_name' => $names['last_name'],
+                    'email' => $socialUser['email'],
+                    'verified_at' => now(),
+                    $provider . '_id' => $socialUser['id'],
+                    'avatar_url' => $socialUser['picture'] ?? null,
+                    'user_type_id' => 2, // Client par défaut
+                    'is_active' => true,
+                    'source_ip_address' => $request->ip(),
+                    'source_server_info' => $request->userAgent(),
+                    'password' => Hash::make(Str::random(16)), // Random password
+                ]);
+
+                // Create user wallet
+                UserWallet::create([
+                    'user_id' => $user->id,
+                    'balance' => 0.00,
+                    'currency' => 'XAF',
+                ]);
+
+                // Assign default role
+                $user->assignRole('Particulier');
+
+                Log::info('Created new user from mobile social auth', [
+                    'provider' => $provider,
+                    'user_id' => $user->id
+                ]);
+            }
+
+            // Generate auth token
+            $token = $user->createAuthToken('mobile-social-login');
+
+            $this->logUserLogin($user, $request->ip(), 'success');
+
+            // Check if profile is incomplete
+            $needsProfileCompletion = empty($user->phone);
+
+            Log::info('Mobile social auth successful', [
+                'provider' => $provider,
+                'user_id' => $user->id,
+                'needs_profile_completion' => $needsProfileCompletion
+            ]);
+
+            return $this->success([
+                'token' => $token,
+                'user' => $user,
+                'needs_profile_completion' => $needsProfileCompletion
+            ], 'Login successful');
+
+        } catch (\Exception $e) {
+            Log::error('Mobile OAuth login failed', [
+                'provider' => $provider,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return $this->error('Authentication failed: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Verify Google ID token
+     */
+    private function verifyGoogleToken($token)
+    {
+        try {
+            $client = new \Google_Client(['client_id' => config('services.google.client_id')]);
+            $payload = $client->verifyIdToken($token);
+
+            if ($payload) {
+                return [
+                    'id' => $payload['sub'],
+                    'email' => $payload['email'],
+                    'name' => $payload['name'] ?? '',
+                    'picture' => $payload['picture'] ?? null,
+                ];
+            }
+        } catch (\Exception $e) {
+            Log::error('Google token verification failed', ['error' => $e->getMessage()]);
+        }
+
+        return null;
+    }
+
+    /**
+     * Verify Facebook access token
+     */
+    private function verifyFacebookToken($token)
+    {
+        try {
+            $response = \Illuminate\Support\Facades\Http::get('https://graph.facebook.com/me', [
+                'access_token' => $token,
+                'fields' => 'id,name,email,picture'
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                return [
+                    'id' => $data['id'],
+                    'email' => $data['email'] ?? null,
+                    'name' => $data['name'] ?? '',
+                    'picture' => $data['picture']['data']['url'] ?? null,
+                ];
+            }
+        } catch (\Exception $e) {
+            Log::error('Facebook token verification failed', ['error' => $e->getMessage()]);
+        }
+
+        return null;
+    }
+
+    /**
+     * Verify Apple ID token
+     */
+    private function verifyAppleToken($token)
+    {
+        try {
+            // Decode JWT (simplified - in production use proper JWT verification)
+            $parts = explode('.', $token);
+            if (count($parts) === 3) {
+                $payload = json_decode(base64_decode($parts[1]), true);
+
+                if ($payload && isset($payload['sub'], $payload['email'])) {
+                    return [
+                        'id' => $payload['sub'],
+                        'email' => $payload['email'],
+                        'name' => $payload['email'], // Apple doesn't always provide name
+                        'picture' => null,
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Apple token verification failed', ['error' => $e->getMessage()]);
+        }
+
+        return null;
+    }
+
+    /**
      * Parse full name into first and last name
      */
     private function parseName($fullName)

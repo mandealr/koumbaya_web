@@ -63,6 +63,9 @@ Route::group([
 
     // Social Authentication - Redirect only (callback is in web.php)
     Route::get('{provider}/redirect', [AuthController::class, 'redirectToProvider'])->where('provider', 'google|facebook|apple');
+
+    // Mobile OAuth - Validate tokens from native SDKs
+    Route::post('social/mobile', [AuthController::class, 'mobileOAuthLogin']);
 });
 
 // Routes d'authentification pour utilisateurs connectés avec rate limiting très permissif
