@@ -324,6 +324,7 @@ class AuthController extends Controller
         $user->load(['wallet', 'userType', 'roles']);
 
         return response()->json([
+            'success' => true,
             'user' => $user
         ]);
     }
