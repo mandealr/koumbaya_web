@@ -86,6 +86,24 @@
                   <span class="ml-2 text-gray-600">(4.8)</span>
                 </div>
               </div>
+
+              <!-- Merchant Info -->
+              <div v-if="product.merchant" class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                <div class="w-12 h-12 rounded-full bg-[#0099cc]/10 flex items-center justify-center">
+                  <svg v-if="product.merchant.company_name" class="w-6 h-6 text-[#0099cc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <svg v-else class="w-6 h-6 text-[#0099cc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-600">Vendu par</p>
+                  <p class="font-semibold text-gray-900">
+                    {{ product.merchant.company_name || `${product.merchant.first_name} ${product.merchant.last_name}` }}
+                  </p>
+                </div>
+              </div>
             </div>
 
             <!-- Product Value -->
