@@ -70,8 +70,25 @@ class PaymentController extends Controller
     {
         $user = auth('sanctum')->user();
 
+        Log::info('Payment initiation from transaction started', [
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'order_number' => $request->order_number,
+            'transaction_id' => $request->transaction_id,
+            'lottery_id' => $request->lottery_id,
+            'phone' => $request->phone,
+            'operator' => $request->operator,
+            'quantity' => $request->quantity,
+            'ip' => $request->ip()
+        ]);
+
         // Vérifier qu'au moins order_number ou transaction_id est fourni
         if (!$request->filled('order_number') && !$request->filled('transaction_id') && !$request->filled('lottery_id')) {
+            Log::warning('Payment initiation failed - missing required parameters', [
+                'user_id' => $user->id,
+                'received_params' => array_keys($request->all())
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Paramètres requis manquants. Vous devez fournir soit order_number, soit transaction_id, soit lottery_id.',
@@ -93,6 +110,11 @@ class PaymentController extends Controller
         ]);
 
         if ($validator->fails()) {
+            Log::warning('Payment initiation failed - validation errors', [
+                'user_id' => $user->id,
+                'errors' => $validator->errors()->toArray()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Données invalides',
@@ -102,11 +124,17 @@ class PaymentController extends Controller
 
         try {
             $order = null;
-            
+
             // Si transaction_id est fourni, récupérer l'ordre via la transaction
             if ($request->filled('transaction_id')) {
                 $transactionId = $request->transaction_id;
-                
+
+                Log::info('Looking up payment by transaction_id', [
+                    'user_id' => $user->id,
+                    'transaction_id' => $transactionId,
+                    'is_numeric' => is_numeric($transactionId)
+                ]);
+
                 // Essayer d'abord de trouver par ID si c'est numérique
                 if (is_numeric($transactionId)) {
                     $transaction = Payment::where('id', (int)$transactionId)
@@ -114,7 +142,7 @@ class PaymentController extends Controller
                         ->with(['order.lottery', 'order.product'])
                         ->first();
                 }
-                
+
                 // Si pas trouvé ou si c'est une référence (TXN-xxx), chercher par reference ou transaction_id
                 if (!isset($transaction) || !$transaction) {
                     $transaction = Payment::where(function($query) use ($transactionId) {
@@ -125,41 +153,93 @@ class PaymentController extends Controller
                     ->with(['order.lottery', 'order.product'])
                     ->first();
                 }
-                    
+
                 if ($transaction && $transaction->order) {
                     $order = $transaction->order;
+
+                    Log::info('Payment and order found', [
+                        'payment_id' => $transaction->id,
+                        'order_id' => $order->id,
+                        'order_number' => $order->order_number,
+                        'order_status' => $order->status,
+                        'order_amount' => $order->total_amount
+                    ]);
+                } else {
+                    Log::warning('Payment lookup failed', [
+                        'transaction_id' => $transactionId,
+                        'user_id' => $user->id,
+                        'transaction_found' => isset($transaction) && $transaction ? 'yes' : 'no',
+                        'order_found' => isset($transaction) && $transaction && $transaction->order ? 'yes' : 'no'
+                    ]);
                 }
             }
             // Si order_number est fourni, récupérer l'ordre existant
             elseif ($request->filled('order_number')) {
+                Log::info('Looking up order by order_number', [
+                    'user_id' => $user->id,
+                    'order_number' => $request->order_number
+                ]);
+
                 $order = Order::where('order_number', $request->order_number)
                     ->where('user_id', $user->id)
                     ->whereIn('status', ['pending', 'awaiting_payment', 'failed'])
                     ->with(['product', 'lottery'])
                     ->first();
 
-                // Vérifier si la commande a expiré
-                if ($order && $order->hasExpired()) {
-                    // Marquer automatiquement comme expirée
-                    $order->markAsExpired();
-                    
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Cette commande a expiré. Vous pouvez créer une nouvelle commande.',
-                        'error_code' => 'ORDER_EXPIRED',
-                        'expired_at' => $order->created_at->addHour(),
-                        'can_reorder' => true
-                    ], 410); // 410 Gone - ressource expirée
+                if ($order) {
+                    Log::info('Order found', [
+                        'order_id' => $order->id,
+                        'order_number' => $order->order_number,
+                        'status' => $order->status,
+                        'created_at' => $order->created_at
+                    ]);
+
+                    // Vérifier si la commande a expiré
+                    if ($order->hasExpired()) {
+                        Log::warning('Order has expired', [
+                            'order_id' => $order->id,
+                            'order_number' => $order->order_number,
+                            'created_at' => $order->created_at,
+                            'expired_at' => $order->created_at->addHour()
+                        ]);
+
+                        // Marquer automatiquement comme expirée
+                        $order->markAsExpired();
+
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Cette commande a expiré. Vous pouvez créer une nouvelle commande.',
+                            'error_code' => 'ORDER_EXPIRED',
+                            'expired_at' => $order->created_at->addHour(),
+                            'can_reorder' => true
+                        ], 410); // 410 Gone - ressource expirée
+                    }
+                } else {
+                    Log::warning('Order not found', [
+                        'order_number' => $request->order_number,
+                        'user_id' => $user->id
+                    ]);
                 }
             }
 
             // Si pas de commande trouvée, créer une nouvelle commande pour la tombola
             if (!$order && $request->filled('lottery_id')) {
+                Log::info('Creating new order for lottery', [
+                    'user_id' => $user->id,
+                    'lottery_id' => $request->lottery_id,
+                    'quantity' => $request->get('quantity', 1)
+                ]);
+
                 $lottery = Lottery::findOrFail($request->lottery_id);
                 $quantity = $request->get('quantity', 1);
                 $totalAmount = $lottery->ticket_price * $quantity;
 
                 if (!$lottery->canPurchaseTicket()) {
+                    Log::warning('Lottery cannot accept new tickets', [
+                        'lottery_id' => $lottery->id,
+                        'lottery_status' => $lottery->status
+                    ]);
+
                     return response()->json([
                         'success' => false,
                         'message' => 'Cette tombola n\'accepte plus de tickets'
@@ -167,6 +247,13 @@ class PaymentController extends Controller
                 }
 
                 if (($lottery->sold_tickets + $quantity) > $lottery->max_tickets) {
+                    Log::warning('Not enough tickets available', [
+                        'lottery_id' => $lottery->id,
+                        'sold_tickets' => $lottery->sold_tickets,
+                        'max_tickets' => $lottery->max_tickets,
+                        'requested_quantity' => $quantity
+                    ]);
+
                     return response()->json([
                         'success' => false,
                         'message' => 'Pas assez de tickets disponibles'
@@ -182,9 +269,17 @@ class PaymentController extends Controller
                     'currency' => 'XAF',
                     'status' => Order::STATUS_PENDING,
                 ]);
+
+                Log::info('New order created', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'lottery_id' => $lottery->id,
+                    'quantity' => $quantity,
+                    'total_amount' => $totalAmount
+                ]);
             }
 
-            // Si aucune commande trouvée, essayer de créer une commande basique 
+            // Si aucune commande trouvée, essayer de créer une commande basique
             // avec les informations disponibles
             if (!$order) {
                 // Déterminer quel paramètre a été utilisé pour la recherche
@@ -197,17 +292,24 @@ class PaymentController extends Controller
                     $searchParam = 'transaction_id';
                     $searchValue = $request->transaction_id;
                 }
-                
+
                 // Essayer de trouver des paiements récents de l'utilisateur pour debug
                 $recentOrders = Order::where('user_id', $user->id)
                     ->orderBy('created_at', 'desc')
                     ->limit(3)
                     ->get(['id', 'order_number', 'status', 'created_at']);
-                    
+
+                Log::warning('No order found for payment initiation', [
+                    'search_param' => $searchParam,
+                    'search_value' => $searchValue,
+                    'user_id' => $user->id,
+                    'recent_orders_count' => $recentOrders->count()
+                ]);
+
                 return response()->json([
                     'success' => false,
-                    'message' => $searchParam === 'order_number' 
-                        ? 'Aucune commande trouvée avec ce numéro de commande.' 
+                    'message' => $searchParam === 'order_number'
+                        ? 'Aucune commande trouvée avec ce numéro de commande.'
                         : 'Aucune commande trouvée. Le transaction_id fourni n\'existe pas ou n\'appartient pas à cet utilisateur.',
                     'debug_info' => [
                         'search_param' => $searchParam,
@@ -219,8 +321,21 @@ class PaymentController extends Controller
             }
 
             // Préparer les données pour eBilling
+            Log::info('Preparing eBilling data', [
+                'order_id' => $order->id,
+                'order_type' => $order->type,
+                'order_amount' => $order->total_amount,
+                'phone' => $request->phone,
+                'operator' => $request->operator
+            ]);
+
             if ($order->type === 'lottery') {
                 if (!$order->lottery) {
+                    Log::error('Lottery not found for order', [
+                        'order_id' => $order->id,
+                        'order_number' => $order->order_number
+                    ]);
+
                     return response()->json([
                         'success' => false,
                         'message' => 'Tombola introuvable'
@@ -238,8 +353,19 @@ class PaymentController extends Controller
                 ];
 
                 $type = 'lottery_ticket';
+
+                Log::info('eBilling data prepared for lottery', [
+                    'lottery_id' => $order->lottery->id,
+                    'lottery_number' => $order->lottery->lottery_number,
+                    'type' => $type
+                ]);
             } elseif ($order->type === 'direct') {
                 if (!$order->product) {
+                    Log::error('Product not found for order', [
+                        'order_id' => $order->id,
+                        'order_number' => $order->order_number
+                    ]);
+
                     return response()->json([
                         'success' => false,
                         'message' => 'Produit introuvable'
@@ -256,7 +382,18 @@ class PaymentController extends Controller
                 ];
 
                 $type = 'product_purchase';
+
+                Log::info('eBilling data prepared for product purchase', [
+                    'product_id' => $order->product->id,
+                    'product_title' => $order->product->title,
+                    'type' => $type
+                ]);
             } else {
+                Log::error('Unsupported transaction type', [
+                    'order_id' => $order->id,
+                    'order_type' => $order->type
+                ]);
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Type de transaction non supporté'
@@ -265,25 +402,63 @@ class PaymentController extends Controller
 
             // Trouver le paiement existant pour cette commande
             $existingPayment = Payment::where('order_id', $order->id)->first();
-            
+
+            Log::info('Initiating eBilling payment', [
+                'order_id' => $order->id,
+                'existing_payment' => $existingPayment ? $existingPayment->id : null,
+                'type' => $type
+            ]);
+
             if ($existingPayment) {
+                Log::info('Using existing payment for eBilling', [
+                    'payment_id' => $existingPayment->id,
+                    'payment_reference' => $existingPayment->reference
+                ]);
+
                 // Utiliser le paiement existant et mettre à jour l'ebilling_id
                 $billId = EBillingService::initiateWithExistingPayment($type, $data, $existingPayment);
             } else {
+                Log::info('Creating new eBilling payment');
+
                 // Créer un nouveau paiement eBilling si aucun n'existe
                 $billId = EBillingService::initiate($type, $data);
             }
 
             if (!$billId) {
+                Log::error('eBilling initiation failed - no bill_id returned', [
+                    'order_id' => $order->id,
+                    'type' => $type,
+                    'existing_payment' => $existingPayment ? $existingPayment->id : null
+                ]);
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Erreur lors de la création du paiement eBilling'
                 ], 500);
             }
 
+            Log::info('eBilling payment created successfully', [
+                'bill_id' => $billId,
+                'order_number' => $order->order_number
+            ]);
+
             // Déclencher automatiquement le push USSD
             $paymentSystemName = $request->operator === 'airtel' ? 'airtelmoney' : 'moovmoney4';
+
+            Log::info('Triggering USSD push', [
+                'bill_id' => $billId,
+                'payment_system' => $paymentSystemName,
+                'phone' => $request->phone,
+                'operator' => $request->operator
+            ]);
+
             $ussdResult = EBillingService::pushUssd($billId, $paymentSystemName, $request->phone);
+
+            Log::info('Payment initiation completed successfully', [
+                'bill_id' => $billId,
+                'order_number' => $order->order_number,
+                'ussd_push_success' => isset($ussdResult['success']) ? $ussdResult['success'] : null
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -297,7 +472,11 @@ class PaymentController extends Controller
                 ]
             ], 201);
         } catch (\Exception $e) {
-            Log::error('Payment creation from transaction failed: ' . $e->getMessage(), [
+            Log::error('Payment creation from transaction failed', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->all()
             ]);

@@ -124,11 +124,18 @@ class EBillingService
      */
     public static function initiateWithExistingPayment($type, $data, $existingPayment)
     {
+        Log::info('E-BILLING :: Initiating with existing payment', [
+            'type' => $type,
+            'payment_id' => $existingPayment->id,
+            'payment_reference' => $existingPayment->reference,
+            'user_id' => $data->user->id
+        ]);
+
         // Use existing payment's reference instead of generating new one
         $data->reference = $existingPayment->reference;
         $fees = 0; // No additional fees for existing payment
         $paymentDataFromSetup = self::setupPaymentData($type, $data, $fees);
-        
+
         if (!$paymentDataFromSetup) {
             Log::error('E-BILLING :: Error setting up payment data for existing payment', [
                 'type' => $type,
@@ -137,10 +144,21 @@ class EBillingService
             return false;
         }
 
+        Log::info('E-BILLING :: Payment data prepared for existing payment', [
+            'payment_id' => $existingPayment->id,
+            'amount' => $paymentDataFromSetup['amount'],
+            'description' => $paymentDataFromSetup['short_description']
+        ]);
+
         // Create E-Billing invoice via API
         $bill_id = self::createEBillingInvoice($paymentDataFromSetup);
-        
+
         if ($bill_id) {
+            Log::info('E-BILLING :: Invoice created for existing payment', [
+                'payment_id' => $existingPayment->id,
+                'bill_id' => $bill_id
+            ]);
+
             // Update existing payment with eBilling information but keep the original reference
             $existingPayment->update([
                 'ebilling_id' => $bill_id,
@@ -156,11 +174,15 @@ class EBillingService
                     'expiry_period' => $paymentDataFromSetup['expiry_period']
                 ])
             ]);
-            
-            Log::info('E-BILLING :: Payment updated successfully', [
+
+            Log::info('E-BILLING :: Payment updated successfully with bill_id', [
                 'payment_id' => $existingPayment->id,
                 'ebilling_id' => $bill_id,
                 'reference' => $existingPayment->reference
+            ]);
+        } else {
+            Log::error('E-BILLING :: Failed to create invoice for existing payment', [
+                'payment_id' => $existingPayment->id
             ]);
         }
 
@@ -304,6 +326,12 @@ class EBillingService
      */
     public static function pushUssd($billId, $paymentSystemName, $payerMsisdn, $type = 'payment')
     {
+        Log::info('E-BILLING :: Initiating USSD push', [
+            'bill_id' => $billId,
+            'payment_system' => $paymentSystemName,
+            'payer_msisdn' => $payerMsisdn,
+            'type' => $type
+        ]);
 
         $username = config('services.ebilling.username');
         $sharedKey = config('services.ebilling.shared_key');
@@ -312,40 +340,77 @@ class EBillingService
 
         $base64 = base64_encode($auth);
 
+        $url = env('URL_EB') . 'e_bills/' . $billId . '/ussd_push';
+
         try {
+            Log::info('E-BILLING :: Sending USSD push request', [
+                'url' => $url,
+                'payment_system_name' => $paymentSystemName,
+                'payer_msisdn' => $payerMsisdn
+            ]);
+
             $response = Http::withHeaders([
                 "Authorization" => "Basic " . $base64
-            ])->post(env('URL_EB') . 'e_bills/' . $billId . '/ussd_push', [
+            ])->post($url, [
                 "payment_system_name" => $paymentSystemName,
                 "payer_msisdn" => $payerMsisdn,
+            ]);
+
+            Log::info('E-BILLING :: USSD push response received', [
+                'bill_id' => $billId,
+                'status_code' => $response->status(),
+                'response_body' => $response->body()
             ]);
 
             $responseData = json_decode($response->body());
 
             if ($responseData) {
                 if ($responseData->message == "Accepted") {
+                    Log::info('E-BILLING :: USSD push accepted', [
+                        'bill_id' => $billId,
+                        'payer_msisdn' => $payerMsisdn,
+                        'response' => $responseData
+                    ]);
+
                     return [
                         'success' => true,
                         'message' => 'Push USSD envoyé avec succès. Gardez votre téléphone à portée de main pour valider la transaction avec votre code PIN secret.',
                         'data' => $responseData
                     ];
                 } else {
+                    Log::warning('E-BILLING :: USSD push not accepted', [
+                        'bill_id' => $billId,
+                        'message' => $responseData->message ?? 'Unknown',
+                        'response' => $responseData
+                    ]);
+
                     return [
                         'success' => false,
                         'message' => $responseData->message ?? 'Push USSD échoué'
                     ];
                 }
             } else {
+                Log::error('E-BILLING :: Empty response from USSD push', [
+                    'bill_id' => $billId,
+                    'response_body' => $response->body()
+                ]);
+
                 return [
                     'success' => false,
                     'message' => 'Échec du Push USSD.'
                 ];
             }
         } catch (\Exception $e) {
-            Log::error('E-BILLING :: USSD push failed', [
+            Log::error('E-BILLING :: USSD push exception', [
+                'bill_id' => $billId,
+                'payment_system' => $paymentSystemName,
+                'payer_msisdn' => $payerMsisdn,
                 'error' => $e->getMessage(),
-                'bill_id' => $billId
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
             ]);
+
             return [
                 'success' => false,
                 'message' => 'Push USSD échoué'
@@ -358,6 +423,11 @@ class EBillingService
      */
     public static function getKyc($operator, $phone)
     {
+        Log::info('E-BILLING :: Requesting KYC information', [
+            'operator' => $operator,
+            'phone' => $phone
+        ]);
+
         $username = config('services.ebilling.username');
         $sharedKey = config('services.ebilling.shared_key');
         $ebillingUrl = config('services.ebilling.url');
@@ -365,21 +435,47 @@ class EBillingService
         $url = $ebillingUrl . 'kyc?payment_system_name=' . $operator . '&msisdn=' . $phone;
 
         try {
+            Log::info('E-BILLING :: Sending KYC request', [
+                'url' => $url,
+                'operator' => $operator
+            ]);
+
             $response = Http::withBasicAuth($username, $sharedKey)->get($url);
+
+            Log::info('E-BILLING :: KYC response received', [
+                'status_code' => $response->status(),
+                'response_body' => $response->body()
+            ]);
 
             if ($response->successful()) {
                 $responseData = $response->json();
                 if (isset($responseData['key_data'])) {
+                    Log::info('E-BILLING :: KYC data retrieved successfully', [
+                        'operator' => $operator,
+                        'phone' => $phone,
+                        'has_data' => true
+                    ]);
+
                     return ['success' => true, 'data' => $responseData['key_data']];
                 }
             }
 
+            Log::warning('E-BILLING :: KYC request failed', [
+                'operator' => $operator,
+                'phone' => $phone,
+                'status_code' => $response->status(),
+                'response' => $response->body()
+            ]);
+
             return ['success' => false, 'message' => 'KYC failed'];
         } catch (\Exception $e) {
-            Log::error('E-BILLING :: KYC failed', [
-                'error' => $e->getMessage(),
+            Log::error('E-BILLING :: KYC exception', [
                 'operator' => $operator,
-                'phone' => $phone
+                'phone' => $phone,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
             ]);
             return ['success' => false, 'message' => 'KYC failed'];
         }
