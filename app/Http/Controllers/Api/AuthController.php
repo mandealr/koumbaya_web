@@ -518,16 +518,40 @@ class AuthController extends Controller
     public function redirectToProvider($provider)
     {
         $validProviders = ['facebook', 'google', 'apple'];
-        
+
         if (!in_array($provider, $validProviders)) {
             return response()->json(['error' => 'Provider not supported'], 400);
         }
 
         try {
+            Log::info('Social auth redirect initiated', [
+                'provider' => $provider,
+                'config' => [
+                    'client_id' => config("services.{$provider}.client_id") ? 'set' : 'missing',
+                    'client_secret' => config("services.{$provider}.client_secret") ? 'set' : 'missing',
+                    'redirect' => config("services.{$provider}.redirect")
+                ]
+            ]);
+
             $redirect_url = Socialite::driver($provider)->redirect()->getTargetUrl();
+
+            Log::info('Social auth redirect URL generated', [
+                'provider' => $provider,
+                'url' => $redirect_url
+            ]);
+
             return response()->json(['redirect_url' => $redirect_url]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Unable to redirect to provider'], 500);
+            Log::error('Social auth redirect failed', [
+                'provider' => $provider,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'error' => 'Unable to redirect to provider',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 
