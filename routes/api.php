@@ -61,9 +61,8 @@ Route::group([
     Route::post('resend-verification', [AuthController::class, 'resendVerificationEmail']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
 
-    // Social Authentication
+    // Social Authentication - Redirect only (callback is in web.php)
     Route::get('{provider}/redirect', [AuthController::class, 'redirectToProvider'])->where('provider', 'google|facebook|apple');
-    Route::get('{provider}/callback', [AuthController::class, 'handleProviderCallback'])->where('provider', 'google|facebook|apple');
 });
 
 // Routes d'authentification pour utilisateurs connectés avec rate limiting très permissif
@@ -473,12 +472,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/sessions/{id}/revoke', [UserProfileController::class, 'revokeSession']);
 });
 
-// Routes d'authentification sociales - IMPORTANT: placées à la fin pour éviter les conflits avec auth/me
-Route::group([
-    'middleware' => ['throttle.api:100,1'],
-    'prefix' => 'auth'
-], function () {
-    // Social Authentication Routes - Ces routes avec wildcards doivent être en dernier
-    Route::get('{provider}', [AuthController::class, 'redirectToProvider']);
-    Route::get('{provider}/callback', [AuthController::class, 'handleProviderCallback']);
-});
+// Note: Social Authentication callback is now in routes/web.php
+// The redirect endpoint is already defined above in the auth group
