@@ -18,22 +18,24 @@ class RoleController extends Controller
 
         return response()->json([
             'success' => true,
-            'roles' => $roles->map(function ($role) {
-                return [
-                    'id' => $role->id,
-                    'name' => $role->name,
-                    'description' => $role->description,
-                    'active' => $role->active,
-                    'mutable' => $role->mutable,
-                    'user_type' => $role->userType ? [
-                        'id' => $role->userType->id,
-                        'name' => $role->userType->name,
-                        'code' => $role->userType->code,
-                    ] : null,
-                    'privileges_count' => $role->privileges->count(),
-                    'users_count' => $role->users()->count(),
-                ];
-            })
+            'data' => [
+                'roles' => $roles->map(function ($role) {
+                    return [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                        'description' => $role->description,
+                        'active' => $role->active,
+                        'mutable' => $role->mutable,
+                        'user_type' => $role->userType ? [
+                            'id' => $role->userType->id,
+                            'name' => $role->userType->name,
+                            'code' => $role->userType->code,
+                        ] : null,
+                        'privileges_count' => $role->privileges->count(),
+                        'users_count' => $role->users()->count(),
+                    ];
+                })
+            ]
         ]);
     }
 

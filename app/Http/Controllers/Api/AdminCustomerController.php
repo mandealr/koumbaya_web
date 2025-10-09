@@ -58,21 +58,23 @@ class AdminCustomerController extends Controller
 
         return response()->json([
             'success' => true,
-            'customers' => $customers->map(function ($customer) {
-                return [
-                    'id' => $customer->id,
-                    'first_name' => $customer->first_name,
-                    'last_name' => $customer->last_name,
-                    'email' => $customer->email,
-                    'phone' => $customer->phone,
-                    'avatar_url' => $customer->avatar_url,
-                    'is_active' => $customer->is_active,
-                    'email_verified_at' => $customer->email_verified_at,
-                    'created_at' => $customer->created_at,
-                    'user_type' => $customer->userType ? $customer->userType->name : null,
-                    'roles' => $customer->roles->pluck('name')->toArray(),
-                ];
-            })
+            'data' => [
+                'customers' => $customers->map(function ($customer) {
+                    return [
+                        'id' => $customer->id,
+                        'first_name' => $customer->first_name,
+                        'last_name' => $customer->last_name,
+                        'email' => $customer->email,
+                        'phone' => $customer->phone,
+                        'avatar_url' => $customer->avatar_url,
+                        'is_active' => $customer->is_active,
+                        'email_verified_at' => $customer->email_verified_at,
+                        'created_at' => $customer->created_at,
+                        'user_type' => $customer->userType ? $customer->userType->name : null,
+                        'roles' => $customer->roles->pluck('name')->toArray(),
+                    ];
+                })
+            ]
         ]);
     }
 
@@ -81,28 +83,15 @@ class AdminCustomerController extends Controller
      */
     public function statistics()
     {
-        $particulierRole = Role::where('name', 'particulier')
-            ->orWhere('name', 'Particulier')
-            ->first();
+        $baseQuery = User::whereHas('roles', function ($q) {
+            $q->where('name', 'particulier')->orWhere('name', 'Particulier');
+        });
 
-        if (!$particulierRole) {
-            return response()->json([
-                'success' => true,
-                'stats' => [
-                    'total' => 0,
-                    'active' => 0,
-                    'inactive' => 0,
-                    'verified' => 0,
-                    'unverified' => 0,
-                ]
-            ]);
-        }
-
-        $total = $particulierRole->users()->count();
-        $active = $particulierRole->users()->where('is_active', true)->count();
-        $inactive = $particulierRole->users()->where('is_active', false)->count();
-        $verified = $particulierRole->users()->whereNotNull('email_verified_at')->count();
-        $unverified = $particulierRole->users()->whereNull('email_verified_at')->count();
+        $total = (clone $baseQuery)->count();
+        $active = (clone $baseQuery)->where('is_active', true)->count();
+        $inactive = (clone $baseQuery)->where('is_active', false)->count();
+        $verified = (clone $baseQuery)->whereNotNull('email_verified_at')->count();
+        $unverified = (clone $baseQuery)->whereNull('email_verified_at')->count();
 
         return response()->json([
             'success' => true,

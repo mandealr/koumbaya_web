@@ -18,19 +18,27 @@ class PrivilegeController extends Controller
 
         return response()->json([
             'success' => true,
-            'privileges' => $privileges->map(function ($privilege) {
-                return [
-                    'id' => $privilege->id,
-                    'name' => $privilege->name,
-                    'description' => $privilege->description,
-                    'user_type' => $privilege->userType ? [
-                        'id' => $privilege->userType->id,
-                        'name' => $privilege->userType->name,
-                        'code' => $privilege->userType->code,
-                    ] : null,
-                    'roles_count' => $privilege->roles->count(),
-                ];
-            })
+            'data' => [
+                'privileges' => $privileges->map(function ($privilege) {
+                    return [
+                        'id' => $privilege->id,
+                        'name' => $privilege->name,
+                        'description' => $privilege->description,
+                        'user_type' => $privilege->userType ? [
+                            'id' => $privilege->userType->id,
+                            'name' => $privilege->userType->name,
+                            'code' => $privilege->userType->code,
+                        ] : null,
+                        'roles' => $privilege->roles->map(function ($role) {
+                            return [
+                                'id' => $role->id,
+                                'name' => $role->name,
+                            ];
+                        }),
+                        'roles_count' => $privilege->roles->count(),
+                    ];
+                })
+            ]
         ]);
     }
 
@@ -51,8 +59,8 @@ class PrivilegeController extends Controller
             'success' => true,
             'stats' => [
                 'total' => $total,
-                'admin_privileges' => $adminPrivileges,
-                'customer_privileges' => $customerPrivileges,
+                'admin_type' => $adminPrivileges,
+                'customer_type' => $customerPrivileges,
             ]
         ]);
     }

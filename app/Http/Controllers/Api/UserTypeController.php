@@ -13,22 +13,30 @@ class UserTypeController extends Controller
      */
     public function index()
     {
-        $userTypes = UserType::withCount(['roles', 'privileges'])->get();
+        $userTypes = UserType::with('roles')->withCount(['roles', 'privileges'])->get();
 
         return response()->json([
             'success' => true,
-            'user_types' => $userTypes->map(function ($type) {
-                return [
-                    'id' => $type->id,
-                    'name' => $type->name,
-                    'code' => $type->code,
-                    'description' => $type->description,
-                    'is_active' => $type->is_active,
-                    'roles_count' => $type->roles_count ?? 0,
-                    'privileges_count' => $type->privileges_count ?? 0,
-                    'users_count' => $type->users()->count(),
-                ];
-            })
+            'data' => [
+                'user_types' => $userTypes->map(function ($type) {
+                    return [
+                        'id' => $type->id,
+                        'name' => $type->name,
+                        'code' => $type->code,
+                        'description' => $type->description,
+                        'active' => $type->is_active,
+                        'roles_count' => $type->roles_count ?? 0,
+                        'privileges_count' => $type->privileges_count ?? 0,
+                        'users_count' => $type->users()->count(),
+                        'roles' => $type->roles->map(function ($role) {
+                            return [
+                                'id' => $role->id,
+                                'name' => $role->name,
+                            ];
+                        }),
+                    ];
+                })
+            ]
         ]);
     }
 

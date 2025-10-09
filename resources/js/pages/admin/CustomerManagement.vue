@@ -188,7 +188,7 @@ const fetchCustomers = async () => {
     params.append('sort_order', filters.value.sort_order)
 
     const response = await api.get(`/admin/customers?${params.toString()}`)
-    customers.value = response.data.customers || []
+    customers.value = response.data.data?.customers || []
   } catch (err) {
     error.value = err.response?.data?.message || 'Erreur lors du chargement des clients'
     console.error('Error fetching customers:', err)
