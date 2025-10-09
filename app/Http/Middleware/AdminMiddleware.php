@@ -19,8 +19,12 @@ class AdminMiddleware
         }
 
         // Vérifier si l'utilisateur a le rôle Admin ou Super Admin
-        $hasAdminRole = $user->roles()->whereIn('name', ['Admin', 'Super Admin'])->exists();
-        
+        // Support nouveaux noms (snake_case) + anciens noms (rétrocompatibilité)
+        $hasAdminRole = $user->roles()->whereIn('name', [
+            'admin', 'superadmin', 'agent',  // Nouveaux noms
+            'Admin', 'Super Admin', 'Agent'  // Anciens noms (rétrocompatibilité)
+        ])->exists();
+
         if (!$hasAdminRole) {
             return response()->json(['error' => 'Accès non autorisé'], 403);
         }

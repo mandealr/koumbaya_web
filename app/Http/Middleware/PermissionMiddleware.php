@@ -34,7 +34,8 @@ class PermissionMiddleware
     private function userHasPermission($user, string $permission): bool
     {
         // Super Admin a toutes les permissions
-        if ($user->hasRole('Super Admin')) {
+        // Support nouveaux noms (snake_case) + anciens noms (rétrocompatibilité)
+        if ($user->hasRole('superadmin') || $user->hasRole('Super Admin')) {
             return true;
         }
 
