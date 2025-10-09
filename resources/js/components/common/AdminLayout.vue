@@ -250,13 +250,13 @@ const menuItems = computed(() => [
   {
     name: 'admin.products',
     to: { name: 'admin.products' },
-    label: 'Produits',
+    label: 'Articles',
     icon: ShoppingBagIcon
   },
   {
     name: 'admin.lotteries',
     to: { name: 'admin.lotteries' },
-    label: 'Tombolas',
+    label: 'Tirages spéciaux',
     icon: GiftIcon,
     badge: badgeCounts.value.lotteries > 0 ? badgeCounts.value.lotteries.toString() : null
   },

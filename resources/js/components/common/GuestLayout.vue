@@ -36,7 +36,7 @@
               to="/products"
               class="text-gray-600 hover:text-[#0099cc] px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
-              Produits
+              Articles
             </router-link>
             <router-link
               to="/how-it-works"
@@ -162,7 +162,7 @@
             class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-[#0099cc] hover:bg-[#0099cc]/5"
             @click="mobileMenuOpen = false"
           >
-            Produits
+            Articles
           </router-link>
           <router-link
             to="/how-it-works"

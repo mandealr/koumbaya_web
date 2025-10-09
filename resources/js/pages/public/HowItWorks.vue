@@ -7,7 +7,7 @@
           Comment ça marche ?
         </h1>
         <p class="text-xl md:text-2xl text-blue-100 leading-relaxed max-w-3xl mx-auto">
-          Découvrez comment obtenir des produits incroyables à prix réduit en quelques clics seulement. 
+          Articles à des conditions extraordinaires ! Découvrez comment obtenir des articles incroyables en quelques clics seulement.
           C'est simple, transparent et malin !
         </p>
       </div>
@@ -21,7 +21,7 @@
             3 étapes pour acheter malin
           </h2>
           <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Notre système de tombola est conçu pour être simple et équitable pour tous les participants
+            Notre système de tirage spécial est conçu pour être simple et équitable pour toute la communauté.
           </p>
         </div>
 
@@ -38,15 +38,15 @@
                 <ArrowRightIcon class="h-8 w-8 text-[#0099cc]/30" />
               </div>
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Choisissez votre produit</h3>
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">Choisissez vos fantastiques articles</h3>
             <p class="text-gray-600 leading-relaxed">
-              Parcourez notre catalogue de produits authentiques : smartphones, ordinateurs, 
+              Parcourez notre catalogue d'articles authentiques : smartphones, ordinateurs,
               voitures, montres de luxe et bien plus encore.
             </p>
             <div class="mt-6 bg-[#0099cc]/5 rounded-xl p-4">
               <div class="flex items-center justify-center gap-2 text-[#0099cc] font-medium">
                 <ShoppingBagIcon class="h-5 w-5" />
-                <span>Plus de 100 produits disponibles</span>
+                <span>Plus de 100 articles disponibles</span>
               </div>
             </div>
           </div>
@@ -63,10 +63,10 @@
                 <ArrowRightIcon class="h-8 w-8 text-[#0099cc]/30" />
               </div>
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Achetez vos tickets</h3>
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">Achetez ou tentez votre chance</h3>
             <p class="text-gray-600 leading-relaxed">
-              Chaque produit a un prix de ticket unique. Plus vous achetez de tickets, 
-              plus vous augmentez vos chances d'obtenir le produit à prix réduit.
+              Il faut faire une distinction entre les articles mis en mode « Acheter maintenant » et ceux mis en « Tirage spécial ».
+              Plus vous achetez de tickets pour un tirage spécial, plus vous augmentez vos chances !
             </p>
             <div class="mt-6 bg-[#0099cc]/5 rounded-xl p-4">
               <div class="flex items-center justify-center gap-2 text-[#0099cc] font-medium">
@@ -84,10 +84,10 @@
                 <span class="text-4xl font-bold text-white">3</span>
               </div>
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Obtenez votre produit</h3>
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">Sortez gagnant ! Profitez des articles</h3>
             <p class="text-gray-600 leading-relaxed">
-              Le tirage se fait automatiquement quand tous les tickets sont vendus. 
-              Si vous obtenez le produit, nous vous livrons gratuitement !
+              Le tirage se fait automatiquement quand tous les tickets sont vendus.
+              Profitez des articles listés et soyez livrés chez vous gratuitement !
             </p>
             <div class="mt-6 bg-yellow-50 rounded-xl p-4">
               <div class="flex items-center justify-center gap-2 text-yellow-700 font-medium">
@@ -105,10 +105,10 @@
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Comment fonctionne notre tombola ?
+            Comment fonctionne notre tirage spécial ?
           </h2>
           <p class="text-xl text-gray-600">
-            Notre système de tombola est 100% équitable et transparent
+            Notre système de tirage spécial est 100% équitable et transparent
           </p>
         </div>
 
@@ -355,14 +355,14 @@
           Prêt à acheter malin ?
         </h2>
         <p class="text-xl text-blue-100 mb-8">
-          Rejoignez les milliers de participants qui ont déjà acheté malin
+          Rejoignez la communauté Koumbaya et tentez votre chance dès aujourd'hui
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <router-link
             to="/products"
             class="bg-white text-[#0099cc] px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-colors shadow-lg"
           >
-            Voir les produits
+            Voir les articles
           </router-link>
           <router-link
             to="/register"
@@ -407,12 +407,12 @@ const faqs = ref([
     answer: "Vous êtes immédiatement notifié par email et SMS. Notre équipe vous contacte dans les 24h pour organiser la livraison gratuite de votre lot. Vous recevez aussi un certificat d'authenticité."
   },
   {
-    question: "Puis-je acheter plusieurs tickets pour le même produit ?",
+    question: "Puis-je acheter plusieurs tickets pour le même article ?",
     answer: "Oui, absolument ! Plus vous achetez de tickets, plus vous augmentez vos chances de gagner. Il n'y a pas de limite au nombre de tickets que vous pouvez acheter."
   },
   {
-    question: "Les produits sont-ils vraiment authentiques ?",
-    answer: "Tous nos produits sont 100% authentiques et neufs. Nous travaillons directement avec les distributeurs officiels et fournissons un certificat d'authenticité avec chaque lot."
+    question: "Les articles sont-ils vraiment authentiques ?",
+    answer: "Tous nos articles sont 100% authentiques et neufs. Nous travaillons directement avec les distributeurs officiels et fournissons un certificat d'authenticité avec chaque lot."
   },
   {
     question: "Combien de temps ai-je pour réclamer mon lot ?",

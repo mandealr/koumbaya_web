@@ -153,11 +153,11 @@
       <div class="flex justify-around text-center">
         <div>
           <div class="text-lg font-semibold text-gray-900">{{ quickStats.products }}</div>
-          <div class="text-xs text-gray-600">Produits</div>
+          <div class="text-xs text-gray-600">Articles</div>
         </div>
         <div>
           <div class="text-lg font-semibold text-blue-600">{{ quickStats.lotteries }}</div>
-          <div class="text-xs text-gray-600">Tombolas</div>
+          <div class="text-xs text-gray-600">Tirages spéciaux</div>
         </div>
         <div>
           <div class="text-lg font-semibold text-purple-600">{{ quickStats.revenue }}</div>
@@ -212,7 +212,7 @@ const navigation = computed(() => {
       href: isIndividualSeller.value ? '/merchant/simple-dashboard' : '/merchant/dashboard', 
       icon: HomeIcon 
     },
-    { name: 'Produits', href: '/merchant/products', icon: ShoppingBagIcon },
+    { name: 'Articles', href: '/merchant/products', icon: ShoppingBagIcon },
     { name: 'Commandes', href: '/merchant/orders', icon: ClipboardDocumentListIcon }
   ]
   

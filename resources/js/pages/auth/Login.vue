@@ -10,7 +10,7 @@
         Content de vous revoir !
       </h2>
       <p class="text-center text-lg text-gray-600 mb-8">
-        Connectez-vous pour accéder à vos tombolas
+        Connectez-vous pour accéder à vos tirages spéciaux
       </p>
       <p class="text-center text-sm text-gray-500">
         Pas encore de compte ?

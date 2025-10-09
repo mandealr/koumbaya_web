@@ -189,7 +189,7 @@ const logoError = ref(false)
 
 const navigationItems = [
   { name: 'customer.dashboard', to: { name: 'customer.dashboard' }, label: 'Accueil' },
-  { name: 'customer.products', to: { name: 'customer.products' }, label: 'Produits' },
+  { name: 'customer.products', to: { name: 'customer.products' }, label: 'Articles' },
   { name: 'customer.tickets', to: { name: 'customer.tickets' }, label: 'Mes Tickets' },
   { name: 'customer.orders', to: { name: 'customer.orders' }, label: 'Mes Commandes' }
 ]

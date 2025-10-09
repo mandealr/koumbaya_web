@@ -16,9 +16,7 @@
                 <span class="text-[#0099cc]">accessible</span>
               </h1>
               <p class="text-xl lg:text-2xl text-gray-600 leading-relaxed">
-                Des smartphones aux voitures, profitez de nos tombolas pour
-                <strong class="text-[#0099cc]">acheter malin</strong> et obtenir des produits
-                <strong class="text-[#0099cc]">à prix réduit</strong>.
+                <strong class="text-[#0099cc]">Accédez à un catalogue de merveilleux articles à des conditions extraordinaires !</strong>
               </p>
             </div>
 
@@ -28,7 +26,7 @@
                 class="inline-flex items-center justify-center gap-2 bg-[#0099cc] hover:bg-[#0088bb] text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 <ShoppingBagIcon class="h-5 w-5" />
-                <span>Découvrir les produits</span>
+                <span>Découvrir les articles</span>
               </router-link>
               <router-link
                 to="/how-it-works"
@@ -47,7 +45,7 @@
               </div>
               <div class="flex items-center gap-2 text-gray-600">
                 <CheckBadgeIcon class="h-6 w-6 text-[#0099cc]" />
-                <span class="font-medium">Produits authentiques</span>
+                <span class="font-medium">Articles authentiques</span>
               </div>
               <div class="flex items-center gap-2 text-gray-600">
                 <TruckIcon class="h-6 w-6 text-[#0099cc]" />
@@ -64,7 +62,7 @@
                 <div class="relative mb-6">
                   <img
                     :src="latestLotteryProduct?.image || placeholderImg"
-                    :alt="latestLotteryProduct?.name || 'Produit tombola'"
+                    :alt="latestLotteryProduct?.name || 'Article tirage spécial'"
                     class="w-full h-48 object-cover rounded-2xl bg-gray-100"
                   />
                   <div class="absolute -top-2 -right-2 bg-[#0099cc] text-white px-3 py-1 rounded-full text-sm font-bold">
@@ -100,7 +98,7 @@
 
               <!-- Floating Elements -->
               <div class="absolute inline-flex items-center -top-8 -left-8 bg-[#0099cc]/10 text-[#0099cc] px-4 py-2 rounded-full text-sm font-medium z-20 animate-float">
-                <SparklesIcon class="h-4 w-4" /> Nouvelle tombola
+                <SparklesIcon class="h-4 w-4" /> Nouveau tirage spécial
               </div>
               <div 
                 v-if="latestLotteryProduct?.isEndingSoon" 
@@ -130,7 +128,7 @@
             Koumbaya en chiffres
           </h2>
           <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Rejoignez des milliers de participants qui ont déjà fait confiance à notre plateforme
+            Rejoignez la communauté Koumbaya
           </p>
         </div>
 
@@ -148,7 +146,7 @@
               <GiftIcon class="h-10 w-10 text-[#0099cc]" />
             </div>
             <div class="text-4xl font-bold text-black mb-2">250+</div>
-            <div class="text-gray-600">Produits gagnés</div>
+            <div class="text-gray-600">Articles gagnés</div>
           </div>
 
           <div class="text-center">
@@ -156,7 +154,7 @@
               <CurrencyDollarIcon class="h-10 w-10 text-[#0099cc]" />
             </div>
             <div class="text-4xl font-bold text-black mb-2">500M+</div>
-            <div class="text-gray-600">FCFA distribués</div>
+            <div class="text-gray-600">FCFA de ventes</div>
           </div>
 
           <div class="text-center">
@@ -175,10 +173,10 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-black mb-4">
-            Simple comme bonjour
+            Tout simplement extraordinaire !
           </h2>
           <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            3 étapes suffisent pour obtenir vos produits à prix cassés
+            Obtenir les meilleurs articles, c'est un jeu d'enfants !
           </p>
         </div>
 
@@ -190,9 +188,9 @@
                 <span class="text-2xl font-bold text-white">1</span>
               </div>
             </div>
-            <h3 class="text-xl font-bold text-black mb-4">Choisissez votre produit</h3>
+            <h3 class="text-xl font-bold text-black mb-4">Choisissez vos fantastiques articles</h3>
             <p class="text-gray-600 leading-relaxed">
-              Parcourez notre catalogue de produits authentiques et sélectionnez celui que vous souhaitez acquérir.
+              Parcourez notre catalogue d'articles authentiques et sélectionnez celui que vous souhaitez acquérir.
             </p>
           </div>
 
@@ -203,9 +201,9 @@
                 <span class="text-2xl font-bold text-white">2</span>
               </div>
             </div>
-            <h3 class="text-xl font-bold text-black mb-4">Achetez vos tickets</h3>
+            <h3 class="text-xl font-bold text-black mb-4">Achetez ou tentez votre chance</h3>
             <p class="text-gray-600 leading-relaxed">
-              Participez à la tombola avec un petit budget. Plus vous prenez de tickets, meilleures sont vos chances d'obtenir le produit.
+              Participez au tirage spécial avec un petit budget, ou achetez directement. Plus vous prenez de tickets, meilleures sont vos chances !
             </p>
           </div>
 
@@ -216,9 +214,9 @@
                 <span class="text-2xl font-bold text-white">3</span>
               </div>
             </div>
-            <h3 class="text-xl font-bold text-black mb-4">Obtenez votre produit</h3>
+            <h3 class="text-xl font-bold text-black mb-4">Sortez gagnant !</h3>
             <p class="text-gray-600 leading-relaxed">
-              Le tirage automatique désigne l'acheteur. Nous livrons gratuitement partout au Gabon !
+              Profitez des articles listés et soyez livrés chez vous. Livraison gratuite partout au Gabon !
             </p>
           </div>
         </div>
@@ -241,10 +239,10 @@
         <div class="flex items-center justify-between mb-12">
           <div>
             <h2 class="text-3xl md:text-4xl font-bold text-black mb-4">
-              Produits en vedette
+              Articles en vedette
             </h2>
             <p class="text-xl text-gray-600">
-              Découvrez les derniers produits - tombolas et achat direct
+              Découvrez les derniers articles - tirages spéciaux et achat direct
             </p>
           </div>
           <router-link
@@ -265,12 +263,12 @@
           >
             <!-- Badge mode de vente -->
             <div class="absolute top-4 left-4 z-10">
-              <span 
-                v-if="product.sale_mode === 'lottery'" 
-                class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg flex items-center gap-1"
+              <span
+                v-if="product.sale_mode === 'lottery'"
+                class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg flex items-center gap-1"
               >
                 <TicketIcon class="h-4 w-4" />
-                Tombola
+                Tirage spécial
               </span>
               <span 
                 v-else 
@@ -337,7 +335,7 @@
                 </p>
               </div>
 
-              <!-- Section spécifique tombola -->
+              <!-- Section spécifique tirage spécial - MASQUÉE pour achat direct selon instructions -->
               <div v-if="product.sale_mode === 'lottery'" class="space-y-2">
                 <div class="flex justify-between text-sm text-gray-600">
                   <span>Progression</span>
@@ -345,7 +343,7 @@
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-3">
                   <div
-                    class="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-500"
+                    class="bg-gradient-to-r from-yellow-400 to-orange-500 h-3 rounded-full transition-all duration-500"
                     :style="{ width: Math.round(((product.soldTickets || 0) / (product.totalTickets || 1000)) * 100) + '%' }"
                   ></div>
                 </div>
@@ -363,15 +361,15 @@
                 </span>
               </div>
 
-              <button 
+              <button
                 class="w-full font-semibold py-3 rounded-xl transition-all duration-200 group-hover:scale-105 group-hover:shadow-lg flex items-center justify-center gap-2 whitespace-nowrap"
-                :class="product.sale_mode === 'lottery' 
-                  ? 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white' 
+                :class="product.sale_mode === 'lottery'
+                  ? 'bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white'
                   : 'bg-gradient-to-r from-[#0099cc] to-cyan-500 hover:from-[#0088bb] hover:to-cyan-600 text-white'"
               >
                 <TicketIcon v-if="product.sale_mode === 'lottery'" class="h-5 w-5 flex-shrink-0" />
                 <CreditCardIcon v-else class="h-5 w-5 flex-shrink-0" />
-                {{ product.sale_mode === 'lottery' ? 'Participer maintenant' : 'Acheter maintenant' }}
+                {{ product.sale_mode === 'lottery' ? 'Tenter votre chance' : 'Acheter maintenant' }}
               </button>
             </div>
           </div>
@@ -382,7 +380,7 @@
             to="/products"
             class="inline-flex items-center gap-2 bg-[#0099cc] hover:bg-[#0088bb] text-white font-semibold px-8 py-4 rounded-2xl transition-all"
           >
-            <span>Voir tous les produits</span>
+            <span>Voir tous les articles</span>
             <ArrowRightIcon class="h-5 w-5" />
           </router-link>
         </div>
@@ -457,7 +455,7 @@
             class="inline-flex items-center justify-center gap-2 border-2 border-white text-white hover:bg-white hover:text-[#0099cc] font-bold px-10 py-5 rounded-2xl transition-all duration-200"
           >
             <EyeIcon class="h-6 w-6" />
-            <span>Voir les produits</span>
+            <span>Voir les articles</span>
           </router-link>
         </div>
       </div>

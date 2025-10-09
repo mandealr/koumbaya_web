@@ -74,10 +74,10 @@
             {{ formatPrice(product.value) }}
           </div>
           <div class="text-sm text-gray-500">
-            Valeur du lot
+            {{ product.sale_mode === 'lottery' ? 'Valeur du lot' : 'Prix de l\'article' }}
           </div>
         </div>
-        <div class="text-right space-y-1">
+        <div v-if="product.sale_mode === 'lottery'" class="text-right space-y-1">
           <div class="font-semibold text-gray-900">
             {{ formatPrice(product.ticketPrice || 500) }} FCFA
           </div>
@@ -87,15 +87,15 @@
         </div>
       </div>
 
-      <!-- Progression des ventes -->
-      <div class="space-y-2">
+      <!-- Progression des ventes - SEULEMENT pour mode tirage spécial -->
+      <div v-if="product.sale_mode === 'lottery'" class="space-y-2">
         <div class="flex justify-between text-sm">
           <span class="text-gray-600">Progression</span>
           <span class="font-medium">{{ product.soldTickets || 0 }}/{{ product.totalTickets || 1000 }}</span>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            class="bg-gradient-to-r from-koumbaya-primary to-blue-600 h-2 rounded-full transition-all duration-300"
+          <div
+            class="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full transition-all duration-300"
             :style="{ width: progressPercentage + '%' }"
           ></div>
         </div>
@@ -104,8 +104,8 @@
         </div>
       </div>
 
-      <!-- Date de tirage -->
-      <div class="flex items-center gap-2 text-sm text-gray-600">
+      <!-- Date de tirage - SEULEMENT pour mode tirage spécial -->
+      <div v-if="product.sale_mode === 'lottery'" class="flex items-center gap-2 text-sm text-gray-600">
         <CalendarIcon class="w-4 h-4 flex-shrink-0" />
         Tirage le {{ formatDate(product.drawDate || new Date()) }}
       </div>
@@ -123,11 +123,15 @@
         </button>
         <button
           @click="onQuickBuy"
-          class="koumbaya-btn koumbaya-btn-outline hover:bg-koumbaya-primary hover:text-white border-koumbaya-primary text-koumbaya-primary flex items-center gap-2"
+          :class="product.sale_mode === 'lottery'
+            ? 'koumbaya-btn bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white border-0'
+            : 'koumbaya-btn koumbaya-btn-outline hover:bg-koumbaya-primary hover:text-white border-koumbaya-primary text-koumbaya-primary'"
+          class="flex items-center gap-2"
           :disabled="product.status !== 'active'"
         >
-          <ShoppingCartIcon class="w-4 h-4" />
-          Acheter
+          <TicketIcon v-if="product.sale_mode === 'lottery'" class="w-4 h-4" />
+          <ShoppingCartIcon v-else class="w-4 h-4" />
+          {{ product.sale_mode === 'lottery' ? 'Participer' : 'Acheter' }}
         </button>
       </div>
     </div>
@@ -184,18 +188,18 @@ const formatDate = (date) => {
 
 const getSaleModeClass = (saleMode) => {
   const classes = {
-    'direct': 'bg-green-100 text-green-800 px-2 py-1 text-xs font-medium rounded-lg',
-    'lottery': 'bg-purple-100 text-purple-800 px-2 py-1 text-xs font-medium rounded-lg'
+    'direct': 'bg-blue-100 text-blue-800 px-2 py-1 text-xs font-medium rounded-lg',
+    'lottery': 'bg-yellow-100 text-orange-800 px-2 py-1 text-xs font-medium rounded-lg'
   }
   return classes[saleMode] || 'bg-gray-100 text-gray-800 px-2 py-1 text-xs font-medium rounded-lg'
 }
 
 const getSaleModeLabel = (saleMode) => {
   const labels = {
-    'direct': 'Direct',
-    'lottery': 'Tombola'
+    'direct': 'Achat direct',
+    'lottery': 'Tirage spécial'
   }
-  return labels[saleMode] || labels['direct'] // Par défaut 'Direct' si non défini
+  return labels[saleMode] || labels['direct'] // Par défaut 'Achat direct' si non défini
 }
 
 const getMerchantName = (merchant) => {

@@ -11,7 +11,7 @@
             </router-link>
           </div>
           <p class="mt-4 text-gray-600 text-sm leading-relaxed">
-            La marketplace innovante qui vous permet d'acquérir des produits premium à prix imbattables grâce aux tombolas équitables.
+            La marketplace innovante qui vous permet d'acquérir des articles premium à des conditions extraordinaires grâce aux tirages spéciaux équitables.
           </p>
           <div class="mt-6 flex space-x-4">
             <a href="#" class="text-gray-400 hover:text-[#0099cc] transition-colors">
