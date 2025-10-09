@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
+use App\Notifications\VendorAccountCreated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -125,9 +126,9 @@ class AdminVendorController extends Controller
                 $user->roles()->attach($businessRole->id);
             }
 
-            // Send password reset email
+            // Send password creation email with custom notification
             $token = Password::broker()->createToken($user);
-            $user->sendPasswordResetNotification($token);
+            $user->notify(new VendorAccountCreated($token));
 
             DB::commit();
 
