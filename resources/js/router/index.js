@@ -375,6 +375,32 @@ const routes = [
         name: 'admin.vendors',
         component: () => import('@/pages/admin/VendorManagement.vue')
       },
+      // User Management Routes
+      {
+        path: 'customers',
+        name: 'admin.customers',
+        component: () => import('@/pages/admin/CustomerManagement.vue')
+      },
+      {
+        path: 'admins',
+        name: 'admin.admins',
+        component: () => import('@/pages/admin/AdminManagement.vue')
+      },
+      {
+        path: 'roles',
+        name: 'admin.roles',
+        component: () => import('@/pages/admin/RoleManagement.vue')
+      },
+      {
+        path: 'privileges',
+        name: 'admin.privileges',
+        component: () => import('@/pages/admin/PrivilegeManagement.vue')
+      },
+      {
+        path: 'user-types',
+        name: 'admin.user-types',
+        component: () => import('@/pages/admin/UserTypeManagement.vue')
+      },
       {
         path: 'refunds',
         name: 'admin.refunds',
