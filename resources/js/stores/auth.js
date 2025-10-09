@@ -31,27 +31,37 @@ export const useAuthStore = defineStore('auth', () => {
   }
   
   const isManager = computed(() => {
-    return hasRole('Super Admin') || hasRole('Admin') || hasRole('Agent')
+    // Nouveaux rôles en snake_case + anciens pour rétrocompatibilité
+    return hasRole('superadmin') || hasRole('admin') || hasRole('agent') ||
+           hasRole('Super Admin') || hasRole('Admin') || hasRole('Agent')
   })
-  
+
   const isAdmin = computed(() => {
-    return hasRole('Super Admin') || hasRole('Admin')
+    // Nouveaux rôles en snake_case + anciens pour rétrocompatibilité
+    return hasRole('superadmin') || hasRole('admin') ||
+           hasRole('Super Admin') || hasRole('Admin')
   })
-  
+
   const isAgent = computed(() => {
-    return hasRole('Agent')
+    // Nouveaux rôles en snake_case + anciens pour rétrocompatibilité
+    return hasRole('agent') || hasRole('Agent')
   })
-  
+
   const isMerchant = computed(() => {
-    return hasRole('Business Enterprise') || hasRole('Business Individual') || hasRole('Business')
+    // Nouveaux rôles en snake_case + anciens pour rétrocompatibilité
+    return hasRole('business_enterprise') || hasRole('business_individual') ||
+           hasRole('Business Enterprise') || hasRole('Business Individual') || hasRole('Business')
   })
-  
+
   const isCustomer = computed(() => {
-    return hasRole('Particulier')
+    // Nouveaux rôles en snake_case + anciens pour rétrocompatibilité
+    return hasRole('particulier') || hasRole('Particulier')
   })
-  
+
   const canSell = computed(() => {
-    return hasRole('Business Enterprise') || hasRole('Business Individual') || hasRole('Business')
+    // Nouveaux rôles en snake_case + anciens pour rétrocompatibilité
+    return hasRole('business_enterprise') || hasRole('business_individual') ||
+           hasRole('Business Enterprise') || hasRole('Business Individual') || hasRole('Business')
   })
 
   // Actions
@@ -274,40 +284,40 @@ export const useAuthStore = defineStore('auth', () => {
       isAgent: isAgent.value,
       isMerchant: isMerchant.value,
       isCustomer: isCustomer.value,
-      isIndividualSeller: hasRole('Business Individual'),
-      isBusinessSeller: hasRole('Business Enterprise'),
+      isIndividualSeller: hasRole('business_individual') || hasRole('Business Individual'),
+      isBusinessSeller: hasRole('business_enterprise') || hasRole('Business Enterprise'),
       roles: user.value?.roles?.map(r => r.name)
     })
-    
-    // 1. MANAGERS (Super Admin, Admin, Agent) → Admin Dashboard
+
+    // 1. MANAGERS (superadmin, admin, agent) → Admin Dashboard
     if (isManager.value) {
       console.log('✅ Utilisateur manager détecté, redirection vers admin.dashboard')
       console.log('  - isAdmin:', isAdmin.value)
-      console.log('  - hasRole Super Admin:', hasRole('Super Admin'))
-      console.log('  - hasRole Admin:', hasRole('Admin'))
-      console.log('  - hasRole Agent:', hasRole('Agent'))
+      console.log('  - hasRole superadmin:', hasRole('superadmin'))
+      console.log('  - hasRole admin:', hasRole('admin'))
+      console.log('  - hasRole agent:', hasRole('agent'))
       return 'admin.dashboard'
     }
-    
+
     // 2. BUSINESS INDIVIDUAL → Simple Merchant Dashboard (vendeur individuel)
-    if (hasRole('Business Individual')) {
+    if (hasRole('business_individual') || hasRole('Business Individual')) {
       console.log('✅ Redirection vers merchant.simple-dashboard (Vendeur Individuel)')
       return 'merchant.simple-dashboard'
     }
-    
+
     // 3. BUSINESS ENTERPRISE → Full Merchant Dashboard (vendeur entreprise)
-    if (hasRole('Business Enterprise')) {
+    if (hasRole('business_enterprise') || hasRole('Business Enterprise')) {
       console.log('✅ Redirection vers merchant.dashboard (Vendeur Entreprise - dashboard complet)')
       return 'merchant.dashboard'
     }
-    
+
     // 4. LEGACY BUSINESS → Simple Merchant Dashboard (rétrocompatibilité)
     if (hasRole('Business')) {
       console.log('✅ Redirection vers merchant.simple-dashboard (Business legacy - simple dashboard)')
       return 'merchant.simple-dashboard'
     }
-    
-    // 5. CUSTOMERS (rôle Particulier ou par défaut) → Customer Dashboard
+
+    // 5. CUSTOMERS (rôle particulier ou par défaut) → Customer Dashboard
     console.log('✅ Redirection vers customer.dashboard (Customer par défaut)')
     return 'customer.dashboard'
   }
@@ -331,8 +341,8 @@ export const useAuthStore = defineStore('auth', () => {
     hasRole,
     
     // Nouveaux helpers pour les profils vendeurs
-    isIndividualSeller: computed(() => hasRole('Business Individual')),
-    isBusinessSeller: computed(() => hasRole('Business Enterprise')),
+    isIndividualSeller: computed(() => hasRole('business_individual') || hasRole('Business Individual')),
+    isBusinessSeller: computed(() => hasRole('business_enterprise') || hasRole('Business Enterprise')),
     
     // Actions
     login,
