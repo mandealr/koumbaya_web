@@ -115,7 +115,7 @@ class AdminVendorController extends Controller
                 'phone' => $request->phone,
                 'company_name' => $request->company_name,
                 'password' => Hash::make($temporaryPassword),
-                'user_type_id' => 2, // Customer type pour les vendeurs Business
+                'user_type_id' => 1, // Merchant type pour les vendeurs Business
                 'is_active' => true,
                 'email_verified_at' => now(), // Auto-verify admin-created accounts
             ]);
