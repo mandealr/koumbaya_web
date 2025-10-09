@@ -167,7 +167,7 @@
     <!-- Create/Edit Vendor Modal -->
     <div
       v-if="showCreateModal || showEditModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
       @click.self="closeModals"
     >
       <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -247,29 +247,20 @@
             </div>
           </div>
 
-          <!-- Mot de passe (seulement pour création) -->
-          <div v-if="showCreateModal" class="bg-yellow-50 rounded-lg p-4 mb-4">
-            <h3 class="text-sm font-semibold text-gray-700 mb-3">Sécurité</h3>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe *</label>
-                <input
-                  v-model="form.password"
-                  type="password"
-                  required
-                  minlength="8"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+          <!-- Information sur l'envoi de l'email de reset password -->
+          <div v-if="showCreateModal" class="bg-blue-50 border-l-4 border-blue-400 rounded-lg p-4 mb-4">
+            <div class="flex items-start">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
               </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe *</label>
-                <input
-                  v-model="form.password_confirmation"
-                  type="password"
-                  required
-                  minlength="8"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              <div class="ml-3">
+                <h3 class="text-sm font-semibold text-blue-800 mb-1">Création de mot de passe</h3>
+                <p class="text-sm text-blue-700">
+                  Un email sera automatiquement envoyé au vendeur avec un lien pour créer son mot de passe.
+                  Il pourra se connecter après avoir défini son mot de passe.
+                </p>
               </div>
             </div>
           </div>
@@ -303,7 +294,7 @@
     <!-- View Vendor Modal -->
     <div
       v-if="showViewModal && selectedVendor"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
       @click.self="closeModals"
     >
       <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -478,17 +469,6 @@ const submitForm = async () => {
   error.value = ''
 
   // Validation
-  if (showCreateModal.value) {
-    if (form.value.password !== form.value.password_confirmation) {
-      error.value = 'Les mots de passe ne correspondent pas'
-      return
-    }
-    if (form.value.password.length < 8) {
-      error.value = 'Le mot de passe doit contenir au moins 8 caractères'
-      return
-    }
-  }
-
   if (!form.value.company_name?.trim()) {
     error.value = 'Le nom de l\'entreprise est obligatoire pour les vendeurs professionnels'
     return
@@ -507,8 +487,7 @@ const submitForm = async () => {
     }
 
     if (showCreateModal.value) {
-      payload.password = form.value.password
-      payload.password_confirmation = form.value.password_confirmation
+      // Pas de mot de passe lors de la création - un email de reset sera envoyé
       await post('/admin/vendors', payload)
     } else {
       await put(`/admin/vendors/${selectedVendor.value.id}`, payload)

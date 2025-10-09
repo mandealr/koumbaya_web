@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 
 class AdminVendorController extends Controller
 {
@@ -90,7 +92,6 @@ class AdminVendorController extends Controller
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
             'company_name' => 'required|string|max:255',
-            'password' => 'required|string|min:8|confirmed',
         ]);
 
         if ($validator->fails()) {
@@ -104,14 +105,15 @@ class AdminVendorController extends Controller
         try {
             DB::beginTransaction();
 
-            // Create the user
+            // Create the user with a temporary random password
+            $temporaryPassword = Str::random(32);
             $user = User::create([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'company_name' => $request->company_name,
-                'password' => Hash::make($request->password),
+                'password' => Hash::make($temporaryPassword),
                 'is_active' => true,
                 'email_verified_at' => now(), // Auto-verify admin-created accounts
             ]);
@@ -122,11 +124,15 @@ class AdminVendorController extends Controller
                 $user->roles()->attach($businessRole->id);
             }
 
+            // Send password reset email
+            $token = Password::broker()->createToken($user);
+            $user->sendPasswordResetNotification($token);
+
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Vendeur Pro créé avec succès',
+                'message' => 'Vendeur Pro créé avec succès. Un email de création de mot de passe a été envoyé.',
                 'vendor' => [
                     'id' => $user->id,
                     'first_name' => $user->first_name,
