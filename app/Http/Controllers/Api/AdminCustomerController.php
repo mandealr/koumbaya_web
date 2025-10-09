@@ -1,0 +1,150 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Models\Role;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
+class AdminCustomerController extends Controller
+{
+    /**
+     * Get all customers (particulier role)
+     */
+    public function index(Request $request)
+    {
+        $query = User::with(['roles', 'userType'])
+            ->whereHas('roles', function ($q) {
+                $q->where('name', 'particulier')->orWhere('name', 'Particulier');
+            });
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'LIKE', "%{$search}%")
+                  ->orWhere('last_name', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('phone', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            switch ($request->status) {
+                case 'active':
+                    $query->where('is_active', true);
+                    break;
+                case 'inactive':
+                    $query->where('is_active', false);
+                    break;
+                case 'verified':
+                    $query->whereNotNull('email_verified_at');
+                    break;
+                case 'unverified':
+                    $query->whereNull('email_verified_at');
+                    break;
+            }
+        }
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        $customers = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'customers' => $customers->map(function ($customer) {
+                return [
+                    'id' => $customer->id,
+                    'first_name' => $customer->first_name,
+                    'last_name' => $customer->last_name,
+                    'email' => $customer->email,
+                    'phone' => $customer->phone,
+                    'avatar_url' => $customer->avatar_url,
+                    'is_active' => $customer->is_active,
+                    'email_verified_at' => $customer->email_verified_at,
+                    'created_at' => $customer->created_at,
+                    'user_type' => $customer->userType ? $customer->userType->name : null,
+                    'roles' => $customer->roles->pluck('name')->toArray(),
+                ];
+            })
+        ]);
+    }
+
+    /**
+     * Get customer statistics
+     */
+    public function statistics()
+    {
+        $particulierRole = Role::where('name', 'particulier')
+            ->orWhere('name', 'Particulier')
+            ->first();
+
+        if (!$particulierRole) {
+            return response()->json([
+                'success' => true,
+                'stats' => [
+                    'total' => 0,
+                    'active' => 0,
+                    'inactive' => 0,
+                    'verified' => 0,
+                    'unverified' => 0,
+                ]
+            ]);
+        }
+
+        $total = $particulierRole->users()->count();
+        $active = $particulierRole->users()->where('is_active', true)->count();
+        $inactive = $particulierRole->users()->where('is_active', false)->count();
+        $verified = $particulierRole->users()->whereNotNull('email_verified_at')->count();
+        $unverified = $particulierRole->users()->whereNull('email_verified_at')->count();
+
+        return response()->json([
+            'success' => true,
+            'stats' => [
+                'total' => $total,
+                'active' => $active,
+                'inactive' => $inactive,
+                'verified' => $verified,
+                'unverified' => $unverified,
+            ]
+        ]);
+    }
+
+    /**
+     * Toggle customer active status
+     */
+    public function toggleStatus($id)
+    {
+        $customer = User::find($id);
+
+        if (!$customer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Client non trouvé'
+            ], 404);
+        }
+
+        // Verify it's a customer
+        if (!$customer->roles->whereIn('name', ['particulier', 'Particulier'])->count()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cet utilisateur n\'est pas un client'
+            ], 403);
+        }
+
+        $customer->is_active = !$customer->is_active;
+        $customer->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Statut du client mis à jour',
+            'is_active' => $customer->is_active
+        ]);
+    }
+}

@@ -21,6 +21,10 @@ use App\Http\Controllers\Api\TicketPriceController;
 use App\Http\Controllers\Api\AdminDashboardController;
 use App\Http\Controllers\Api\AdminUserController;
 use App\Http\Controllers\Api\AdminVendorController;
+use App\Http\Controllers\Api\AdminCustomerController;
+use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\PrivilegeController;
+use App\Http\Controllers\Api\UserTypeController;
 use App\Http\Controllers\Api\AdminProductController;
 use App\Http\Controllers\Api\AdminPaymentController;
 use App\Http\Controllers\Api\AdminSettingsController;
@@ -360,6 +364,39 @@ Route::group([
         Route::post('/', [AdminVendorController::class, 'store']);
         Route::put('/{id}', [AdminVendorController::class, 'update']);
         Route::delete('/{id}', [AdminVendorController::class, 'destroy']);
+    });
+
+    // Admin Customers Management (Particulier role)
+    Route::prefix('customers')->group(function () {
+        Route::get('/', [AdminCustomerController::class, 'index']);
+        Route::get('/statistics', [AdminCustomerController::class, 'statistics']);
+        Route::post('/{id}/toggle-status', [AdminCustomerController::class, 'toggleStatus']);
+    });
+
+    // Admin Users Management (Admin roles: superadmin, admin, agent)
+    Route::prefix('admins')->group(function () {
+        Route::get('/', [AdminUserController::class, 'index']);
+        Route::get('/statistics', [AdminUserController::class, 'statistics']);
+        Route::post('/', [AdminUserController::class, 'store']);
+        Route::post('/{id}/toggle-status', [AdminUserController::class, 'toggleStatus']);
+    });
+
+    // Roles Management
+    Route::prefix('roles')->group(function () {
+        Route::get('/', [RoleController::class, 'index']);
+        Route::get('/statistics', [RoleController::class, 'statistics']);
+    });
+
+    // Privileges Management
+    Route::prefix('privileges')->group(function () {
+        Route::get('/', [PrivilegeController::class, 'index']);
+        Route::get('/statistics', [PrivilegeController::class, 'statistics']);
+    });
+
+    // User Types Management
+    Route::prefix('user-types')->group(function () {
+        Route::get('/', [UserTypeController::class, 'index']);
+        Route::get('/statistics', [UserTypeController::class, 'statistics']);
     });
 
     // Admin Products Management

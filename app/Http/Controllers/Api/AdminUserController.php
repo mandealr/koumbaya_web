@@ -338,6 +338,38 @@ class AdminUserController extends Controller
     }
 
     /**
+     * Get admin statistics
+     */
+    public function statistics()
+    {
+        $total = User::whereHas('roles', function ($q) {
+            $q->whereIn('name', ['superadmin', 'admin', 'agent', 'Super Admin', 'Admin', 'Agent']);
+        })->count();
+
+        $superadmin = User::whereHas('roles', function ($q) {
+            $q->whereIn('name', ['superadmin', 'Super Admin']);
+        })->count();
+
+        $admin = User::whereHas('roles', function ($q) {
+            $q->whereIn('name', ['admin', 'Admin']);
+        })->count();
+
+        $agent = User::whereHas('roles', function ($q) {
+            $q->whereIn('name', ['agent', 'Agent']);
+        })->count();
+
+        return response()->json([
+            'success' => true,
+            'stats' => [
+                'total' => $total,
+                'superadmin' => $superadmin,
+                'admin' => $admin,
+                'agent' => $agent,
+            ]
+        ]);
+    }
+
+    /**
      * Get roles available for admin creation
      */
     public function getAdminRoles()
