@@ -11,24 +11,43 @@ class RoleSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
-     * Crée le système hybride de rôles Koumbaya :
-     * - Particulier : rôle de base obligatoire
-     * - Business : rôle additionnel (+ particulier)
-     * - Managers : rôles administratifs
+     *
+     * Architecture à deux niveaux :
+     * Niveau 1 : UserType (admin, customer)
+     * Niveau 2 : Roles rattachés aux types
+     *
+     * Pour admin : superadmin, admin, agent
+     * Pour customer : particulier, business_individual, business_enterprise
      */
     public function run(): void
     {
         // Récupérer les user_type_id créés
         $customerTypeId = UserType::where('code', 'customer')->first()->id;
-        $merchantTypeId = UserType::where('code', 'merchant')->first()->id;
         $adminTypeId = UserType::where('code', 'admin')->first()->id;
 
         $roles = [
-            // === RÔLES CLIENT ===
+            // === RÔLES CUSTOMER (Niveau 2) ===
             [
-                'name' => 'Particulier',
-                'description' => 'Client qui peut acheter des produits et participer aux loteries',
+                'name' => 'particulier',
+                'description' => 'Client qui peut acheter des articles et participer aux tirages spéciaux',
+                'active' => true,
+                'mutable' => false,
+                'user_type_id' => $customerTypeId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'business_individual',
+                'description' => 'Vendeur individuel avec contraintes (500 tickets fixes, prix min 100k)',
+                'active' => true,
+                'mutable' => false,
+                'user_type_id' => $customerTypeId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'business_enterprise',
+                'description' => 'Marchand entreprise professionnel avec toutes les fonctionnalités',
                 'active' => true,
                 'mutable' => false,
                 'user_type_id' => $customerTypeId,
@@ -36,29 +55,9 @@ class RoleSeeder extends Seeder
                 'updated_at' => now(),
             ],
 
-            // === RÔLES MARCHAND ===
+            // === RÔLES ADMIN (Niveau 2) ===
             [
-                'name' => 'Business Enterprise',
-                'description' => 'Marchand entreprise avec toutes les fonctionnalités (tickets personnalisables)',
-                'active' => true,
-                'mutable' => false,
-                'user_type_id' => $merchantTypeId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Business Individual',
-                'description' => 'Vendeur individuel avec contraintes (500 tickets fixes)',
-                'active' => true,
-                'mutable' => false,
-                'user_type_id' => $merchantTypeId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-
-            // === RÔLES ADMIN ===
-            [
-                'name' => 'Agent',
+                'name' => 'agent',
                 'description' => 'Agent de support client et modération basique',
                 'active' => true,
                 'mutable' => false,
@@ -67,7 +66,7 @@ class RoleSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Admin',
+                'name' => 'admin',
                 'description' => 'Administrateur - Gestion complète de la plateforme',
                 'active' => true,
                 'mutable' => false,
@@ -76,8 +75,8 @@ class RoleSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Super Admin',
-                'description' => 'Super administrateur - Accès système complet',
+                'name' => 'superadmin',
+                'description' => 'Super administrateur - Accès système complet et gestion des rôles',
                 'active' => true,
                 'mutable' => false,
                 'user_type_id' => $adminTypeId,
@@ -94,12 +93,14 @@ class RoleSeeder extends Seeder
             );
         }
 
-        echo "✅ Rôles Koumbaya créés (avec nouveaux profils vendeurs) :\n";
-        echo "   - Particulier (pour customers)\n";
-        echo "   - Business Enterprise (pour merchants - flexibilité complète)\n";
-        echo "   - Business Individual (pour vendeurs - 500 tickets fixes)\n";
-        echo "   - Agent (pour admins)\n";
-        echo "   - Admin (pour admins)\n";
-        echo "   - Super Admin (pour admins)\n";
+        echo "✅ Rôles créés (Niveau 2) :\n";
+        echo "   CUSTOMER TYPE:\n";
+        echo "   - particulier : Client acheteur\n";
+        echo "   - business_individual : Vendeur individuel (contraintes)\n";
+        echo "   - business_enterprise : Vendeur professionnel\n";
+        echo "   ADMIN TYPE:\n";
+        echo "   - agent : Agent support\n";
+        echo "   - admin : Administrateur\n";
+        echo "   - superadmin : Super administrateur\n";
     }
 }

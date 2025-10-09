@@ -18,23 +18,56 @@
       </div>
 
       <!-- Navigation -->
-      <nav class="mt-6 flex-1">
+      <nav class="mt-6 flex-1 overflow-y-auto" style="max-height: calc(100vh - 180px);">
         <div class="px-3 space-y-1">
-          <router-link
-            v-for="item in menuItems"
-            :key="item.name"
-            :to="item.to"
-            :class="[
-              'admin-sidebar-item',
-              $route.name === item.name ? 'active' : ''
-            ]"
-          >
-            <component :is="item.icon" class="w-5 h-5 mr-3" />
-            <span class="font-medium">{{ item.label }}</span>
-            <span v-if="item.badge" class="ml-auto bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
-              {{ item.badge }}
-            </span>
-          </router-link>
+          <template v-for="item in menuItems" :key="item.name">
+            <!-- Menu item with children (dropdown) -->
+            <div v-if="item.children">
+              <button
+                @click="toggleDropdown(item.name)"
+                :class="[
+                  'admin-sidebar-item w-full',
+                  isDropdownActive(item) ? 'active' : ''
+                ]"
+              >
+                <component :is="item.icon" class="w-5 h-5 mr-3" />
+                <span class="font-medium">{{ item.label }}</span>
+                <ChevronDownIcon :class="['w-4 h-4 ml-auto transition-transform', openDropdowns.includes(item.name) ? 'rotate-180' : '']" />
+              </button>
+
+              <!-- Sub-menu items -->
+              <div v-show="openDropdowns.includes(item.name)" class="ml-8 mt-1 space-y-1">
+                <router-link
+                  v-for="child in item.children"
+                  :key="child.name"
+                  :to="child.to"
+                  :class="[
+                    'admin-sidebar-item text-sm',
+                    $route.name === child.name ? 'active' : ''
+                  ]"
+                >
+                  <component :is="child.icon" class="w-4 h-4 mr-2" />
+                  <span>{{ child.label }}</span>
+                </router-link>
+              </div>
+            </div>
+
+            <!-- Regular menu item -->
+            <router-link
+              v-else
+              :to="item.to"
+              :class="[
+                'admin-sidebar-item',
+                $route.name === item.name ? 'active' : ''
+              ]"
+            >
+              <component :is="item.icon" class="w-5 h-5 mr-3" />
+              <span class="font-medium">{{ item.label }}</span>
+              <span v-if="item.badge" class="ml-auto bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
+                {{ item.badge }}
+              </span>
+            </router-link>
+          </template>
         </div>
 
         <!-- Sidebar Footer -->
@@ -217,7 +250,11 @@ import {
   ChevronDownIcon,
   CurrencyDollarIcon,
   ClipboardDocumentListIcon,
-  BuildingStorefrontIcon
+  BuildingStorefrontIcon,
+  UserGroupIcon,
+  ShieldCheckIcon,
+  KeyIcon,
+  RectangleStackIcon
 } from '@heroicons/vue/24/outline'
 
 const authStore = useAuthStore()
@@ -227,11 +264,26 @@ const { get } = useApi()
 
 const sidebarOpen = ref(true) // Open by default on desktop
 const userDropdownOpen = ref(false)
+const openDropdowns = ref(['user-management']) // Open user management by default
 const badgeCounts = ref({
   users: 0,
   lotteries: 0,
   refunds: 0
 })
+
+const toggleDropdown = (name) => {
+  const index = openDropdowns.value.indexOf(name)
+  if (index > -1) {
+    openDropdowns.value.splice(index, 1)
+  } else {
+    openDropdowns.value.push(name)
+  }
+}
+
+const isDropdownActive = (item) => {
+  if (!item.children) return false
+  return item.children.some(child => route.name === child.name)
+}
 
 const menuItems = computed(() => [
   {
@@ -241,11 +293,47 @@ const menuItems = computed(() => [
     icon: HomeIcon
   },
   {
-    name: 'admin.users',
-    to: { name: 'admin.users' },
-    label: 'Utilisateurs',
-    icon: UsersIcon,
-    badge: badgeCounts.value.users > 0 ? badgeCounts.value.users.toString() : null
+    name: 'user-management',
+    label: 'Gestion des utilisateurs',
+    icon: UserGroupIcon,
+    children: [
+      {
+        name: 'admin.customers',
+        to: { name: 'admin.customers' },
+        label: 'Liste des clients',
+        icon: UsersIcon
+      },
+      {
+        name: 'admin.vendors',
+        to: { name: 'admin.vendors' },
+        label: 'Liste des marchands pro',
+        icon: BuildingStorefrontIcon
+      },
+      {
+        name: 'admin.admins',
+        to: { name: 'admin.admins' },
+        label: 'Liste des admins',
+        icon: ShieldCheckIcon
+      },
+      {
+        name: 'admin.roles',
+        to: { name: 'admin.roles' },
+        label: 'Rôles',
+        icon: KeyIcon
+      },
+      {
+        name: 'admin.privileges',
+        to: { name: 'admin.privileges' },
+        label: 'Privilèges',
+        icon: ShieldCheckIcon
+      },
+      {
+        name: 'admin.user-types',
+        to: { name: 'admin.user-types' },
+        label: 'Types d\'utilisateurs',
+        icon: RectangleStackIcon
+      }
+    ]
   },
   {
     name: 'admin.products',
@@ -265,12 +353,6 @@ const menuItems = computed(() => [
     to: { name: 'admin.orders' },
     label: 'Commandes',
     icon: ClipboardDocumentListIcon
-  },
-  {
-    name: 'admin.vendors',
-    to: { name: 'admin.vendors' },
-    label: 'Vendeurs Pro',
-    icon: BuildingStorefrontIcon
   },
   {
     name: 'admin.refunds',
@@ -294,8 +376,19 @@ const menuItems = computed(() => [
 ])
 
 const currentPageTitle = computed(() => {
-  const currentItem = menuItems.value.find(item => item.name === route.name)
-  return currentItem?.label || 'Page'
+  // Check top-level items
+  let currentItem = menuItems.value.find(item => item.name === route.name)
+  if (currentItem) return currentItem.label
+
+  // Check children in dropdown menus
+  for (const item of menuItems.value) {
+    if (item.children) {
+      const childItem = item.children.find(child => child.name === route.name)
+      if (childItem) return childItem.label
+    }
+  }
+
+  return 'Page'
 })
 
 // Charger les compteurs de badges

@@ -11,23 +11,24 @@ class PermissionSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
-     * Crée les permissions pour la structure BD Koumbaya optimisée
+     *
+     * Architecture à deux niveaux :
+     * Les privilèges sont rattachés aux user_types (admin ou customer)
+     * et ensuite assignés aux rôles via la table pivot role_privileges
      */
     public function run(): void
     {
         // Récupérer les user_type_id
         $customerTypeId = UserType::where('code', 'customer')->first()->id;
-        $merchantTypeId = UserType::where('code', 'merchant')->first()->id;
         $adminTypeId = UserType::where('code', 'admin')->first()->id;
 
         // Permissions organisées par type d'utilisateur
         $permissions = [
-            
-            // === PERMISSIONS CLIENTS ===
+
+            // === PERMISSIONS CUSTOMER TYPE (particulier, business_individual, business_enterprise) ===
             [
                 'name' => 'products.browse',
-                'description' => 'Parcourir et voir les produits',
+                'description' => 'Parcourir et voir les articles',
                 'user_type_id' => $customerTypeId,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -55,7 +56,7 @@ class PermissionSeeder extends Seeder
             ],
             [
                 'name' => 'lotteries.participate',
-                'description' => 'Participer aux loteries',
+                'description' => 'Participer aux tirages spéciaux',
                 'user_type_id' => $customerTypeId,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -74,66 +75,65 @@ class PermissionSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-
-            // === PERMISSIONS MARCHANDS ===
+            // Permissions vendeur (pour business_individual et business_enterprise)
             [
                 'name' => 'products.create',
-                'description' => 'Créer des produits',
-                'user_type_id' => $merchantTypeId,
+                'description' => 'Créer des articles',
+                'user_type_id' => $customerTypeId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'name' => 'products.manage_own',
-                'description' => 'Gérer ses propres produits',
-                'user_type_id' => $merchantTypeId,
+                'description' => 'Gérer ses propres articles',
+                'user_type_id' => $customerTypeId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'name' => 'lotteries.create',
-                'description' => 'Créer des loteries',
-                'user_type_id' => $merchantTypeId,
+                'description' => 'Créer des tirages spéciaux',
+                'user_type_id' => $customerTypeId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'name' => 'lotteries.manage_own',
-                'description' => 'Gérer ses propres loteries',
-                'user_type_id' => $merchantTypeId,
+                'description' => 'Gérer ses propres tirages spéciaux',
+                'user_type_id' => $customerTypeId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'name' => 'orders.manage_sales',
                 'description' => 'Gérer ses commandes de vente',
-                'user_type_id' => $merchantTypeId,
+                'user_type_id' => $customerTypeId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'name' => 'orders.export_own',
                 'description' => 'Exporter ses propres commandes',
-                'user_type_id' => $merchantTypeId,
+                'user_type_id' => $customerTypeId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'name' => 'analytics.view_own',
                 'description' => 'Voir ses propres statistiques de vente',
-                'user_type_id' => $merchantTypeId,
+                'user_type_id' => $customerTypeId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'name' => 'finances.manage_own',
                 'description' => 'Gérer ses propres finances',
-                'user_type_id' => $merchantTypeId,
+                'user_type_id' => $customerTypeId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
 
-            // === PERMISSIONS ADMINISTRATEURS ===
+            // === PERMISSIONS ADMIN TYPE (agent, admin, superadmin) ===
             [
                 'name' => 'users.manage_all',
                 'description' => 'Gérer tous les utilisateurs',
@@ -250,8 +250,7 @@ class PermissionSeeder extends Seeder
         }
 
         echo "✅ " . count($permissions) . " privilèges créés avec succès.\n";
-        echo "   - " . count(array_filter($permissions, fn($p) => $p['user_type_id'] === $customerTypeId)) . " privilèges pour clients\n";
-        echo "   - " . count(array_filter($permissions, fn($p) => $p['user_type_id'] === $merchantTypeId)) . " privilèges pour marchands\n";
-        echo "   - " . count(array_filter($permissions, fn($p) => $p['user_type_id'] === $adminTypeId)) . " privilèges pour administrateurs\n";
+        echo "   - " . count(array_filter($permissions, fn($p) => $p['user_type_id'] === $customerTypeId)) . " privilèges pour customer type\n";
+        echo "   - " . count(array_filter($permissions, fn($p) => $p['user_type_id'] === $adminTypeId)) . " privilèges pour admin type\n";
     }
 }

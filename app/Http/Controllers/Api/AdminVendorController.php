@@ -16,13 +16,13 @@ use Illuminate\Support\Str;
 class AdminVendorController extends Controller
 {
     /**
-     * Get all Business vendors
+     * Get all Business vendors (business_enterprise and business_individual)
      */
     public function index(Request $request)
     {
         $query = User::with(['roles'])
             ->whereHas('roles', function ($q) {
-                $q->where('name', 'Business');
+                $q->whereIn('name', ['business_enterprise', 'business_individual']);
             });
 
         // Search filter
@@ -106,6 +106,9 @@ class AdminVendorController extends Controller
         try {
             DB::beginTransaction();
 
+            // Récupérer le customer type_id
+            $customerTypeId = \App\Models\UserType::where('code', 'customer')->first()->id;
+
             // Create the user with a temporary random password
             $temporaryPassword = Str::random(32);
             $user = User::create([
@@ -115,13 +118,13 @@ class AdminVendorController extends Controller
                 'phone' => $request->phone,
                 'company_name' => $request->company_name,
                 'password' => Hash::make($temporaryPassword),
-                'user_type_id' => 1, // Merchant type pour les vendeurs Business
+                'user_type_id' => $customerTypeId, // Customer type pour les vendeurs business_enterprise
                 'is_active' => true,
                 'email_verified_at' => now(), // Auto-verify admin-created accounts
             ]);
 
-            // Assign Business role
-            $businessRole = Role::where('name', 'Business')->first();
+            // Assign business_enterprise role
+            $businessRole = Role::where('name', 'business_enterprise')->first();
             if ($businessRole) {
                 $user->roles()->attach($businessRole->id);
             }
@@ -171,7 +174,7 @@ class AdminVendorController extends Controller
         }
 
         // Verify it's a Business vendor
-        if (!$vendor->roles->contains('name', 'Business')) {
+        if (!$vendor->roles->whereIn('name', ['business_enterprise', 'business_individual'])->count()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Cet utilisateur n\'est pas un vendeur professionnel'
@@ -238,7 +241,7 @@ class AdminVendorController extends Controller
         }
 
         // Verify it's a Business vendor
-        if (!$vendor->roles->contains('name', 'Business')) {
+        if (!$vendor->roles->whereIn('name', ['business_enterprise', 'business_individual'])->count()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Cet utilisateur n\'est pas un vendeur professionnel'

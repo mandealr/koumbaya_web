@@ -36,4 +36,35 @@ class Role extends Model
     {
         return $this->belongsToMany(Privilege::class, 'role_privileges', 'role_id', 'privilege_id');
     }
+
+    public function userType()
+    {
+        return $this->belongsTo(UserType::class, 'user_type_id');
+    }
+
+    /**
+     * Scopes
+     */
+    public function scopeForUserType($query, $userTypeId)
+    {
+        return $query->where('user_type_id', $userTypeId);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('active', true);
+    }
+
+    /**
+     * Helpers
+     */
+    public function isAdmin(): bool
+    {
+        return $this->userType && $this->userType->code === 'admin';
+    }
+
+    public function isCustomer(): bool
+    {
+        return $this->userType && $this->userType->code === 'customer';
+    }
 }

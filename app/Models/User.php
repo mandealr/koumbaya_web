@@ -278,33 +278,38 @@ class User extends Authenticatable
     }
 
     /**
-     * Helpers pour les types d'utilisateurs (système hybride Koumbaya)
+     * Helpers pour les types d'utilisateurs (architecture à deux niveaux)
+     * Niveau 1 : UserType (admin, customer)
+     * Niveau 2 : Role (superadmin, admin, agent, business_enterprise, business_individual, particulier)
      */
     public function isAdmin(): bool
     {
-        return $this->hasAnyRole(['Super Admin', 'Admin']);
+        return $this->hasAnyRole(['superadmin', 'admin']);
     }
 
     public function isSuperAdmin(): bool
     {
-        return $this->hasRole('Super Admin');
+        return $this->hasRole('superadmin');
     }
 
     public function isManager(): bool
     {
-        return $this->hasAnyRole(['Super Admin', 'Admin', 'Agent', 'Agent Back Office']);
+        return $this->hasAnyRole(['superadmin', 'admin', 'agent']);
     }
 
     public function isCustomer(): bool
     {
-        return $this->hasRole('Particulier') || (!$this->isManager() && !$this->can_sell);
+        return $this->hasRole('particulier') || $this->userType?->code === 'customer';
     }
 
     public function isMerchant(): bool
     {
-        return $this->hasRole('Business Enterprise') || 
-               $this->hasRole('Business Individual') || 
-               $this->hasRole('Business'); // Support for legacy Business role
+        return $this->hasRole('business_enterprise') ||
+               $this->hasRole('business_individual') ||
+               // Support for legacy roles during migration
+               $this->hasRole('Business Enterprise') ||
+               $this->hasRole('Business Individual') ||
+               $this->hasRole('Business');
     }
 
     /**
@@ -312,7 +317,7 @@ class User extends Authenticatable
      */
     public function isIndividualSeller(): bool
     {
-        return $this->hasRole('Business Individual');
+        return $this->hasRole('business_individual') || $this->hasRole('Business Individual');
     }
 
     /**
@@ -320,7 +325,7 @@ class User extends Authenticatable
      */
     public function isBusinessSeller(): bool
     {
-        return $this->hasRole('Business Enterprise');
+        return $this->hasRole('business_enterprise') || $this->hasRole('Business Enterprise');
     }
 
     /**
@@ -328,13 +333,13 @@ class User extends Authenticatable
      */
     public function canCustomizeTickets(): bool
     {
-        // Business Individual : tickets fixes à 500
-        if ($this->hasRole('Business Individual')) {
+        // business_individual : tickets fixes à 500
+        if ($this->hasRole('business_individual') || $this->hasRole('Business Individual')) {
             return false;
         }
-        
-        // Business Enterprise : peut personnaliser
-        if ($this->hasRole('Business Enterprise')) {
+
+        // business_enterprise : peut personnaliser
+        if ($this->hasRole('business_enterprise') || $this->hasRole('Business Enterprise')) {
             return true;
         }
 
@@ -347,12 +352,12 @@ class User extends Authenticatable
      */
     public function getFixedTicketCount(): ?int
     {
-        // Business Individual : 500 tickets fixes
-        if ($this->hasRole('Business Individual')) {
+        // business_individual : 500 tickets fixes
+        if ($this->hasRole('business_individual') || $this->hasRole('Business Individual')) {
             return 500;
         }
-        
-        // Business Enterprise : pas de limite fixe
+
+        // business_enterprise : pas de limite fixe
         return null;
     }
 
@@ -361,12 +366,12 @@ class User extends Authenticatable
      */
     public function getMinProductPrice(): ?int
     {
-        // Business Individual : prix minimum 100 000 FCFA
-        if ($this->hasRole('Business Individual')) {
+        // business_individual : prix minimum 100 000 FCFA
+        if ($this->hasRole('business_individual') || $this->hasRole('Business Individual')) {
             return 100000;
         }
-        
-        // Business Enterprise : pas de limite
+
+        // business_enterprise : pas de limite
         return null;
     }
 }

@@ -10,32 +10,26 @@ class UserTypeSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
-     * Crée les types d'utilisateurs selon le système Koumbaya
+     *
+     * Architecture à deux niveaux :
+     * Niveau 1 : UserType (admin, customer)
+     * Niveau 2 : Roles (rattachés aux user types)
      */
     public function run(): void
     {
         $userTypes = [
             [
-                'name' => 'Marchand',
-                'code' => 'merchant',
-                'description' => 'Utilisateur marchand qui peut vendre des produits',
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Client',
-                'code' => 'customer',
-                'description' => 'Client qui achète des produits et participe aux loteries',
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
                 'name' => 'Administrateur',
                 'code' => 'admin',
-                'description' => 'Administrateur du système',
+                'description' => 'Accès à l\'espace d\'administration',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Client/Marchand',
+                'code' => 'customer',
+                'description' => 'Accès à l\'espace client/marchand (particulier, business_individual, business_enterprise)',
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -50,9 +44,8 @@ class UserTypeSeeder extends Seeder
             );
         }
 
-        echo "✅ Types d'utilisateurs créés :\n";
-        echo "   - Marchand (merchant) : Utilisateurs vendeurs\n";
-        echo "   - Client (customer) : Utilisateurs acheteurs\n";
-        echo "   - Administrateur (admin) : Administrateurs système\n";
+        echo "✅ Types d'utilisateurs créés (Niveau 1) :\n";
+        echo "   - Administrateur (admin) : Accès espace administration\n";
+        echo "   - Client/Marchand (customer) : Accès espace client/marchand\n";
     }
 }

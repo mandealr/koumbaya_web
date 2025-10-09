@@ -12,39 +12,43 @@ class RolePermissionSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
-     * Associe les privilèges aux rôles selon la structure BD optimisée Koumbaya
+     *
+     * Architecture à deux niveaux :
+     * Associe les privilèges aux rôles (Niveau 2)
+     * selon leur user_type (Niveau 1)
      */
     public function run(): void
     {
         // Les rôles seront récupérés dynamiquement dans la boucle
 
-        // Définir les associations rôles => privilèges (noms compatibles code existant)
+        // Définir les associations rôles => privilèges
         $rolePrivileges = [
-            
-            // === PARTICULIER ===
-            'Particulier' => [
+
+            // === CUSTOMER TYPE ROLES ===
+
+            // PARTICULIER (client acheteur uniquement)
+            'particulier' => [
                 'products.browse',
-                'orders.create', 
+                'orders.create',
                 'orders.view_own',
                 'payments.make',
                 'lotteries.participate',
                 'profile.manage_own',
                 'notifications.view_own',
             ],
-            
-            // === BUSINESS ===
-            'Business' => [
-                // Toutes les permissions particulier
+
+            // BUSINESS INDIVIDUAL (vendeur individuel avec contraintes)
+            'business_individual' => [
+                // Permissions particulier
                 'products.browse',
-                'orders.create', 
+                'orders.create',
                 'orders.view_own',
                 'payments.make',
                 'lotteries.participate',
                 'profile.manage_own',
                 'notifications.view_own',
-                
-                // + Permissions business
+
+                // + Permissions vendeur
                 'products.create',
                 'products.manage_own',
                 'lotteries.create',
@@ -54,9 +58,33 @@ class RolePermissionSeeder extends Seeder
                 'analytics.view_own',
                 'finances.manage_own',
             ],
-            
-            // === AGENT ===
-            'Agent' => [
+
+            // BUSINESS ENTERPRISE (vendeur professionnel sans contraintes)
+            'business_enterprise' => [
+                // Permissions particulier
+                'products.browse',
+                'orders.create',
+                'orders.view_own',
+                'payments.make',
+                'lotteries.participate',
+                'profile.manage_own',
+                'notifications.view_own',
+
+                // + Permissions vendeur professionnel
+                'products.create',
+                'products.manage_own',
+                'lotteries.create',
+                'lotteries.manage_own',
+                'orders.manage_sales',
+                'orders.export_own',
+                'analytics.view_own',
+                'finances.manage_own',
+            ],
+
+            // === ADMIN TYPE ROLES ===
+
+            // AGENT (support et modération basique)
+            'agent' => [
                 'users.manage_all',
                 'support.handle_tickets',
                 'moderation.review_content',
@@ -64,9 +92,9 @@ class RolePermissionSeeder extends Seeder
                 'orders.manage_all',
                 'products.manage_all',
             ],
-            
-            // === ADMIN ===
-            'Admin' => [
+
+            // ADMIN (gestion complète de la plateforme)
+            'admin' => [
                 // Toutes les permissions agent
                 'users.manage_all',
                 'support.handle_tickets',
@@ -74,7 +102,7 @@ class RolePermissionSeeder extends Seeder
                 'refunds.process',
                 'orders.manage_all',
                 'products.manage_all',
-                
+
                 // + Permissions admin
                 'lotteries.manage_all',
                 'orders.export_all',
@@ -84,9 +112,9 @@ class RolePermissionSeeder extends Seeder
                 'notifications.send_all',
                 'roles.assign',
             ],
-            
-            // === SUPER ADMIN ===
-            'Super Admin' => '*', // Tous les privilèges
+
+            // SUPERADMIN (accès système complet)
+            'superadmin' => '*', // Tous les privilèges
         ];
 
         // Traiter les associations
