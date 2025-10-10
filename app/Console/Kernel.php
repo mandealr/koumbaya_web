@@ -60,6 +60,13 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/lottery-reminders.log'));
+
+        // Annuler les commandes en attente depuis plus d'une heure - toutes les 30 minutes
+        $schedule->command('orders:cancel-pending')
+            ->everyThirtyMinutes()
+            ->withoutOverlapping()
+            ->runInBackground()
+            ->appendOutputTo(storage_path('logs/cancelled-orders.log'));
     }
 
     /**
