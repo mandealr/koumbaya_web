@@ -85,7 +85,7 @@ class AdminVendorController extends Controller
                     ] : null,
                     'avatar_url' => $vendor->avatar_url,
                     'is_active' => $vendor->is_active,
-                    'email_verified_at' => $vendor->email_verified_at,
+                    'email_verified_at' => $vendor->verified_at,
                     'created_at' => $vendor->created_at,
                     'roles' => $vendor->roles->pluck('name')->toArray(),
                 ];
