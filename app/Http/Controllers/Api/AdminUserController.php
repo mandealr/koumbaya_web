@@ -18,7 +18,8 @@ class AdminUserController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::with(['roles']);
+        // Filter only admin user type (user_type_id = 3)
+        $query = User::with(['roles'])->where('user_type_id', 3);
 
         // Search filter
         if ($request->filled('search')) {
