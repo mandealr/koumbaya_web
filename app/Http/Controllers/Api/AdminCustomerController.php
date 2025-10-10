@@ -41,10 +41,10 @@ class AdminCustomerController extends Controller
                     $query->where('is_active', false);
                     break;
                 case 'verified':
-                    $query->whereNotNull('email_verified_at');
+                    $query->whereNotNull('verified_at');
                     break;
                 case 'unverified':
-                    $query->whereNull('email_verified_at');
+                    $query->whereNull('verified_at');
                     break;
             }
         }
@@ -70,7 +70,7 @@ class AdminCustomerController extends Controller
                         'phone' => $customer->phone,
                         'avatar_url' => $customer->avatar_url,
                         'is_active' => $customer->is_active,
-                        'email_verified_at' => $customer->email_verified_at,
+                        'email_verified_at' => $customer->verified_at,
                         'created_at' => $customer->created_at,
                         'user_type' => $customer->userType ? $customer->userType->name : null,
                         'roles' => $customer->roles->pluck('name')->toArray(),
@@ -100,8 +100,8 @@ class AdminCustomerController extends Controller
         $total = (clone $baseQuery)->count();
         $active = (clone $baseQuery)->where('is_active', true)->count();
         $inactive = (clone $baseQuery)->where('is_active', false)->count();
-        $verified = (clone $baseQuery)->whereNotNull('email_verified_at')->count();
-        $unverified = (clone $baseQuery)->whereNull('email_verified_at')->count();
+        $verified = (clone $baseQuery)->whereNotNull('verified_at')->count();
+        $unverified = (clone $baseQuery)->whereNull('verified_at')->count();
 
         return response()->json([
             'success' => true,
