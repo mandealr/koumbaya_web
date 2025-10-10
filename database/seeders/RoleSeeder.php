@@ -38,7 +38,7 @@ class RoleSeeder extends Seeder
         $roles = [
             // === RÔLES CUSTOMER (Niveau 2) ===
             [
-                'id' => 1,
+                'id' => 6,
                 'name' => 'Particulier',
                 'description' => 'Client qui peut acheter des articles et participer aux tirages spéciaux',
                 'active' => true,
@@ -48,7 +48,7 @@ class RoleSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 2,
+                'id' => 5,
                 'name' => 'Business Individual',
                 'description' => 'Vendeur individuel avec contraintes (500 tickets fixes, prix min 100k)',
                 'active' => true,
@@ -58,7 +58,7 @@ class RoleSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 3,
+                'id' => 4,
                 'name' => 'Business Enterprise',
                 'description' => 'Marchand entreprise professionnel avec toutes les fonctionnalités',
                 'active' => true,
@@ -70,7 +70,7 @@ class RoleSeeder extends Seeder
 
             // === RÔLES ADMIN (Niveau 2) ===
             [
-                'id' => 4,
+                'id' => 3,
                 'name' => 'Agent',
                 'description' => 'Agent de support client et modération basique',
                 'active' => true,
@@ -80,7 +80,7 @@ class RoleSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 5,
+                'id' => 2,
                 'name' => 'Admin',
                 'description' => 'Administrateur - Gestion complète de la plateforme',
                 'active' => true,
@@ -90,7 +90,7 @@ class RoleSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 6,
+                'id' => 1,
                 'name' => 'Super Admin',
                 'description' => 'Super administrateur - Accès système complet et gestion des rôles',
                 'active' => true,
