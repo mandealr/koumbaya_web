@@ -1,8 +1,19 @@
 <template>
   <div class="p-6">
-    <div class="mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Gestion des rôles</h1>
-      <p class="text-gray-600 mt-1">Gérer les rôles et leurs privilèges associés</p>
+    <div class="mb-6 flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Gestion des rôles</h1>
+        <p class="text-gray-600 mt-1">Gérer les rôles et leurs privilèges associés</p>
+      </div>
+      <button
+        @click="openCreateModal"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+      >
+        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Créer un rôle
+      </button>
     </div>
 
     <!-- Statistics Cards -->
@@ -108,17 +119,118 @@
         </div>
       </div>
     </div>
+
+    <!-- Create Role Modal -->
+    <div
+      v-if="showCreateModal"
+      class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+      @click.self="closeModal"
+    >
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <div class="flex justify-between items-center">
+            <h2 class="text-xl font-bold text-gray-900">Créer un nouveau rôle</h2>
+            <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <form @submit.prevent="createRole" class="p-6 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nom du rôle *</label>
+            <input
+              v-model="form.name"
+              type="text"
+              required
+              placeholder="Ex: Modérateur"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+              v-model="form.description"
+              rows="3"
+              placeholder="Description du rôle..."
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Type d'utilisateur *</label>
+            <select
+              v-model="form.user_type_id"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Sélectionner un type</option>
+              <option v-for="type in userTypes" :key="type.id" :value="type.id">
+                {{ type.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="flex items-center">
+            <input
+              v-model="form.active"
+              type="checkbox"
+              id="active"
+              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label for="active" class="ml-2 block text-sm text-gray-700">Rôle actif</label>
+          </div>
+
+          <div v-if="formError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            {{ formError }}
+          </div>
+
+          <div class="flex justify-end space-x-3 pt-4 border-t">
+            <button
+              type="button"
+              @click="closeModal"
+              class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              :disabled="submitting"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+            >
+              {{ submitting ? 'Création...' : 'Créer' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import api from '@/composables/api'
+import { useApi } from '@/composables/api'
+
+const { get, post } = useApi()
 
 const roles = ref([])
+const userTypes = ref([])
 const statistics = ref({})
 const loading = ref(false)
 const error = ref('')
+const showCreateModal = ref(false)
+const submitting = ref(false)
+const formError = ref('')
+
+const form = ref({
+  name: '',
+  description: '',
+  user_type_id: '',
+  active: true
+})
 
 const totalUsers = computed(() => {
   return roles.value.reduce((sum, role) => sum + (role.users_count || 0), 0)
@@ -129,10 +241,10 @@ const fetchRoles = async () => {
   error.value = ''
 
   try {
-    const response = await api.get('/admin/roles')
+    const response = await get('/admin/roles')
 
-    if (response.data.success) {
-      roles.value = response.data.data?.roles || []
+    if (response.success) {
+      roles.value = response.data?.roles || []
     } else {
       roles.value = []
     }
@@ -144,12 +256,61 @@ const fetchRoles = async () => {
   }
 }
 
+const fetchUserTypes = async () => {
+  try {
+    const response = await get('/admin/roles/user-types')
+    if (response.success) {
+      userTypes.value = response.data?.user_types || []
+    }
+  } catch (err) {
+    console.error('Error fetching user types:', err)
+  }
+}
+
 const fetchStatistics = async () => {
   try {
-    const response = await api.get('/admin/roles/statistics')
-    statistics.value = response.data.stats || {}
+    const response = await get('/admin/roles/statistics')
+    statistics.value = response.stats || {}
   } catch (err) {
     console.error('Error fetching statistics:', err)
+  }
+}
+
+const openCreateModal = () => {
+  showCreateModal.value = true
+  if (userTypes.value.length === 0) {
+    fetchUserTypes()
+  }
+}
+
+const closeModal = () => {
+  showCreateModal.value = false
+  form.value = {
+    name: '',
+    description: '',
+    user_type_id: '',
+    active: true
+  }
+  formError.value = ''
+}
+
+const createRole = async () => {
+  formError.value = ''
+  submitting.value = true
+
+  try {
+    const response = await post('/admin/roles', form.value)
+
+    if (response.success) {
+      closeModal()
+      fetchRoles()
+      fetchStatistics()
+    }
+  } catch (err) {
+    formError.value = err.response?.data?.message || 'Erreur lors de la création du rôle'
+    console.error('Error creating role:', err)
+  } finally {
+    submitting.value = false
   }
 }
 

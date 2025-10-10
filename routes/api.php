@@ -384,6 +384,10 @@ Route::group([
     // Roles Management
     Route::prefix('roles')->group(function () {
         Route::get('/', [RoleController::class, 'index']);
+        Route::post('/', [RoleController::class, 'store']);
+        Route::put('/{id}', [RoleController::class, 'update']);
+        Route::delete('/{id}', [RoleController::class, 'destroy']);
+        Route::get('/user-types', [RoleController::class, 'getUserTypes']);
         Route::get('/statistics', [RoleController::class, 'statistics']);
     });
 
