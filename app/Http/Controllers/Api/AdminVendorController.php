@@ -50,10 +50,10 @@ class AdminVendorController extends Controller
                     $query->where('is_active', false);
                     break;
                 case 'verified':
-                    $query->whereNotNull('email_verified_at');
+                    $query->whereNotNull('verified_at');
                     break;
                 case 'unverified':
-                    $query->whereNull('email_verified_at');
+                    $query->whereNull('verified_at');
                     break;
             }
         }

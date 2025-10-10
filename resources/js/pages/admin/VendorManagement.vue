@@ -521,11 +521,11 @@ const loadVendors = async () => {
   try {
     const response = await get('/admin/vendors')
     console.log('Vendors API response:', response)
-    if (response?.data?.vendors) {
-      vendors.value = response.data.vendors
+    if (response?.vendors) {
+      vendors.value = response.vendors
       console.log('Vendors loaded:', vendors.value.length, vendors.value)
     } else {
-      console.log('No vendors in response data')
+      console.log('No vendors in response')
     }
   } catch (err) {
     console.error('Error loading vendors:', err)
