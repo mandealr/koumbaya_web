@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Company;
 use App\Notifications\VendorAccountCreated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -16,13 +17,13 @@ use Illuminate\Support\Str;
 class AdminVendorController extends Controller
 {
     /**
-     * Get all Business vendors (business_enterprise and business_individual)
+     * Get all Business vendors (Business Enterprise and Business Individual)
      */
     public function index(Request $request)
     {
-        $query = User::with(['roles'])
+        $query = User::with(['roles', 'company'])
             ->whereHas('roles', function ($q) {
-                $q->whereIn('name', ['business_enterprise', 'business_individual']);
+                $q->whereIn('name', ['Business Enterprise', 'Business Individual', 'business_enterprise', 'business_individual']);
             });
 
         // Search filter
@@ -33,7 +34,9 @@ class AdminVendorController extends Controller
                   ->orWhere('last_name', 'LIKE', "%{$search}%")
                   ->orWhere('email', 'LIKE', "%{$search}%")
                   ->orWhere('phone', 'LIKE', "%{$search}%")
-                  ->orWhere('company_name', 'LIKE', "%{$search}%");
+                  ->orWhereHas('company', function ($cq) use ($search) {
+                      $cq->where('business_name', 'LIKE', "%{$search}%");
+                  });
             });
         }
 
@@ -71,7 +74,15 @@ class AdminVendorController extends Controller
                     'last_name' => $vendor->last_name,
                     'email' => $vendor->email,
                     'phone' => $vendor->phone,
-                    'company_name' => $vendor->company_name,
+                    'business_name' => $vendor->company?->business_name ?? $vendor->business_name,
+                    'company' => $vendor->company ? [
+                        'id' => $vendor->company->id,
+                        'business_name' => $vendor->company->business_name,
+                        'business_email' => $vendor->company->business_email,
+                        'tax_id' => $vendor->company->tax_id,
+                        'company_type' => $vendor->company->company_type,
+                        'is_verified' => $vendor->company->is_verified,
+                    ] : null,
                     'avatar_url' => $vendor->avatar_url,
                     'is_active' => $vendor->is_active,
                     'email_verified_at' => $vendor->email_verified_at,
@@ -92,7 +103,11 @@ class AdminVendorController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
-            'company_name' => 'required|string|max:255',
+            'business_name' => 'required|string|max:255',
+            'business_email' => 'nullable|email',
+            'business_description' => 'nullable|string',
+            'tax_id' => 'nullable|string|unique:companies,tax_id',
+            'company_type' => 'nullable|in:individual,enterprise',
         ]);
 
         if ($validator->fails()) {
@@ -109,27 +124,39 @@ class AdminVendorController extends Controller
             // Récupérer le customer type_id
             $customerTypeId = \App\Models\UserType::where('code', 'customer')->first()->id;
 
-            // Create the user with a temporary random password
+            // 1. Créer d'abord la company
+            $company = Company::create([
+                'business_name' => $request->business_name,
+                'business_email' => $request->business_email,
+                'business_description' => $request->business_description,
+                'tax_id' => $request->tax_id,
+                'phone' => $request->phone,
+                'company_type' => $request->company_type ?? 'enterprise',
+                'is_verified' => false,
+                'is_active' => true,
+            ]);
+
+            // 2. Create the user with a temporary random password
             $temporaryPassword = Str::random(32);
             $user = User::create([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'email' => $request->email,
                 'phone' => $request->phone,
-                'company_name' => $request->company_name,
                 'password' => Hash::make($temporaryPassword),
-                'user_type_id' => $customerTypeId, // Customer type pour les vendeurs business_enterprise
+                'user_type_id' => $customerTypeId,
+                'company_id' => $company->id,
                 'is_active' => true,
                 'email_verified_at' => now(), // Auto-verify admin-created accounts
             ]);
 
-            // Assign business_enterprise role
-            $businessRole = Role::where('name', 'business_enterprise')->first();
+            // 3. Assign Business Enterprise role
+            $businessRole = Role::where('name', 'Business Enterprise')->first();
             if ($businessRole) {
                 $user->roles()->attach($businessRole->id);
             }
 
-            // Send password creation email with custom notification
+            // 4. Send password creation email with custom notification
             $token = Password::broker()->createToken($user);
             $user->notify(new VendorAccountCreated($token));
 
@@ -144,7 +171,13 @@ class AdminVendorController extends Controller
                     'last_name' => $user->last_name,
                     'email' => $user->email,
                     'phone' => $user->phone,
-                    'company_name' => $user->company_name,
+                    'company' => [
+                        'id' => $company->id,
+                        'business_name' => $company->business_name,
+                        'business_email' => $company->business_email,
+                        'tax_id' => $company->tax_id,
+                        'company_type' => $company->company_type,
+                    ],
                     'email_verified_at' => $user->email_verified_at,
                     'created_at' => $user->created_at,
                 ]
@@ -174,7 +207,7 @@ class AdminVendorController extends Controller
         }
 
         // Verify it's a Business vendor
-        if (!$vendor->roles->whereIn('name', ['business_enterprise', 'business_individual'])->count()) {
+        if (!$vendor->roles->whereIn('name', ['Business Enterprise', 'Business Individual', 'business_enterprise', 'business_individual'])->count()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Cet utilisateur n\'est pas un vendeur professionnel'
@@ -186,7 +219,7 @@ class AdminVendorController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
             'phone' => 'nullable|string|max:20',
-            'company_name' => 'required|string|max:255',
+            'business_name' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -203,7 +236,7 @@ class AdminVendorController extends Controller
                 'last_name' => $request->last_name,
                 'email' => $request->email,
                 'phone' => $request->phone,
-                'company_name' => $request->company_name,
+                'business_name' => $request->business_name,
             ]);
 
             return response()->json([
@@ -215,7 +248,7 @@ class AdminVendorController extends Controller
                     'last_name' => $vendor->last_name,
                     'email' => $vendor->email,
                     'phone' => $vendor->phone,
-                    'company_name' => $vendor->company_name,
+                    'business_name' => $vendor->business_name,
                 ]
             ]);
         } catch (\Exception $e) {
@@ -241,7 +274,7 @@ class AdminVendorController extends Controller
         }
 
         // Verify it's a Business vendor
-        if (!$vendor->roles->whereIn('name', ['business_enterprise', 'business_individual'])->count()) {
+        if (!$vendor->roles->whereIn('name', ['Business Enterprise', 'Business Individual', 'business_enterprise', 'business_individual'])->count()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Cet utilisateur n\'est pas un vendeur professionnel'

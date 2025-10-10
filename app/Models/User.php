@@ -44,6 +44,7 @@ class User extends Authenticatable
         'mfa_is_active',
         'google2fa_secret',
         'user_type_id',
+        'company_id',
         'last_otp_request',
         'country_id',
         'language_id',
@@ -187,6 +188,11 @@ class User extends Authenticatable
     public function language()
     {
         return $this->belongsTo(Language::class, 'language_id');
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id');
     }
 
     /**

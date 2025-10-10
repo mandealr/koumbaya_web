@@ -112,7 +112,10 @@
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ vendor.company_name || 'N/A' }}</div>
+                <div class="text-sm text-gray-900">{{ vendor.business_name || vendor.company?.business_name || 'N/A' }}</div>
+                <div v-if="vendor.company?.company_type" class="text-xs text-gray-500">
+                  {{ vendor.company.company_type === 'enterprise' ? 'Entreprise' : 'Individuel' }}
+                </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-500">{{ vendor.email }}</div>
@@ -211,15 +214,55 @@
           <!-- Informations de l'entreprise -->
           <div class="bg-blue-50 rounded-lg p-4 mb-4">
             <h3 class="text-sm font-semibold text-gray-700 mb-3">Informations de l'entreprise</h3>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nom de l'entreprise *</label>
-              <input
-                v-model="form.company_name"
-                type="text"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p class="text-xs text-gray-500 mt-1">Ce champ est obligatoire pour les vendeurs professionnels</p>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nom de l'entreprise *</label>
+                <input
+                  v-model="form.business_name"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p class="text-xs text-gray-500 mt-1">Ce champ est obligatoire pour les vendeurs professionnels</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email de l'entreprise</label>
+                <input
+                  v-model="form.business_email"
+                  type="email"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Description de l'entreprise</label>
+                <textarea
+                  v-model="form.business_description"
+                  rows="3"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Décrivez brièvement l'activité de l'entreprise..."
+                ></textarea>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Numéro fiscal / SIRET</label>
+                  <input
+                    v-model="form.tax_id"
+                    type="text"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Ex: 123456789"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Type d'entreprise</label>
+                  <select
+                    v-model="form.company_type"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="enterprise">Entreprise</option>
+                    <option value="individual">Individuel</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -317,10 +360,45 @@
             </div>
             <div>
               <h3 class="text-xl font-bold text-gray-900">{{ selectedVendor.first_name }} {{ selectedVendor.last_name }}</h3>
-              <p class="text-gray-600">{{ selectedVendor.company_name || 'N/A' }}</p>
+              <p class="text-gray-600">{{ selectedVendor.business_name || selectedVendor.company?.business_name || 'N/A' }}</p>
             </div>
           </div>
 
+          <!-- Company Info Section -->
+          <div v-if="selectedVendor.company" class="bg-blue-50 rounded-lg p-4">
+            <h4 class="font-semibold text-gray-900 mb-3">Informations de l'entreprise</h4>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm text-gray-500">Nom</p>
+                <p class="font-medium">{{ selectedVendor.company.business_name }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Type</p>
+                <p class="font-medium">{{ selectedVendor.company.company_type === 'enterprise' ? 'Entreprise' : 'Individuel' }}</p>
+              </div>
+              <div v-if="selectedVendor.company.business_email">
+                <p class="text-sm text-gray-500">Email entreprise</p>
+                <p class="font-medium">{{ selectedVendor.company.business_email }}</p>
+              </div>
+              <div v-if="selectedVendor.company.tax_id">
+                <p class="text-sm text-gray-500">Numéro fiscal</p>
+                <p class="font-medium">{{ selectedVendor.company.tax_id }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Statut entreprise</p>
+                <span
+                  :class="[
+                    'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
+                    selectedVendor.company.is_verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                  ]"
+                >
+                  {{ selectedVendor.company.is_verified ? 'Vérifiée' : 'Non vérifiée' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Info Section -->
           <div class="grid grid-cols-2 gap-4">
             <div>
               <p class="text-sm text-gray-500">Email</p>
@@ -331,7 +409,7 @@
               <p class="font-medium">{{ selectedVendor.phone || 'N/A' }}</p>
             </div>
             <div>
-              <p class="text-sm text-gray-500">Statut</p>
+              <p class="text-sm text-gray-500">Statut compte</p>
               <span
                 :class="[
                   'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
@@ -394,9 +472,11 @@ const form = ref({
   last_name: '',
   email: '',
   phone: '',
-  company_name: '',
-  password: '',
-  password_confirmation: ''
+  business_name: '',
+  business_email: '',
+  business_description: '',
+  tax_id: '',
+  company_type: 'enterprise'
 })
 
 const filteredVendors = computed(() => {
@@ -408,7 +488,8 @@ const filteredVendors = computed(() => {
       v.first_name?.toLowerCase().includes(search) ||
       v.last_name?.toLowerCase().includes(search) ||
       v.email?.toLowerCase().includes(search) ||
-      v.company_name?.toLowerCase().includes(search)
+      v.business_name?.toLowerCase().includes(search) ||
+      v.company?.business_name?.toLowerCase().includes(search)
     )
   }
 
@@ -450,9 +531,11 @@ const resetForm = () => {
     last_name: '',
     email: '',
     phone: '',
-    company_name: '',
-    password: '',
-    password_confirmation: ''
+    business_name: '',
+    business_email: '',
+    business_description: '',
+    tax_id: '',
+    company_type: 'enterprise'
   }
   error.value = ''
 }
@@ -469,7 +552,7 @@ const submitForm = async () => {
   error.value = ''
 
   // Validation
-  if (!form.value.company_name?.trim()) {
+  if (!form.value.business_name?.trim()) {
     error.value = 'Le nom de l\'entreprise est obligatoire pour les vendeurs professionnels'
     return
   }
@@ -482,8 +565,11 @@ const submitForm = async () => {
       last_name: form.value.last_name,
       email: form.value.email,
       phone: form.value.phone,
-      company_name: form.value.company_name,
-      role: 'Business'
+      business_name: form.value.business_name,
+      business_email: form.value.business_email,
+      business_description: form.value.business_description,
+      tax_id: form.value.tax_id,
+      company_type: form.value.company_type
     }
 
     if (showCreateModal.value) {
@@ -514,9 +600,11 @@ const editVendor = (vendor) => {
     last_name: vendor.last_name,
     email: vendor.email,
     phone: vendor.phone || '',
-    company_name: vendor.company_name || '',
-    password: '',
-    password_confirmation: ''
+    business_name: vendor.business_name || vendor.company?.business_name || '',
+    business_email: vendor.company?.business_email || '',
+    business_description: vendor.company?.business_description || '',
+    tax_id: vendor.company?.tax_id || '',
+    company_type: vendor.company?.company_type || 'enterprise'
   }
   showEditModal.value = true
 }
