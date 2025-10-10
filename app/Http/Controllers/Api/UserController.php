@@ -34,19 +34,16 @@ class UserController extends Controller
         try {
             // Trouver le rôle Business Individual
             $businessIndividualRole = Role::where('name', 'Business Individual')->first();
-            
+
             if (!$businessIndividualRole) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Rôle vendeur individuel non trouvé.'
                 ], 500);
             }
-            
+
             // Assigner le rôle Business Individual à l'utilisateur
             $user->assignRole('Business Individual');
-            
-            // Activer can_sell
-            $user->update(['can_sell' => true]);
             
             return response()->json([
                 'success' => true,
