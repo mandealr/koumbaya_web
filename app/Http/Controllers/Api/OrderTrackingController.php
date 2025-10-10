@@ -1115,4 +1115,126 @@ class OrderTrackingController extends Controller
             ]);
         }
     }
+
+    /**
+     * Annuler une commande
+     *
+     * @OA\Post(
+     *     path="/api/orders/{order_number}/cancel",
+     *     tags={"Orders"},
+     *     summary="Annuler une commande",
+     *     description="Permet à un client d'annuler sa propre commande si elle n'est pas encore payée ou expédiée",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="order_number",
+     *         in="path",
+     *         required=true,
+     *         description="Numéro de la commande à annuler",
+     *         @OA\Schema(type="string"),
+     *         example="ORD-68E91F6E15263"
+     *     ),
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="reason", type="string", example="Je ne veux plus cet article")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Commande annulée avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Commande annulée avec succès"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="order_number", type="string"),
+     *                 @OA\Property(property="status", type="string")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Commande ne peut pas être annulée",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Commande non trouvée",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Commande non trouvée")
+     *         )
+     *     )
+     * )
+     */
+    public function cancel(Request $request, string $orderNumber): JsonResponse
+    {
+        $user = Auth::user();
+
+        // Récupérer la commande de l'utilisateur
+        $order = Order::where('order_number', $orderNumber)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Commande non trouvée'
+            ], 404);
+        }
+
+        // Vérifier si la commande peut être annulée
+        $currentStatus = OrderStatus::from($order->status);
+
+        // Seules les commandes pending, awaiting_payment ou failed peuvent être annulées par le client
+        if (!in_array($currentStatus, [OrderStatus::PENDING, OrderStatus::AWAITING_PAYMENT, OrderStatus::FAILED])) {
+            $statusMessages = [
+                OrderStatus::PAID->value => 'déjà payée',
+                OrderStatus::SHIPPING->value => 'en cours de livraison',
+                OrderStatus::FULFILLED->value => 'déjà livrée',
+                OrderStatus::CANCELLED->value => 'déjà annulée',
+                OrderStatus::REFUNDED->value => 'remboursée',
+            ];
+
+            $currentStatusText = $statusMessages[$order->status] ?? $order->status;
+
+            return response()->json([
+                'success' => false,
+                'message' => "Cette commande ne peut pas être annulée car elle est {$currentStatusText}."
+            ], 403);
+        }
+
+        $reason = $request->input('reason', 'Annulée par le client');
+
+        // Annuler la commande
+        $order->update([
+            'status' => OrderStatus::CANCELLED->value,
+            'notes' => ($order->notes ? $order->notes . "\n" : '') . "Annulation: {$reason}"
+        ]);
+
+        // Si un paiement était en attente, le marquer comme échoué
+        if ($order->payment) {
+            $order->payment->update([
+                'status' => 'failed',
+                'notes' => ($order->payment->notes ? $order->payment->notes . "\n" : '') . "Commande annulée par le client"
+            ]);
+        }
+
+        \Log::info('Commande annulée par le client', [
+            'order_number' => $orderNumber,
+            'user_id' => $user->id,
+            'reason' => $reason
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Commande annulée avec succès',
+            'data' => [
+                'order_number' => $order->order_number,
+                'status' => $order->status
+            ]
+        ], 200);
+    }
 }

@@ -224,6 +224,7 @@ Route::group([
         Route::get('/{order_number}', [OrderTrackingController::class, 'show']);
         Route::get('/{order_number}/invoice', [OrderTrackingController::class, 'invoice']);
         Route::post('/{order_number}/confirm-delivery', [OrderTrackingController::class, 'confirmDelivery']);
+        Route::post('/{order_number}/cancel', [OrderTrackingController::class, 'cancel']);
         Route::patch('/{order_number}/status', [OrderTrackingController::class, 'updateStatus']);
     });
     
