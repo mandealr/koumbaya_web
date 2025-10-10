@@ -39,7 +39,7 @@ class RoleSeeder extends Seeder
             // === RÔLES CUSTOMER (Niveau 2) ===
             [
                 'id' => 1,
-                'name' => 'particulier',
+                'name' => 'Particulier',
                 'description' => 'Client qui peut acheter des articles et participer aux tirages spéciaux',
                 'active' => true,
                 'mutable' => false,
@@ -49,7 +49,7 @@ class RoleSeeder extends Seeder
             ],
             [
                 'id' => 2,
-                'name' => 'business_individual',
+                'name' => 'Business Individual',
                 'description' => 'Vendeur individuel avec contraintes (500 tickets fixes, prix min 100k)',
                 'active' => true,
                 'mutable' => false,
@@ -59,7 +59,7 @@ class RoleSeeder extends Seeder
             ],
             [
                 'id' => 3,
-                'name' => 'business_enterprise',
+                'name' => 'Business Enterprise',
                 'description' => 'Marchand entreprise professionnel avec toutes les fonctionnalités',
                 'active' => true,
                 'mutable' => false,
@@ -71,7 +71,7 @@ class RoleSeeder extends Seeder
             // === RÔLES ADMIN (Niveau 2) ===
             [
                 'id' => 4,
-                'name' => 'agent',
+                'name' => 'Agent',
                 'description' => 'Agent de support client et modération basique',
                 'active' => true,
                 'mutable' => false,
@@ -81,7 +81,7 @@ class RoleSeeder extends Seeder
             ],
             [
                 'id' => 5,
-                'name' => 'admin',
+                'name' => 'Admin',
                 'description' => 'Administrateur - Gestion complète de la plateforme',
                 'active' => true,
                 'mutable' => false,
@@ -91,7 +91,7 @@ class RoleSeeder extends Seeder
             ],
             [
                 'id' => 6,
-                'name' => 'superadmin',
+                'name' => 'Super Admin',
                 'description' => 'Super administrateur - Accès système complet et gestion des rôles',
                 'active' => true,
                 'mutable' => false,
@@ -107,12 +107,12 @@ class RoleSeeder extends Seeder
 
         echo "✅ Rôles créés (Niveau 2) :\n";
         echo "   CUSTOMER TYPE (ID: 2):\n";
-        echo "   - ID 1 : particulier → Client acheteur\n";
-        echo "   - ID 2 : business_individual → Vendeur individuel (contraintes)\n";
-        echo "   - ID 3 : business_enterprise → Vendeur professionnel\n";
+        echo "   - ID 1 : Particulier → Client acheteur\n";
+        echo "   - ID 2 : Business Individual → Vendeur individuel (contraintes)\n";
+        echo "   - ID 3 : Business Enterprise → Vendeur professionnel\n";
         echo "   ADMIN TYPE (ID: 1):\n";
-        echo "   - ID 4 : agent → Agent support\n";
-        echo "   - ID 5 : admin → Administrateur\n";
-        echo "   - ID 6 : superadmin → Super administrateur\n";
+        echo "   - ID 4 : Agent → Agent support\n";
+        echo "   - ID 5 : Admin → Administrateur\n";
+        echo "   - ID 6 : Super Admin → Super administrateur\n";
     }
 }

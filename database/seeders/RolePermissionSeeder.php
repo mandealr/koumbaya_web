@@ -27,7 +27,7 @@ class RolePermissionSeeder extends Seeder
             // === CUSTOMER TYPE ROLES ===
 
             // PARTICULIER (client acheteur uniquement)
-            'particulier' => [
+            'Particulier' => [
                 'products.browse',
                 'orders.create',
                 'orders.view_own',
@@ -38,7 +38,7 @@ class RolePermissionSeeder extends Seeder
             ],
 
             // BUSINESS INDIVIDUAL (vendeur individuel avec contraintes)
-            'business_individual' => [
+            'Business Individual' => [
                 // Permissions particulier
                 'products.browse',
                 'orders.create',
@@ -60,7 +60,7 @@ class RolePermissionSeeder extends Seeder
             ],
 
             // BUSINESS ENTERPRISE (vendeur professionnel sans contraintes)
-            'business_enterprise' => [
+            'Business Enterprise' => [
                 // Permissions particulier
                 'products.browse',
                 'orders.create',
@@ -84,7 +84,7 @@ class RolePermissionSeeder extends Seeder
             // === ADMIN TYPE ROLES ===
 
             // AGENT (support et modération basique)
-            'agent' => [
+            'Agent' => [
                 'users.manage_all',
                 'support.handle_tickets',
                 'moderation.review_content',
@@ -94,7 +94,7 @@ class RolePermissionSeeder extends Seeder
             ],
 
             // ADMIN (gestion complète de la plateforme)
-            'admin' => [
+            'Admin' => [
                 // Toutes les permissions agent
                 'users.manage_all',
                 'support.handle_tickets',
@@ -114,7 +114,7 @@ class RolePermissionSeeder extends Seeder
             ],
 
             // SUPERADMIN (accès système complet)
-            'superadmin' => '*', // Tous les privilèges
+            'Super Admin' => '*', // Tous les privilèges
         ];
 
         // Traiter les associations

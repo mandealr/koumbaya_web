@@ -17,15 +17,17 @@ class MigrateExistingUsersSeeder extends Seeder
      * - UserType ID 1 = admin (superadmin, admin, agent)
      * - UserType ID 2 = customer (particulier, business_individual, business_enterprise)
      *
-     * Mapping des anciens rôles vers les nouveaux:
-     * - "Super Admin" → "superadmin" (user_type_id = 1)
-     * - "Admin" → "admin" (user_type_id = 1)
-     * - "Agent" → "agent" (user_type_id = 1)
-     * - "Business Enterprise" → "business_enterprise" (user_type_id = 2)
-     * - "Business Individual" → "business_individual" (user_type_id = 2)
-     * - "Business" → "business_enterprise" (user_type_id = 2)
-     * - "Particulier" → "particulier" (user_type_id = 2)
-     * - "Client" → "particulier" (user_type_id = 2)
+     * Rôles disponibles (nomenclature maintenue):
+     * - "Super Admin" (user_type_id = 1)
+     * - "Admin" (user_type_id = 1)
+     * - "Agent" (user_type_id = 1)
+     * - "Business Enterprise" (user_type_id = 2)
+     * - "Business Individual" (user_type_id = 2)
+     * - "Particulier" (user_type_id = 2)
+     *
+     * Mapping minimal pour anciens noms:
+     * - "Business" → "Business Enterprise"
+     * - "Client" → "Particulier"
      */
     public function run(): void
     {
@@ -60,7 +62,7 @@ class MigrateExistingUsersSeeder extends Seeder
                 $user->user_type_id = $customerTypeId;
                 $user->save();
 
-                $particulierRole = Role::where('name', 'particulier')->first();
+                $particulierRole = Role::where('name', 'Particulier')->first();
                 if ($particulierRole) {
                     \DB::table('user_roles')->insert([
                         'user_id' => $user->id,
@@ -68,7 +70,7 @@ class MigrateExistingUsersSeeder extends Seeder
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
-                    echo "   ✅ Assigné: particulier (user_type_id = {$customerTypeId})\n\n";
+                    echo "   ✅ Assigné: Particulier (user_type_id = {$customerTypeId})\n\n";
                     $migratedCount++;
                 }
                 continue;
@@ -81,37 +83,37 @@ class MigrateExistingUsersSeeder extends Seeder
                 $newRoleName = null;
                 $newUserTypeId = null;
 
-                // Mapping des rôles
+                // Mapping des rôles (nomenclature maintenue)
                 switch ($oldRole->name) {
                     case 'Super Admin':
                     case 'superadmin':
-                        $newRoleName = 'superadmin';
+                        $newRoleName = 'Super Admin';
                         $newUserTypeId = $adminTypeId;
                         break;
 
                     case 'Admin':
                     case 'admin':
-                        $newRoleName = 'admin';
+                        $newRoleName = 'Admin';
                         $newUserTypeId = $adminTypeId;
                         break;
 
                     case 'Agent':
                     case 'agent':
                     case 'Agent Back Office':
-                        $newRoleName = 'agent';
+                        $newRoleName = 'Agent';
                         $newUserTypeId = $adminTypeId;
                         break;
 
                     case 'Business Enterprise':
                     case 'business_enterprise':
                     case 'Business':
-                        $newRoleName = 'business_enterprise';
+                        $newRoleName = 'Business Enterprise';
                         $newUserTypeId = $customerTypeId;
                         break;
 
                     case 'Business Individual':
                     case 'business_individual':
-                        $newRoleName = 'business_individual';
+                        $newRoleName = 'Business Individual';
                         $newUserTypeId = $customerTypeId;
                         break;
 
@@ -119,7 +121,7 @@ class MigrateExistingUsersSeeder extends Seeder
                     case 'particulier':
                     case 'Client':
                     default:
-                        $newRoleName = 'particulier';
+                        $newRoleName = 'Particulier';
                         $newUserTypeId = $customerTypeId;
                         break;
                 }
