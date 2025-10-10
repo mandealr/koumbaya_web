@@ -126,10 +126,10 @@
       class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
       @click.self="closeModal"
     >
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div class="px-6 py-4 border-b border-gray-200">
+      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-white px-6 py-4 border-b border-gray-200">
           <div class="flex justify-between items-center">
-            <h2 class="text-xl font-bold text-gray-900">Créer un nouveau rôle</h2>
+            <h2 class="text-xl font-bold text-gray-900">Créer un nouveau rôle administrateur</h2>
             <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
               <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -161,17 +161,25 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Type d'utilisateur *</label>
-            <select
-              v-model="form.user_type_id"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Sélectionner un type</option>
-              <option v-for="type in userTypes" :key="type.id" :value="type.id">
-                {{ type.name }}
-              </option>
-            </select>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Privilèges</label>
+            <div class="max-h-64 overflow-y-auto border border-gray-300 rounded-md p-3 space-y-2">
+              <div v-if="privileges.length === 0" class="text-sm text-gray-500 text-center py-4">
+                Chargement des privilèges...
+              </div>
+              <div v-else v-for="privilege in privileges" :key="privilege.id" class="flex items-start">
+                <input
+                  :id="`privilege-${privilege.id}`"
+                  v-model="form.privileges"
+                  type="checkbox"
+                  :value="privilege.id"
+                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-0.5"
+                />
+                <label :for="`privilege-${privilege.id}`" class="ml-3 block text-sm">
+                  <span class="font-medium text-gray-900">{{ privilege.name }}</span>
+                  <span v-if="privilege.description" class="block text-gray-500 text-xs">{{ privilege.description }}</span>
+                </label>
+              </div>
+            </div>
           </div>
 
           <div class="flex items-center">
@@ -218,17 +226,20 @@ const { get, post } = useApi()
 
 const roles = ref([])
 const userTypes = ref([])
+const privileges = ref([])
 const statistics = ref({})
 const loading = ref(false)
 const error = ref('')
 const showCreateModal = ref(false)
 const submitting = ref(false)
 const formError = ref('')
+const adminTypeId = ref(null)
 
 const form = ref({
   name: '',
   description: '',
   user_type_id: '',
+  privileges: [],
   active: true
 })
 
@@ -261,9 +272,25 @@ const fetchUserTypes = async () => {
     const response = await get('/admin/roles/user-types')
     if (response.success) {
       userTypes.value = response.data?.user_types || []
+      // Trouver l'ID du type Administrateur
+      const adminType = userTypes.value.find(t => t.name === 'Administrateur')
+      if (adminType) {
+        adminTypeId.value = adminType.id
+      }
     }
   } catch (err) {
     console.error('Error fetching user types:', err)
+  }
+}
+
+const fetchPrivileges = async () => {
+  try {
+    const response = await get('/admin/roles/privileges')
+    if (response.success) {
+      privileges.value = response.data?.privileges || []
+    }
+  } catch (err) {
+    console.error('Error fetching privileges:', err)
   }
 }
 
@@ -276,10 +303,13 @@ const fetchStatistics = async () => {
   }
 }
 
-const openCreateModal = () => {
+const openCreateModal = async () => {
   showCreateModal.value = true
   if (userTypes.value.length === 0) {
-    fetchUserTypes()
+    await fetchUserTypes()
+  }
+  if (privileges.value.length === 0) {
+    await fetchPrivileges()
   }
 }
 
@@ -289,6 +319,7 @@ const closeModal = () => {
     name: '',
     description: '',
     user_type_id: '',
+    privileges: [],
     active: true
   }
   formError.value = ''
@@ -299,7 +330,13 @@ const createRole = async () => {
   submitting.value = true
 
   try {
-    const response = await post('/admin/roles', form.value)
+    // Définir automatiquement le type Admin
+    const payload = {
+      ...form.value,
+      user_type_id: adminTypeId.value
+    }
+
+    const response = await post('/admin/roles', payload)
 
     if (response.success) {
       closeModal()
@@ -355,5 +392,6 @@ const getRoleBadgeColor = (name) => {
 onMounted(() => {
   fetchRoles()
   fetchStatistics()
+  fetchUserTypes()
 })
 </script>

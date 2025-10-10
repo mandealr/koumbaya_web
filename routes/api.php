@@ -388,6 +388,7 @@ Route::group([
         Route::put('/{id}', [RoleController::class, 'update']);
         Route::delete('/{id}', [RoleController::class, 'destroy']);
         Route::get('/user-types', [RoleController::class, 'getUserTypes']);
+        Route::get('/privileges', [RoleController::class, 'getPrivileges']);
         Route::get('/statistics', [RoleController::class, 'statistics']);
     });
 

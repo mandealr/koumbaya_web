@@ -49,6 +49,8 @@ class RoleController extends Controller
             'description' => 'nullable|string|max:500',
             'user_type_id' => 'required|exists:user_types,id',
             'active' => 'boolean',
+            'privileges' => 'nullable|array',
+            'privileges.*' => 'exists:privileges,id',
         ]);
 
         $role = Role::create([
@@ -59,11 +61,16 @@ class RoleController extends Controller
             'mutable' => true, // Les rôles créés manuellement sont modifiables
         ]);
 
+        // Attach privileges if provided
+        if ($request->filled('privileges')) {
+            $role->privileges()->attach($request->privileges);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Rôle créé avec succès',
             'data' => [
-                'role' => $role->load('userType')
+                'role' => $role->load(['userType', 'privileges'])
             ]
         ], 201);
     }
@@ -148,6 +155,21 @@ class RoleController extends Controller
             'success' => true,
             'data' => [
                 'user_types' => $userTypes
+            ]
+        ]);
+    }
+
+    /**
+     * Get all privileges for role creation
+     */
+    public function getPrivileges()
+    {
+        $privileges = \App\Models\Privilege::where('active', true)->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'privileges' => $privileges
             ]
         ]);
     }
