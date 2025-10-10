@@ -149,7 +149,7 @@ class RoleController extends Controller
      */
     public function getUserTypes()
     {
-        $userTypes = UserType::where('active', true)->get();
+        $userTypes = UserType::all();
 
         return response()->json([
             'success' => true,
@@ -164,7 +164,7 @@ class RoleController extends Controller
      */
     public function getPrivileges()
     {
-        $privileges = \App\Models\Privilege::where('active', true)->get();
+        $privileges = \App\Models\Privilege::all();
 
         return response()->json([
             'success' => true,
