@@ -147,23 +147,17 @@ class RolePermissionSeeder extends Seeder
     }
 
     /**
-     * Assigner les privilèges à un rôle avec firstOrCreate (évite les doublons)
+     * Assigner les privilèges à un rôle
      */
     private function assignPrivilegesToRole($roleId, $privilegeIds)
     {
         foreach ($privilegeIds as $privilegeId) {
-            RolePrivilege::firstOrCreate(
-                [
-                    'role_id' => $roleId,
-                    'privilege_id' => $privilegeId,
-                ],
-                [
-                    'role_id' => $roleId,
-                    'privilege_id' => $privilegeId,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
-            );
+            RolePrivilege::create([
+                'role_id' => $roleId,
+                'privilege_id' => $privilegeId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
     }
 }

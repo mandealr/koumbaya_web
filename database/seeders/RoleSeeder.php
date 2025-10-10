@@ -21,13 +21,24 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        // Récupérer les user_type_id créés
-        $customerTypeId = UserType::where('code', 'customer')->first()->id;
-        $adminTypeId = UserType::where('code', 'admin')->first()->id;
+        echo "🔄 Nettoyage des rôles existants...\n";
+
+        // Vider la table roles et user_roles (pivot)
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \DB::table('user_roles')->truncate();
+        Role::truncate();
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        echo "📝 Création des nouveaux rôles...\n";
+
+        // Les IDs sont fixes car on a recréé les user_types avec des IDs fixes
+        $adminTypeId = 1;  // admin
+        $customerTypeId = 2;  // customer
 
         $roles = [
             // === RÔLES CUSTOMER (Niveau 2) ===
             [
+                'id' => 1,
                 'name' => 'particulier',
                 'description' => 'Client qui peut acheter des articles et participer aux tirages spéciaux',
                 'active' => true,
@@ -37,6 +48,7 @@ class RoleSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'id' => 2,
                 'name' => 'business_individual',
                 'description' => 'Vendeur individuel avec contraintes (500 tickets fixes, prix min 100k)',
                 'active' => true,
@@ -46,6 +58,7 @@ class RoleSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'id' => 3,
                 'name' => 'business_enterprise',
                 'description' => 'Marchand entreprise professionnel avec toutes les fonctionnalités',
                 'active' => true,
@@ -57,6 +70,7 @@ class RoleSeeder extends Seeder
 
             // === RÔLES ADMIN (Niveau 2) ===
             [
+                'id' => 4,
                 'name' => 'agent',
                 'description' => 'Agent de support client et modération basique',
                 'active' => true,
@@ -66,6 +80,7 @@ class RoleSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'id' => 5,
                 'name' => 'admin',
                 'description' => 'Administrateur - Gestion complète de la plateforme',
                 'active' => true,
@@ -75,6 +90,7 @@ class RoleSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'id' => 6,
                 'name' => 'superadmin',
                 'description' => 'Super administrateur - Accès système complet et gestion des rôles',
                 'active' => true,
@@ -85,22 +101,18 @@ class RoleSeeder extends Seeder
             ],
         ];
 
-        // Créer les rôles avec firstOrCreate (évite les doublons)
         foreach ($roles as $roleData) {
-            Role::firstOrCreate(
-                ['name' => $roleData['name'], 'user_type_id' => $roleData['user_type_id']],
-                $roleData
-            );
+            Role::create($roleData);
         }
 
         echo "✅ Rôles créés (Niveau 2) :\n";
-        echo "   CUSTOMER TYPE:\n";
-        echo "   - particulier : Client acheteur\n";
-        echo "   - business_individual : Vendeur individuel (contraintes)\n";
-        echo "   - business_enterprise : Vendeur professionnel\n";
-        echo "   ADMIN TYPE:\n";
-        echo "   - agent : Agent support\n";
-        echo "   - admin : Administrateur\n";
-        echo "   - superadmin : Super administrateur\n";
+        echo "   CUSTOMER TYPE (ID: 2):\n";
+        echo "   - ID 1 : particulier → Client acheteur\n";
+        echo "   - ID 2 : business_individual → Vendeur individuel (contraintes)\n";
+        echo "   - ID 3 : business_enterprise → Vendeur professionnel\n";
+        echo "   ADMIN TYPE (ID: 1):\n";
+        echo "   - ID 4 : agent → Agent support\n";
+        echo "   - ID 5 : admin → Administrateur\n";
+        echo "   - ID 6 : superadmin → Super administrateur\n";
     }
 }

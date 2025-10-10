@@ -18,9 +18,19 @@ class PermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        // Récupérer les user_type_id
-        $customerTypeId = UserType::where('code', 'customer')->first()->id;
-        $adminTypeId = UserType::where('code', 'admin')->first()->id;
+        echo "🔄 Nettoyage des privilèges existants...\n";
+
+        // Vider la table privileges et role_privileges (pivot)
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \DB::table('role_privileges')->truncate();
+        Privilege::truncate();
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        echo "📝 Création des nouveaux privilèges...\n";
+
+        // Les IDs sont fixes car on a recréé les user_types avec des IDs fixes
+        $adminTypeId = 1;  // admin
+        $customerTypeId = 2;  // customer
 
         // Permissions organisées par type d'utilisateur
         $permissions = [
@@ -241,16 +251,12 @@ class PermissionSeeder extends Seeder
             ],
         ];
 
-        // Créer les privilèges avec firstOrCreate (évite les doublons)
         foreach ($permissions as $privilegeData) {
-            Privilege::firstOrCreate(
-                ['name' => $privilegeData['name'], 'user_type_id' => $privilegeData['user_type_id']],
-                $privilegeData
-            );
+            Privilege::create($privilegeData);
         }
 
         echo "✅ " . count($permissions) . " privilèges créés avec succès.\n";
-        echo "   - " . count(array_filter($permissions, fn($p) => $p['user_type_id'] === $customerTypeId)) . " privilèges pour customer type\n";
-        echo "   - " . count(array_filter($permissions, fn($p) => $p['user_type_id'] === $adminTypeId)) . " privilèges pour admin type\n";
+        echo "   - " . count(array_filter($permissions, fn($p) => $p['user_type_id'] === $customerTypeId)) . " privilèges pour CUSTOMER type (ID: 2)\n";
+        echo "   - " . count(array_filter($permissions, fn($p) => $p['user_type_id'] === $adminTypeId)) . " privilèges pour ADMIN type (ID: 1)\n";
     }
 }

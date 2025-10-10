@@ -17,16 +17,27 @@ class UserTypeSeeder extends Seeder
      */
     public function run(): void
     {
+        echo "🔄 Nettoyage des types d'utilisateurs existants...\n";
+
+        // Vider la table user_types
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        UserType::truncate();
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        echo "📝 Création des nouveaux types d'utilisateurs...\n";
+
         $userTypes = [
             [
+                'id' => 1,
                 'name' => 'Administrateur',
                 'code' => 'admin',
-                'description' => 'Accès à l\'espace d\'administration',
+                'description' => 'Accès à l\'espace d\'administration (superadmin, admin, agent)',
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
+                'id' => 2,
                 'name' => 'Client/Marchand',
                 'code' => 'customer',
                 'description' => 'Accès à l\'espace client/marchand (particulier, business_individual, business_enterprise)',
@@ -36,16 +47,12 @@ class UserTypeSeeder extends Seeder
             ],
         ];
 
-        // Créer les types d'utilisateurs avec firstOrCreate (évite les doublons)
         foreach ($userTypes as $userTypeData) {
-            UserType::firstOrCreate(
-                ['code' => $userTypeData['code']],
-                $userTypeData
-            );
+            UserType::create($userTypeData);
         }
 
         echo "✅ Types d'utilisateurs créés (Niveau 1) :\n";
-        echo "   - Administrateur (admin) : Accès espace administration\n";
-        echo "   - Client/Marchand (customer) : Accès espace client/marchand\n";
+        echo "   - ID 1 : Administrateur (admin) → Rôles: superadmin, admin, agent\n";
+        echo "   - ID 2 : Client/Marchand (customer) → Rôles: particulier, business_individual, business_enterprise\n";
     }
 }

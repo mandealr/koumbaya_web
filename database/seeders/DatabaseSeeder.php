@@ -33,14 +33,17 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,     // Privilèges dans table privileges
             RolePermissionSeeder::class, // Associations roles ↔ privileges
 
-            // === ÉTAPE 3: Utilisateurs et profils ===
-            UserSeeder::class,           // Utilisateurs avec nouvelle structure
+            // === ÉTAPE 3: Migration des utilisateurs existants ===
+            MigrateExistingUsersSeeder::class, // Migrer les users vers nouvelle structure
 
-            // === ÉTAPE 4: Configuration système ===
+            // === ÉTAPE 4: Utilisateurs de test (optionnel) ===
+            // UserSeeder::class,           // Créer nouveaux users de test
+
+            // === ÉTAPE 5: Configuration système ===
             SettingsSeeder::class,       // Paramètres application
             PaymentMethodsSeeder::class, // Méthodes de paiement E-Billing
 
-            // === ÉTAPE 5: Données métier ===
+            // === ÉTAPE 6: Données métier ===
             ProductSeeder::class,        // Produits pour démonstration
             LotterySeeder::class,        // Tombolas de test
             // UserRatingSeeder::class,     // Évaluations utilisateurs (désactivé)
