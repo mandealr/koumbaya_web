@@ -205,17 +205,27 @@ const getSaleModeLabel = (saleMode) => {
 const getMerchantName = (merchant) => {
   if (!merchant) return 'Vendeur non spécifié'
 
-  // Si c'est un objet avec les propriétés first_name et last_name
-  if (merchant.first_name && merchant.last_name) {
-    return `${merchant.first_name} ${merchant.last_name}`
+  // Priorité 1: Nom de la company (nouvelle architecture)
+  if (merchant.company?.business_name) {
+    return merchant.company.business_name
   }
 
-  // Si c'est un objet avec company_name
+  // Priorité 2: business_name direct (ancienne architecture)
+  if (merchant.business_name) {
+    return merchant.business_name
+  }
+
+  // Priorité 3: company_name (compatibilité)
   if (merchant.company_name) {
     return merchant.company_name
   }
 
-  // Si c'est un objet avec name
+  // Priorité 4: Nom complet pour vendeurs particuliers
+  if (merchant.first_name && merchant.last_name) {
+    return `${merchant.first_name} ${merchant.last_name}`
+  }
+
+  // Priorité 5: name générique
   if (merchant.name) {
     return merchant.name
   }

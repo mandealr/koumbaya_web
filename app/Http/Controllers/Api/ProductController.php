@@ -99,7 +99,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'merchant', 'activeLottery']);
+        $query = Product::with(['category', 'merchant.company', 'activeLottery']);
 
         // Filtrer par marchand si paramètre "my_products" est présent et user authentifié
         if ($request->boolean('my_products')) {
@@ -437,9 +437,9 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::with([
-            'category', 
-            'merchant', 
-            'activeLottery.tickets', 
+            'category',
+            'merchant.company',
+            'activeLottery.tickets',
             'lotteries' => function($query) {
                 $query->completed()->with('winner')->orderBy('draw_date', 'desc')->limit(5);
             }

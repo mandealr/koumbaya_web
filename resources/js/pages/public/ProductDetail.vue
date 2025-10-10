@@ -90,7 +90,7 @@
               <!-- Merchant Info -->
               <div v-if="product.merchant" class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
                 <div class="w-12 h-12 rounded-full bg-[#0099cc]/10 flex items-center justify-center">
-                  <svg v-if="product.merchant.company_name" class="w-6 h-6 text-[#0099cc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg v-if="getMerchantName(product.merchant) && !isIndividualMerchant(product.merchant)" class="w-6 h-6 text-[#0099cc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                   <svg v-else class="w-6 h-6 text-[#0099cc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,7 +100,10 @@
                 <div>
                   <p class="text-sm text-gray-600">Vendu par</p>
                   <p class="font-semibold text-gray-900">
-                    {{ product.merchant.company_name || `${product.merchant.first_name} ${product.merchant.last_name}` }}
+                    {{ getMerchantName(product.merchant) }}
+                  </p>
+                  <p v-if="product.merchant.company?.company_type" class="text-xs text-gray-500">
+                    {{ product.merchant.company.company_type === 'enterprise' ? 'Entreprise' : 'Vendeur individuel' }}
                   </p>
                 </div>
               </div>
@@ -472,6 +475,46 @@ const formatDate = (date) => {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+const getMerchantName = (merchant) => {
+  if (!merchant) return 'Vendeur non spécifié'
+
+  // Priorité 1: Nom de la company (nouvelle architecture)
+  if (merchant.company?.business_name) {
+    return merchant.company.business_name
+  }
+
+  // Priorité 2: business_name direct (ancienne architecture)
+  if (merchant.business_name) {
+    return merchant.business_name
+  }
+
+  // Priorité 3: company_name (compatibilité)
+  if (merchant.company_name) {
+    return merchant.company_name
+  }
+
+  // Priorité 4: Nom complet pour vendeurs particuliers
+  if (merchant.first_name && merchant.last_name) {
+    return `${merchant.first_name} ${merchant.last_name}`
+  }
+
+  return 'Vendeur'
+}
+
+const isIndividualMerchant = (merchant) => {
+  if (!merchant) return false
+
+  // Si c'est une company de type individual
+  if (merchant.company?.company_type === 'individual') return true
+
+  // Si pas de company ou business_name, c'est un particulier
+  if (!merchant.company?.business_name && !merchant.business_name && !merchant.company_name) {
+    return true
+  }
+
+  return false
 }
 
 
