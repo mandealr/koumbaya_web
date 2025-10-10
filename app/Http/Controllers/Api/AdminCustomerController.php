@@ -54,26 +54,22 @@ class AdminCustomerController extends Controller
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
 
-        $customers = $query->get();
+        // Pagination
+        $perPage = $request->get('per_page', 15);
+        $customers = $query->paginate($perPage);
 
         return response()->json([
             'success' => true,
             'data' => [
-                'customers' => $customers->map(function ($customer) {
-                    return [
-                        'id' => $customer->id,
-                        'first_name' => $customer->first_name,
-                        'last_name' => $customer->last_name,
-                        'email' => $customer->email,
-                        'phone' => $customer->phone,
-                        'avatar_url' => $customer->avatar_url,
-                        'is_active' => $customer->is_active,
-                        'email_verified_at' => $customer->email_verified_at,
-                        'created_at' => $customer->created_at,
-                        'user_type' => $customer->userType ? $customer->userType->name : null,
-                        'roles' => $customer->roles->pluck('name')->toArray(),
-                    ];
-                })
+                'customers' => $customers->items(),
+                'pagination' => [
+                    'total' => $customers->total(),
+                    'per_page' => $customers->perPage(),
+                    'current_page' => $customers->currentPage(),
+                    'last_page' => $customers->lastPage(),
+                    'from' => $customers->firstItem(),
+                    'to' => $customers->lastItem(),
+                ]
             ]
         ]);
     }
