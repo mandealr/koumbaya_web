@@ -95,7 +95,7 @@
         </div>
         <div class="w-full bg-gray-200 rounded-full h-2">
           <div
-            class="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full transition-all duration-300"
+            class="bg-gradient-to-r from-purple-500 to-purple-700 h-2 rounded-full transition-all duration-300"
             :style="{ width: progressPercentage + '%' }"
           ></div>
         </div>
@@ -189,7 +189,7 @@ const formatDate = (date) => {
 const getSaleModeClass = (saleMode) => {
   const classes = {
     'direct': 'bg-blue-100 text-blue-800 px-2 py-1 text-xs font-medium rounded-lg',
-    'lottery': 'bg-yellow-100 text-orange-800 px-2 py-1 text-xs font-medium rounded-lg'
+    'lottery': 'bg-purple-100 text-purple-800 px-2 py-1 text-xs font-medium rounded-lg'
   }
   return classes[saleMode] || 'bg-gray-100 text-gray-800 px-2 py-1 text-xs font-medium rounded-lg'
 }
