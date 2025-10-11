@@ -49,7 +49,7 @@ class ProductResource extends JsonResource
             }),
             
             'merchant' => $this->whenLoaded('merchant', function () {
-                return [
+                $merchantData = [
                     'id' => $this->merchant->id,
                     'name' => $this->merchant->full_name,
                     'first_name' => $this->merchant->first_name,
@@ -57,6 +57,16 @@ class ProductResource extends JsonResource
                     'company_name' => $this->merchant->company_name,
                     'email' => $this->merchant->email,
                 ];
+
+                // Include company relationship if loaded
+                if ($this->merchant->relationLoaded('company') && $this->merchant->company) {
+                    $merchantData['company'] = [
+                        'id' => $this->merchant->company->id,
+                        'business_name' => $this->merchant->company->business_name,
+                    ];
+                }
+
+                return $merchantData;
             }),
             
             'active_lottery' => $this->whenLoaded('activeLottery', function () {
