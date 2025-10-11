@@ -240,8 +240,15 @@ const handleClickOutside = (event) => {
 
 
 onMounted(() => {
+  console.log('🎨 CustomerLayout: onMounted')
+  console.log('🎨 CustomerLayout: User:', authStore.user)
+  console.log('🎨 CustomerLayout: isAuthenticated:', authStore.isAuthenticated)
+  console.log('🎨 CustomerLayout: isDualRole:', authStore.isDualRole)
+  console.log('🎨 CustomerLayout: isMerchant:', authStore.isMerchant)
+  console.log('🎨 CustomerLayout: isCustomer:', authStore.isCustomer)
+
   document.addEventListener('click', handleClickOutside)
-  
+
   onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside)
   })
