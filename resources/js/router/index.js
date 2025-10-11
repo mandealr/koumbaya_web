@@ -24,7 +24,8 @@ import HowItWorks from '@/pages/public/HowItWorks.vue'
 import Contact from '@/pages/public/Contact.vue'
 
 // Customer Pages
-import CustomerDashboard from '@/pages/customer/Dashboard.vue'
+// import CustomerDashboard from '@/pages/customer/Dashboard.vue'
+import CustomerDashboard from '@/pages/customer/DashboardSimple.vue' // TEMP DEBUG
 import Products from '@/pages/customer/Products.vue'
 import ProductDetail from '@/pages/customer/ProductDetail.vue'
 import Profile from '@/pages/customer/Profile.vue'
