@@ -265,7 +265,7 @@
             <div class="absolute top-4 left-4 z-10">
               <span
                 v-if="product.sale_mode === 'lottery'"
-                class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg flex items-center gap-1"
+                class="bg-gradient-to-r from-purple-500 to-purple-700 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg flex items-center gap-1"
               >
                 <TicketIcon class="h-4 w-4" />
                 Tirage spécial
@@ -335,6 +335,12 @@
                 </p>
               </div>
 
+              <!-- Vendeur -->
+              <div v-if="product.merchant" class="flex items-center gap-2 text-sm bg-gray-50 rounded-lg px-3 py-2">
+                <UserCircleIcon class="w-4 h-4 flex-shrink-0 text-gray-500" />
+                <span class="text-gray-700 font-medium">{{ getMerchantName(product.merchant) }}</span>
+              </div>
+
               <!-- Section spécifique tirage spécial - MASQUÉE pour achat direct selon instructions -->
               <div v-if="product.sale_mode === 'lottery'" class="space-y-2">
                 <div class="flex justify-between text-sm text-gray-600">
@@ -343,7 +349,7 @@
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-3">
                   <div
-                    class="bg-gradient-to-r from-yellow-400 to-orange-500 h-3 rounded-full transition-all duration-500"
+                    class="bg-gradient-to-r from-purple-500 to-purple-700 h-3 rounded-full transition-all duration-500"
                     :style="{ width: Math.round(((product.soldTickets || 0) / (product.totalTickets || 1000)) * 100) + '%' }"
                   ></div>
                 </div>
@@ -364,7 +370,7 @@
               <button
                 class="w-full font-semibold py-3 rounded-xl transition-all duration-200 group-hover:scale-105 group-hover:shadow-lg flex items-center justify-center gap-2 whitespace-nowrap"
                 :class="product.sale_mode === 'lottery'
-                  ? 'bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white'
+                  ? 'bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white'
                   : 'bg-gradient-to-r from-[#0099cc] to-cyan-500 hover:from-[#0088bb] hover:to-cyan-600 text-white'"
               >
                 <TicketIcon v-if="product.sale_mode === 'lottery'" class="h-5 w-5 flex-shrink-0" />
@@ -488,7 +494,8 @@ import {
   FireIcon,
   TicketIcon,
   ShoppingCartIcon,
-  CreditCardIcon
+  CreditCardIcon,
+  UserCircleIcon
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
@@ -543,7 +550,8 @@ const loadFeaturedProducts = async () => {
           sale_mode: 'lottery',
           has_active_lottery: product.has_active_lottery || false,
           lottery_ends_soon: product.lottery_ends_soon || false,
-          category: product.category
+          category: product.category,
+          merchant: product.merchant || null
         }
       })
       allProducts.push(...lotteryProducts)
@@ -560,7 +568,8 @@ const loadFeaturedProducts = async () => {
         image: getProductImageUrlWithFallback(product, placeholderImg),
         isNew: isNewProduct(product.created_at),
         sale_mode: 'direct',
-        category: product.category
+        category: product.category,
+        merchant: product.merchant || null
       }))
       allProducts.push(...directProducts)
     }
@@ -773,6 +782,37 @@ const formatPrice = (price) => {
     currency: 'XAF',
     minimumFractionDigits: 0
   }).format(price).replace('XAF', 'FCFA')
+}
+
+const getMerchantName = (merchant) => {
+  if (!merchant) return 'Vendeur non spécifié'
+
+  // Priorité 1: Nom de la company (nouvelle architecture)
+  if (merchant.company?.business_name) {
+    return merchant.company.business_name
+  }
+
+  // Priorité 2: business_name direct (ancienne architecture)
+  if (merchant.business_name) {
+    return merchant.business_name
+  }
+
+  // Priorité 3: company_name (compatibilité)
+  if (merchant.company_name) {
+    return merchant.company_name
+  }
+
+  // Priorité 4: Nom complet pour vendeurs particuliers
+  if (merchant.first_name && merchant.last_name) {
+    return `${merchant.first_name} ${merchant.last_name}`
+  }
+
+  // Priorité 5: name générique
+  if (merchant.name) {
+    return merchant.name
+  }
+
+  return 'Vendeur'
 }
 
 const viewProduct = (product) => {
