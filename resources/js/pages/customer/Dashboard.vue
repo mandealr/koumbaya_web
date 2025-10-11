@@ -282,6 +282,15 @@ const refreshDashboard = async () => {
 }
 
 onMounted(async () => {
-  await loadDashboardData()
+  console.log('🏠 CustomerDashboard: onMounted - Starting to load dashboard data')
+  console.log('🏠 CustomerDashboard: User:', authStore.user)
+  console.log('🏠 CustomerDashboard: isAuthenticated:', authStore.isAuthenticated)
+  console.log('🏠 CustomerDashboard: isDualRole:', authStore.isDualRole)
+  try {
+    await loadDashboardData()
+    console.log('🏠 CustomerDashboard: Dashboard data loaded successfully')
+  } catch (err) {
+    console.error('🏠 CustomerDashboard: Error loading dashboard data:', err)
+  }
 })
 </script>
