@@ -88,7 +88,7 @@
                   Mon Profil
                 </router-link>
                 <router-link
-                  v-if="authStore.isDualRole"
+                  v-if="authStore.isMerchant && authStore.isCustomer"
                   to="/merchant/dashboard"
                   class="block px-4 py-2 text-sm text-[#0099cc] hover:bg-blue-50 font-medium"
                   @click="userMenuOpen = false"

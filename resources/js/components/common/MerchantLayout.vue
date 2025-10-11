@@ -238,7 +238,7 @@ const userNavigation = computed(() => {
   ]
 
   // Ajouter le lien de switch pour les utilisateurs avec double rôle
-  if (authStore.isDualRole) {
+  if (authStore.isMerchant && authStore.isCustomer) {
     items.push({
       name: 'Passer à l\'espace client',
       href: '/customer/dashboard',
