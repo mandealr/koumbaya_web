@@ -88,6 +88,15 @@
                   Mon Profil
                 </router-link>
                 <router-link
+                  v-if="authStore.isDualRole"
+                  to="/merchant/dashboard"
+                  class="block px-4 py-2 text-sm text-[#0099cc] hover:bg-blue-50 font-medium"
+                  @click="userMenuOpen = false"
+                >
+                  <ArrowsRightLeftIcon class="w-4 h-4 inline mr-2" />
+                  Passer à l'espace vendeur
+                </router-link>
+                <router-link
                   to="/customer/tickets"
                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   @click="userMenuOpen = false"
@@ -176,7 +185,8 @@ import {
   CreditCardIcon,
   ArrowRightOnRectangleIcon,
   Bars3Icon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  ArrowsRightLeftIcon
 } from '@heroicons/vue/24/outline'
 
 const authStore = useAuthStore()

@@ -95,7 +95,8 @@
                       :key="item.name"
                       :to="item.href"
                       @click="userMenuOpen = false"
-                      class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      :class="item.class || 'flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'"
+                      class="flex items-center px-4 py-2 text-sm"
                     >
                       <component :is="item.icon" class="w-4 h-4 mr-3" />
                       {{ item.name }}
@@ -187,7 +188,8 @@ import {
   ChevronDownIcon,
   ArrowRightOnRectangleIcon,
   Bars3Icon,
-  CurrencyDollarIcon
+  CurrencyDollarIcon,
+  ArrowsRightLeftIcon
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
@@ -230,10 +232,25 @@ const navigation = computed(() => {
   return baseNavigation
 })
 
-const userNavigation = [
-  { name: 'Profil', href: '/merchant/profile', icon: UserIcon },
-  { name: 'Paramètres', href: '/merchant/settings', icon: CogIcon }
-]
+const userNavigation = computed(() => {
+  const items = [
+    { name: 'Profil', href: '/merchant/profile', icon: UserIcon }
+  ]
+
+  // Ajouter le lien de switch pour les utilisateurs avec double rôle
+  if (authStore.isDualRole) {
+    items.push({
+      name: 'Passer à l\'espace client',
+      href: '/customer/dashboard',
+      icon: ArrowsRightLeftIcon,
+      class: 'text-[#0099cc] hover:bg-blue-50 font-medium'
+    })
+  }
+
+  items.push({ name: 'Paramètres', href: '/merchant/settings', icon: CogIcon })
+
+  return items
+})
 
 // Computed
 const user = computed(() => authStore.user)

@@ -64,6 +64,11 @@ export const useAuthStore = defineStore('auth', () => {
            hasRole('Business Enterprise') || hasRole('Business Individual') || hasRole('Business')
   })
 
+  const isDualRole = computed(() => {
+    // Utilisateur ayant à la fois le rôle client ET vendeur
+    return isCustomer.value && isMerchant.value
+  })
+
   // Actions
   async function login(credentials) {
     loading.value = true
@@ -338,8 +343,9 @@ export const useAuthStore = defineStore('auth', () => {
     isMerchant,
     isCustomer,
     canSell,
+    isDualRole,
     hasRole,
-    
+
     // Nouveaux helpers pour les profils vendeurs
     isIndividualSeller: computed(() => hasRole('business_individual') || hasRole('Business Individual')),
     isBusinessSeller: computed(() => hasRole('business_enterprise') || hasRole('Business Enterprise')),
