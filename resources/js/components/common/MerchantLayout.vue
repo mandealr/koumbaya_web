@@ -241,7 +241,7 @@ const userNavigation = computed(() => {
   if (authStore.isMerchant && authStore.isCustomer) {
     items.push({
       name: 'Passer à l\'espace client',
-      href: '/customer/dashboard',
+      href: { name: 'customer.dashboard' },
       icon: ArrowsRightLeftIcon,
       class: 'text-[#0099cc] hover:bg-blue-50 font-medium'
     })
