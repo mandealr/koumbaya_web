@@ -533,19 +533,36 @@ const router = createRouter({
 
 // Navigation Guards
 router.beforeEach(async (to, from, next) => {
+  console.log('🔀 Router beforeEach:', {
+    to: to.path,
+    from: from.path,
+    toName: to.name,
+    fromName: from.name
+  })
+
   const authStore = useAuthStore()
-  
+
+  console.log('🔀 Router auth state:', {
+    isAuthenticated: authStore.isAuthenticated,
+    isCustomer: authStore.isCustomer,
+    isMerchant: authStore.isMerchant,
+    initializing: authStore.initializing
+  })
+
   // Attendre la fin de l'initialisation de l'auth si nécessaire
   if (authStore.initializing) {
+    console.log('⏳ Router: Waiting for auth initialization...')
     let attempts = 0
     while (authStore.initializing && attempts < 100) { // Max 5 secondes (50ms * 100)
       await new Promise(resolve => setTimeout(resolve, 50))
       attempts++
     }
+    console.log('✅ Router: Auth initialized after', attempts, 'attempts')
   }
-  
+
   // Check if route requires authentication
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    console.log('🔒 Router: Route requires auth but user not authenticated, redirecting to login')
     // Préserver l'URL de destination pour rediriger après connexion
     const redirectPath = to.fullPath
     next({ 
@@ -557,22 +574,27 @@ router.beforeEach(async (to, from, next) => {
   
   // Redirect authenticated users away from guest pages
   if (to.meta.requiresGuest && authStore.isAuthenticated) {
+    console.log('👻 Router: Guest page accessed by authenticated user, redirecting')
     const redirectTo = authStore.getDefaultRedirect()
     next({ name: redirectTo })
     return
   }
-  
+
   // Role-based access control
   if (to.meta.role && authStore.isAuthenticated) {
+    console.log('🔐 Router: Checking role-based access for', to.meta.role)
     const hasAccess = checkRoleAccess(to.meta.role, authStore)
-    
+
     if (!hasAccess) {
+      console.log('❌ Router: Access denied, redirecting to default')
       const redirectTo = authStore.getDefaultRedirect()
       next({ name: redirectTo })
       return
     }
+    console.log('✅ Router: Access granted')
   }
-  
+
+  console.log('✅ Router: Allowing navigation to', to.path)
   next()
 })
 
