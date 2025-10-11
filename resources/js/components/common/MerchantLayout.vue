@@ -209,26 +209,30 @@ const quickStats = ref({
 // Navigation items - conditionnelle selon le rôle
 const navigation = computed(() => {
   const baseNavigation = [
-    { 
-      name: isIndividualSeller.value ? 'Mon Espace Vendeur' : 'Dashboard', 
-      href: isIndividualSeller.value ? '/merchant/simple-dashboard' : '/merchant/dashboard', 
-      icon: HomeIcon 
+    {
+      name: isIndividualSeller.value ? 'Mon Espace Vendeur' : 'Dashboard',
+      href: isIndividualSeller.value ? '/merchant/simple-dashboard' : '/merchant/dashboard',
+      icon: HomeIcon
     },
     { name: 'Articles', href: '/merchant/products', icon: ShoppingBagIcon },
     { name: 'Commandes', href: '/merchant/orders', icon: ClipboardDocumentListIcon }
   ]
-  
-  // Ajouter les fonctionnalités avancées seulement pour Business Enterprise
+
+  // Tombolas et Remboursements pour tous les vendeurs (individuels et entreprises)
+  baseNavigation.push(
+    { name: 'Tombolas', href: '/merchant/lotteries', icon: GiftIcon },
+    { name: 'Remboursements', href: '/merchant/refunds', icon: CurrencyDollarIcon }
+  )
+
+  // Ajouter les statistiques seulement pour Business Enterprise
   if (!isIndividualSeller.value) {
     baseNavigation.push(
-      { name: 'Tombolas', href: '/merchant/lotteries', icon: GiftIcon },
-      { name: 'Remboursements', href: '/merchant/refunds', icon: CurrencyDollarIcon },
       { name: 'Statistiques', href: '/merchant/analytics', icon: ChartBarIcon }
     )
   }
-  
+
   baseNavigation.push({ name: 'Paramètres', href: '/merchant/settings', icon: CogIcon })
-  
+
   return baseNavigation
 })
 
