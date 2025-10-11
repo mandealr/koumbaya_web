@@ -84,7 +84,7 @@
       <!-- Actions rapides -->
       <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
         <h2 class="text-xl font-bold text-gray-900 mb-6">Actions Rapides</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
           <button
             @click="showCreateProductModal = true"
             class="flex flex-col items-center justify-center p-8 bg-gradient-to-br from-[#0099cc] to-[#0088bb] text-white rounded-2xl hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
@@ -108,6 +108,17 @@
           </router-link>
 
           <router-link
+            to="/merchant/lotteries"
+            class="flex flex-col items-center justify-center p-8 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-2xl hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            <svg class="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+            </svg>
+            <h3 class="text-lg font-semibold mb-2">Mes Tombolas</h3>
+            <p class="text-purple-100 text-sm text-center">Suivre l'état de mes tombolas</p>
+          </router-link>
+
+          <router-link
             to="/merchant/orders"
             class="flex flex-col items-center justify-center p-8 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
@@ -116,6 +127,17 @@
             </svg>
             <h3 class="text-lg font-semibold mb-2">Mes Ventes</h3>
             <p class="text-green-100 text-sm text-center">{{ recentOrders.length }} commande(s) récente(s)</p>
+          </router-link>
+
+          <router-link
+            to="/merchant/refunds"
+            class="flex flex-col items-center justify-center p-8 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-2xl hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            <svg class="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+            </svg>
+            <h3 class="text-lg font-semibold mb-2">Remboursements</h3>
+            <p class="text-orange-100 text-sm text-center">Gérer les demandes de remboursement</p>
           </router-link>
         </div>
       </div>
