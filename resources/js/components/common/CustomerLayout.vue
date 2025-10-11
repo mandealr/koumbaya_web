@@ -89,7 +89,7 @@
                 </router-link>
                 <router-link
                   v-if="authStore.isMerchant && authStore.isCustomer"
-                  to="/merchant/dashboard"
+                  :to="{ name: merchantDashboardRoute }"
                   class="block px-4 py-2 text-sm text-[#0099cc] hover:bg-blue-50 font-medium"
                   @click="userMenuOpen = false"
                 >
@@ -215,6 +215,16 @@ const shouldShowVerificationBanner = computed(() => {
   return authStore.isAuthenticated &&
          authStore.user &&
          !authStore.user.verified_at
+})
+
+// Déterminer le bon dashboard vendeur selon le type
+const merchantDashboardRoute = computed(() => {
+  // Business Individual → Simple Dashboard
+  if (authStore.isIndividualSeller) {
+    return 'merchant.simple-dashboard'
+  }
+  // Business Enterprise → Full Dashboard
+  return 'merchant.dashboard'
 })
 
 const handleLogout = async () => {
