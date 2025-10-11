@@ -56,6 +56,12 @@
         {{ product.description || 'Aucune description disponible' }}
       </p>
 
+      <!-- Vendeur -->
+      <div v-if="product.merchant" class="flex items-center gap-2 text-sm bg-gray-50 rounded-lg px-3 py-2">
+        <UserCircleIcon class="w-4 h-4 flex-shrink-0 text-gray-500" />
+        <span class="text-gray-700 font-medium">{{ getMerchantName(product.merchant) }}</span>
+      </div>
+
       <!-- Prix selon le mode -->
       <div v-if="product.sale_mode === 'lottery'" class="space-y-3">
         <!-- Prix du ticket -->
@@ -138,7 +144,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { CalendarIcon, ShoppingBagIcon, TicketIcon, StarIcon } from '@heroicons/vue/24/outline'
+import { CalendarIcon, ShoppingBagIcon, TicketIcon, StarIcon, UserCircleIcon } from '@heroicons/vue/24/outline'
 import ProductImage from './ProductImage.vue'
 
 const props = defineProps({
@@ -161,6 +167,37 @@ const formatDate = (date) => {
     month: 'long',
     year: 'numeric'
   })
+}
+
+const getMerchantName = (merchant) => {
+  if (!merchant) return 'Vendeur non spécifié'
+
+  // Priorité 1: Nom de la company (nouvelle architecture)
+  if (merchant.company?.business_name) {
+    return merchant.company.business_name
+  }
+
+  // Priorité 2: business_name direct (ancienne architecture)
+  if (merchant.business_name) {
+    return merchant.business_name
+  }
+
+  // Priorité 3: company_name (compatibilité)
+  if (merchant.company_name) {
+    return merchant.company_name
+  }
+
+  // Priorité 4: Nom complet pour vendeurs particuliers
+  if (merchant.first_name && merchant.last_name) {
+    return `${merchant.first_name} ${merchant.last_name}`
+  }
+
+  // Priorité 5: name générique
+  if (merchant.name) {
+    return merchant.name
+  }
+
+  return 'Vendeur'
 }
 
 const calculateProgress = (product) => {

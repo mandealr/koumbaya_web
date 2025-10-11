@@ -690,7 +690,9 @@ const loadProduct = async () => {
       drawDate: productData.active_lottery?.draw_date || productData.active_lottery?.end_date,
       isNew: productData.created_at ? new Date(productData.created_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) : false,
       activeLottery: productData.active_lottery || null,
-      lotteries: productData.lotteries || []
+      lotteries: productData.lotteries || [],
+      merchant: productData.merchant || null,
+      images: productData.images || []
     }
     
     console.log('Product loaded successfully:', product.value.name)
