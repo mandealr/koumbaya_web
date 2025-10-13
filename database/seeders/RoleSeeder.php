@@ -35,44 +35,13 @@ class RoleSeeder extends Seeder
         $adminTypeId = 1;  // admin
         $customerTypeId = 2;  // customer
 
+        // Ordre : du plus important au moins important
         $roles = [
-            // === RÔLES CUSTOMER (Niveau 2) ===
+            // === RÔLES ADMIN (Plus importants) ===
             [
-                'id' => 6,
-                'name' => 'Particulier',
-                'description' => 'Client qui peut acheter des articles et participer aux tirages spéciaux',
-                'active' => true,
-                'mutable' => false,
-                'user_type_id' => $customerTypeId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 5,
-                'name' => 'Business Individual',
-                'description' => 'Vendeur individuel avec contraintes (500 tickets fixes, prix min 100k)',
-                'active' => true,
-                'mutable' => false,
-                'user_type_id' => $customerTypeId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 4,
-                'name' => 'Business Enterprise',
-                'description' => 'Marchand entreprise professionnel avec toutes les fonctionnalités',
-                'active' => true,
-                'mutable' => false,
-                'user_type_id' => $customerTypeId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-
-            // === RÔLES ADMIN (Niveau 2) ===
-            [
-                'id' => 3,
-                'name' => 'Agent',
-                'description' => 'Agent de support client et modération basique',
+                'id' => 1,
+                'name' => 'Super Admin',
+                'description' => 'Super administrateur - Accès système complet et gestion des rôles',
                 'active' => true,
                 'mutable' => false,
                 'user_type_id' => $adminTypeId,
@@ -90,12 +59,44 @@ class RoleSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 1,
-                'name' => 'Super Admin',
-                'description' => 'Super administrateur - Accès système complet et gestion des rôles',
+                'id' => 3,
+                'name' => 'Agent',
+                'description' => 'Agent de support client et modération basique',
                 'active' => true,
                 'mutable' => false,
                 'user_type_id' => $adminTypeId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+
+            // === RÔLES CUSTOMER (Moins importants) ===
+            [
+                'id' => 4,
+                'name' => 'Business Enterprise',
+                'description' => 'Marchand entreprise professionnel avec toutes les fonctionnalités',
+                'active' => true,
+                'mutable' => false,
+                'user_type_id' => $customerTypeId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => 5,
+                'name' => 'Business Individual',
+                'description' => 'Vendeur individuel avec contraintes (500 tickets fixes, prix min 100k)',
+                'active' => true,
+                'mutable' => false,
+                'user_type_id' => $customerTypeId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => 6,
+                'name' => 'Particulier',
+                'description' => 'Client qui peut acheter des articles et participer aux tirages spéciaux',
+                'active' => true,
+                'mutable' => false,
+                'user_type_id' => $customerTypeId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -106,13 +107,13 @@ class RoleSeeder extends Seeder
         }
 
         echo "✅ Rôles créés (Niveau 2) :\n";
-        echo "   CUSTOMER TYPE (ID: 2):\n";
-        echo "   - ID 1 : Particulier → Client acheteur\n";
-        echo "   - ID 2 : Business Individual → Vendeur individuel (contraintes)\n";
-        echo "   - ID 3 : Business Enterprise → Vendeur professionnel\n";
-        echo "   ADMIN TYPE (ID: 1):\n";
-        echo "   - ID 4 : Agent → Agent support\n";
-        echo "   - ID 5 : Admin → Administrateur\n";
-        echo "   - ID 6 : Super Admin → Super administrateur\n";
+        echo "   ADMIN TYPE (ID: 1) - Plus importants:\n";
+        echo "   - ID 1 : Super Admin → Super administrateur\n";
+        echo "   - ID 2 : Admin → Administrateur\n";
+        echo "   - ID 3 : Agent → Agent support\n";
+        echo "   CUSTOMER TYPE (ID: 2) - Moins importants:\n";
+        echo "   - ID 4 : Business Enterprise → Vendeur professionnel\n";
+        echo "   - ID 5 : Business Individual → Vendeur individuel (contraintes)\n";
+        echo "   - ID 6 : Particulier → Client acheteur\n";
     }
 }

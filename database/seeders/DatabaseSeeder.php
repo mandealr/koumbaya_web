@@ -11,63 +11,58 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      *
-     * Ordre de seeding pour la structure BD optimisée Koumbaya :
-     * 1. Données de base (pays, langues, catégories)
-     * 2. Système de rôles et privilèges
-     * 3. Utilisateurs avec attribution de rôles
-     * 4. Configuration et données métier
+     * PRODUCTION - Option B : Base avec un super administrateur initial
+     *
+     * Ordre de seeding :
+     * 1. Données de référence (pays, langues, catégories)
+     * 2. Système de rôles et privilèges (du plus important au moins important)
+     * 3. Super administrateur initial
+     * 4. Configuration système
      */
     public function run(): void
     {
-        $this->command->info('🚀 Démarrage du seeding Koumbaya BD optimisée...');
+        $this->command->info('🚀 Démarrage du seeding Koumbaya PRODUCTION...');
+        $this->command->info('');
 
         $this->call([
             // === ÉTAPE 1: Données de référence ===
-            CountrySeeder::class,
-            LanguageSeeder::class,
-            CategorySeeder::class,
-            UserTypeSeeder::class,       // Types : customer, merchant, admin
+            CountrySeeder::class,        // 20 pays africains
+            LanguageSeeder::class,       // Français, Anglais
+            CategorySeeder::class,       // 22 catégories produits
+            UserTypeSeeder::class,       // 2 types : admin (ID: 1), customer (ID: 2)
 
-            // === ÉTAPE 2: Système de sécurité ===
-            RoleSeeder::class,           // Rôles optimisés pour chaque user_type
-            PermissionSeeder::class,     // Privilèges dans table privileges
-            RolePermissionSeeder::class, // Associations roles ↔ privileges
+            // === ÉTAPE 2: Système de sécurité (ordre hiérarchique) ===
+            RoleSeeder::class,           // 6 rôles : Super Admin → Particulier
+            PermissionSeeder::class,     // 30 privilèges
+            RolePermissionSeeder::class, // Associations rôles ↔ privilèges
 
-            // === ÉTAPE 3: Migration des utilisateurs existants ===
-            MigrateExistingUsersSeeder::class, // Migrer les users vers nouvelle structure
+            // === ÉTAPE 3: Super Administrateur initial ===
+            MinimalUserSeeder::class,    // 1 super admin pour gérer la plateforme
 
-            // === ÉTAPE 4: Utilisateurs de test (optionnel) ===
-            // UserSeeder::class,           // Créer nouveaux users de test
-
-            // === ÉTAPE 5: Configuration système ===
+            // === ÉTAPE 4: Configuration système ===
             SettingsSeeder::class,       // Paramètres application
             PaymentMethodsSeeder::class, // Méthodes de paiement E-Billing
-
-            // === ÉTAPE 6: Données métier ===
-            ProductSeeder::class,        // Produits pour démonstration
-            LotterySeeder::class,        // Tombolas de test
-            // UserRatingSeeder::class,     // Évaluations utilisateurs (désactivé)
         ]);
 
-        $this->command->info('✅ Seeding Koumbaya BD optimisée terminé avec succès !');
         $this->command->info('');
-        $this->command->info('📋 COMPTES DE TEST CRÉÉS :');
+        $this->command->info('✅ Seeding Koumbaya PRODUCTION terminé avec succès !');
         $this->command->info('');
-        $this->command->info('🛡️  ADMINISTRATEURS:');
-        $this->command->info('   👑 Super Admin: superadmin@koumbaya.ga (SuperAdmin2024!)');
-        $this->command->info('   🔧 Admin Plateforme: admin@koumbaya.ga (Admin2024!)');
-        $this->command->info('   👨‍💼 Agent Support: agent@koumbaya.ga (Agent2024!)');
+        $this->command->info('📋 COMPTE SUPER ADMINISTRATEUR :');
         $this->command->info('');
-        $this->command->info('🏪 COMPTES MARCHANDS:');
-        $this->command->info('   🏢 Marchand 1: merchant1@koumbaya.ga (Merchant2024!)');
-        $this->command->info('   🏢 Marchand 2: merchant2@koumbaya.ga (Merchant2024!)');
+        $this->command->info('   👑 Email: admin@koumbaya.com');
+        $this->command->info('   📱 Téléphone: +24177000001');
+        $this->command->info('   🔑 Mot de passe: Koumbaya@Admin2024!');
         $this->command->info('');
-        $this->command->info('👤 COMPTES CLIENTS:');
-        $this->command->info('   🛒 Client 1: client1@koumbaya.ga (Client2024!)');
-        $this->command->info('   🛒 Client 2: client2@koumbaya.ga (Client2024!)');
+        $this->command->info('⚠️  IMPORTANT: Changez le mot de passe après la première connexion !');
         $this->command->info('');
-        $this->command->info('💰 Portefeuilles initialisés avec soldes de test');
-        $this->command->info('🔐 Système de rôles et privilèges complet');
-        $this->command->info('📊 Architecture order-centric prête pour E-Billing');
+        $this->command->info('📊 STRUCTURE CRÉÉE :');
+        $this->command->info('   ✅ 2 UserTypes : Admin (1) > Customer (2)');
+        $this->command->info('   ✅ 6 Rôles : Super Admin (1) → Particulier (6)');
+        $this->command->info('   ✅ 30 Privilèges assignés');
+        $this->command->info('   ✅ 20 Pays africains');
+        $this->command->info('   ✅ 22 Catégories de produits');
+        $this->command->info('   ✅ Configuration E-Billing');
+        $this->command->info('');
+        $this->command->info('🎯 Base de données prête pour la PRODUCTION !');
     }
 }

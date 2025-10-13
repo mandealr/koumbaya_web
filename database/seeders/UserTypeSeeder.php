@@ -26,7 +26,9 @@ class UserTypeSeeder extends Seeder
 
         echo "📝 Création des nouveaux types d'utilisateurs...\n";
 
+        // Ordre : du plus important au moins important
         $userTypes = [
+            // === ADMIN : Plus important ===
             [
                 'id' => 1,
                 'name' => 'Administrateur',
@@ -36,6 +38,7 @@ class UserTypeSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            // === CUSTOMER : Moins important ===
             [
                 'id' => 2,
                 'name' => 'Client/Marchand',
