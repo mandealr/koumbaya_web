@@ -22,6 +22,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'XAF',
                 'currency_symbol' => 'FCFA',
                 'flag' => 'ga.png',
+                'flag_emoji' => '🇬🇦',
                 'is_active' => true,
             ],
             [
@@ -32,6 +33,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'XAF',
                 'currency_symbol' => 'FCFA',
                 'flag' => 'cm.png',
+                'flag_emoji' => '🇨🇲',
                 'is_active' => true,
             ],
             [
@@ -42,6 +44,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'XOF',
                 'currency_symbol' => 'FCFA',
                 'flag' => 'sn.png',
+                'flag_emoji' => '🇸🇳',
                 'is_active' => true,
             ],
             [
@@ -52,6 +55,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'XOF',
                 'currency_symbol' => 'FCFA',
                 'flag' => 'ci.png',
+                'flag_emoji' => '🇨🇮',
                 'is_active' => true,
             ],
             [
@@ -62,6 +66,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'XOF',
                 'currency_symbol' => 'FCFA',
                 'flag' => 'bf.png',
+                'flag_emoji' => '🇧🇫',
                 'is_active' => true,
             ],
             [
@@ -72,6 +77,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'XOF',
                 'currency_symbol' => 'FCFA',
                 'flag' => 'ml.png',
+                'flag_emoji' => '🇲🇱',
                 'is_active' => true,
             ],
             [
@@ -82,6 +88,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'XOF',
                 'currency_symbol' => 'FCFA',
                 'flag' => 'ne.png',
+                'flag_emoji' => '🇳🇪',
                 'is_active' => true,
             ],
             [
@@ -92,6 +99,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'XAF',
                 'currency_symbol' => 'FCFA',
                 'flag' => 'td.png',
+                'flag_emoji' => '🇹🇩',
                 'is_active' => true,
             ],
             [
@@ -102,6 +110,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'XAF',
                 'currency_symbol' => 'FCFA',
                 'flag' => 'cf.png',
+                'flag_emoji' => '🇨🇫',
                 'is_active' => true,
             ],
             [
@@ -112,6 +121,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'XAF',
                 'currency_symbol' => 'FCFA',
                 'flag' => 'gq.png',
+                'flag_emoji' => '🇬🇶',
                 'is_active' => true,
             ],
             [
@@ -122,6 +132,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'XAF',
                 'currency_symbol' => 'FCFA',
                 'flag' => 'cg.png',
+                'flag_emoji' => '🇨🇬',
                 'is_active' => true,
             ],
             [
@@ -132,6 +143,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'CDF',
                 'currency_symbol' => 'FC',
                 'flag' => 'cd.png',
+                'flag_emoji' => '🇨🇩',
                 'is_active' => true,
             ],
             [
@@ -142,6 +154,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'XOF',
                 'currency_symbol' => 'FCFA',
                 'flag' => 'bj.png',
+                'flag_emoji' => '🇧🇯',
                 'is_active' => true,
             ],
             [
@@ -152,6 +165,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'XOF',
                 'currency_symbol' => 'FCFA',
                 'flag' => 'tg.png',
+                'flag_emoji' => '🇹🇬',
                 'is_active' => true,
             ],
             [
@@ -162,6 +176,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'GNF',
                 'currency_symbol' => 'FG',
                 'flag' => 'gn.png',
+                'flag_emoji' => '🇬🇳',
                 'is_active' => true,
             ],
             [
@@ -172,6 +187,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'MGA',
                 'currency_symbol' => 'Ar',
                 'flag' => 'mg.png',
+                'flag_emoji' => '🇲🇬',
                 'is_active' => true,
             ],
             [
@@ -182,6 +198,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'BIF',
                 'currency_symbol' => 'FBu',
                 'flag' => 'bi.png',
+                'flag_emoji' => '🇧🇮',
                 'is_active' => true,
             ],
             [
@@ -192,6 +209,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'RWF',
                 'currency_symbol' => 'FRw',
                 'flag' => 'rw.png',
+                'flag_emoji' => '🇷🇼',
                 'is_active' => true,
             ],
             [
@@ -202,6 +220,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'DJF',
                 'currency_symbol' => 'Fdj',
                 'flag' => 'dj.png',
+                'flag_emoji' => '🇩🇯',
                 'is_active' => true,
             ],
             [
@@ -212,6 +231,7 @@ class CountrySeeder extends Seeder
                 'currency_code' => 'KMF',
                 'currency_symbol' => 'CF',
                 'flag' => 'km.png',
+                'flag_emoji' => '🇰🇲',
                 'is_active' => true,
             ],
         ];
@@ -223,10 +243,11 @@ class CountrySeeder extends Seeder
                 'code' => $country['iso_code_2'], // Utiliser iso_code_2 comme code
                 'phone_code' => $country['phone_code'],
                 'flag' => $country['flag'] ?? null,
+                'flag_emoji' => $country['flag_emoji'] ?? null,
                 'is_active' => $country['is_active'] ?? true,
                 'sort_order' => 0,
             ];
-            
+
             Country::firstOrCreate(
                 ['code' => $countryData['code']],
                 $countryData
