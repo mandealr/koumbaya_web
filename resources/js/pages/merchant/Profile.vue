@@ -191,6 +191,96 @@
             </div>
           </form>
         </div>
+
+        <!-- Section Changement de mot de passe -->
+        <div class="mt-6 bg-white rounded-xl shadow-sm border border-gray-200">
+          <form @submit.prevent="updatePassword" class="space-y-6 p-6">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Changer le mot de passe</h3>
+
+              <div v-if="!user?.has_password" class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-start">
+                  <svg class="w-5 h-5 text-blue-600 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                  </svg>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-blue-800">Compte connecté via réseau social</p>
+                    <p class="text-sm text-blue-700 mt-1">
+                      Vous vous êtes connecté via Google ou Facebook. Définissez un mot de passe pour pouvoir vous connecter directement avec votre email.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <!-- Mot de passe actuel (seulement si l'utilisateur a déjà un mot de passe) -->
+                <div v-if="user?.has_password || passwordForm.showCurrentPassword">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Mot de passe actuel <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="passwordForm.current_password"
+                    type="password"
+                    :required="user?.has_password"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    style="color: #5f5f5f"
+                    placeholder="Entrez votre mot de passe actuel"
+                  >
+                  <p v-if="passwordErrors.current_password" class="mt-1 text-sm text-red-600">
+                    {{ passwordErrors.current_password }}
+                  </p>
+                </div>
+
+                <!-- Nouveau mot de passe -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ user?.has_password ? 'Nouveau mot de passe' : 'Mot de passe' }} <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="passwordForm.new_password"
+                    type="password"
+                    required
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    style="color: #5f5f5f"
+                    placeholder="Minimum 8 caractères"
+                  >
+                  <p class="mt-1 text-xs text-gray-500">
+                    Minimum 8 caractères, avec au moins une majuscule, une minuscule et un chiffre
+                  </p>
+                  <p v-if="passwordErrors.new_password" class="mt-1 text-sm text-red-600">
+                    {{ passwordErrors.new_password }}
+                  </p>
+                </div>
+
+                <!-- Confirmation du nouveau mot de passe -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Confirmer le mot de passe <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="passwordForm.new_password_confirmation"
+                    type="password"
+                    required
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    style="color: #5f5f5f"
+                    placeholder="Confirmez votre mot de passe"
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Bouton de sauvegarde -->
+            <div class="flex justify-end pt-6 border-t border-gray-200">
+              <button
+                type="submit"
+                :disabled="loadingPassword"
+                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+              >
+                {{ loadingPassword ? 'Sauvegarde...' : (user?.has_password ? 'Changer le mot de passe' : 'Définir le mot de passe') }}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -208,11 +298,17 @@ const { get, put } = useApi()
 
 // State
 const loading = ref(false)
+const loadingPassword = ref(false)
 const stats = reactive({
   products: 0,
   lotteries: 0,
   orders: 0,
   revenue: 0
+})
+
+const passwordErrors = reactive({
+  current_password: '',
+  new_password: ''
 })
 
 // Computed
@@ -267,6 +363,13 @@ const profileForm = reactive({
   bio: ''
 })
 
+const passwordForm = reactive({
+  current_password: '',
+  new_password: '',
+  new_password_confirmation: '',
+  showCurrentPassword: false
+})
+
 // Methods
 const loadUserData = () => {
   if (user.value) {
@@ -318,6 +421,68 @@ const updateProfile = async () => {
 
 const resetForm = () => {
   loadUserData()
+}
+
+const updatePassword = async () => {
+  loadingPassword.value = true
+
+  // Reset errors
+  passwordErrors.current_password = ''
+  passwordErrors.new_password = ''
+
+  try {
+    // Préparer les données selon que l'utilisateur a déjà un mot de passe ou non
+    const data = {
+      new_password: passwordForm.new_password,
+      new_password_confirmation: passwordForm.new_password_confirmation
+    }
+
+    // Ajouter current_password seulement si l'utilisateur a déjà un mot de passe
+    if (user.value?.has_password || passwordForm.current_password) {
+      data.current_password = passwordForm.current_password
+    }
+
+    const response = await put('/user/password', data)
+
+    // Reset form
+    passwordForm.current_password = ''
+    passwordForm.new_password = ''
+    passwordForm.new_password_confirmation = ''
+
+    if (window.$toast) {
+      const message = response.data?.is_first_password
+        ? 'Mot de passe défini avec succès'
+        : 'Mot de passe modifié avec succès'
+      window.$toast.success(message, '✅ Sécurité')
+    }
+
+    // Refresh user data
+    await authStore.refreshUser()
+  } catch (error) {
+    console.error('Erreur lors du changement de mot de passe:', error)
+
+    // Gérer les erreurs de validation
+    if (error.response?.data?.errors) {
+      const errors = error.response.data.errors
+      if (errors.current_password) {
+        passwordErrors.current_password = Array.isArray(errors.current_password)
+          ? errors.current_password[0]
+          : errors.current_password
+      }
+      if (errors.new_password) {
+        passwordErrors.new_password = Array.isArray(errors.new_password)
+          ? errors.new_password[0]
+          : errors.new_password
+      }
+    }
+
+    if (window.$toast) {
+      const errorMessage = error.response?.data?.message || 'Erreur lors du changement de mot de passe'
+      window.$toast.error(errorMessage, '❌ Erreur')
+    }
+  } finally {
+    loadingPassword.value = false
+  }
 }
 
 const getDefaultAvatar = () => {

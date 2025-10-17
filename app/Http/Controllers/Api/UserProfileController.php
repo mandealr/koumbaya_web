@@ -66,27 +66,41 @@ class UserProfileController extends Controller
 
     /**
      * Update user password
+     * Permet aux utilisateurs OAuth (sans mot de passe initial) de définir un mot de passe
      */
     public function updatePassword(Request $request)
     {
         $user = auth()->user();
 
-        $request->validate([
-            'current_password' => 'required',
-            'new_password' => ['required', Password::defaults(), 'confirmed'],
-        ]);
+        // Vérifier si l'utilisateur a déjà un mot de passe
+        $hasPassword = !empty($user->password);
 
-        // Check current password
-        if (!Hash::check($request->current_password, $user->password)) {
-            return $this->sendError('Current password is incorrect', ['current_password' => ['The current password is incorrect.']], 422);
+        // Si l'utilisateur a un mot de passe, exiger le mot de passe actuel
+        if ($hasPassword) {
+            $request->validate([
+                'current_password' => 'required',
+                'new_password' => ['required', Password::defaults(), 'confirmed'],
+            ]);
+
+            // Vérifier le mot de passe actuel
+            if (!Hash::check($request->current_password, $user->password)) {
+                return $this->sendError('Current password is incorrect', ['current_password' => ['The current password is incorrect.']], 422);
+            }
+        } else {
+            // Pour les comptes OAuth sans mot de passe initial, ne pas exiger current_password
+            $request->validate([
+                'new_password' => ['required', Password::defaults(), 'confirmed'],
+            ]);
         }
 
-        // Update password
+        // Mettre à jour le mot de passe
         $user->update([
             'password' => Hash::make($request->new_password)
         ]);
 
-        return $this->sendResponse([], 'Password updated successfully');
+        return $this->sendResponse([
+            'is_first_password' => !$hasPassword
+        ], $hasPassword ? 'Password updated successfully' : 'Password set successfully');
     }
 
     /**

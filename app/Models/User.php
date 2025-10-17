@@ -65,6 +65,17 @@ class User extends Authenticatable
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     */
+    protected $appends = [
+        'full_name',
+        'is_merchant',
+        'is_verified',
+        'is_customer',
+        'has_password'
+    ];
+
+    /**
      * Get the attributes that should be cast.
      */
     protected function casts(): array
@@ -240,6 +251,25 @@ class User extends Authenticatable
     public function getIsMerchantAttribute()
     {
         return $this->isMerchant();
+    }
+
+    public function getIsVerifiedAttribute()
+    {
+        return $this->verified_at !== null;
+    }
+
+    public function getIsCustomerAttribute()
+    {
+        return $this->isCustomer();
+    }
+
+    /**
+     * Vérifier si l'utilisateur a un mot de passe défini
+     * Utile pour les comptes OAuth qui n'ont pas de mot de passe initial
+     */
+    public function getHasPasswordAttribute()
+    {
+        return !empty($this->attributes['password']);
     }
 
 

@@ -1577,4 +1577,93 @@ class ProductController extends Controller
             ]
         ]);
     }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/products/{id}",
+     *     tags={"Products"},
+     *     summary="Supprimer un produit (SoftDelete)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID du produit",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Produit supprimé"),
+     *     @OA\Response(response=403, description="Non autorisé"),
+     *     @OA\Response(response=422, description="Impossible de supprimer")
+     * )
+     */
+    public function destroy($id)
+    {
+        $user = auth()->user();
+        $product = Product::findOrFail($id);
+
+        // Vérifier que l'utilisateur est le propriétaire OU admin/super admin
+        $isOwner = $product->merchant_id === $user->id;
+        $isAdmin = $user->hasRole(['Admin', 'Super Admin']);
+
+        if (!$isOwner && !$isAdmin) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Non autorisé à supprimer ce produit'
+            ], 403);
+        }
+
+        // Vérifier qu'il n'y a pas de commandes payées
+        $paidOrdersCount = $product->orders()
+            ->whereIn('status', ['paid', 'fulfilled'])
+            ->count();
+
+        if ($paidOrdersCount > 0) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Impossible de supprimer ce produit car il a des commandes payées',
+                'details' => [
+                    'paid_orders_count' => $paidOrdersCount,
+                    'message' => 'Vous ne pouvez pas supprimer un produit qui a été acheté.'
+                ]
+            ], 422);
+        }
+
+        // Pour les produits en mode tombola, vérifier qu'il n'y a pas de tickets vendus
+        if ($product->sale_mode === 'lottery') {
+            $activeLottery = $product->activeLottery;
+            if ($activeLottery) {
+                $soldTickets = $activeLottery->sold_tickets ?? 0;
+                if ($soldTickets > 0) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Impossible de supprimer ce produit car des tickets ont été vendus',
+                        'details' => [
+                            'sold_tickets' => $soldTickets,
+                            'message' => 'Vous ne pouvez pas supprimer un produit tombola avec des tickets vendus.'
+                        ]
+                    ], 422);
+                }
+            }
+        }
+
+        // SoftDelete du produit
+        $product->delete();
+
+        \Log::info('Product soft deleted', [
+            'product_id' => $product->id,
+            'product_name' => $product->name,
+            'deleted_by' => $user->id,
+            'user_name' => $user->fullName,
+            'is_admin' => $isAdmin
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Produit supprimé avec succès',
+            'data' => [
+                'product_id' => $product->id,
+                'product_name' => $product->name
+            ]
+        ]);
+    }
 }

@@ -252,6 +252,7 @@ Route::group([
     Route::get('merchant/products', [ProductController::class, 'merchantProducts']);
     Route::post('products', [ProductController::class, 'store']);
     Route::put('products/{id}', [ProductController::class, 'update']);
+    Route::delete('products/{id}', [ProductController::class, 'destroy']);
     Route::post('products/{id}/create-lottery', [ProductController::class, 'createLottery']);
     
     // Lotteries (Marchands seulement)
