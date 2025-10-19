@@ -94,19 +94,37 @@ class OtpController extends Controller
             }
         }
 
-        // Vérifier s'il n'y a pas déjà un code valide récent
+        // Vérifier s'il n'y a pas déjà un code valide récent (30 secondes)
         $recentOtp = Otp::forIdentifier($identifier)
                         ->forPurpose($purpose)
                         ->valid()
-                        ->where('created_at', '>', now()->subMinutes(1))
+                        ->where('created_at', '>', now()->subSeconds(30))
                         ->first();
 
         if ($recentOtp) {
-            return $this->sendError(
-                'Un code de vérification a déjà été envoyé récemment. Veuillez patienter.',
-                [],
-                429
-            );
+            $remainingSeconds = 30 - now()->diffInSeconds($recentOtp->created_at);
+
+            Log::info('OTP send blocked - code too recent', [
+                'identifier' => $identifier,
+                'purpose' => $purpose,
+                'otp_id' => $recentOtp->id,
+                'created_at' => $recentOtp->created_at,
+                'remaining_seconds' => $remainingSeconds,
+                'masked_identifier' => $recentOtp->masked_identifier
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => "Un code de vérification a déjà été envoyé récemment. Veuillez patienter {$remainingSeconds} secondes.",
+                'errors' => [],
+                'data' => [
+                    'remaining_seconds' => max(0, $remainingSeconds),
+                    'resend_available_at' => now()->addSeconds($remainingSeconds)->toISOString(),
+                    'masked_identifier' => $recentOtp->masked_identifier,
+                    'expires_at' => $recentOtp->expires_at->format('Y-m-d H:i:s'),
+                    'hint' => 'Utilisez l\'endpoint /api/otp/resend après le délai'
+                ]
+            ], 429);
         }
 
         // Envoyer l'OTP selon le type
