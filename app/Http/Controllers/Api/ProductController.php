@@ -1613,7 +1613,7 @@ class ProductController extends Controller
 
         // Vérifier que l'utilisateur est le propriétaire OU admin/super admin
         $isOwner = $product->merchant_id === $user->id;
-        $isAdmin = $user->hasRole(['Admin', 'Super Admin']);
+        $isAdmin = $user->hasAnyRole(['Admin', 'Super Admin']);
 
         if (!$isOwner && !$isAdmin) {
             return response()->json([
@@ -1664,7 +1664,7 @@ class ProductController extends Controller
 
         // Vérifier que l'utilisateur est le propriétaire OU admin/super admin
         $isOwner = $product->merchant_id === $user->id;
-        $isAdmin = $user->hasRole(['Admin', 'Super Admin']);
+        $isAdmin = $user->hasAnyRole(['Admin', 'Super Admin']);
 
         if (!$isOwner && !$isAdmin) {
             \Log::warning('Unauthorized product deletion attempt', [
