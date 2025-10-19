@@ -606,15 +606,16 @@ class Product extends Model
                     ];
                 }
 
-                // Vérifier si la tombola est active
-                if ($lottery->status === 'active' && $lottery->draw_date > now()) {
-                    $errors[] = [
-                        'code' => 'ACTIVE_LOTTERY_EXISTS',
-                        'message' => "Tombola #{$lottery->id} encore active",
+                // Vérifier si la tombola est active SANS tickets vendus
+                // Si active avec tickets vendus, déjà bloqué ci-dessus
+                if ($lottery->status === 'active' && $lottery->draw_date > now() && $paidTicketsCount == 0) {
+                    $warnings[] = [
+                        'code' => 'ACTIVE_LOTTERY_NO_SALES',
+                        'message' => "Tombola #{$lottery->id} active sans tickets vendus - sera annulée",
                         'lottery_id' => $lottery->id,
                         'lottery_number' => $lottery->lottery_number,
                         'draw_date' => $lottery->draw_date->toDateTimeString(),
-                        'severity' => 'critical'
+                        'severity' => 'warning'
                     ];
                 }
 
