@@ -116,9 +116,9 @@
                   
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Confirmer le nouveau mot de passe</label>
-                    <input 
-                      v-model="passwordForm.confirm_password"
-                      type="password" 
+                    <input
+                      v-model="passwordForm.new_password_confirmation"
+                      type="password"
                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" style="color: #5f5f5f"
                     >
                   </div>
@@ -221,7 +221,7 @@ const accountForm = reactive({
 const passwordForm = reactive({
   current_password: '',
   new_password: '',
-  confirm_password: ''
+  new_password_confirmation: ''
 })
 
 const preferences = reactive({
@@ -257,24 +257,25 @@ const updateAccountInfo = async () => {
 }
 
 const updatePassword = async () => {
-  if (passwordForm.new_password !== passwordForm.confirm_password) {
+  if (passwordForm.new_password !== passwordForm.new_password_confirmation) {
     if (window.$toast) {
       window.$toast.error('Les mots de passe ne correspondent pas', '❌ Validation')
     }
     return
   }
-  
+
   try {
     await put('/user/password', {
       current_password: passwordForm.current_password,
-      new_password: passwordForm.new_password
+      new_password: passwordForm.new_password,
+      new_password_confirmation: passwordForm.new_password_confirmation
     })
-    
+
     // Reset form
     passwordForm.current_password = ''
     passwordForm.new_password = ''
-    passwordForm.confirm_password = ''
-    
+    passwordForm.new_password_confirmation = ''
+
     if (window.$toast) {
       window.$toast.success('Mot de passe mis à jour avec succès', '✅ Sécurité')
     }
