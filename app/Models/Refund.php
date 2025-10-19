@@ -63,6 +63,18 @@ class Refund extends Model
         return $this->belongsTo(Lottery::class, 'lottery_id');
     }
 
+    public function order()
+    {
+        return $this->hasOneThrough(
+            Order::class,
+            Payment::class,
+            'id', // Foreign key on payments table
+            'id', // Foreign key on orders table
+            'transaction_id', // Local key on refunds table
+            'order_id' // Local key on payments table
+        );
+    }
+
     public function processedBy()
     {
         return $this->belongsTo(User::class, 'processed_by');
