@@ -650,8 +650,8 @@ class Product extends Model
         // 5. Vérifier les tickets réservés mais non payés
         if ($this->sale_mode === 'lottery') {
             $reservedTicketsCount = $this->lotteryTickets()
-                ->where('status', 'reserved')
-                ->where('created_at', '>', now()->subHours(2)) // Réservations de moins de 2h
+                ->where('lottery_tickets.status', 'reserved')
+                ->where('lottery_tickets.created_at', '>', now()->subHours(2)) // Réservations de moins de 2h
                 ->count();
 
             if ($reservedTicketsCount > 0) {
