@@ -148,14 +148,14 @@
       </router-link>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative">
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div
         v-for="product in filteredProducts"
         :key="product.id"
-        class="bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200 hover:scale-[1.02] relative"
+        class="bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200 flex flex-col"
       >
         <!-- Product Image -->
-        <div class="relative h-48 bg-gray-200">
+        <div class="relative h-48 bg-gray-200 rounded-t-xl overflow-hidden">
           <ProductImage
             :src="getProductImageSrc(product)"
             :alt="product.name"
@@ -168,7 +168,7 @@
             </span>
           </div>
           <div class="absolute top-3 right-3 flex flex-col gap-2">
-            <div class="bg-black/50 text-white px-2 py-1 rounded-lg text-xs font-medium">
+            <div class="bg-black/50 text-white px-2 py-1 rounded-lg text-xs font-medium backdrop-blur-sm">
               {{ product.category?.name || 'Sans catégorie' }}
             </div>
             <div :class="getSaleModeClass(product.sale_mode)">
@@ -178,12 +178,13 @@
         </div>
 
         <!-- Product Content -->
-        <div class="p-6 relative">
-          <div class="flex items-start justify-between mb-3">
-            <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ product.name }}</h3>
-            <div class="text-right ml-2">
-              <p class="text-lg font-bold text-[#0099cc]">{{ formatAmount(product.price) }} FCFA</p>
-              <p class="text-xs text-gray-500">Valeur</p>
+        <div class="p-5 flex-1 flex flex-col">
+          <!-- Header with Title and Price -->
+          <div class="mb-3">
+            <h3 class="text-lg font-semibold text-gray-900 line-clamp-2 mb-2">{{ product.name }}</h3>
+            <div class="flex items-center justify-between">
+              <span class="text-2xl font-bold text-[#0099cc]">{{ formatAmount(product.price) }}</span>
+              <span class="text-xs text-gray-500 font-medium">FCFA</span>
             </div>
           </div>
 
@@ -193,7 +194,7 @@
           <div class="space-y-3 mb-4">
             <!-- Direct Sale Mode -->
             <div v-if="product.sale_mode === 'direct'" class="text-center py-2">
-              <div class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+              <div class="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium border border-blue-200">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
@@ -203,105 +204,118 @@
 
             <!-- Lottery Mode -->
             <div v-else-if="product.sale_mode === 'lottery'">
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Progression</span>
-                <span class="font-medium">{{ getLotteryProgression(product).sold }}/{{ getLotteryProgression(product).max }}</span>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="text-gray-600 font-medium">Progression</span>
+                <span class="font-semibold text-purple-700">{{ getLotteryProgression(product).sold }}/{{ getLotteryProgression(product).max }}</span>
               </div>
 
-              <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
                 <div
-                  class="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-500"
+                  class="bg-gradient-to-r from-purple-500 to-purple-600 h-2.5 rounded-full transition-all duration-500"
                   :style="{ width: getLotteryProgression(product).percentage + '%' }"
                 ></div>
               </div>
 
               <div class="flex justify-between text-xs text-gray-500">
-                <span>{{ getLotteryProgression(product).percentage }}% vendu</span>
-                <span v-if="product.lottery?.draw_date">Fin: {{ formatDate(product.lottery.draw_date) }}</span>
+                <span class="font-medium">{{ getLotteryProgression(product).percentage }}% vendu</span>
+                <span v-if="product.lottery?.draw_date" class="font-medium">Fin: {{ formatDate(product.lottery.draw_date) }}</span>
               </div>
             </div>
           </div>
 
           <!-- Revenue Info -->
-          <div class="grid grid-cols-2 gap-4 mb-4 text-center">
-            <div class="bg-green-50 p-3 rounded-lg">
-              <p class="text-green-700 font-semibold text-lg">{{ formatAmount(product.revenue || 0) }}</p>
-              <p class="text-green-600 text-xs">Revenus</p>
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="bg-gradient-to-br from-green-50 to-green-100 p-3 rounded-lg border border-green-200">
+              <p class="text-green-700 font-bold text-base">{{ formatAmount(product.revenue || 0) }}</p>
+              <p class="text-green-600 text-xs font-medium">Revenus</p>
             </div>
-            <div class="bg-blue-50 p-3 rounded-lg">
-              <p v-if="product.sale_mode === 'lottery'" class="text-blue-700 font-semibold text-lg">{{ formatAmount(product.lottery?.ticket_price || 0) }}</p>
-              <p v-else class="text-blue-700 font-semibold text-lg">{{ product.stock_quantity || 0 }}</p>
-              <p v-if="product.sale_mode === 'lottery'" class="text-blue-600 text-xs">Prix/ticket</p>
-              <p v-else class="text-blue-600 text-xs">Stock</p>
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-3 rounded-lg border border-blue-200">
+              <p v-if="product.sale_mode === 'lottery'" class="text-blue-700 font-bold text-base">{{ formatAmount(product.lottery?.ticket_price || 0) }}</p>
+              <p v-else class="text-blue-700 font-bold text-base">{{ product.stock_quantity || 0 }}</p>
+              <p v-if="product.sale_mode === 'lottery'" class="text-blue-600 text-xs font-medium">Prix/ticket</p>
+              <p v-else class="text-blue-600 text-xs font-medium">Stock</p>
             </div>
           </div>
 
-          <!-- Actions -->
-          <div class="flex space-x-2">
-            <button
-              @click="viewProduct(product)"
-              class="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors inline-flex items-center justify-center gap-1"
-            >
-              <EyeIcon class="w-4 h-4" />
-              Voir
-            </button>
-
-            <button
-              v-if="product.status === 'draft'"
-              @click="publishProduct(product)"
-              class="flex-1 px-4 py-2 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-lg text-sm font-medium transition-colors inline-flex items-center justify-center gap-1"
-            >
-              <RocketLaunchIcon class="w-4 h-4" />
-              Publier
-            </button>
-
-            <button
-              v-if="product.status === 'active'"
-              @click="editProduct(product)"
-              class="flex-1 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm font-medium transition-colors inline-flex items-center justify-center gap-1"
-            >
-              <PencilIcon class="w-4 h-4" />
-              Modifier
-            </button>
-
-            <div class="relative">
+          <!-- Actions - Spacer to push to bottom -->
+          <div class="mt-auto">
+            <!-- Primary Actions -->
+            <div class="grid grid-cols-2 gap-2 mb-2">
               <button
-                @click="toggleProductMenu(product.id)"
-                :data-product-id="product.id"
-                class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                @click="viewProduct(product)"
+                class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-all hover:scale-105 inline-flex items-center justify-center gap-1.5"
               >
-                <EllipsisVerticalIcon class="w-4 h-4" />
+                <EyeIcon class="w-4 h-4" />
+                Voir
               </button>
 
-              <div
-                v-if="showProductMenu === product.id"
-                data-dropdown-menu
-                class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200"
-                style="z-index: 999999; position: fixed;"
+              <button
+                v-if="product.status === 'draft'"
+                @click="publishProduct(product)"
+                class="px-4 py-2.5 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-lg text-sm font-medium transition-all hover:scale-105 inline-flex items-center justify-center gap-1.5 shadow-md"
               >
-                <button
-                  @click="duplicateProduct(product)"
-                  class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg flex items-center gap-2"
-                >
-                  <DocumentDuplicateIcon class="w-4 h-4" />
-                  Dupliquer
-                </button>
-                <button
-                  @click="viewAnalytics(product)"
-                  class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                >
-                  <ChartBarIcon class="w-4 h-4" />
-                  Analytiques
-                </button>
-                <button
-                  v-if="canDeleteProduct(product)"
-                  @click="deleteProduct(product)"
-                  class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-b-lg flex items-center gap-2"
-                >
-                  <TrashIcon class="w-4 h-4" />
-                  Supprimer
-                </button>
-              </div>
+                <RocketLaunchIcon class="w-4 h-4" />
+                Publier
+              </button>
+
+              <button
+                v-else-if="product.status === 'active'"
+                @click="editProduct(product)"
+                class="px-4 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm font-medium transition-all hover:scale-105 inline-flex items-center justify-center gap-1.5 shadow-md"
+              >
+                <PencilIcon class="w-4 h-4" />
+                Modifier
+              </button>
+
+              <button
+                v-else
+                @click="editProduct(product)"
+                class="px-4 py-2.5 bg-gray-400 hover:bg-gray-500 text-white rounded-lg text-sm font-medium transition-all hover:scale-105 inline-flex items-center justify-center gap-1.5"
+              >
+                <PencilIcon class="w-4 h-4" />
+                Modifier
+              </button>
+            </div>
+
+            <!-- Secondary Actions -->
+            <div class="grid grid-cols-3 gap-2">
+              <button
+                @click="duplicateProduct(product)"
+                class="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-medium transition-all inline-flex items-center justify-center gap-1 border border-blue-200"
+                title="Dupliquer"
+              >
+                <DocumentDuplicateIcon class="w-4 h-4" />
+                <span class="hidden sm:inline">Dupliquer</span>
+              </button>
+
+              <button
+                @click="viewAnalytics(product)"
+                class="px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg text-xs font-medium transition-all inline-flex items-center justify-center gap-1 border border-purple-200"
+                title="Analytiques"
+              >
+                <ChartBarIcon class="w-4 h-4" />
+                <span class="hidden sm:inline">Stats</span>
+              </button>
+
+              <button
+                v-if="canDeleteProduct(product)"
+                @click="deleteProduct(product)"
+                class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-medium transition-all inline-flex items-center justify-center gap-1 border border-red-200"
+                title="Supprimer"
+              >
+                <TrashIcon class="w-4 h-4" />
+                <span class="hidden sm:inline">Supprimer</span>
+              </button>
+
+              <button
+                v-else
+                disabled
+                class="px-3 py-2 bg-gray-50 text-gray-400 rounded-lg text-xs font-medium cursor-not-allowed inline-flex items-center justify-center gap-1 border border-gray-200"
+                title="Impossible de supprimer"
+              >
+                <TrashIcon class="w-4 h-4" />
+                <span class="hidden sm:inline">Supprimer</span>
+              </button>
             </div>
           </div>
         </div>
@@ -422,7 +436,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import ProductImage from '@/components/common/ProductImage.vue'
 import { useApi } from '@/composables/api'
@@ -464,7 +478,6 @@ const {
 // State
 const showProductModal = ref(false)
 const selectedProduct = ref(null)
-const showProductMenu = ref(null)
 
 const filters = reactive({
   search: '',
@@ -553,7 +566,6 @@ const formatDate = (dateString) => {
 const viewProduct = (product) => {
   selectedProduct.value = product
   showProductModal.value = true
-  showProductMenu.value = null
 }
 
 const closeProductModal = () => {
@@ -668,6 +680,10 @@ const publishProduct = async (product) => {
 }
 
 const duplicateProduct = async (product) => {
+  if (!confirm(`Dupliquer le produit "${product.title || product.name}" ?`)) {
+    return
+  }
+
   try {
     const response = await post('/products', {
       title: (product.title || product.name) + ' (Copie)',
@@ -691,33 +707,32 @@ const duplicateProduct = async (product) => {
       window.$toast.error('Erreur lors de la duplication', '❌ Erreur')
     }
   }
-  showProductMenu.value = null
 }
 
 const viewAnalytics = (product) => {
   router.push(`/merchant/analytics?product=${product.id}`)
-  showProductMenu.value = null
 }
 
 const deleteProduct = async (product) => {
-  if (confirm(`Supprimer définitivement "${product.title || product.name}" ? Cette action est irréversible.`)) {
-    try {
-      const response = await del(`/products/${product.id}`)
-      if (response && response.success) {
-        await loadProducts() // Refresh products
-        if (window.$toast) {
-          window.$toast.success('Produit supprimé', '✅ Suppression')
-        }
-      } else {
-        throw new Error(response?.message || 'Erreur lors de la suppression')
-      }
-    } catch (error) {
-      console.error('Error deleting product:', error)
+  if (!confirm(`Supprimer définitivement "${product.title || product.name}" ? Cette action est irréversible.`)) {
+    return
+  }
+
+  try {
+    const response = await del(`/products/${product.id}`)
+    if (response && response.success) {
+      await loadProducts() // Refresh products
       if (window.$toast) {
-        window.$toast.error('Erreur lors de la suppression', '❌ Erreur')
+        window.$toast.success('Produit supprimé', '✅ Suppression')
       }
+    } else {
+      throw new Error(response?.message || 'Erreur lors de la suppression')
     }
-    showProductMenu.value = null
+  } catch (error) {
+    console.error('Error deleting product:', error)
+    if (window.$toast) {
+      window.$toast.error('Erreur lors de la suppression', '❌ Erreur')
+    }
   }
 }
 
@@ -728,10 +743,6 @@ const { getProductImageUrlWithFallback } = useProductImage()
 
 const getProductImageSrc = (product) => {
   return getProductImageUrlWithFallback(product, '/images/products/placeholder.jpg')
-}
-
-const toggleProductMenu = (productId) => {
-  showProductMenu.value = showProductMenu.value === productId ? null : productId
 }
 
 // Helper pour les icônes des stats
@@ -798,27 +809,11 @@ const getLotteryProgression = (product) => {
   return { sold, max, percentage }
 }
 
-// Close menu when clicking outside
-const handleClickOutside = (event) => {
-  // Vérifier si le clic est en dehors du menu et du bouton
-  const menuElement = event.target.closest('[data-dropdown-menu]')
-  const buttonElement = event.target.closest('[data-product-id]')
-  
-  if (!menuElement && !buttonElement) {
-    showProductMenu.value = null
-  }
-}
-
 onMounted(async () => {
-  document.addEventListener('click', handleClickOutside)
   await Promise.all([
     loadProducts(),
     loadCategories(),
     loadProductStats()
   ])
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
 })
 </script>
