@@ -633,7 +633,7 @@ class Product extends Model
 
         // 4. Vérifier les remboursements en cours (CRITIQUE)
         $pendingRefundsCount = \App\Models\Refund::whereHas('order', function ($query) {
-                $query->where('product_id', $this->id);
+                $query->where('orders.product_id', $this->id);
             })
             ->whereIn('status', ['pending', 'processing', 'approved'])
             ->count();
