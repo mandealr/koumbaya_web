@@ -261,7 +261,7 @@
               <button
                 v-else-if="product.status === 'active'"
                 @click="editProduct(product)"
-                class="px-4 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm font-medium transition-all hover:scale-105 inline-flex items-center justify-center gap-1.5 shadow-md"
+                class="px-4 py-2.5 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-lg text-sm font-medium transition-all hover:scale-105 inline-flex items-center justify-center gap-1.5 shadow-md"
               >
                 <PencilIcon class="w-4 h-4" />
                 Modifier
@@ -270,7 +270,7 @@
               <button
                 v-else
                 @click="editProduct(product)"
-                class="px-4 py-2.5 bg-gray-400 hover:bg-gray-500 text-white rounded-lg text-sm font-medium transition-all hover:scale-105 inline-flex items-center justify-center gap-1.5"
+                class="px-4 py-2.5 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-lg text-sm font-medium transition-all hover:scale-105 inline-flex items-center justify-center gap-1.5 shadow-md"
               >
                 <PencilIcon class="w-4 h-4" />
                 Modifier
