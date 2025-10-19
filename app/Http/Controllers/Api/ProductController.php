@@ -1579,6 +1579,67 @@ class ProductController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/products/{id}/can-delete",
+     *     tags={"Products"},
+     *     summary="Vérifier si un produit peut être supprimé",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID du produit",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Résultat de la vérification",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="can_delete", type="boolean"),
+     *             @OA\Property(property="errors", type="array", @OA\Items(type="object")),
+     *             @OA\Property(property="warnings", type="array", @OA\Items(type="object")),
+     *             @OA\Property(property="summary", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Non autorisé"),
+     *     @OA\Response(response=404, description="Produit non trouvé")
+     * )
+     */
+    public function canDelete($id)
+    {
+        $user = auth()->user();
+        $product = Product::findOrFail($id);
+
+        // Vérifier que l'utilisateur est le propriétaire OU admin/super admin
+        $isOwner = $product->merchant_id === $user->id;
+        $isAdmin = $user->hasRole(['Admin', 'Super Admin']);
+
+        if (!$isOwner && !$isAdmin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Non autorisé à accéder à cette information'
+            ], 403);
+        }
+
+        // Obtenir les détails de vérification
+        $deletionCheck = $product->canDeleteProduct();
+
+        return response()->json([
+            'success' => true,
+            'can_delete' => $deletionCheck['can_delete'],
+            'errors' => $deletionCheck['errors'],
+            'warnings' => $deletionCheck['warnings'],
+            'summary' => $deletionCheck['summary'],
+            'permissions' => [
+                'is_owner' => $isOwner,
+                'is_admin' => $isAdmin,
+                'can_attempt_delete' => $isOwner || $isAdmin
+            ]
+        ]);
+    }
+
+    /**
      * @OA\Delete(
      *     path="/api/products/{id}",
      *     tags={"Products"},
@@ -1606,55 +1667,69 @@ class ProductController extends Controller
         $isAdmin = $user->hasRole(['Admin', 'Super Admin']);
 
         if (!$isOwner && !$isAdmin) {
+            \Log::warning('Unauthorized product deletion attempt', [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'user_id' => $user->id,
+                'user_name' => $user->fullName ?? $user->email,
+                'is_owner' => $isOwner,
+                'is_admin' => $isAdmin
+            ]);
+
             return response()->json([
                 'success' => false,
                 'error' => 'Non autorisé à supprimer ce produit'
             ], 403);
         }
 
-        // Vérifier qu'il n'y a pas de commandes payées
-        $paidOrdersCount = $product->orders()
-            ->whereIn('status', ['paid', 'fulfilled'])
-            ->count();
+        // Utiliser la méthode centralisée pour vérifier si le produit peut être supprimé
+        $deletionCheck = $product->canDeleteProduct();
 
-        if ($paidOrdersCount > 0) {
+        if (!$deletionCheck['can_delete']) {
+            \Log::warning('Product deletion blocked', [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'user_id' => $user->id,
+                'user_name' => $user->fullName ?? $user->email,
+                'errors' => $deletionCheck['errors'],
+                'warnings' => $deletionCheck['warnings'],
+                'summary' => $deletionCheck['summary']
+            ]);
+
             return response()->json([
                 'success' => false,
-                'error' => 'Impossible de supprimer ce produit car il a des commandes payées',
+                'error' => 'Impossible de supprimer ce produit',
                 'details' => [
-                    'paid_orders_count' => $paidOrdersCount,
-                    'message' => 'Vous ne pouvez pas supprimer un produit qui a été acheté.'
+                    'errors' => $deletionCheck['errors'],
+                    'warnings' => $deletionCheck['warnings'],
+                    'summary' => $deletionCheck['summary']
                 ]
             ], 422);
         }
 
-        // Pour les produits en mode tombola, vérifier qu'il n'y a pas de tickets vendus
-        if ($product->sale_mode === 'lottery') {
-            $activeLottery = $product->activeLottery;
-            if ($activeLottery) {
-                $soldTickets = $activeLottery->sold_tickets ?? 0;
-                if ($soldTickets > 0) {
-                    return response()->json([
-                        'success' => false,
-                        'error' => 'Impossible de supprimer ce produit car des tickets ont été vendus',
-                        'details' => [
-                            'sold_tickets' => $soldTickets,
-                            'message' => 'Vous ne pouvez pas supprimer un produit tombola avec des tickets vendus.'
-                        ]
-                    ], 422);
-                }
-            }
+        // Si des avertissements existent, les logger mais continuer
+        if (!empty($deletionCheck['warnings'])) {
+            \Log::info('Product deletion proceeding with warnings', [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'warnings' => $deletionCheck['warnings']
+            ]);
         }
 
         // SoftDelete du produit
         $product->delete();
 
-        \Log::info('Product soft deleted', [
+        \Log::info('Product soft deleted successfully', [
             'product_id' => $product->id,
             'product_name' => $product->name,
+            'sale_mode' => $product->sale_mode,
             'deleted_by' => $user->id,
-            'user_name' => $user->fullName,
-            'is_admin' => $isAdmin
+            'user_name' => $user->fullName ?? $user->email,
+            'user_email' => $user->email,
+            'is_admin' => $isAdmin,
+            'is_owner' => $isOwner,
+            'deletion_summary' => $deletionCheck['summary'],
+            'deleted_at' => now()->toISOString()
         ]);
 
         return response()->json([
@@ -1662,7 +1737,8 @@ class ProductController extends Controller
             'message' => 'Produit supprimé avec succès',
             'data' => [
                 'product_id' => $product->id,
-                'product_name' => $product->name
+                'product_name' => $product->name,
+                'warnings' => $deletionCheck['warnings'] ?? []
             ]
         ]);
     }

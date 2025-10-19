@@ -16,6 +16,51 @@ class OtpService
     public static function sendEmailOtp($email, $purpose = Otp::PURPOSE_REGISTRATION, $expirationMinutes = 30)
     {
         try {
+            // Vérifier que l'email est valide
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                Log::warning('Tentative d\'envoi OTP avec email invalide', [
+                    'email' => $email,
+                    'purpose' => $purpose
+                ]);
+
+                return [
+                    'success' => false,
+                    'message' => 'Adresse email invalide'
+                ];
+            }
+
+            // Pour la réinitialisation de mot de passe, vérifier que l'utilisateur existe
+            if ($purpose === Otp::PURPOSE_PASSWORD_RESET || $purpose === 'password_reset') {
+                $user = \App\Models\User::where('email', $email)->first();
+
+                if (!$user) {
+                    Log::warning('Tentative de réinitialisation pour email inexistant', [
+                        'email' => $email
+                    ]);
+
+                    // Pour la sécurité, on retourne un message générique
+                    // (ne pas révéler si l'email existe ou non)
+                    return [
+                        'success' => true,
+                        'message' => 'Si cette adresse email existe, un code de vérification a été envoyé',
+                        'masked_identifier' => self::maskEmail($email),
+                        'expires_at' => now()->addMinutes($expirationMinutes)->format('Y-m-d H:i:s')
+                    ];
+                }
+
+                // Log pour les utilisateurs OAuth
+                $isOAuthUser = !empty($user->google_id) || !empty($user->facebook_id) || !empty($user->apple_id);
+                if ($isOAuthUser) {
+                    Log::info('Réinitialisation de mot de passe pour utilisateur OAuth', [
+                        'email' => $email,
+                        'user_id' => $user->id,
+                        'has_google_id' => !empty($user->google_id),
+                        'has_facebook_id' => !empty($user->facebook_id),
+                        'has_apple_id' => !empty($user->apple_id)
+                    ]);
+                }
+            }
+
             // Générer le code OTP
             $otp = Otp::generate($email, Otp::TYPE_EMAIL, $purpose, $expirationMinutes);
 
@@ -40,21 +85,51 @@ class OtpService
                 ];
             }
 
-            return [
-                'success' => false,
-                'message' => 'Erreur lors de l\'envoi de l\'email'
-            ];
-        } catch (\Exception $e) {
-            Log::error('Erreur envoi OTP email', [
+            Log::error('Échec envoi email OTP - sendEmailCode a retourné false', [
                 'email' => $email,
-                'error' => $e->getMessage()
+                'purpose' => $purpose,
+                'otp_id' => $otp->id
             ]);
 
             return [
                 'success' => false,
-                'message' => 'Erreur lors de l\'envoi du code de vérification'
+                'message' => 'Impossible d\'envoyer l\'email. Veuillez réessayer dans quelques instants.'
+            ];
+        } catch (\Exception $e) {
+            Log::error('Erreur exception lors de l\'envoi OTP email', [
+                'email' => $email,
+                'purpose' => $purpose,
+                'error' => $e->getMessage(),
+                'error_class' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Une erreur est survenue lors de l\'envoi du code. Veuillez contacter le support si le problème persiste.'
             ];
         }
+    }
+
+    /**
+     * Masquer une adresse email pour la sécurité
+     */
+    private static function maskEmail($email)
+    {
+        $parts = explode('@', $email);
+        if (count($parts) != 2) return $email;
+
+        $localPart = $parts[0];
+        $domain = $parts[1];
+
+        if (strlen($localPart) <= 2) {
+            return str_repeat('*', strlen($localPart)) . '@' . $domain;
+        }
+
+        $maskedLocal = substr($localPart, 0, 2) . str_repeat('*', strlen($localPart) - 2);
+        return $maskedLocal . '@' . $domain;
     }
 
     /**
@@ -238,15 +313,45 @@ class OtpService
                 'subject' => $subject,
                 'code' => $code,
                 'env' => config('app.env'),
-                'mail_mailer' => config('mail.default')
+                'mail_mailer' => config('mail.default'),
+                'purpose' => $purpose
             ]);
 
             // Utiliser la classe Mailable pour un envoi plus fiable
             if ($purpose === 'password_reset') {
-                // Créer un utilisateur fictif pour le template si pas d'utilisateur trouvé
+                // Trouver l'utilisateur ou créer un objet fictif pour le template
                 $user = \App\Models\User::where('email', $email)->first();
+
                 if (!$user) {
-                    $user = (object) ['first_name' => 'Utilisateur', 'last_name' => ''];
+                    Log::warning('Tentative de réinitialisation pour email inexistant', [
+                        'email' => $email
+                    ]);
+                    // Créer un objet utilisateur fictif pour le template
+                    $user = (object) [
+                        'first_name' => 'Utilisateur',
+                        'last_name' => ''
+                    ];
+                } else {
+                    // Vérifier si c'est un utilisateur OAuth sans mot de passe défini
+                    $isOAuthUser = !empty($user->google_id) || !empty($user->facebook_id) || !empty($user->apple_id);
+
+                    Log::info('Envoi de code de réinitialisation', [
+                        'email' => $email,
+                        'user_id' => $user->id,
+                        'is_oauth_user' => $isOAuthUser,
+                        'has_google_id' => !empty($user->google_id),
+                        'has_facebook_id' => !empty($user->facebook_id),
+                        'has_apple_id' => !empty($user->apple_id),
+                        'verified_at' => $user->verified_at ? true : false
+                    ]);
+
+                    // S'assurer que first_name et last_name sont définis
+                    if (empty($user->first_name)) {
+                        $user->first_name = 'Utilisateur';
+                    }
+                    if (empty($user->last_name)) {
+                        $user->last_name = '';
+                    }
                 }
 
                 $resetUrl = config('app.frontend_url', 'https://koumbaya.com') . '/reset-password-verify?identifier=' . urlencode($email) . '&method=email';
@@ -273,7 +378,12 @@ class OtpService
         } catch (\Exception $e) {
             Log::error('Erreur envoi email OTP', [
                 'email' => $email,
-                'error' => $e->getMessage()
+                'purpose' => $purpose,
+                'error' => $e->getMessage(),
+                'error_class' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
             ]);
             return false;
         }

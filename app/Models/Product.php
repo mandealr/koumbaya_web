@@ -543,4 +543,148 @@ class Product extends Model
             'updated_at' => $this->updated_at,
         ];
     }
+
+    /**
+     * Vérifier si un produit peut être supprimé
+     *
+     * Cette méthode centralise toute la logique de vérification pour la suppression
+     * Elle vérifie les commandes, tickets, tombolas et remboursements
+     *
+     * @return array ['can_delete' => bool, 'errors' => array, 'warnings' => array]
+     */
+    public function canDeleteProduct(): array
+    {
+        $errors = [];
+        $warnings = [];
+
+        // 1. Vérifier les commandes payées (CRITIQUE - bloque la suppression)
+        $paidOrdersCount = $this->orders()
+            ->whereIn('status', ['paid', 'fulfilled'])
+            ->count();
+
+        if ($paidOrdersCount > 0) {
+            $errors[] = [
+                'code' => 'PAID_ORDERS_EXIST',
+                'message' => "Impossible de supprimer : {$paidOrdersCount} commande(s) payée(s)",
+                'count' => $paidOrdersCount,
+                'severity' => 'critical'
+            ];
+        }
+
+        // 2. Vérifier les commandes en attente (AVERTISSEMENT)
+        $pendingOrdersCount = $this->orders()
+            ->whereIn('status', ['pending', 'awaiting_payment'])
+            ->count();
+
+        if ($pendingOrdersCount > 0) {
+            $warnings[] = [
+                'code' => 'PENDING_ORDERS_EXIST',
+                'message' => "Attention : {$pendingOrdersCount} commande(s) en attente de paiement",
+                'count' => $pendingOrdersCount,
+                'severity' => 'warning'
+            ];
+        }
+
+        // 3. Pour les produits en mode tombola : vérifications spécifiques
+        if ($this->sale_mode === 'lottery') {
+            $lotteries = $this->lotteries()->get();
+
+            foreach ($lotteries as $lottery) {
+                // Vérifier les tickets payés (source fiable via relation)
+                $paidTicketsCount = $lottery->tickets()
+                    ->where('status', 'paid')
+                    ->count();
+
+                if ($paidTicketsCount > 0) {
+                    $errors[] = [
+                        'code' => 'PAID_TICKETS_EXIST',
+                        'message' => "Tombola #{$lottery->id} : {$paidTicketsCount} ticket(s) vendu(s)",
+                        'lottery_id' => $lottery->id,
+                        'lottery_number' => $lottery->lottery_number,
+                        'count' => $paidTicketsCount,
+                        'severity' => 'critical'
+                    ];
+                }
+
+                // Vérifier si la tombola est active
+                if ($lottery->status === 'active' && $lottery->draw_date > now()) {
+                    $errors[] = [
+                        'code' => 'ACTIVE_LOTTERY_EXISTS',
+                        'message' => "Tombola #{$lottery->id} encore active",
+                        'lottery_id' => $lottery->id,
+                        'lottery_number' => $lottery->lottery_number,
+                        'draw_date' => $lottery->draw_date->toDateTimeString(),
+                        'severity' => 'critical'
+                    ];
+                }
+
+                // Vérifier si la tombola est complétée avec un gagnant
+                if ($lottery->status === 'completed' && $lottery->winner_user_id) {
+                    $warnings[] = [
+                        'code' => 'COMPLETED_LOTTERY_WITH_WINNER',
+                        'message' => "Tombola #{$lottery->id} complétée avec gagnant",
+                        'lottery_id' => $lottery->id,
+                        'winner_id' => $lottery->winner_user_id,
+                        'severity' => 'info'
+                    ];
+                }
+            }
+        }
+
+        // 4. Vérifier les remboursements en cours (CRITIQUE)
+        $pendingRefundsCount = \App\Models\Refund::whereHas('order', function ($query) {
+                $query->where('product_id', $this->id);
+            })
+            ->whereIn('status', ['pending', 'processing', 'approved'])
+            ->count();
+
+        if ($pendingRefundsCount > 0) {
+            $errors[] = [
+                'code' => 'PENDING_REFUNDS_EXIST',
+                'message' => "Remboursements en cours : {$pendingRefundsCount}",
+                'count' => $pendingRefundsCount,
+                'severity' => 'critical'
+            ];
+        }
+
+        // 5. Vérifier les tickets réservés mais non payés
+        if ($this->sale_mode === 'lottery') {
+            $reservedTicketsCount = $this->lotteryTickets()
+                ->where('status', 'reserved')
+                ->where('created_at', '>', now()->subHours(2)) // Réservations de moins de 2h
+                ->count();
+
+            if ($reservedTicketsCount > 0) {
+                $warnings[] = [
+                    'code' => 'RESERVED_TICKETS_EXIST',
+                    'message' => "Tickets réservés (non payés) : {$reservedTicketsCount}",
+                    'count' => $reservedTicketsCount,
+                    'severity' => 'warning'
+                ];
+            }
+        }
+
+        return [
+            'can_delete' => empty($errors),
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'summary' => [
+                'paid_orders' => $paidOrdersCount ?? 0,
+                'pending_orders' => $pendingOrdersCount ?? 0,
+                'pending_refunds' => $pendingRefundsCount ?? 0,
+                'sale_mode' => $this->sale_mode,
+                'checked_at' => now()->toISOString()
+            ]
+        ];
+    }
+
+    /**
+     * Vérifier rapidement si le produit peut être supprimé (version simple)
+     *
+     * @return bool
+     */
+    public function isDeletable(): bool
+    {
+        return $this->canDeleteProduct()['can_delete'];
+    }
 }

@@ -299,33 +299,81 @@ class AdminProductController extends Controller
      */
     public function destroy($id)
     {
+        $user = auth()->user();
         $product = Product::findOrFail($id);
 
-        // Check if product has active lottery
-        if ($product->has_active_lottery) {
+        // Vérifier que l'utilisateur est au moins Admin
+        if (!$user->isAdmin() && !$user->isSuperAdmin()) {
+            \Log::warning('Unauthorized admin product deletion attempt', [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'user_id' => $user->id,
+                'user_email' => $user->email
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Impossible de supprimer un produit avec une tombola active'
+                'message' => 'Accès refusé'
+            ], 403);
+        }
+
+        // Utiliser la méthode centralisée pour vérifier si le produit peut être supprimé
+        $deletionCheck = $product->canDeleteProduct();
+
+        if (!$deletionCheck['can_delete']) {
+            \Log::warning('Admin product deletion blocked', [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'admin_id' => $user->id,
+                'admin_email' => $user->email,
+                'errors' => $deletionCheck['errors'],
+                'warnings' => $deletionCheck['warnings'],
+                'summary' => $deletionCheck['summary']
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Impossible de supprimer ce produit',
+                'details' => [
+                    'errors' => $deletionCheck['errors'],
+                    'warnings' => $deletionCheck['warnings'],
+                    'summary' => $deletionCheck['summary']
+                ]
             ], 422);
         }
 
-        // Check if product has any paid tickets
-        $hasPaidTickets = $product->lotteryTickets()
-            ->where('status', 'paid')
-            ->exists();
-
-        if ($hasPaidTickets) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Impossible de supprimer un produit avec des tickets vendus'
-            ], 422);
+        // Si des avertissements existent, les logger mais continuer
+        if (!empty($deletionCheck['warnings'])) {
+            \Log::info('Admin product deletion proceeding with warnings', [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'admin_id' => $user->id,
+                'warnings' => $deletionCheck['warnings']
+            ]);
         }
 
+        // SoftDelete du produit
         $product->delete();
+
+        \Log::info('Product soft deleted by admin', [
+            'product_id' => $product->id,
+            'product_name' => $product->name,
+            'sale_mode' => $product->sale_mode,
+            'merchant_id' => $product->merchant_id,
+            'deleted_by' => $user->id,
+            'admin_email' => $user->email,
+            'deletion_summary' => $deletionCheck['summary'],
+            'deleted_at' => now()->toISOString()
+        ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Produit supprimé avec succès'
+            'message' => 'Produit supprimé avec succès',
+            'data' => [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'warnings' => $deletionCheck['warnings'] ?? []
+            ]
         ]);
     }
 
