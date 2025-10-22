@@ -86,13 +86,13 @@
         <h2 class="text-xl font-bold text-gray-900 mb-6">Actions Rapides</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
           <router-link
-            to="/merchant/create-product"
+            to="/merchant/products/create"
             class="flex flex-col items-center justify-center p-8 bg-gradient-to-br from-[#0099cc] to-[#0088bb] text-white rounded-2xl hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             <svg class="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
-            <h3 class="text-lg font-semibold mb-2">Créer un Produit</h3>
+            <h3 class="text-lg font-semibold mb-2 text-center">Créer un Produit</h3>
             <p class="text-blue-100 text-sm text-center">Publier un nouveau produit avec formulaire complet</p>
           </router-link>
 
@@ -168,7 +168,7 @@
           <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun produit</h3>
           <p class="text-gray-600 mb-4">Commencez par créer votre premier produit</p>
           <router-link
-            to="/merchant/create-product"
+            to="/merchant/products/create"
             class="inline-block px-6 py-3 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-lg font-medium transition-colors"
           >
             Créer mon premier produit
