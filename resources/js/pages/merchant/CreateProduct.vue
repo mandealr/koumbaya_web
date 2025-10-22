@@ -4,7 +4,9 @@
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-3xl font-bold text-gray-900">Publier un Nouveau Produit</h1>
-        <p class="mt-2 text-gray-600">Créez votre tombola et mettez votre produit en vente</p>
+        <p class="mt-2 text-gray-600">
+          {{ form.sale_mode === 'lottery' ? 'Créez votre tombola et mettez votre produit en jeu' : 'Mettez votre produit en vente directe' }}
+        </p>
       </div>
       <router-link
         to="/merchant/products"
@@ -635,12 +637,18 @@ const currentStep = ref(1)
 const loading = ref(false)
 const fileInput = ref(null)
 
-const steps = [
+// Steps computed dynamically based on sale_mode
+const steps = computed(() => [
   { id: 1, title: 'Informations', description: 'Détails du produit', icon: InformationCircleIcon },
   { id: 2, title: 'Photos', description: 'Images du produit', icon: CameraIcon },
-  { id: 3, title: 'Tombola', description: 'Configuration', icon: CheckIcon },
+  {
+    id: 3,
+    title: form.sale_mode === 'lottery' ? 'Tombola' : 'Configuration',
+    description: form.sale_mode === 'lottery' ? 'Paramètres tombola' : 'Vente directe',
+    icon: CheckIcon
+  },
   { id: 4, title: 'Publication', description: 'Vérification', icon: RocketLaunchIcon }
-]
+])
 
 const categories = ref([])
 const lotteryDurationConstraints = ref(null)
@@ -831,14 +839,14 @@ const validateStep1 = () => {
 const validateStep3 = () => {
   console.log('=== VALIDATION ÉTAPE 3 ===')
   console.log('Sale mode:', form.sale_mode)
-  
+
   // Direct sale mode - always valid (no extra fields required)
   if (form.sale_mode === 'direct') {
     console.log('Direct sale mode - always valid')
     console.log('==========================')
     return true
   }
-  
+
   // Lottery mode - validate lottery fields
   if (form.sale_mode === 'lottery') {
     console.log('Lottery mode - validating fields...')
@@ -847,41 +855,59 @@ const validateStep3 = () => {
       total_tickets: form.total_tickets,
       min_tickets: form.min_tickets,
       end_date: form.end_date,
-      lottery_duration: form.lottery_duration
+      lottery_duration: form.lottery_duration,
+      has_duration_constraints: !!lotteryDurationConstraints.value
     })
-    
-    const checks = {
+
+    // Vérifier les champs de base (toujours requis)
+    const basicChecks = {
       hasTicketPrice: !!form.ticket_price,
       hasTotalTickets: !!form.total_tickets,
       hasMinTickets: !!form.min_tickets,
-      hasEndDate: !!form.end_date,
       ticketPriceValid: parseFloat(form.ticket_price) >= 100,
       totalTicketsValid: parseInt(form.total_tickets) >= 10,
       minTicketsValid: parseInt(form.min_tickets) >= 10,
-      minTicketsNotExceedTotal: parseInt(form.min_tickets) <= parseInt(form.total_tickets),
-      endDateValid: new Date(form.end_date) > new Date()
+      minTicketsNotExceedTotal: parseInt(form.min_tickets) <= parseInt(form.total_tickets)
     }
-    
+
+    // Vérifier la durée (soit via end_date, soit via lottery_duration selon le profil)
+    let durationCheck = false
+    if (lotteryDurationConstraints.value && !lotteryDurationConstraints.value.can_customize) {
+      // Vendeur individuel : pas besoin de validation de durée (elle est fixe)
+      console.log('Individual seller - duration is fixed, no validation needed')
+      durationCheck = true
+    } else if (lotteryDurationConstraints.value?.can_customize && form.lottery_duration) {
+      // Vendeur business : vérifier lottery_duration
+      console.log('Business seller - validating lottery_duration')
+      durationCheck = parseInt(form.lottery_duration) >= 1
+    } else if (form.end_date) {
+      // Fallback : vérifier end_date
+      console.log('Using end_date fallback')
+      durationCheck = new Date(form.end_date) > new Date()
+    }
+
+    const checks = { ...basicChecks, durationCheck }
     console.log('Validation checks:', checks)
-    
-    const isValid = form.ticket_price && 
-                    form.total_tickets && 
-                    form.min_tickets && 
-                    form.end_date &&
-                    parseFloat(form.ticket_price) >= 100 && // Minimum ticket price
-                    parseInt(form.total_tickets) >= 10 && // Minimum tickets
+
+    // Validation globale
+    const isValid = form.ticket_price &&
+                    form.total_tickets &&
+                    form.min_tickets &&
+                    parseFloat(form.ticket_price) >= 100 &&
+                    parseInt(form.total_tickets) >= 10 &&
                     parseInt(form.min_tickets) >= 10 &&
                     parseInt(form.min_tickets) <= parseInt(form.total_tickets) &&
-                    new Date(form.end_date) > new Date() // End date in future
-    
+                    durationCheck // Durée valide selon le profil
+
     console.log('Overall validation result:', isValid)
-    
+
     // Clear step 3 errors if valid
     if (isValid) {
       errors.ticket_price = ''
       errors.total_tickets = ''
       errors.min_tickets = ''
       errors.end_date = ''
+      errors.lottery_duration = ''
       console.log('Cleared all step 3 errors')
     } else {
       console.log('Validation failed - checking individual fields...')
@@ -897,15 +923,15 @@ const validateStep3 = () => {
       if (parseInt(form.min_tickets) > parseInt(form.total_tickets)) {
         console.log('Min tickets exceeds total tickets')
       }
-      if (!form.end_date || new Date(form.end_date) <= new Date()) {
-        console.log('End date invalid')
+      if (!durationCheck) {
+        console.log('Duration validation failed')
       }
     }
-    
+
     console.log('==========================')
     return isValid
   }
-  
+
   console.log('Unknown sale mode - returning false')
   console.log('==========================')
   return false

@@ -85,16 +85,16 @@
       <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
         <h2 class="text-xl font-bold text-gray-900 mb-6">Actions Rapides</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-          <button
-            @click="showCreateProductModal = true"
+          <router-link
+            to="/merchant/create-product"
             class="flex flex-col items-center justify-center p-8 bg-gradient-to-br from-[#0099cc] to-[#0088bb] text-white rounded-2xl hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             <svg class="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
             <h3 class="text-lg font-semibold mb-2">Créer un Produit</h3>
-            <p class="text-blue-100 text-sm text-center">Publier un nouveau produit avec 500 tickets fixes</p>
-          </button>
+            <p class="text-blue-100 text-sm text-center">Publier un nouveau produit avec formulaire complet</p>
+          </router-link>
 
           <router-link
             to="/merchant/products"
@@ -167,12 +167,12 @@
           </svg>
           <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun produit</h3>
           <p class="text-gray-600 mb-4">Commencez par créer votre premier produit</p>
-          <button
-            @click="showCreateProductModal = true"
-            class="px-6 py-3 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-lg font-medium transition-colors"
+          <router-link
+            to="/merchant/create-product"
+            class="inline-block px-6 py-3 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-lg font-medium transition-colors"
           >
             Créer mon premier produit
-          </button>
+          </router-link>
         </div>
 
         <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -278,130 +278,14 @@
         </div>
       </div>
     </div>
-
-    <!-- Modal de création de produit simplifié -->
-    <div v-if="showCreateProductModal" class="fixed inset-0 bg-black/40 overflow-y-auto h-full w-full z-50">
-      <div class="relative top-20 mx-auto p-8 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-2xl bg-white max-h-[80vh] overflow-y-auto">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-2xl font-bold text-gray-900">Créer un Nouveau Produit</h3>
-          <button @click="showCreateProductModal = false" class="text-gray-400 hover:text-gray-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-
-        <form @submit.prevent="createProduct" class="space-y-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Nom du produit *
-            </label>
-            <input
-              v-model="newProduct.name"
-              type="text"
-              required
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent"
-              style="color: #5f5f5f"
-              placeholder="Ex: iPhone 15 Pro Max 256GB"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Description *
-            </label>
-            <textarea
-              v-model="newProduct.description"
-              rows="3"
-              required
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent"
-              style="color: #5f5f5f"
-              placeholder="Décrivez votre produit..."
-            ></textarea>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Valeur du produit (FCFA) *
-              </label>
-              <input
-                v-model="newProduct.price"
-                type="number"
-                required
-                min="100000"
-                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent"
-                style="color: #5f5f5f"
-                placeholder="100000"
-              />
-              <p class="text-xs text-gray-500 mt-1">Minimum recommandé: 100,000 FCFA</p>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Localisation *
-              </label>
-              <input
-                v-model="newProduct.location"
-                type="text"
-                required
-                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent"
-                style="color: #5f5f5f"
-                placeholder="Libreville, Gabon"
-              />
-            </div>
-          </div>
-
-          <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
-            <div class="flex items-start space-x-3">
-              <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <div class="text-sm text-blue-800">
-                <h4 class="font-semibold mb-2">Configuration automatique pour vendeur individuel :</h4>
-                <ul class="space-y-1">
-                  <li>• <strong>Mode:</strong> Tombola automatique</li>
-                  <li>• <strong>Nombre de tickets:</strong> 500 (fixe)</li>
-                  <li>• <strong>Prix par ticket:</strong> {{ formatAmount(Math.ceil((newProduct.price || 100000) / 500)) }} FCFA</li>
-                  <li>• <strong>Koumbich potentiel:</strong> {{ formatAmount((newProduct.price || 100000)) }} FCFA</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex justify-end space-x-4 pt-6 border-t">
-            <button
-              @click="showCreateProductModal = false"
-              type="button"
-              class="px-6 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-medium transition-colors"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              :disabled="createProductLoading"
-              class="px-6 py-3 bg-[#0099cc] hover:bg-[#0088bb] text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-            >
-              <span v-if="createProductLoading" class="flex items-center">
-                <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                Création...
-              </span>
-              <span v-else>Créer le produit</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
 import { useApi } from '@/composables/api'
 
-const router = useRouter()
-const { get, post, loading, error } = useApi()
+const { get, loading, error } = useApi()
 
 // State
 const stats = ref({
@@ -413,15 +297,6 @@ const stats = ref({
 
 const products = ref([])
 const recentOrders = ref([])
-const showCreateProductModal = ref(false)
-const createProductLoading = ref(false)
-
-const newProduct = reactive({
-  name: '',
-  description: '',
-  price: '',
-  location: ''
-})
 
 // Methods
 const formatAmount = (amount) => {
@@ -519,8 +394,8 @@ const loadRecentOrders = async () => {
       recentOrders.value = response.data.map(order => ({
         id: order.id,
         product_name: order.product?.title || order.product?.name || 'Produit inconnu',
-        customer_name: (order.user?.name || 
-                       (order.user?.first_name + ' ' + order.user?.last_name) || 
+        customer_name: (order.user?.name ||
+                       (order.user?.first_name + ' ' + order.user?.last_name) ||
                        'Client inconnu').trim(),
         amount: parseFloat(order.amount || 0),
         status: order.status || 'pending',
@@ -530,78 +405,6 @@ const loadRecentOrders = async () => {
   } catch (err) {
     console.error('Erreur lors du chargement des commandes:', err)
   }
-}
-
-const createProduct = async () => {
-  createProductLoading.value = true
-  
-  try {
-    // Calculer automatiquement le prix par ticket (toujours 500 tickets pour vendeur individuel)
-    const ticketPrice = Math.ceil(parseFloat(newProduct.price) / 500)
-    
-    const productData = {
-      name: newProduct.name,
-      description: newProduct.description,
-      price: parseFloat(newProduct.price),
-      location: newProduct.location,
-      sale_mode: 'lottery',
-      ticket_price: ticketPrice,
-      total_tickets: 500, // Fixe pour vendeur individuel
-      min_participants: 250, // 50% des tickets minimum
-      category_id: 1, // Catégorie par défaut
-      condition: 'new' // Par défaut
-    }
-
-    const response = await post('/products', productData)
-    
-    if (response && response.product) {
-      // Créer automatiquement la tombola
-      try {
-        await post(`/products/${response.product.id}/create-lottery`, {
-          duration_days: 7
-        })
-        
-        if (window.$toast) {
-          window.$toast.success('Produit et tombola créés avec succès !', '✅ Succès')
-        }
-        
-        // Fermer le modal et recharger les données
-        showCreateProductModal.value = false
-        resetNewProduct()
-        await Promise.all([loadProducts(), loadStats()])
-        
-      } catch (lotteryError) {
-        console.error('Error creating lottery:', lotteryError)
-        if (window.$toast) {
-          window.$toast.warning('Produit créé mais erreur lors de la création de la tombola', '⚠️ Attention')
-        }
-      }
-    }
-    
-  } catch (err) {
-    console.error('Erreur lors de la création du produit:', err)
-    let errorMessage = 'Erreur lors de la création du produit'
-    
-    if (err.response?.data?.message) {
-      errorMessage = err.response.data.message
-    } else if (err.response?.data?.errors) {
-      const errors = err.response.data.errors
-      errorMessage = Object.values(errors).flat().join(', ')
-    }
-    
-    if (window.$toast) {
-      window.$toast.error(errorMessage, '❌ Erreur')
-    }
-  } finally {
-    createProductLoading.value = false
-  }
-}
-
-const resetNewProduct = () => {
-  newProduct.name = ''
-  newProduct.description = ''
-  newProduct.price = ''
-  newProduct.location = ''
 }
 
 // Lifecycle
