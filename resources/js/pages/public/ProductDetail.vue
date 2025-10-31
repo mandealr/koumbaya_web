@@ -627,6 +627,12 @@ const shareProduct = () => {
 }
 
 const viewProduct = (prod) => {
+  // Bloquer la navigation si c'est un produit fallback
+  if (typeof prod.id === 'string' && prod.id.startsWith('fallback')) {
+    console.warn('Navigation bloquée vers produit fallback:', prod.id)
+    return
+  }
+
   router.push({ name: 'public.product.detail', params: { id: prod.id } })
 }
 

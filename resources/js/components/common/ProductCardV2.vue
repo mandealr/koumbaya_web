@@ -1,8 +1,14 @@
 <template>
-  <div 
-    class="group cursor-pointer overflow-hidden bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
-    :class="{'ring-2 ring-purple-500': product.sale_mode === 'lottery', 'ring-2 ring-[#0099cc]': product.sale_mode === 'direct'}"
-    @click="$emit('view-product', product)"
+  <div
+    :class="[
+      'overflow-hidden bg-white rounded-xl shadow-sm transition-all duration-300 border border-gray-100',
+      isFallbackProduct
+        ? 'opacity-75 cursor-not-allowed'
+        : 'group cursor-pointer hover:shadow-xl transform hover:-translate-y-1',
+      !isFallbackProduct && product.sale_mode === 'lottery' && 'ring-2 ring-purple-500',
+      !isFallbackProduct && product.sale_mode === 'direct' && 'ring-2 ring-[#0099cc]'
+    ]"
+    @click="!isFallbackProduct && $emit('view-product', product)"
   >
     <!-- Image avec badges -->
     <div class="relative overflow-hidden h-48">
@@ -18,7 +24,11 @@
       
       <!-- Mode de vente - Badge principal -->
       <div class="absolute top-3 left-3">
-        <div v-if="product.sale_mode === 'lottery'" class="flex items-center bg-purple-600 text-white px-3 py-1.5 rounded-full shadow-lg">
+        <div v-if="isFallbackProduct" class="flex items-center bg-gray-600 text-white px-3 py-1.5 rounded-full shadow-lg">
+          <StarIcon class="w-4 h-4 mr-1.5 flex-shrink-0" />
+          <span class="text-sm font-semibold">Exemple</span>
+        </div>
+        <div v-else-if="product.sale_mode === 'lottery'" class="flex items-center bg-purple-600 text-white px-3 py-1.5 rounded-full shadow-lg">
           <TicketIcon class="w-4 h-4 mr-1.5 flex-shrink-0" />
           <span class="text-sm font-semibold">Tombola</span>
         </div>
@@ -118,20 +128,28 @@
       </div>
 
       <!-- Bouton d'action -->
-      <button 
-        v-if="!isLotterySoldOut"
+      <button
+        v-if="isFallbackProduct"
+        disabled
+        class="w-full py-3 px-4 rounded-lg font-medium bg-gray-400 text-white cursor-not-allowed opacity-60"
+      >
+        <ShoppingBagIcon class="w-5 h-5 mr-2 flex-shrink-0" />
+        Non disponible
+      </button>
+      <button
+        v-else-if="!isLotterySoldOut"
         @click.stop="$emit('view-product', product)"
         class="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 btn-responsive btn-wrap-mobile group-hover:shadow-md"
-        :class="product.sale_mode === 'lottery' 
-          ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+        :class="product.sale_mode === 'lottery'
+          ? 'bg-purple-600 hover:bg-purple-700 text-white'
           : 'bg-[#0099cc] hover:bg-[#0088bb] text-white'"
       >
         <ShoppingBagIcon class="w-5 h-5 mr-2 flex-shrink-0" />
         {{ product.sale_mode === 'lottery' ? 'Participer à la tombola' : 'Acheter maintenant' }}
       </button>
-      
+
       <!-- Bouton Complet pour tombola -->
-      <button 
+      <button
         v-else
         disabled
         class="w-full py-3 px-4 rounded-lg font-medium bg-gray-400 text-white cursor-not-allowed"
@@ -155,6 +173,10 @@ const props = defineProps({
 })
 
 defineEmits(['view-product'])
+
+const isFallbackProduct = computed(() => {
+  return typeof props.product.id === 'string' && props.product.id.startsWith('fallback')
+})
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('fr-FR').format(price || 0)

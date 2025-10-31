@@ -232,6 +232,12 @@ const applyFilters = () => {
 
 // Navigation
 const viewProduct = (product) => {
+  // Bloquer la navigation si c'est un produit fallback
+  if (typeof product.id === 'string' && product.id.startsWith('fallback')) {
+    console.warn('Navigation bloquée vers produit fallback:', product.id)
+    return
+  }
+
   router.push({ name: 'customer.product.detail', params: { id: product.id } })
 }
 

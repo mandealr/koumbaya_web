@@ -258,20 +258,33 @@
           <div
             v-for="product in featuredProducts"
             :key="product.id"
-            @click="viewProduct(product)"
-            class="bg-white rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group border border-gray-100 relative overflow-hidden"
+            @click="!isFallbackProduct(product) && viewProduct(product)"
+            :class="[
+              'bg-white rounded-3xl p-6 shadow-lg transition-all duration-300 border border-gray-100 relative overflow-hidden',
+              isFallbackProduct(product)
+                ? 'opacity-75 cursor-not-allowed'
+                : 'hover:shadow-2xl cursor-pointer group'
+            ]"
           >
             <!-- Badge mode de vente -->
             <div class="absolute top-4 left-4 z-10">
+              <!-- Badge Exemple pour les produits fallback -->
               <span
-                v-if="product.sale_mode === 'lottery'"
+                v-if="isFallbackProduct(product)"
+                class="bg-gradient-to-r from-gray-500 to-gray-700 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg flex items-center gap-1"
+              >
+                <EyeIcon class="h-4 w-4" />
+                Exemple
+              </span>
+              <span
+                v-else-if="product.sale_mode === 'lottery'"
                 class="bg-gradient-to-r from-purple-500 to-purple-700 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg flex items-center gap-1"
               >
                 <TicketIcon class="h-4 w-4" />
                 Tirage spécial
               </span>
-              <span 
-                v-else 
+              <span
+                v-else
                 class="bg-gradient-to-r from-[#0099cc] to-cyan-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg flex items-center gap-1"
               >
                 <ShoppingCartIcon class="h-4 w-4" />
@@ -368,14 +381,19 @@
               </div>
 
               <button
-                class="w-full font-semibold py-3 rounded-xl transition-all duration-200 group-hover:scale-105 group-hover:shadow-lg flex items-center justify-center gap-2 whitespace-nowrap"
-                :class="product.sale_mode === 'lottery'
-                  ? 'bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white'
-                  : 'bg-gradient-to-r from-[#0099cc] to-cyan-500 hover:from-[#0088bb] hover:to-cyan-600 text-white'"
+                :disabled="isFallbackProduct(product)"
+                class="w-full font-semibold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap"
+                :class="[
+                  isFallbackProduct(product)
+                    ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                    : product.sale_mode === 'lottery'
+                      ? 'bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white group-hover:scale-105 group-hover:shadow-lg'
+                      : 'bg-gradient-to-r from-[#0099cc] to-cyan-500 hover:from-[#0088bb] hover:to-cyan-600 text-white group-hover:scale-105 group-hover:shadow-lg'
+                ]"
               >
                 <TicketIcon v-if="product.sale_mode === 'lottery'" class="h-5 w-5 flex-shrink-0" />
                 <CreditCardIcon v-else class="h-5 w-5 flex-shrink-0" />
-                {{ product.sale_mode === 'lottery' ? 'Tenter votre chance' : 'Acheter maintenant' }}
+                {{ isFallbackProduct(product) ? 'Non disponible' : (product.sale_mode === 'lottery' ? 'Tenter votre chance' : 'Acheter maintenant') }}
               </button>
             </div>
           </div>
@@ -815,7 +833,17 @@ const getMerchantName = (merchant) => {
   return 'Vendeur'
 }
 
+const isFallbackProduct = (product) => {
+  return typeof product.id === 'string' && product.id.startsWith('fallback')
+}
+
 const viewProduct = (product) => {
+  // Ne pas naviguer si c'est un produit fallback
+  if (isFallbackProduct(product)) {
+    console.warn('Clic bloqué sur produit fallback:', product.id)
+    return
+  }
+
   router.push({ name: 'public.product.detail', params: { id: product.id } })
 }
 
