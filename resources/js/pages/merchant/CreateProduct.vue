@@ -7,6 +7,12 @@
         <p class="mt-2 text-gray-600">
           {{ form.sale_mode === 'lottery' ? 'Créez votre tombola et mettez votre produit en jeu' : 'Mettez votre produit en vente directe' }}
         </p>
+        <p class="mt-1 text-sm text-blue-600 flex items-center">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          Sauvegarde automatique activée
+        </p>
       </div>
       <router-link
         to="/merchant/products"
@@ -708,7 +714,7 @@ const errors = reactive({
   description: '',
   category_id: '',
   condition: '',
-  value: '',
+  price: '', // Changé de 'value' à 'price'
   location: '',
   images: '',
   ticket_price: '',
@@ -1228,7 +1234,10 @@ const handleSubmit = async () => {
     
     if (productResponse.product) {
       console.log('Product created successfully, ID:', productResponse.product.id)
-      
+
+      // Effacer le brouillon après une publication réussie
+      clearFormFromLocalStorage()
+
       // Product creation automatically creates lottery if sale_mode is 'lottery'
       // No need to make separate lottery creation call
       if (form.sale_mode === 'lottery') {
@@ -1237,7 +1246,7 @@ const handleSubmit = async () => {
       } else {
         showSuccessToast('Produit créé avec succès !')
       }
-      
+
       // Redirect to products list
       console.log('Redirecting to products list...')
       setTimeout(() => {
@@ -1429,6 +1438,84 @@ const validateLotteryDuration = () => {
   }
 }
 
+// Sauvegarde automatique dans localStorage
+const STORAGE_KEY = 'koumbaya_create_product_draft'
+
+const saveFormToLocalStorage = () => {
+  try {
+    const draftData = {
+      form: {
+        name: form.name,
+        description: form.description,
+        category_id: form.category_id,
+        condition: form.condition,
+        sale_mode: form.sale_mode,
+        price: form.price,
+        location: form.location,
+        imageUrls: form.imageUrls,
+        ticket_price: form.ticket_price,
+        total_tickets: form.total_tickets,
+        min_tickets: form.min_tickets,
+        end_date: form.end_date,
+        lottery_duration: form.lottery_duration
+      },
+      currentStep: currentStep.value,
+      timestamp: new Date().toISOString()
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(draftData))
+    console.log('✓ Brouillon sauvegardé automatiquement')
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde du brouillon:', error)
+  }
+}
+
+const loadFormFromLocalStorage = () => {
+  try {
+    const savedData = localStorage.getItem(STORAGE_KEY)
+    if (savedData) {
+      const draftData = JSON.parse(savedData)
+      console.log('=== RESTAURATION DU BROUILLON ===')
+      console.log('Date de sauvegarde:', draftData.timestamp)
+
+      // Demander confirmation à l'utilisateur
+      if (confirm('Un brouillon de produit a été trouvé. Voulez-vous le restaurer ?')) {
+        // Restaurer les données du formulaire
+        Object.assign(form, draftData.form)
+        currentStep.value = draftData.currentStep || 1
+
+        showSuccessToast('Brouillon restauré avec succès')
+        console.log('Brouillon restauré')
+      } else {
+        // Effacer le brouillon si l'utilisateur refuse
+        clearFormFromLocalStorage()
+        console.log('Brouillon refusé et effacé')
+      }
+      console.log('=================================')
+    }
+  } catch (error) {
+    console.error('Erreur lors de la restauration du brouillon:', error)
+  }
+}
+
+const clearFormFromLocalStorage = () => {
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+    console.log('✓ Brouillon effacé')
+  } catch (error) {
+    console.error('Erreur lors de l\'effacement du brouillon:', error)
+  }
+}
+
+// Watcher pour sauvegarder automatiquement à chaque modification
+watch(() => ({ ...form }), () => {
+  saveFormToLocalStorage()
+}, { deep: true, debounce: 500 })
+
+// Watcher pour sauvegarder l'étape actuelle
+watch(currentStep, () => {
+  saveFormToLocalStorage()
+})
+
 // Load categories on mount
 const loadCategories = async () => {
   try {
@@ -1498,25 +1585,29 @@ onMounted(() => {
   console.log('User seller type:', user.value?.seller_type)
   console.log('Is individual seller:', isIndividualSeller.value)
   console.log('Is business seller:', isBusinessSeller.value)
-  
+
+  // Charger les données avant de restaurer le brouillon
   loadCategories()
   loadLotteryDurationConstraints()
-  
-  // Forcer le nombre de tickets à 500 pour les vendeurs individuels
-  if (isIndividualSeller.value) {
+
+  // Vérifier et restaurer un brouillon sauvegardé
+  loadFormFromLocalStorage()
+
+  // Forcer le nombre de tickets à 500 pour les vendeurs individuels (si pas de brouillon)
+  if (isIndividualSeller.value && !form.total_tickets) {
     console.log('Setting default 500 tickets for individual seller')
     form.total_tickets = '500'
-  } else {
-    form.total_tickets = ''
   }
-  
-  // Set default end date (tomorrow)
-  const tomorrow = new Date()
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  tomorrow.setHours(12, 0, 0, 0)
-  form.end_date = tomorrow.toISOString().slice(0, 16)
-  console.log('Set default end date:', form.end_date)
-  
+
+  // Set default end date (tomorrow) si pas déjà défini
+  if (!form.end_date) {
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    tomorrow.setHours(12, 0, 0, 0)
+    form.end_date = tomorrow.toISOString().slice(0, 16)
+    console.log('Set default end date:', form.end_date)
+  }
+
   console.log('Initial form state:', {
     sale_mode: form.sale_mode,
     total_tickets: form.total_tickets,

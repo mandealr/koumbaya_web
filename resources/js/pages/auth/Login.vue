@@ -99,31 +99,6 @@
                   <div class="text-sm text-red-800 font-semibold leading-relaxed">
                     {{ errors.general }}
                   </div>
-                  <!-- Conseils selon le type d'erreur -->
-                  <div v-if="errors.general.includes('Identifiants incorrects')" class="mt-2 text-xs text-red-600 bg-red-100 rounded-lg p-2">
-                    <div class="font-medium mb-1">💡 Conseils :</div>
-                    <ul class="space-y-1 list-disc list-inside ml-2">
-                      <li>Vérifiez que votre adresse email est correcte</li>
-                      <li>Assurez-vous que les majuscules/minuscules sont respectées</li>
-                      <li>Essayez de réinitialiser votre mot de passe si nécessaire</li>
-                    </ul>
-                  </div>
-                  <div v-else-if="errors.general.includes('connexion internet')" class="mt-2 text-xs text-red-600 bg-red-100 rounded-lg p-2">
-                    <div class="font-medium mb-1">💡 Conseils :</div>
-                    <ul class="space-y-1 list-disc list-inside ml-2">
-                      <li>Vérifiez votre connexion WiFi ou données mobiles</li>
-                      <li>Essayez de rafraîchir la page</li>
-                      <li>Contactez votre fournisseur internet si le problème persiste</li>
-                    </ul>
-                  </div>
-                  <div v-else-if="errors.general.includes('Trop de tentatives')" class="mt-2 text-xs text-red-600 bg-red-100 rounded-lg p-2">
-                    <div class="font-medium mb-1">💡 Que faire :</div>
-                    <ul class="space-y-1 list-disc list-inside ml-2">
-                      <li>Attendez 15 minutes avant de réessayer</li>
-                      <li>Utilisez ce temps pour vérifier vos identifiants</li>
-                      <li>Réinitialisez votre mot de passe si nécessaire</li>
-                    </ul>
-                  </div>
                 </div>
                 <button
                   @click="errors.general = ''"
