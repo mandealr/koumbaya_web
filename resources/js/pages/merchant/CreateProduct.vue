@@ -965,7 +965,7 @@ const nextStep = () => {
     lottery_duration: form.lottery_duration
   })
   
-  if (canProceed.value && currentStep.value < steps.length) {
+  if (canProceed.value && currentStep.value < steps.value.length) {
     console.log(`Moving from step ${currentStep.value} to step ${currentStep.value + 1}`)
     currentStep.value++
     
