@@ -565,7 +565,10 @@ class StatsController extends Controller
             ->get();
             
         // Transformer les données pour le frontend
-        $lotteries = $popularLotteries->map(function($lottery) {
+        $lotteries = $popularLotteries->filter(function($lottery) {
+            // Filtrer les tombolas qui n'ont pas de produit associé
+            return $lottery->product !== null;
+        })->map(function($lottery) {
             return [
                 'id' => $lottery->id,
                 'lottery_number' => $lottery->lottery_number,
@@ -574,7 +577,7 @@ class StatsController extends Controller
                 'total_tickets' => $lottery->max_tickets,
                 'ticket_price' => $lottery->ticket_price,
                 'draw_date' => $lottery->draw_date,
-                'progress' => $lottery->max_tickets > 0 ? 
+                'progress' => $lottery->max_tickets > 0 ?
                     round(($lottery->sold_tickets / $lottery->max_tickets) * 100, 2) : 0,
                 'time_remaining' => $lottery->time_remaining ?? null,
                 'product' => [
@@ -588,7 +591,7 @@ class StatsController extends Controller
                     ] : null
                 ]
             ];
-        });
+        })->values();
         
         return response()->json([
             'success' => true,
