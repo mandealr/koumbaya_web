@@ -552,9 +552,10 @@ const loadFeaturedProducts = async () => {
         const soldTickets = parseInt(lottery?.sold_tickets || 0)
         const maxTickets = parseInt(lottery?.max_tickets || lottery?.total_tickets || 1000)
         const progressFromAPI = lottery?.progress_percentage || lottery?.participation_rate || 0
-        
+
         return {
           id: product.id,
+          slug: product.slug,
           name: product.name || product.title,
           value: product.price || 0,
           price: product.price || 0,
@@ -579,6 +580,7 @@ const loadFeaturedProducts = async () => {
     if (directResponse && directResponse.success && directResponse.data) {
       const directProducts = (directResponse.data.products || directResponse.data).slice(0, 2).map(product => ({
         id: product.id,
+        slug: product.slug,
         name: product.name || product.title,
         value: product.price || 0,
         price: product.price || 0,
