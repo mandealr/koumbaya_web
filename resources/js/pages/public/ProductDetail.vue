@@ -34,24 +34,30 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <!-- Product Images -->
           <div class="space-y-4">
-            <div class="relative overflow-hidden rounded-2xl bg-gray-100">
+            <div class="relative overflow-hidden rounded-2xl bg-gray-100 cursor-pointer group" @click="openLightbox(0)">
               <ProductImage
-                :src="product.image_url || product.main_image || product.image"
+                :src="currentImage"
                 :alt="product.name"
                 container-class="w-full h-96 lg:h-[500px]"
-                image-class="w-full h-full object-cover"
+                image-class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
-              <div v-if="hasActiveLottery" class="absolute top-4 right-4">
+              <!-- Overlay with zoom icon on hover -->
+              <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
+                <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                </svg>
+              </div>
+              <div v-if="hasActiveLottery" class="absolute top-4 right-4 z-10">
                 <span class="bg-[#0099cc] text-white px-4 py-2 rounded-full font-semibold">
                   {{ formatPrice(product.ticketPrice) }} / ticket
                 </span>
               </div>
-              <div v-else class="absolute top-4 right-4">
+              <div v-else class="absolute top-4 right-4 z-10">
                 <span class="bg-green-600 text-white px-4 py-2 rounded-full font-semibold">
                   Achat direct
                 </span>
               </div>
-              <div v-if="product.isNew" class="absolute top-4 left-4">
+              <div v-if="product.isNew" class="absolute top-4 left-4 z-10">
                 <span class="bg-[#0099cc] text-white px-4 py-2 rounded-full font-semibold">
                   Nouveau
                 </span>
@@ -59,17 +65,84 @@
             </div>
 
             <!-- Thumbnail Gallery -->
-            <div v-if="product.images && product.images.length > 1" class="grid grid-cols-4 gap-4">
-              <div v-for="(image, index) in product.images.slice(0, 4)" :key="index" class="relative overflow-hidden rounded-xl bg-gray-100 cursor-pointer hover:ring-2 hover:ring-[#0099cc] transition-all">
+            <div v-if="allImages.length > 1" class="grid grid-cols-4 gap-4">
+              <div
+                v-for="(image, index) in allImages.slice(0, 4)"
+                :key="index"
+                @click="openLightbox(index)"
+                class="relative overflow-hidden rounded-xl bg-gray-100 cursor-pointer hover:ring-2 hover:ring-[#0099cc] transition-all"
+                :class="{ 'ring-2 ring-[#0099cc]': currentImageIndex === index }"
+              >
                 <ProductImage
                   :src="image"
                   :alt="`${product.name} - Vue ${index + 1}`"
                   container-class="w-full h-20"
                   image-class="w-full h-full object-cover"
                 />
+                <div v-if="index === 3 && allImages.length > 4" class="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-semibold">
+                  +{{ allImages.length - 4 }}
+                </div>
               </div>
             </div>
           </div>
+
+          <!-- Lightbox Modal -->
+          <Teleport to="body">
+            <Transition name="fade">
+              <div
+                v-if="showLightbox"
+                class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+                @click="closeLightbox"
+              >
+                <!-- Close button -->
+                <button
+                  @click.stop="closeLightbox"
+                  class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors z-50"
+                  aria-label="Fermer"
+                >
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+
+                <!-- Previous button -->
+                <button
+                  v-if="allImages.length > 1"
+                  @click.stop="previousImage"
+                  class="absolute left-4 text-white hover:text-gray-300 transition-colors z-50"
+                  aria-label="Image précédente"
+                >
+                  <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+
+                <!-- Image container -->
+                <div class="relative max-w-7xl max-h-screen px-4 py-16" @click.stop>
+                  <img
+                    :src="allImages[lightboxIndex]"
+                    :alt="`${product.name} - Vue ${lightboxIndex + 1}`"
+                    class="max-w-full max-h-[90vh] object-contain mx-auto rounded-lg"
+                  />
+                  <div class="text-white text-center mt-4">
+                    {{ lightboxIndex + 1 }} / {{ allImages.length }}
+                  </div>
+                </div>
+
+                <!-- Next button -->
+                <button
+                  v-if="allImages.length > 1"
+                  @click.stop="nextImage"
+                  class="absolute right-4 text-white hover:text-gray-300 transition-colors z-50"
+                  aria-label="Image suivante"
+                >
+                  <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </Transition>
+          </Teleport>
 
           <!-- Product Info -->
           <div class="space-y-8">
@@ -418,7 +491,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ProductImage from '@/components/common/ProductImage.vue'
 import { useApi } from '@/composables/api'
@@ -446,9 +519,43 @@ const loading = ref(true)
 const product = ref(null)
 const error = ref(null)
 
+// Lightbox state
+const showLightbox = ref(false)
+const lightboxIndex = ref(0)
+const currentImageIndex = ref(0)
+
 // Computed properties
 const hasActiveLottery = computed(() => {
   return product.value && product.value.activeLottery && product.value.activeLottery.id
+})
+
+const allImages = computed(() => {
+  if (!product.value) return []
+
+  const images = []
+
+  // Ajouter l'image principale
+  const mainImage = product.value.image_url || product.value.main_image || product.value.image
+  if (mainImage && mainImage !== placeholderImg) {
+    images.push(mainImage)
+  }
+
+  // Ajouter les images supplémentaires
+  if (product.value.images && Array.isArray(product.value.images)) {
+    product.value.images.forEach(img => {
+      // Éviter les doublons avec l'image principale
+      if (img && img !== mainImage && img !== placeholderImg) {
+        images.push(img)
+      }
+    })
+  }
+
+  // Si aucune image n'est disponible, utiliser le placeholder
+  return images.length > 0 ? images : [placeholderImg]
+})
+
+const currentImage = computed(() => {
+  return allImages.value[currentImageIndex.value] || placeholderImg
 })
 
 // Produits similaires (chargés depuis l'API)
@@ -626,6 +733,45 @@ const shareProduct = () => {
   }
 }
 
+// Lightbox methods
+const selectImage = (index) => {
+  currentImageIndex.value = index
+}
+
+const openLightbox = (index) => {
+  lightboxIndex.value = index
+  showLightbox.value = true
+  // Empêcher le scroll du body
+  document.body.style.overflow = 'hidden'
+}
+
+const closeLightbox = () => {
+  showLightbox.value = false
+  // Réactiver le scroll du body
+  document.body.style.overflow = ''
+}
+
+const previousImage = () => {
+  lightboxIndex.value = (lightboxIndex.value - 1 + allImages.value.length) % allImages.value.length
+}
+
+const nextImage = () => {
+  lightboxIndex.value = (lightboxIndex.value + 1) % allImages.value.length
+}
+
+// Gestion du clavier pour la lightbox
+const handleKeydown = (e) => {
+  if (!showLightbox.value) return
+
+  if (e.key === 'Escape') {
+    closeLightbox()
+  } else if (e.key === 'ArrowLeft') {
+    previousImage()
+  } else if (e.key === 'ArrowRight') {
+    nextImage()
+  }
+}
+
 const viewProduct = (prod) => {
   // Bloquer la navigation si c'est un produit fallback
   if (typeof prod.id === 'string' && prod.id.startsWith('fallback')) {
@@ -720,5 +866,26 @@ const loadProduct = async () => {
 
 onMounted(() => {
   loadProduct()
+  // Ajouter l'event listener pour le clavier
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  // Nettoyer l'event listener
+  window.removeEventListener('keydown', handleKeydown)
+  // S'assurer que le scroll du body est réactivé
+  document.body.style.overflow = ''
 })
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

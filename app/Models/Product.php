@@ -13,6 +13,7 @@ class Product extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'image',
         'images', // Support pour array d'images
@@ -187,24 +188,24 @@ class Product extends Model
      */
     public function getImagesAttribute($value)
     {
-        // Si on a des images dans l'array, les retourner
-        if ($value && is_array(json_decode($value, true))) {
-            return json_decode($value, true);
+        // Si le cast a déjà transformé la valeur en array
+        if (is_array($value)) {
+            return $value;
         }
-        
+
         // Si on a des images en JSON string, les décoder
         if ($value && is_string($value)) {
             $decoded = json_decode($value, true);
-            if (is_array($decoded)) {
+            if (is_array($decoded) && !empty($decoded)) {
                 return $decoded;
             }
         }
-        
+
         // Sinon, retourner l'image principale dans un array si elle existe
-        if ($this->attributes['image']) {
+        if (isset($this->attributes['image']) && $this->attributes['image']) {
             return [$this->attributes['image']];
         }
-        
+
         return [];
     }
 
@@ -483,25 +484,51 @@ class Product extends Model
     {
         // Calcul automatique lors de la création
         static::creating(function ($product) {
+            // Générer le slug automatiquement si non fourni
+            if (empty($product->slug) && !empty($product->name)) {
+                $product->slug = \Illuminate\Support\Str::slug($product->name);
+
+                // Vérifier l'unicité
+                $originalSlug = $product->slug;
+                $counter = 1;
+                while (static::where('slug', $product->slug)->exists()) {
+                    $product->slug = $originalSlug . '-' . $counter;
+                    $counter++;
+                }
+            }
+
             if (config('koumbaya.features.auto_calculate_ticket_price', true)) {
                 $meta = $product->meta ?? [];
-                
+
                 // Calculer le prix de ticket seulement pour les produits en mode tombola
                 if ($product->price && $product->sale_mode === 'lottery' && (!isset($meta['ticket_price']) || $meta['ticket_price'] == 0)) {
                     $meta['ticket_price'] = $product->calculateTicketPrice();
                 }
-                
+
                 // Définir min_participants seulement pour les tombolas
                 if ($product->sale_mode === 'lottery' && !isset($meta['min_participants'])) {
                     $meta['min_participants'] = config('koumbaya.ticket_calculation.default_tickets', 1000);
                 }
-                
+
                 $product->meta = $meta;
             }
         });
 
         // Recalcul automatique lors de la modification du prix
         static::updating(function ($product) {
+            // Régénérer le slug si le nom change
+            if ($product->isDirty('name') && !$product->isDirty('slug')) {
+                $product->slug = \Illuminate\Support\Str::slug($product->name);
+
+                // Vérifier l'unicité
+                $originalSlug = $product->slug;
+                $counter = 1;
+                while (static::where('slug', $product->slug)->where('id', '!=', $product->id)->exists()) {
+                    $product->slug = $originalSlug . '-' . $counter;
+                    $counter++;
+                }
+            }
+
             if (config('koumbaya.features.auto_calculate_ticket_price', true)) {
                 // Recalculer seulement pour les produits en mode tombola
                 if ($product->isDirty('price') && $product->price && $product->sale_mode === 'lottery') {

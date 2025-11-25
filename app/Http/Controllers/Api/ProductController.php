@@ -421,9 +421,9 @@ class ProductController extends Controller
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
-     *         description="ID du produit",
+     *         description="ID ou slug du produit",
      *         required=true,
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -436,6 +436,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
+        // Support à la fois l'ID et le slug
         $product = Product::with([
             'category',
             'merchant.company',
@@ -443,7 +444,17 @@ class ProductController extends Controller
             'lotteries' => function($query) {
                 $query->completed()->with('winner')->orderBy('draw_date', 'desc')->limit(5);
             }
-        ])->findOrFail($id);
+        ]);
+
+        // Si c'est un nombre, chercher par ID, sinon par slug
+        if (is_numeric($id)) {
+            $product = $product->findOrFail($id);
+        } else {
+            $product = $product->where('slug', $id)->firstOrFail();
+        }
+
+        // Incrémenter le compteur de vues
+        $product->increment('views_count');
 
         return $this->sendResponse(
             new ProductResource($product),
