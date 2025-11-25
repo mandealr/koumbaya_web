@@ -779,7 +779,9 @@ const viewProduct = (prod) => {
     return
   }
 
-  router.push({ name: 'public.product.detail', params: { id: prod.id } })
+  // Utiliser le slug si disponible, sinon utiliser l'ID
+  const identifier = prod.slug || prod.id
+  router.push({ name: 'public.product.detail', params: { id: identifier } })
 }
 
 const loadRelatedProducts = async (categoryId, currentProductId) => {

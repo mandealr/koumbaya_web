@@ -238,7 +238,9 @@ const viewProduct = (product) => {
     return
   }
 
-  router.push({ name: 'customer.product.detail', params: { id: product.id } })
+  // Utiliser le slug si disponible, sinon utiliser l'ID
+  const identifier = product.slug || product.id
+  router.push({ name: 'customer.product.detail', params: { id: identifier } })
 }
 
 
