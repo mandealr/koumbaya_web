@@ -73,12 +73,12 @@ class AdminPaymentController extends Controller
                 'order_number' => $payment->order->order_number ?? $payment->reference,
                 'reference' => $payment->reference,
                 'user_id' => $payment->user_id,
-                'user_name' => $payment->user ? 
+                'user_name' => $payment->user ?
                     trim($payment->user->first_name . ' ' . $payment->user->last_name) : 'N/A',
                 'user_email' => $payment->user->email ?? 'N/A',
-                'product_name' => $payment->lottery 
+                'product_name' => $payment->lottery && $payment->lottery->product
                     ? ($payment->lottery->product->title ?? $payment->lottery->product->name)
-                    : ($payment->product->title ?? $payment->product->name ?? 'N/A'),
+                    : ($payment->product ? ($payment->product->title ?? $payment->product->name) : 'N/A'),
                 'tickets_count' => $payment->quantity ?? 1,
                 'amount' => $payment->amount,
                 'currency' => $payment->currency ?? 'FCFA',
@@ -250,9 +250,9 @@ class AdminPaymentController extends Controller
                 'user_name' => $payment->user ? 
                     trim($payment->user->first_name . ' ' . $payment->user->last_name) : 'N/A',
                 'user_email' => $payment->user->email ?? 'N/A',
-                'product_name' => $payment->lottery 
+                'product_name' => $payment->lottery && $payment->lottery->product
                     ? ($payment->lottery->product->title ?? $payment->lottery->product->name)
-                    : ($payment->product->title ?? $payment->product->name ?? 'N/A'),
+                    : ($payment->product ? ($payment->product->title ?? $payment->product->name) : 'N/A'),
                 'amount' => $payment->amount,
                 'currency' => $payment->currency ?? 'FCFA',
                 'status' => $payment->is_paid 
