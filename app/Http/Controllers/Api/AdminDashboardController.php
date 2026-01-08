@@ -118,12 +118,12 @@ class AdminDashboardController extends Controller
                         'total_tickets' => $lottery->total_tickets,
                         'end_date' => $lottery->end_date,
                         'created_at' => $lottery->created_at,
-                        'product' => [
+                        'product' => $lottery->product ? [
                             'id' => $lottery->product->id,
                             'name' => $lottery->product->name,
                             'image_url' => $lottery->product->image_url,
                             'main_image' => $lottery->product->main_image
-                        ]
+                        ] : null
                     ];
                 });
                 
