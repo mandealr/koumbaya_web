@@ -1,39 +1,66 @@
 @extends('emails.layouts.base')
 
 @section('content')
-    <h2>Confirmation de paiement</h2>
-    
-    <p>Bonjour {{ $payment->customer_name ?? 'Client' }},</p>
-    
-    <p>Nous confirmons la réception de votre paiement de <strong>{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</strong>.</p>
-    
-    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <h3>Détails du paiement</h3>
-        <ul style="list-style: none; padding: 0;">
-            <li><strong>Référence :</strong> {{ $payment->reference }}</li>
-            <li><strong>Montant :</strong> {{ number_format($payment->amount, 0, ',', ' ') }} FCFA</li>
-            <li><strong>Méthode :</strong> {{ ucfirst($payment->payment_method ?? 'Mobile Money') }}</li>
-            <li><strong>Date :</strong> {{ $payment->paid_at ? $payment->paid_at->format('d/m/Y à H:i') : 'Maintenant' }}</li>
-        </ul>
+    <h2 style="color: #1f2937; margin-top: 0;">Confirmation de paiement</h2>
+
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
+        Bonjour <strong>{{ $payment->customer_name ?? 'Client' }}</strong>,
+    </p>
+
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
+        Nous confirmons la réception de votre paiement de <strong style="color: #0099cc;">{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</strong>.
+    </p>
+
+    <div class="info-box">
+        <h3 style="color: #1f2937; margin-top: 0; font-size: 18px;">Détails du paiement</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Référence :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ $payment->reference }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Montant :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Méthode :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ ucfirst($payment->payment_method ?? 'Mobile Money') }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Date :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ $payment->paid_at ? $payment->paid_at->format('d/m/Y à H:i') : 'Maintenant' }}</td>
+            </tr>
+        </table>
     </div>
-    
+
     @if($payment->order)
-        <h3>Informations de la commande</h3>
-        <ul style="list-style: none; padding: 0;">
-            <li><strong>Numéro :</strong> {{ $payment->order->order_number }}</li>
+        <h3 style="color: #1f2937; font-size: 18px;">Informations de la commande</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Numéro :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ $payment->order->order_number }}</td>
+            </tr>
             @if($payment->order->product)
-                <li><strong>Produit :</strong> {{ $payment->order->product->name }}</li>
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Produit :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ $payment->order->product->name }}</td>
+            </tr>
             @endif
             @if($payment->order->lottery)
-                <li><strong>Tombola :</strong> {{ $payment->order->lottery->title }}</li>
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Tombola :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ $payment->order->lottery->title }}</td>
+            </tr>
             @endif
-        </ul>
+        </table>
     @endif
-    
-    <p>Merci de votre confiance !</p>
-    
-    <p style="margin-top: 30px;">
+
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-top: 30px;">
+        Merci de votre confiance !
+    </p>
+
+    <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
         L'équipe Koumbaya<br>
-        <a href="{{ config('app.frontend_url') }}">{{ config('app.frontend_url') }}</a>
+        <a href="{{ config('app.frontend_url') }}" style="color: #0099cc; text-decoration: none;">{{ config('app.frontend_url') }}</a>
     </p>
 @endsection

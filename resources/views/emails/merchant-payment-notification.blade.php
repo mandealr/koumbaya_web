@@ -1,46 +1,76 @@
 @extends('emails.layouts.base')
 
 @section('content')
-    <h2>Nouveau paiement reçu</h2>
-    
-    <p>Bonjour,</p>
-    
-    <p>Vous avez reçu un nouveau paiement de <strong>{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</strong> sur votre boutique Koumbaya.</p>
-    
-    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <h3>Détails du paiement</h3>
-        <ul style="list-style: none; padding: 0;">
-            <li><strong>Référence :</strong> {{ $payment->reference }}</li>
-            <li><strong>Client :</strong> {{ $payment->customer_name ?? 'N/A' }}</li>
-            <li><strong>Téléphone :</strong> {{ $payment->customer_phone ?? 'N/A' }}</li>
-            <li><strong>Montant :</strong> {{ number_format($payment->amount, 0, ',', ' ') }} FCFA</li>
-            <li><strong>Méthode :</strong> {{ ucfirst($payment->payment_method ?? 'Mobile Money') }}</li>
-            <li><strong>Date :</strong> {{ $payment->paid_at ? $payment->paid_at->format('d/m/Y à H:i') : 'Maintenant' }}</li>
-        </ul>
+    <h2 style="color: #1f2937; margin-top: 0;">Nouveau paiement reçu</h2>
+
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
+        Bonjour,
+    </p>
+
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
+        Vous avez reçu un nouveau paiement de <strong style="color: #0099cc;">{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</strong> sur votre boutique Koumbaya.
+    </p>
+
+    <div class="info-box">
+        <h3 style="color: #1f2937; margin-top: 0; font-size: 18px;">Détails du paiement</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Référence :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ $payment->reference }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Client :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ $payment->customer_name ?? 'N/A' }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Téléphone :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ $payment->customer_phone ?? 'N/A' }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Montant :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Méthode :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ ucfirst($payment->payment_method ?? 'Mobile Money') }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Date :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ $payment->paid_at ? $payment->paid_at->format('d/m/Y à H:i') : 'Maintenant' }}</td>
+            </tr>
+        </table>
     </div>
-    
+
     @if($payment->order)
-        <h3>Détails de la commande</h3>
-        <ul style="list-style: none; padding: 0;">
-            <li><strong>Numéro :</strong> {{ $payment->order->order_number }}</li>
+        <h3 style="color: #1f2937; font-size: 18px;">Détails de la commande</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Numéro :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ $payment->order->order_number }}</td>
+            </tr>
             @if($payment->order->product)
-                <li><strong>Produit :</strong> {{ $payment->order->product->name }}</li>
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Produit :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ $payment->order->product->name }}</td>
+            </tr>
             @endif
             @if($payment->order->lottery)
-                <li><strong>Tombola :</strong> {{ $payment->order->lottery->title }}</li>
+            <tr>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Tombola :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ $payment->order->lottery->title }}</td>
+            </tr>
             @endif
-        </ul>
+        </table>
     @endif
-    
+
     <div style="text-align: center; margin: 30px 0;">
-        <a href="{{ config('app.frontend_url') }}/merchant/dashboard" 
-           style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+        <a href="{{ config('app.frontend_url') }}/merchant/dashboard" class="koumbaya-button">
             Voir dans le tableau de bord
         </a>
     </div>
-    
-    <p style="margin-top: 30px;">
+
+    <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
         L'équipe Koumbaya<br>
-        <a href="{{ config('app.frontend_url') }}">{{ config('app.frontend_url') }}</a>
+        <a href="{{ config('app.frontend_url') }}" style="color: #0099cc; text-decoration: none;">{{ config('app.frontend_url') }}</a>
     </p>
 @endsection

@@ -298,19 +298,52 @@ class PaymentCallbackController extends Controller
      */
     private function notifyUser(Payment $payment, $result)
     {
-        // Ici vous pouvez implémenter:
-        // - Notification push mobile
-        // - Email de confirmation
-        // - SMS de confirmation
-        // - Mise à jour temps réel via websockets
-        
-        Log::info('User notification:', [
-            'user_id' => $payment->user_id,
-            'payment_id' => $payment->id,
-            'reference' => $payment->reference,
-            'order_id' => $payment->order_id,
-            'result' => $result
-        ]);
+        try {
+            if ($result === 'success') {
+                // Send confirmation email to customer
+                if ($payment->user && $payment->user->email) {
+                    \Mail::to($payment->user->email)->send(new \App\Mail\PaymentConfirmation($payment));
+
+                    Log::info('Payment success email sent to customer', [
+                        'payment_id' => $payment->id,
+                        'customer_email' => $payment->user->email
+                    ]);
+                }
+
+                // Send notification to merchant if applicable
+                if ($payment->order && $payment->order->product && $payment->order->product->merchant_id) {
+                    $merchant = \App\Models\User::find($payment->order->product->merchant_id);
+
+                    if ($merchant && $merchant->email) {
+                        \Mail::to($merchant->email)->send(new \App\Mail\MerchantPaymentNotification($payment));
+
+                        Log::info('Payment notification sent to merchant', [
+                            'payment_id' => $payment->id,
+                            'merchant_id' => $merchant->id,
+                            'merchant_email' => $merchant->email
+                        ]);
+                    }
+                }
+
+                // Send to admin if configured
+                if (config('mail.admin_email')) {
+                    \Mail::to(config('mail.admin_email'))->send(new \App\Mail\MerchantPaymentNotification($payment));
+                }
+            }
+
+            Log::info('User notification:', [
+                'user_id' => $payment->user_id,
+                'payment_id' => $payment->id,
+                'reference' => $payment->reference,
+                'order_id' => $payment->order_id,
+                'result' => $result
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send payment notification emails', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     /**

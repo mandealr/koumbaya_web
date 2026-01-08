@@ -20,20 +20,35 @@
                 width: 100% !important;
             }
         }
-        .koumbaya-gradient {
-            background: linear-gradient(135deg, #0099cc 0%, #0088bb 100%);
+        .koumbaya-header {
+            background-color: #0099cc;
         }
         .koumbaya-primary {
             color: #0099cc;
+        }
+        .koumbaya-secondary {
+            color: #9333EA;
         }
         .koumbaya-button {
             background-color: #0099cc;
             border: 8px solid #0099cc;
             border-radius: 8px;
+            color: #ffffff;
+            text-decoration: none;
+            display: inline-block;
+            padding: 12px 24px;
+            font-weight: 600;
         }
         .koumbaya-button:hover {
             background-color: #0088bb;
             border-color: #0088bb;
+        }
+        .info-box {
+            background-color: #f8fafc;
+            border-left: 4px solid #0099cc;
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -46,11 +61,11 @@
                 
                 <!-- Header -->
                 <tr>
-                    <td class="header koumbaya-gradient" style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; padding: 25px 0; text-align: center; background: linear-gradient(135deg, #0099cc 0%, #0088bb 100%);">
-                        <a href="{{ config('app.url') }}" style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; color: #ffffff; font-size: 24px; font-weight: bold; text-decoration: none; display: inline-block; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                    <td class="header koumbaya-header" style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; padding: 25px 0; text-align: center; background-color: #0099cc;">
+                        <a href="{{ config('app.url') }}" style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; color: #ffffff; font-size: 24px; font-weight: bold; text-decoration: none; display: inline-block;">
                             KOUMBAYA MARKETPLACE
                         </a>
-                        <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">Rendre l'impossible accessible</p>
+                        <p style="margin: 8px 0 0 0; color: #ffffff; font-size: 14px;">Rendre l'impossible accessible</p>
                     </td>
                 </tr>
 

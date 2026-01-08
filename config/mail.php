@@ -115,4 +115,16 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Koumbaya MarketPlace'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Email Address
+    |--------------------------------------------------------------------------
+    |
+    | This email address will receive copies of important notifications
+    | such as payment confirmations, new orders, and other admin alerts.
+    |
+    */
+
+    'admin_email' => env('MAIL_ADMIN_EMAIL', 'admin@koumbaya.com'),
+
 ];
