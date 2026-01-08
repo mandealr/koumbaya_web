@@ -349,7 +349,7 @@
                 </li>
                 <li class="flex items-start gap-3">
                   <CheckIcon class="h-5 w-5 text-[#0099cc] mt-0.5" />
-                  <span>Livraison express partout au Cameroun</span>
+                  <span>Livraison express partout au Gabon</span>
                 </li>
                 <li class="flex items-start gap-3">
                   <CheckIcon class="h-5 w-5 text-[#0099cc] mt-0.5" />

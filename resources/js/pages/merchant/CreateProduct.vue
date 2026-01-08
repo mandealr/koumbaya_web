@@ -25,7 +25,8 @@
 
     <!-- Progress Steps -->
     <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-      <div class="flex items-center justify-between mb-8">
+      <!-- Desktop view -->
+      <div class="hidden md:flex items-center justify-between mb-8">
         <div
           v-for="(step, index) in steps"
           :key="step.id"
@@ -61,17 +62,53 @@
           ></div>
         </div>
       </div>
+
+      <!-- Mobile view -->
+      <div class="md:hidden">
+        <div class="flex items-center justify-center mb-4">
+          <div :class="[
+            'flex items-center justify-center w-12 h-12 rounded-full border-2 font-medium text-sm transition-all',
+            'border-[#0099cc] bg-[#0099cc] text-white'
+          ]">
+            <component :is="steps[currentStep - 1].icon" class="w-6 h-6" />
+          </div>
+        </div>
+        <div class="text-center">
+          <p class="text-base font-medium text-[#0099cc]">
+            {{ steps[currentStep - 1].title }}
+          </p>
+          <p class="text-sm text-gray-700">{{ steps[currentStep - 1].description }}</p>
+          <p class="text-xs text-gray-500 mt-2">Étape {{ currentStep }} sur {{ steps.length }}</p>
+        </div>
+        <!-- Progress bar mobile -->
+        <div class="mt-4 w-full bg-gray-200 rounded-full h-2">
+          <div
+            class="bg-[#0099cc] h-2 rounded-full transition-all duration-300"
+            :style="{ width: `${(currentStep / steps.length) * 100}%` }"
+          ></div>
+        </div>
+      </div>
     </div>
 
     <form @submit.prevent="handleSubmit" class="space-y-6">
       <!-- Step 1: Basic Information -->
       <div v-if="currentStep === 1" class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-6">Informations de base</h2>
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Informations de base</h2>
+
+        <!-- Note explicative champs obligatoires -->
+        <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <p class="text-sm text-blue-800 flex items-center">
+            <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+            Les champs marqués d'un astérisque <span class="text-red-600 font-bold mx-1">*</span> sont obligatoires pour passer à l'étape suivante
+          </p>
+        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div class="lg:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Nom du produit *
+              Nom du produit <span class="text-red-600">*</span>
             </label>
             <input
               v-model="form.name"
@@ -86,7 +123,7 @@
 
           <div class="lg:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Description *
+              Description <span class="text-red-600">*</span>
             </label>
             <textarea
               v-model="form.description"
@@ -101,7 +138,7 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Catégorie *
+              Catégorie <span class="text-red-600">*</span>
             </label>
             <select
               v-model="form.category_id"
@@ -125,7 +162,7 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Condition *
+              Condition <span class="text-red-600">*</span>
             </label>
             <select
               v-model="form.condition"
@@ -141,7 +178,7 @@
 
           <div class="lg:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Mode de vente *
+              Mode de vente <span class="text-red-600">*</span>
             </label>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <label class="flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors"
@@ -178,15 +215,17 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Valeur du produit (FCFA) *
+              Valeur du produit (FCFA) <span class="text-red-600">*</span>
             </label>
             <input
               v-model="form.price"
-              type="number"
+              type="text"
+              inputmode="numeric"
               required
-              min="0"
               class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0099cc] focus:border-transparent transition-all" style="color: #5f5f5f"
               placeholder="Ex: 800000"
+              @input="handlePriceInput"
+              @paste="handlePricePaste"
             />
             <p v-if="errors.price" class="mt-1 text-sm text-red-600">{{ errors.price }}</p>
             <p v-else-if="form.price && parseFloat(form.price) < 1000" class="mt-1 text-sm text-orange-600">La valeur minimum est de 1000 FCFA</p>
@@ -200,7 +239,7 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Localisation *
+              Localisation <span class="text-red-600">*</span>
             </label>
             <input
               v-model="form.location"
@@ -293,7 +332,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Nombre de tickets *
+              Nombre de tickets <span class="text-red-600">*</span>
             </label>
             <!-- BLOQUÉ À 500 TICKETS POUR TOUS -->
             <div>
@@ -324,7 +363,7 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Prix par ticket (FCFA) *
+              Prix par ticket (FCFA) <span class="text-red-600">*</span>
             </label>
             <!-- Prix du ticket automatiquement calculé (lecture seule) -->
             <input
@@ -353,7 +392,7 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              {{ lotteryDurationConstraints?.can_customize ? 'Durée de la tombola *' : 'Date de fin de vente *' }}
+              {{ lotteryDurationConstraints?.can_customize ? 'Durée de la tombola' : 'Date de fin de vente' }} <span class="text-red-600">*</span>
             </label>
             
             <!-- Durée pour vendeurs business -->
@@ -420,7 +459,7 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Tickets minimum pour valider *
+              Tickets minimum pour valider <span class="text-red-600">*</span>
             </label>
             <input
               v-model="form.min_tickets"
@@ -1121,6 +1160,30 @@ const handleFiles = (files) => {
 
 const removeImage = (index) => {
   form.images.splice(index, 1)
+}
+
+// Gestion du champ prix - accepter uniquement les chiffres
+const handlePriceInput = (event) => {
+  const value = event.target.value
+  // Supprimer tous les caractères non numériques
+  const numericValue = value.replace(/[^0-9]/g, '')
+  form.price = numericValue
+
+  // Mettre à jour l'input avec la valeur nettoyée
+  event.target.value = numericValue
+}
+
+// Gestion du copier-coller dans le champ prix
+const handlePricePaste = (event) => {
+  event.preventDefault()
+  const pastedText = event.clipboardData.getData('text')
+  // Extraire uniquement les chiffres du texte collé
+  const numericValue = pastedText.replace(/[^0-9]/g, '')
+  form.price = numericValue
+
+  // Trigger l'événement input pour mettre à jour l'affichage
+  event.target.value = numericValue
+  event.target.dispatchEvent(new Event('input'))
 }
 
 const calculateLotteryMetrics = () => {
