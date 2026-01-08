@@ -712,14 +712,46 @@ class EBillingService
      */
     private static function sendPaymentNotifications(Payment $payment)
     {
+        Log::info('E-BILLING :: Starting email notifications process', [
+            'payment_id' => $payment->id,
+            'user_id' => $payment->user_id,
+            'amount' => $payment->amount,
+            'mail_driver' => config('mail.default'),
+            'mail_host' => config('mail.mailers.smtp.host'),
+            'mail_from' => config('mail.from.address')
+        ]);
+
         try {
             // Send notification to customer
             if ($payment->user && $payment->user->email) {
-                Mail::to($payment->user->email)->send(new \App\Mail\PaymentConfirmation($payment));
-
-                Log::info('E-BILLING :: Customer email sent successfully', [
+                Log::info('E-BILLING :: Attempting to send customer email', [
                     'payment_id' => $payment->id,
-                    'customer_email' => $payment->user->email
+                    'customer_email' => $payment->user->email,
+                    'customer_name' => $payment->user->first_name . ' ' . $payment->user->last_name
+                ]);
+
+                try {
+                    Mail::to($payment->user->email)->send(new \App\Mail\PaymentConfirmation($payment));
+
+                    Log::info('E-BILLING :: Customer email sent successfully', [
+                        'payment_id' => $payment->id,
+                        'customer_email' => $payment->user->email
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('E-BILLING :: Failed to send customer email', [
+                        'payment_id' => $payment->id,
+                        'customer_email' => $payment->user->email,
+                        'error' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                }
+            } else {
+                Log::warning('E-BILLING :: Cannot send customer email - user or email missing', [
+                    'payment_id' => $payment->id,
+                    'has_user' => $payment->user ? 'yes' : 'no',
+                    'has_email' => $payment->user && $payment->user->email ? 'yes' : 'no'
                 ]);
             }
 
@@ -728,29 +760,88 @@ class EBillingService
                 $merchant = \App\Models\User::find($payment->order->product->merchant_id);
 
                 if ($merchant && $merchant->email) {
-                    Mail::to($merchant->email)->send(new \App\Mail\MerchantPaymentNotification($payment));
-
-                    Log::info('E-BILLING :: Merchant email sent successfully', [
+                    Log::info('E-BILLING :: Attempting to send merchant email', [
                         'payment_id' => $payment->id,
                         'merchant_id' => $merchant->id,
                         'merchant_email' => $merchant->email
                     ]);
+
+                    try {
+                        Mail::to($merchant->email)->send(new \App\Mail\MerchantPaymentNotification($payment));
+
+                        Log::info('E-BILLING :: Merchant email sent successfully', [
+                            'payment_id' => $payment->id,
+                            'merchant_id' => $merchant->id,
+                            'merchant_email' => $merchant->email
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('E-BILLING :: Failed to send merchant email', [
+                            'payment_id' => $payment->id,
+                            'merchant_email' => $merchant->email,
+                            'error' => $e->getMessage(),
+                            'file' => $e->getFile(),
+                            'line' => $e->getLine(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                    }
+                } else {
+                    Log::warning('E-BILLING :: Merchant found but no email', [
+                        'payment_id' => $payment->id,
+                        'merchant_id' => $payment->order->product->merchant_id,
+                        'has_merchant' => $merchant ? 'yes' : 'no',
+                        'has_email' => $merchant && $merchant->email ? 'yes' : 'no'
+                    ]);
                 }
+            } else {
+                Log::info('E-BILLING :: No merchant to notify', [
+                    'payment_id' => $payment->id,
+                    'has_order' => $payment->order ? 'yes' : 'no',
+                    'has_product' => $payment->order && $payment->order->product ? 'yes' : 'no',
+                    'has_merchant_id' => $payment->order && $payment->order->product && $payment->order->product->merchant_id ? 'yes' : 'no'
+                ]);
             }
 
             // Also send to admin email if configured
-            if (config('mail.admin_email')) {
-                Mail::to(config('mail.admin_email'))->send(new \App\Mail\MerchantPaymentNotification($payment));
-
-                Log::info('E-BILLING :: Admin email sent successfully', [
+            $adminEmail = config('mail.admin_email');
+            if ($adminEmail) {
+                Log::info('E-BILLING :: Attempting to send admin email', [
                     'payment_id' => $payment->id,
-                    'admin_email' => config('mail.admin_email')
+                    'admin_email' => $adminEmail
+                ]);
+
+                try {
+                    Mail::to($adminEmail)->send(new \App\Mail\MerchantPaymentNotification($payment));
+
+                    Log::info('E-BILLING :: Admin email sent successfully', [
+                        'payment_id' => $payment->id,
+                        'admin_email' => $adminEmail
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('E-BILLING :: Failed to send admin email', [
+                        'payment_id' => $payment->id,
+                        'admin_email' => $adminEmail,
+                        'error' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                }
+            } else {
+                Log::warning('E-BILLING :: Admin email not configured', [
+                    'payment_id' => $payment->id,
+                    'config_value' => $adminEmail
                 ]);
             }
+
+            Log::info('E-BILLING :: Email notifications process completed', [
+                'payment_id' => $payment->id
+            ]);
         } catch (\Exception $e) {
-            Log::error('E-BILLING :: Failed to send email notifications', [
+            Log::error('E-BILLING :: General exception in email notifications', [
                 'payment_id' => $payment->id,
                 'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
         }

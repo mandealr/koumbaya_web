@@ -298,15 +298,47 @@ class PaymentCallbackController extends Controller
      */
     private function notifyUser(Payment $payment, $result)
     {
+        Log::info('CALLBACK :: Starting notification process', [
+            'payment_id' => $payment->id,
+            'user_id' => $payment->user_id,
+            'result' => $result,
+            'mail_driver' => config('mail.default'),
+            'mail_host' => config('mail.mailers.smtp.host'),
+            'mail_from' => config('mail.from.address')
+        ]);
+
         try {
             if ($result === 'success') {
                 // Send confirmation email to customer
                 if ($payment->user && $payment->user->email) {
-                    \Mail::to($payment->user->email)->send(new \App\Mail\PaymentConfirmation($payment));
-
-                    Log::info('Payment success email sent to customer', [
+                    Log::info('CALLBACK :: Attempting to send customer success email', [
                         'payment_id' => $payment->id,
-                        'customer_email' => $payment->user->email
+                        'customer_email' => $payment->user->email,
+                        'customer_name' => $payment->user->first_name . ' ' . $payment->user->last_name
+                    ]);
+
+                    try {
+                        \Mail::to($payment->user->email)->send(new \App\Mail\PaymentConfirmation($payment));
+
+                        Log::info('CALLBACK :: Customer success email sent successfully', [
+                            'payment_id' => $payment->id,
+                            'customer_email' => $payment->user->email
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('CALLBACK :: Failed to send customer success email', [
+                            'payment_id' => $payment->id,
+                            'customer_email' => $payment->user->email,
+                            'error' => $e->getMessage(),
+                            'file' => $e->getFile(),
+                            'line' => $e->getLine(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                    }
+                } else {
+                    Log::warning('CALLBACK :: Cannot send customer email - user or email missing', [
+                        'payment_id' => $payment->id,
+                        'has_user' => $payment->user ? 'yes' : 'no',
+                        'has_email' => $payment->user && $payment->user->email ? 'yes' : 'no'
                     ]);
                 }
 
@@ -315,23 +347,81 @@ class PaymentCallbackController extends Controller
                     $merchant = \App\Models\User::find($payment->order->product->merchant_id);
 
                     if ($merchant && $merchant->email) {
-                        \Mail::to($merchant->email)->send(new \App\Mail\MerchantPaymentNotification($payment));
-
-                        Log::info('Payment notification sent to merchant', [
+                        Log::info('CALLBACK :: Attempting to send merchant notification', [
                             'payment_id' => $payment->id,
                             'merchant_id' => $merchant->id,
                             'merchant_email' => $merchant->email
                         ]);
+
+                        try {
+                            \Mail::to($merchant->email)->send(new \App\Mail\MerchantPaymentNotification($payment));
+
+                            Log::info('CALLBACK :: Merchant notification sent successfully', [
+                                'payment_id' => $payment->id,
+                                'merchant_id' => $merchant->id,
+                                'merchant_email' => $merchant->email
+                            ]);
+                        } catch (\Exception $e) {
+                            Log::error('CALLBACK :: Failed to send merchant notification', [
+                                'payment_id' => $payment->id,
+                                'merchant_email' => $merchant->email,
+                                'error' => $e->getMessage(),
+                                'file' => $e->getFile(),
+                                'line' => $e->getLine(),
+                                'trace' => $e->getTraceAsString()
+                            ]);
+                        }
+                    } else {
+                        Log::warning('CALLBACK :: Merchant found but no email', [
+                            'payment_id' => $payment->id,
+                            'merchant_id' => $payment->order->product->merchant_id,
+                            'has_merchant' => $merchant ? 'yes' : 'no',
+                            'has_email' => $merchant && $merchant->email ? 'yes' : 'no'
+                        ]);
                     }
+                } else {
+                    Log::info('CALLBACK :: No merchant to notify', [
+                        'payment_id' => $payment->id,
+                        'has_order' => $payment->order ? 'yes' : 'no',
+                        'has_product' => $payment->order && $payment->order->product ? 'yes' : 'no',
+                        'has_merchant_id' => $payment->order && $payment->order->product && $payment->order->product->merchant_id ? 'yes' : 'no'
+                    ]);
                 }
 
                 // Send to admin if configured
-                if (config('mail.admin_email')) {
-                    \Mail::to(config('mail.admin_email'))->send(new \App\Mail\MerchantPaymentNotification($payment));
+                $adminEmail = config('mail.admin_email');
+                if ($adminEmail) {
+                    Log::info('CALLBACK :: Attempting to send admin notification', [
+                        'payment_id' => $payment->id,
+                        'admin_email' => $adminEmail
+                    ]);
+
+                    try {
+                        \Mail::to($adminEmail)->send(new \App\Mail\MerchantPaymentNotification($payment));
+
+                        Log::info('CALLBACK :: Admin notification sent successfully', [
+                            'payment_id' => $payment->id,
+                            'admin_email' => $adminEmail
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('CALLBACK :: Failed to send admin notification', [
+                            'payment_id' => $payment->id,
+                            'admin_email' => $adminEmail,
+                            'error' => $e->getMessage(),
+                            'file' => $e->getFile(),
+                            'line' => $e->getLine(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                    }
+                } else {
+                    Log::warning('CALLBACK :: Admin email not configured', [
+                        'payment_id' => $payment->id,
+                        'config_value' => $adminEmail
+                    ]);
                 }
             }
 
-            Log::info('User notification:', [
+            Log::info('CALLBACK :: Notification process completed', [
                 'user_id' => $payment->user_id,
                 'payment_id' => $payment->id,
                 'reference' => $payment->reference,
@@ -339,9 +429,12 @@ class PaymentCallbackController extends Controller
                 'result' => $result
             ]);
         } catch (\Exception $e) {
-            Log::error('Failed to send payment notification emails', [
+            Log::error('CALLBACK :: General exception in notification process', [
                 'payment_id' => $payment->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
             ]);
         }
     }
