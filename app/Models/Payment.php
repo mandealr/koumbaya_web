@@ -289,4 +289,84 @@ class Payment extends Model
             'callback_url' => $this->callback_url,
         ];
     }
+
+    /**
+     * Calcul des frais et montants marchands
+     */
+
+    /**
+     * Frais E-Billing (%)
+     */
+    public function getEbillingFeePercentageAttribute()
+    {
+        return config('services.ebilling.ebilling_percentage', 2); // 2%
+    }
+
+    /**
+     * Montant des frais E-Billing
+     */
+    public function getEbillingFeeAmountAttribute()
+    {
+        return round($this->amount * ($this->ebilling_fee_percentage / 100), 2);
+    }
+
+    /**
+     * Commission Koumbaya (%)
+     */
+    public function getPlatformFeePercentageAttribute()
+    {
+        return config('koumbaya.ticket_calculation.commission_rate', 0.10) * 100; // 10%
+    }
+
+    /**
+     * Montant de la commission Koumbaya
+     */
+    public function getPlatformFeeAmountAttribute()
+    {
+        return round($this->amount * config('koumbaya.ticket_calculation.commission_rate', 0.10), 2);
+    }
+
+    /**
+     * Total des frais (E-Billing + Commission Koumbaya)
+     */
+    public function getTotalFeesAttribute()
+    {
+        return $this->ebilling_fee_amount + $this->platform_fee_amount;
+    }
+
+    /**
+     * Montant net que le marchand recevra
+     */
+    public function getMerchantNetAmountAttribute()
+    {
+        return $this->amount - $this->total_fees;
+    }
+
+    /**
+     * Montant net formaté
+     */
+    public function getFormattedMerchantNetAmountAttribute()
+    {
+        return number_format($this->merchant_net_amount, 0, ',', ' ') . ' ' . $this->currency;
+    }
+
+    /**
+     * Détails complets des frais pour affichage
+     */
+    public function getFeesBreakdownAttribute()
+    {
+        return [
+            'gross_amount' => $this->amount,
+            'ebilling_fee' => [
+                'percentage' => $this->ebilling_fee_percentage,
+                'amount' => $this->ebilling_fee_amount,
+            ],
+            'platform_fee' => [
+                'percentage' => $this->platform_fee_percentage,
+                'amount' => $this->platform_fee_amount,
+            ],
+            'total_fees' => $this->total_fees,
+            'net_amount' => $this->merchant_net_amount,
+        ];
+    }
 }

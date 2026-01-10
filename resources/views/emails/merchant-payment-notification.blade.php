@@ -8,7 +8,7 @@
     </p>
 
     <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
-        Vous avez reçu un nouveau paiement de <strong style="color: #0099cc;">{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</strong> sur votre boutique Koumbaya.
+        Vous avez reçu un nouveau paiement sur votre boutique Koumbaya. Après déduction des frais, vous recevrez <strong style="color: #10b981; font-size: 18px;">{{ number_format($payment->merchant_net_amount, 0, ',', ' ') }} {{ $payment->currency }}</strong>.
     </p>
 
     <div class="info-box">
@@ -27,8 +27,29 @@
                 <td style="padding: 8px 0; color: #1f2937;">{{ $payment->customer_phone ?? 'N/A' }}</td>
             </tr>
             <tr>
-                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Montant :</td>
-                <td style="padding: 8px 0; color: #1f2937;">{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</td>
+                <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Montant payé :</td>
+                <td style="padding: 8px 0; color: #1f2937;">{{ number_format($payment->amount, 0, ',', ' ') }} {{ $payment->currency }}</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="padding: 12px 0 8px 0;">
+                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin: 8px 0;">
+                        <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Détail des frais :</p>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                            <tr>
+                                <td style="padding: 4px 0; color: #9ca3af;">Frais E-Billing ({{ $payment->ebilling_fee_percentage }}%)</td>
+                                <td style="padding: 4px 0; color: #ef4444; text-align: right;">- {{ number_format($payment->ebilling_fee_amount, 0, ',', ' ') }} {{ $payment->currency }}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 4px 0; color: #9ca3af;">Commission Koumbaya ({{ $payment->platform_fee_percentage }}%)</td>
+                                <td style="padding: 4px 0; color: #ef4444; text-align: right;">- {{ number_format($payment->platform_fee_amount, 0, ',', ' ') }} {{ $payment->currency }}</td>
+                            </tr>
+                            <tr style="border-top: 2px solid #10b981;">
+                                <td style="padding: 8px 0 0 0; color: #1f2937; font-weight: 700; font-size: 15px;">Montant net à recevoir</td>
+                                <td style="padding: 8px 0 0 0; color: #10b981; font-weight: 700; text-align: right; font-size: 16px;">{{ number_format($payment->merchant_net_amount, 0, ',', ' ') }} {{ $payment->currency }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
             </tr>
             <tr>
                 <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Méthode :</td>
