@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Lottery;
 use App\Mail\PaymentConfirmation;
 use App\Mail\MerchantPaymentNotification;
+use App\Mail\AdminPaymentNotification;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -257,23 +258,25 @@ class TestPaymentNotifications extends Command
     {
         $payment = $testData['payment'];
         $user = $testData['user'];
+        $testEmail = $this->argument('email'); // Email de test
 
         Log::info('TEST :: Envoi notification paiement client', [
             'payment_id' => $payment->id,
+            'test_email' => $testEmail,
             'user_email' => $user->email,
             'amount' => $payment->amount,
             'scenario' => $testData['scenario']
         ]);
 
-        // Envoyer l'email
-        Mail::to($user->email)->send(new PaymentConfirmation($payment));
+        // Envoyer l'email à l'adresse de test (pas l'adresse réelle)
+        Mail::to($testEmail)->send(new PaymentConfirmation($payment));
 
         // Afficher un aperçu des données
         $this->table(
             ['Champ', 'Valeur'],
             [
                 ['👤 Client', $user->full_name],
-                ['📧 Email', $user->email],
+                ['📧 Envoyé à', $testEmail],
                 ['💰 Montant', number_format($payment->amount, 0, ',', ' ') . ' XAF'],
                 ['🔖 Référence', $payment->reference],
                 ['📱 Méthode', ucfirst(str_replace('_', ' ', $payment->payment_method))],
@@ -291,24 +294,26 @@ class TestPaymentNotifications extends Command
         $payment = $testData['payment'];
         $merchant = $testData['merchant'];
         $product = $testData['product'];
+        $testEmail = $this->argument('email'); // Email de test
 
         Log::info('TEST :: Envoi notification paiement marchand', [
             'payment_id' => $payment->id,
+            'test_email' => $testEmail,
             'merchant_email' => $merchant->email,
             'product_id' => $product->id,
             'amount' => $payment->amount,
             'scenario' => $testData['scenario']
         ]);
 
-        // Envoyer l'email
-        Mail::to($merchant->email)->send(new MerchantPaymentNotification($payment));
+        // Envoyer l'email à l'adresse de test (pas l'adresse réelle du marchand)
+        Mail::to($testEmail)->send(new MerchantPaymentNotification($payment));
 
         // Afficher un aperçu des données
         $this->table(
             ['Champ', 'Valeur'],
             [
                 ['🏪 Marchand', $merchant->full_name],
-                ['📧 Email', $merchant->email],
+                ['📧 Envoyé à', $testEmail],
                 ['💰 Montant', number_format($payment->amount, 0, ',', ' ') . ' XAF'],
                 ['🔖 Référence', $payment->reference],
                 ['🛍️ Produit', $product->name],
@@ -324,26 +329,27 @@ class TestPaymentNotifications extends Command
     protected function sendAdminNotification($testData)
     {
         $payment = $testData['payment'];
+        $testEmail = $this->argument('email'); // Email de test
         $adminEmail = config('mail.admin_email', 'admin@koumbaya.com');
 
-        Log::info('TEST :: Envoi copie admin', [
+        Log::info('TEST :: Envoi notification admin', [
             'payment_id' => $payment->id,
-            'admin_email' => $adminEmail,
+            'test_email' => $testEmail,
+            'real_admin_email' => $adminEmail,
             'amount' => $payment->amount,
             'scenario' => $testData['scenario']
         ]);
 
-        // Envoyer les deux notifications à l'admin pour qu'il puisse voir les deux templates
-        Mail::to($adminEmail)
-            ->cc($adminEmail) // Mettre en copie pour s'assurer
-            ->send(new PaymentConfirmation($payment));
+        // Envoyer l'email admin spécifique à l'adresse de test
+        Mail::to($testEmail)->send(new AdminPaymentNotification($payment));
 
         // Afficher un aperçu des données
         $this->table(
             ['Champ', 'Valeur'],
             [
                 ['👨‍💼 Admin', 'Administrateur Koumbaya'],
-                ['📧 Email', $adminEmail],
+                ['📧 Envoyé à', $testEmail],
+                ['📧 Email réel', $adminEmail],
                 ['💰 Montant', number_format($payment->amount, 0, ',', ' ') . ' XAF'],
                 ['🔖 Référence', $payment->reference],
                 ['📦 Commande', $testData['order']->order_number],
@@ -363,12 +369,13 @@ class TestPaymentNotifications extends Command
         $this->newLine();
 
         $this->line('🎯 <comment>Scénario :</comment> ' . ucfirst($testData['scenario']));
-        $this->line('👤 <comment>Email client :</comment> ' . $email);
-        $this->line('🏪 <comment>Email marchand :</comment> ' . ($merchantEmail ?: 'merchant@koumbaya.com'));
-
+        $this->line('📧 <comment>Adresse de test :</comment> ' . $email . ' (les 3 emails sont envoyés ici)');
+        $this->newLine();
+        $this->line('📨 <comment>Emails envoyés :</comment>');
+        $this->line('   • Email 1 : Confirmation client (PaymentConfirmation)');
+        $this->line('   • Email 2 : Notification marchand (MerchantPaymentNotification)');
         if (!$this->option('no-admin')) {
-            $adminEmail = config('mail.admin_email', 'admin@koumbaya.com');
-            $this->line('👨‍💼 <comment>Email admin :</comment> ' . $adminEmail);
+            $this->line('   • Email 3 : Notification admin (AdminPaymentNotification)');
         }
 
         $this->newLine();

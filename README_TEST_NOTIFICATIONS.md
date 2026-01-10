@@ -84,13 +84,24 @@ php artisan cache:clear
 
 ## 📧 Où vont les emails ?
 
-✅ **Les emails sont envoyés aux adresses spécifiées**
+✅ **Pour les tests : TOUS les 3 emails sont envoyés à l'adresse que vous fournissez**
 
-- **Email client** → adresse fournie en argument
-- **Email marchand** → `merchant@koumbaya.com` (par défaut) ou `--merchant-email`
-- **Email admin** → `MAIL_ADMIN_EMAIL` depuis `.env` (par défaut inclus, utiliser `--no-admin` pour désactiver)
+Quand vous exécutez :
+```bash
+php artisan test:payment-notifications mebodoaristide@gmail.com
+```
 
-⚠️ **Exception** : Si `MAIL_MAILER=log`, les emails vont dans `storage/logs/laravel.log`
+**Vous recevrez 3 emails distincts** à `mebodoaristide@gmail.com` :
+1. 📨 **Email client** : Confirmation de paiement (template client)
+2. 🏪 **Email marchand** : Notification de vente (template marchand)
+3. 👨‍💼 **Email admin** : Alerte plateforme (template admin - NOUVEAU)
+
+Ceci vous permet de **voir et tester les 3 templates** facilement.
+
+⚠️ **En production**, chaque email sera envoyé à sa vraie adresse :
+- Client → email du client
+- Marchand → email du marchand
+- Admin → `MAIL_ADMIN_EMAIL` depuis `.env`
 
 ---
 
