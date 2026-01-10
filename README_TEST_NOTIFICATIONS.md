@@ -3,14 +3,20 @@
 ## 🚀 Utilisation rapide
 
 ```bash
-# Test complet (client + marchand)
+# Test complet (client + marchand + admin)
 php artisan test:payment-notifications votre@email.com
+
+# Test sans copie admin
+php artisan test:payment-notifications votre@email.com --no-admin
 
 # Test notification client uniquement
 php artisan test:payment-notifications votre@email.com --type=customer
 
 # Test notification marchand uniquement
 php artisan test:payment-notifications votre@email.com --type=merchant
+
+# Test notification admin uniquement
+php artisan test:payment-notifications votre@email.com --type=admin
 
 # Spécifier un email marchand différent
 php artisan test:payment-notifications client@test.com --merchant-email=marchand@test.com
@@ -78,10 +84,11 @@ php artisan cache:clear
 
 ## 📧 Où vont les emails ?
 
-✅ **Les emails sont envoyés aux adresses spécifiées**, pas à `MAIL_ADMIN_EMAIL`
+✅ **Les emails sont envoyés aux adresses spécifiées**
 
 - **Email client** → adresse fournie en argument
 - **Email marchand** → `merchant@koumbaya.com` (par défaut) ou `--merchant-email`
+- **Email admin** → `MAIL_ADMIN_EMAIL` depuis `.env` (par défaut inclus, utiliser `--no-admin` pour désactiver)
 
 ⚠️ **Exception** : Si `MAIL_MAILER=log`, les emails vont dans `storage/logs/laravel.log`
 

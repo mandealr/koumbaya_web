@@ -22,16 +22,17 @@ class TestPaymentNotifications extends Command
      */
     protected $signature = 'test:payment-notifications
                             {email? : Email address to send test notifications to}
-                            {--type=all : Type of notification (customer|merchant|all)}
+                            {--type=all : Type of notification (customer|merchant|admin|all)}
                             {--scenario=lottery : Payment scenario (lottery|direct|custom)}
-                            {--merchant-email= : Merchant email for merchant notification test}';
+                            {--merchant-email= : Merchant email for merchant notification test}
+                            {--no-admin : Do not send copy to admin}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Test payment notification emails (customer and merchant)';
+    protected $description = 'Test payment notification emails (customer, merchant and admin)';
 
     /**
      * Execute the console command.
@@ -91,6 +92,14 @@ class TestPaymentNotifications extends Command
                 $this->sendMerchantNotification($testData);
                 $sent++;
                 $this->info('✅ Notification marchand envoyée');
+            }
+
+            // Envoyer une copie à l'admin (sauf si --no-admin)
+            if (!$this->option('no-admin') && ($type === 'admin' || $type === 'all')) {
+                $this->info('📤 Envoi de la copie admin...');
+                $this->sendAdminNotification($testData);
+                $sent++;
+                $this->info('✅ Copie admin envoyée');
             }
 
             $this->newLine();
@@ -310,6 +319,41 @@ class TestPaymentNotifications extends Command
     }
 
     /**
+     * Envoyer une copie à l'admin
+     */
+    protected function sendAdminNotification($testData)
+    {
+        $payment = $testData['payment'];
+        $adminEmail = config('mail.admin_email', 'admin@koumbaya.com');
+
+        Log::info('TEST :: Envoi copie admin', [
+            'payment_id' => $payment->id,
+            'admin_email' => $adminEmail,
+            'amount' => $payment->amount,
+            'scenario' => $testData['scenario']
+        ]);
+
+        // Envoyer les deux notifications à l'admin pour qu'il puisse voir les deux templates
+        Mail::to($adminEmail)
+            ->cc($adminEmail) // Mettre en copie pour s'assurer
+            ->send(new PaymentConfirmation($payment));
+
+        // Afficher un aperçu des données
+        $this->table(
+            ['Champ', 'Valeur'],
+            [
+                ['👨‍💼 Admin', 'Administrateur Koumbaya'],
+                ['📧 Email', $adminEmail],
+                ['💰 Montant', number_format($payment->amount, 0, ',', ' ') . ' XAF'],
+                ['🔖 Référence', $payment->reference],
+                ['📦 Commande', $testData['order']->order_number],
+                ['👤 Client', $testData['user']->full_name],
+                ['🏪 Marchand', $testData['merchant']->full_name],
+            ]
+        );
+    }
+
+    /**
      * Afficher le résumé du test
      */
     protected function displayTestSummary($testData, $email, $merchantEmail)
@@ -321,6 +365,12 @@ class TestPaymentNotifications extends Command
         $this->line('🎯 <comment>Scénario :</comment> ' . ucfirst($testData['scenario']));
         $this->line('👤 <comment>Email client :</comment> ' . $email);
         $this->line('🏪 <comment>Email marchand :</comment> ' . ($merchantEmail ?: 'merchant@koumbaya.com'));
+
+        if (!$this->option('no-admin')) {
+            $adminEmail = config('mail.admin_email', 'admin@koumbaya.com');
+            $this->line('👨‍💼 <comment>Email admin :</comment> ' . $adminEmail);
+        }
+
         $this->newLine();
 
         $this->line('💳 <comment>Détails paiement :</comment>');
