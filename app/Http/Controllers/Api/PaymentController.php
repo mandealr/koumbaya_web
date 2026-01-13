@@ -1072,6 +1072,19 @@ class PaymentController extends Controller
                         'final_order_status' => $lockedPayment->order->fresh()->status
                     ]);
 
+                    // Dispatch OrderStatusChanged event for email notifications
+                    \App\Events\OrderStatusChanged::dispatch(
+                        $lockedPayment->order->fresh(),
+                        'pending', // previous status
+                        OrderStatus::PAID->value
+                    );
+
+                    Log::info('OrderStatusChanged event dispatched for email notification', [
+                        'payment_id' => $lockedPayment->id,
+                        'order_id' => $lockedPayment->order->id,
+                        'order_number' => $lockedPayment->order->order_number
+                    ]);
+
                     // Update lottery tickets to paid status if this is a lottery order
                     if ($lockedPayment->order->type === 'lottery' && $lockedPayment->order->lottery_id) {
                         LotteryTicket::where('payment_id', $lockedPayment->id)

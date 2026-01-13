@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Events\OrderStatusChanged;
 use App\Events\UserRegistered;
 use App\Listeners\SendOrderStatusEmail;
+use App\Listeners\SendPaymentConfirmationEmail;
 use App\Listeners\SendWelcomeEmail;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
@@ -21,6 +22,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         OrderStatusChanged::class => [
             SendOrderStatusEmail::class,
+            SendPaymentConfirmationEmail::class, // Envoie emails de paiement
         ],
     ];
 
