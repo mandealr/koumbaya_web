@@ -45,9 +45,9 @@ class PaymentController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"transaction_id", "phone", "operator"},
+     *             required={"transaction_id", "operator"},
      *             @OA\Property(property="transaction_id", type="string", example="TXN-1234567890-ABC123"),
-     *             @OA\Property(property="phone", type="string", example="074123456"),
+     *             @OA\Property(property="phone", type="string", example="074123456", description="Numéro de téléphone (optionnel, utilise le numéro du profil si non fourni)"),
      *             @OA\Property(property="operator", type="string", enum={"airtel", "moov"}, example="airtel")
      *         )
      *     ),
@@ -105,7 +105,7 @@ class PaymentController extends Controller
             'transaction_id' => 'nullable',  // Accepter n'importe quel type
             'lottery_id' => 'nullable|integer',
             'quantity' => 'nullable|integer|min:1|max:10',
-            'phone' => 'required|string|max:20',
+            'phone' => 'nullable|string|max:20',  // Optionnel, utilisera le numéro du profil si non fourni
             'operator' => 'required|string|in:airtel,moov'
         ]);
 
@@ -119,6 +119,31 @@ class PaymentController extends Controller
                 'success' => false,
                 'message' => 'Données invalides',
                 'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Si le numéro de téléphone n'est pas fourni, utiliser celui du profil utilisateur
+        $phone = $request->phone;
+        if (!$phone && $user->phone) {
+            $phone = $user->phone;
+            Log::info('Using phone number from user profile', [
+                'user_id' => $user->id,
+                'phone' => $phone
+            ]);
+        }
+
+        // Vérifier qu'un numéro de téléphone est disponible
+        if (!$phone) {
+            Log::warning('Payment initiation failed - no phone number available', [
+                'user_id' => $user->id,
+                'request_phone' => $request->phone,
+                'user_phone' => $user->phone
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Numéro de téléphone requis. Veuillez renseigner votre numéro de téléphone dans votre profil ou le fournir lors du paiement.',
+                'error_code' => 'PHONE_REQUIRED'
             ], 422);
         }
 
@@ -325,7 +350,7 @@ class PaymentController extends Controller
                 'order_id' => $order->id,
                 'order_type' => $order->type,
                 'order_amount' => $order->total_amount,
-                'phone' => $request->phone,
+                'phone' => $phone,
                 'operator' => $request->operator
             ]);
 
@@ -349,7 +374,7 @@ class PaymentController extends Controller
                     'quantity' => 1, // Quantity from lottery tickets count
                     'amount' => $order->total_amount,
                     'reference' => $order->order_number,
-                    'phone' => $request->phone
+                    'phone' => $phone
                 ];
 
                 $type = 'lottery_ticket';
@@ -378,7 +403,7 @@ class PaymentController extends Controller
                     'product' => $order->product,
                     'amount' => $order->total_amount,
                     'reference' => $order->order_number,
-                    'phone' => $request->phone
+                    'phone' => $phone
                 ];
 
                 $type = 'product_purchase';
@@ -448,11 +473,11 @@ class PaymentController extends Controller
             Log::info('Triggering USSD push', [
                 'bill_id' => $billId,
                 'payment_system' => $paymentSystemName,
-                'phone' => $request->phone,
+                'phone' => $phone,
                 'operator' => $request->operator
             ]);
 
-            $ussdResult = EBillingService::pushUssd($billId, $paymentSystemName, $request->phone);
+            $ussdResult = EBillingService::pushUssd($billId, $paymentSystemName, $phone);
 
             Log::info('Payment initiation completed successfully', [
                 'bill_id' => $billId,
