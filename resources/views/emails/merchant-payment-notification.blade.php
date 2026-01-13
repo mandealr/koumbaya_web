@@ -8,8 +8,14 @@
     </p>
 
     <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
-        Vous avez reçu un nouveau paiement sur votre boutique Koumbaya. Après déduction des frais, vous recevrez <strong style="color: #10b981; font-size: 18px;">{{ number_format($payment->merchant_net_amount, 0, ',', ' ') }} {{ $payment->currency }}</strong>.
+        Vous avez reçu une nouvelle commande payée sur votre boutique Koumbaya. Préparez et expédiez la commande pour que le client puisse la recevoir.
     </p>
+
+    <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 6px;">
+        <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+            <strong>Important :</strong> Le montant de <strong style="color: #10b981;">{{ number_format($payment->merchant_net_amount, 0, ',', ' ') }} {{ $payment->currency }}</strong> (après frais) vous sera versé après confirmation de livraison par le client.
+        </p>
+    </div>
 
     <div class="info-box">
         <h3 style="color: #1f2937; margin-top: 0; font-size: 18px;">Détails du paiement</h3>
