@@ -33,6 +33,7 @@
     "dependencies": {
         "@headlessui/vue": "^1.7.16",
         "@heroicons/vue": "^2.0.18",
+        "intl-tel-input": "^25.15.0",
         "lodash-es": "^4.17.21",
         "pinia": "^2.1.7",
         "vue-tel-input": "^9.3.0"

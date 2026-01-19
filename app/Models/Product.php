@@ -160,16 +160,7 @@ class Product extends Model
         // Priorité : image puis images[0]
         $image = $this->attributes['image'] ?? null;
         $images = $this->images;
-        
-        // Debug temporaire
-        \Log::info('getMainImageAttribute Debug', [
-            'product_id' => $this->id,
-            'image' => $image,
-            'images' => $images,
-            'images_type' => gettype($images),
-            'images_count' => is_array($images) ? count($images) : 0
-        ]);
-        
+
         // Priorité 1: champ image
         if ($image) {
             return $image;
@@ -215,14 +206,7 @@ class Product extends Model
     public function getImageUrlAttribute()
     {
         $mainImage = $this->main_image;
-        
-        // Debug temporaire
-        \Log::info('getImageUrlAttribute Debug', [
-            'product_id' => $this->id,
-            'main_image' => $mainImage,
-            'main_image_type' => gettype($mainImage)
-        ]);
-        
+
         if (!$mainImage) {
             return null;
         }
