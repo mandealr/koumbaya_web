@@ -88,6 +88,21 @@
             </tr>
             @endif
         </table>
+
+        @if($payment->order->tickets && $payment->order->tickets->count() > 0)
+        <div style="background-color: #faf5ff; padding: 16px; border-radius: 8px; border-left: 4px solid #9333ea; margin-top: 16px;">
+            <h4 style="color: #1f2937; margin: 0 0 12px 0; font-size: 16px;">
+                Tickets achetés ({{ $payment->order->tickets->count() }})
+            </h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                @foreach($payment->order->tickets as $ticket)
+                <span style="display: inline-block; background-color: #9333ea; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 14px; margin: 4px;">
+                    {{ $ticket->ticket_number }}
+                </span>
+                @endforeach
+            </div>
+        </div>
+        @endif
     @endif
 
     <div style="text-align: center; margin: 30px 0;">

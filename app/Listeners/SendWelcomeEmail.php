@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\UserRegistered;
 use App\Mail\WelcomeEmail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class SendWelcomeEmail
@@ -21,7 +22,20 @@ class SendWelcomeEmail
      */
     public function handle(UserRegistered $event): void
     {
-        // Envoyer l'email de bienvenue
-        Mail::to($event->user->email)->send(new WelcomeEmail($event->user));
+        try {
+            Mail::to($event->user->email)->send(new WelcomeEmail($event->user));
+
+            Log::info('Email de bienvenue envoyé', [
+                'user_id' => $event->user->id,
+                'email' => $event->user->email,
+                'name' => $event->user->first_name . ' ' . $event->user->last_name,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erreur envoi email de bienvenue', [
+                'user_id' => $event->user->id,
+                'email' => $event->user->email,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

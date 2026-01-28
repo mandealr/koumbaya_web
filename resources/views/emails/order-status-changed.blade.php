@@ -67,6 +67,24 @@
     </div>
     @endif
 
+    @if($order->tickets && $order->tickets->count() > 0)
+    <h3 style="color: #1f2937; font-size: 18px; margin-top: 24px;">
+        Vos tickets de tombola ({{ $order->tickets->count() }})
+    </h3>
+    <div style="background-color: #faf5ff; padding: 16px; border-radius: 8px; border-left: 4px solid #9333ea;">
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            @foreach($order->tickets as $ticket)
+            <span style="display: inline-block; background-color: #9333ea; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 14px; margin: 4px;">
+                {{ $ticket->ticket_number }}
+            </span>
+            @endforeach
+        </div>
+        <p style="margin: 12px 0 0 0; color: #6b7280; font-size: 13px;">
+            Conservez ces numéros précieusement. Ils seront utilisés lors du tirage au sort.
+        </p>
+    </div>
+    @endif
+
     @if($newStatus === 'paid')
     <div class="info-box" style="margin-top: 24px;">
         <h4 style="color: #1f2937; margin-top: 0; font-size: 16px;">Paiement confirmé !</h4>
