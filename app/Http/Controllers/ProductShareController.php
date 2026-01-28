@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Lottery;
 use Illuminate\Http\Request;
 
 class ProductShareController extends Controller
@@ -17,7 +18,6 @@ class ProductShareController extends Controller
         $product = Product::with(['category', 'merchant', 'activeLottery'])->find($id);
 
         if (!$product) {
-            // Produit non trouvé, rediriger vers la page d'accueil
             return redirect('/');
         }
 
@@ -27,21 +27,110 @@ class ProductShareController extends Controller
 
         // Si c'est un humain, rediriger vers la SPA
         if (!$isBot) {
-            return redirect("/products/{$id}");
+            return redirect("/customer/products/{$product->slug}");
         }
 
-        // Construire l'URL de l'image
-        $imageUrl = $this->getProductImageUrl($product);
+        return $this->renderProductShare($product);
+    }
 
-        // Construire la description
+    /**
+     * Affiche la page produit par slug avec détection des bots
+     */
+    public function showBySlug(Request $request, $slug)
+    {
+        // Récupérer le produit par son slug
+        $product = Product::with(['category', 'merchant', 'activeLottery'])
+            ->where('slug', $slug)
+            ->first();
+
+        if (!$product) {
+            // Essayer de trouver par ID si le slug ressemble à un nombre
+            if (is_numeric($slug)) {
+                $product = Product::with(['category', 'merchant', 'activeLottery'])->find($slug);
+            }
+        }
+
+        if (!$product) {
+            return view('app');
+        }
+
+        // Détecter si c'est un bot de réseau social
+        $userAgent = $request->header('User-Agent', '');
+        $isBot = $this->isSocialMediaBot($userAgent);
+
+        // Si c'est un humain, servir la SPA normale
+        if (!$isBot) {
+            return view('app');
+        }
+
+        return $this->renderProductShare($product);
+    }
+
+    /**
+     * Affiche la page tombola avec détection des bots
+     */
+    public function showLottery(Request $request, $id)
+    {
+        // Récupérer la tombola avec son produit
+        $lottery = Lottery::with(['product.category', 'product.merchant'])->find($id);
+
+        if (!$lottery || !$lottery->product) {
+            return view('app');
+        }
+
+        // Détecter si c'est un bot de réseau social
+        $userAgent = $request->header('User-Agent', '');
+        $isBot = $this->isSocialMediaBot($userAgent);
+
+        // Si c'est un humain, servir la SPA normale
+        if (!$isBot) {
+            return view('app');
+        }
+
+        return $this->renderLotteryShare($lottery);
+    }
+
+    /**
+     * Render le partage produit
+     */
+    private function renderProductShare(Product $product)
+    {
+        $imageUrl = $this->getProductImageUrl($product);
         $description = $this->buildDescription($product);
 
-        // Retourner la vue avec les meta tags dynamiques
         return view('share.product', [
             'product' => $product,
             'imageUrl' => $imageUrl,
             'description' => $description,
-            'canonicalUrl' => url("/products/{$id}"),
+            'canonicalUrl' => url("/customer/products/{$product->slug}"),
+        ]);
+    }
+
+    /**
+     * Render le partage tombola
+     */
+    private function renderLotteryShare(Lottery $lottery)
+    {
+        $product = $lottery->product;
+        $imageUrl = $this->getProductImageUrl($product);
+
+        // Description spécifique tombola
+        $ticketPrice = number_format($lottery->ticket_price, 0, ',', ' ');
+        $productPrice = number_format($product->price, 0, ',', ' ');
+        $ticketsSold = $lottery->tickets()->where('status', 'paid')->count();
+        $maxTickets = $lottery->max_tickets;
+
+        $description = "Tentez de gagner ce produit d'une valeur de {$productPrice} FCFA pour seulement {$ticketPrice} FCFA ! ";
+        $description .= "{$ticketsSold}/{$maxTickets} tickets vendus. ";
+        $description .= strip_tags(substr($product->description ?? '', 0, 100));
+
+        return view('share.product', [
+            'product' => $product,
+            'lottery' => $lottery,
+            'imageUrl' => $imageUrl,
+            'description' => $description,
+            'canonicalUrl' => url("/lotteries/{$lottery->id}"),
+            'title' => "Tombola : {$product->name}",
         ]);
     }
 

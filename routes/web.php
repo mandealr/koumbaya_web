@@ -24,6 +24,13 @@ Route::get('auth/{provider}/callback', [AuthController::class, 'handleProviderCa
 Route::get('share/product/{id}', [ProductShareController::class, 'show'])
     ->where('id', '[0-9]+');
 
+// Route pour les pages produit SPA avec détection des bots sociaux
+Route::get('customer/products/{slug}', [ProductShareController::class, 'showBySlug']);
+
+// Route pour les pages tombola SPA avec détection des bots sociaux
+Route::get('lotteries/{id}', [ProductShareController::class, 'showLottery'])
+    ->where('id', '[0-9]+');
+
 // Route pour servir l'application Vue.js (SPA)
 Route::get('/{any}', function () {
     return view('app');

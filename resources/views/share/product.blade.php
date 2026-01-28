@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, follow">
 
-    <title>{{ $product->name }} - Koumbaya Marketplace</title>
+    <title>{{ $title ?? $product->name }} - Koumbaya Marketplace</title>
     <meta name="description" content="{{ $description }}">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="product">
     <meta property="og:url" content="{{ $canonicalUrl }}">
-    <meta property="og:title" content="{{ $product->name }}">
+    <meta property="og:title" content="{{ $title ?? $product->name }}">
     <meta property="og:description" content="{{ $description }}">
     <meta property="og:image" content="{{ $imageUrl }}">
     <meta property="og:image:width" content="1200">
