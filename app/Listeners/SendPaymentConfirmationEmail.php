@@ -94,53 +94,59 @@ class SendPaymentConfirmationEmail
             }
 
             // 2. Send notification to merchant if applicable
-            if ($order->product && $order->product->merchant_id) {
-                $merchant = \App\Models\User::find($order->product->merchant_id);
+            // Récupérer le marchand selon le type de commande (tombola ou achat direct)
+            $merchant = null;
+            $merchantSource = null;
 
-                if ($merchant && $merchant->email) {
-                    Log::info('PAYMENT_EMAIL :: Attempting to send merchant notification', [
+            if ($order->lottery && $order->lottery->product && $order->lottery->product->merchant) {
+                // Commande de tombola → marchand via lottery->product->merchant
+                $merchant = $order->lottery->product->merchant;
+                $merchantSource = 'lottery';
+            } elseif ($order->product && $order->product->merchant) {
+                // Commande directe → marchand via product->merchant
+                $merchant = $order->product->merchant;
+                $merchantSource = 'product';
+            }
+
+            if ($merchant && $merchant->email) {
+                Log::info('PAYMENT_EMAIL :: Attempting to send merchant notification', [
+                    'order_id' => $order->id,
+                    'payment_id' => $payment->id,
+                    'merchant_id' => $merchant->id,
+                    'merchant_email' => $merchant->email,
+                    'merchant_source' => $merchantSource
+                ]);
+
+                try {
+                    Mail::to($merchant->email)->send(new MerchantPaymentNotification($payment));
+
+                    Log::info('PAYMENT_EMAIL :: Merchant notification sent successfully', [
                         'order_id' => $order->id,
                         'payment_id' => $payment->id,
                         'merchant_id' => $merchant->id,
-                        'merchant_email' => $merchant->email
+                        'merchant_email' => $merchant->email,
+                        'merchant_source' => $merchantSource
                     ]);
-
-                    try {
-                        Mail::to($merchant->email)->send(new MerchantPaymentNotification($payment));
-
-                        Log::info('PAYMENT_EMAIL :: Merchant notification sent successfully', [
-                            'order_id' => $order->id,
-                            'payment_id' => $payment->id,
-                            'merchant_id' => $merchant->id,
-                            'merchant_email' => $merchant->email
-                        ]);
-                    } catch (\Exception $e) {
-                        Log::error('PAYMENT_EMAIL :: Failed to send merchant notification', [
-                            'order_id' => $order->id,
-                            'payment_id' => $payment->id,
-                            'merchant_email' => $merchant->email,
-                            'error' => $e->getMessage(),
-                            'file' => $e->getFile(),
-                            'line' => $e->getLine(),
-                            'trace' => $e->getTraceAsString()
-                        ]);
-                    }
-                } else {
-                    Log::warning('PAYMENT_EMAIL :: Merchant found but no email', [
+                } catch (\Exception $e) {
+                    Log::error('PAYMENT_EMAIL :: Failed to send merchant notification', [
                         'order_id' => $order->id,
                         'payment_id' => $payment->id,
-                        'merchant_id' => $order->product->merchant_id,
-                        'has_merchant' => $merchant ? 'yes' : 'no',
-                        'has_email' => $merchant && $merchant->email ? 'yes' : 'no'
+                        'merchant_email' => $merchant->email,
+                        'error' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'trace' => $e->getTraceAsString()
                     ]);
                 }
             } else {
-                Log::info('PAYMENT_EMAIL :: No merchant to notify (lottery or no product)', [
+                Log::info('PAYMENT_EMAIL :: No merchant to notify', [
                     'order_id' => $order->id,
                     'payment_id' => $payment->id,
                     'order_type' => $order->type,
+                    'has_lottery' => $order->lottery ? 'yes' : 'no',
                     'has_product' => $order->product ? 'yes' : 'no',
-                    'has_merchant_id' => $order->product && $order->product->merchant_id ? 'yes' : 'no'
+                    'merchant_found' => $merchant ? 'yes' : 'no',
+                    'merchant_has_email' => $merchant && $merchant->email ? 'yes' : 'no'
                 ]);
             }
 
