@@ -501,10 +501,13 @@ class ProductController extends Controller
         }
 
         // Build validation rules based on sale mode
+        $minProductPrice = config('koumbaya.marketplace.min_product_price', 1000);
+        $minTicketPrice = config('koumbaya.ticket_calculation.min_ticket_price', 200);
+
         $rules = [
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'price' => 'required|numeric|min:1000',
+            'price' => "required|numeric|min:{$minProductPrice}",
             'category_id' => 'required|exists:categories,id',
             'sale_mode' => 'required|string|in:direct,lottery',
             'images' => 'nullable|array',
@@ -515,7 +518,7 @@ class ProductController extends Controller
         // Add lottery-specific validation rules only if lottery mode
         if ($request->sale_mode === 'lottery') {
             $rules['total_tickets'] = 'required|integer|min:10|max:10000'; // Nombre de tickets requis
-            $rules['ticket_price'] = 'nullable|numeric|min:100'; // Calculé automatiquement
+            $rules['ticket_price'] = "nullable|numeric|min:{$minTicketPrice}"; // Calculé automatiquement
             $rules['min_participants'] = 'nullable|integer|min:10|max:10000';
             $rules['lottery_duration'] = 'nullable|integer|min:1|max:60'; // Durée en jours
         }
@@ -807,11 +810,14 @@ class ProductController extends Controller
             return response()->json(['error' => 'Impossible de modifier un produit avec une tombola active'], 422);
         }
 
+        $minProductPrice = config('koumbaya.marketplace.min_product_price', 1000);
+        $minTicketPrice = config('koumbaya.ticket_calculation.min_ticket_price', 200);
+
         $validator = Validator::make($request->all(), [
             'name' => 'string|max:255',
             'description' => 'string',
-            'price' => 'numeric|min:1000',
-            'ticket_price' => 'numeric|min:100',
+            'price' => "numeric|min:{$minProductPrice}",
+            'ticket_price' => "numeric|min:{$minTicketPrice}",
             'images' => 'nullable|array',
             'status' => 'in:draft,active',
             'vendor_profile_id' => 'nullable|exists:vendor_profiles,id',
