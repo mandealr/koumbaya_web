@@ -648,13 +648,15 @@ const loadParticipants = async () => {
   try {
     const lottery = product.value.lottery || product.value.active_lottery
     if (lottery) {
-      // TODO: Endpoint /lotteries/{id}/participants n'existe pas encore
-      // Utiliser /tickets/my-tickets en attendant ou créer l'endpoint manquant
-      console.log('Participants endpoint not available yet for lottery:', lottery.id)
-      participants.value = []
+      const response = await get(`/lotteries/${lottery.id}/participants`)
+      if (response && response.success && response.data) {
+        participants.value = response.data.participants || []
+      } else {
+        participants.value = []
+      }
     }
-  } catch (error) {
-    console.error('Error loading participants:', error)
+  } catch (err) {
+    console.error('Error loading participants:', err)
     participants.value = []
   }
 }

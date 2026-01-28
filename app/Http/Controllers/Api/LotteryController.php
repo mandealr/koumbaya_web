@@ -583,16 +583,78 @@ class LotteryController extends Controller
     public function drawHistory($id)
     {
         $lottery = Lottery::findOrFail($id);
-        
+
         $history = DrawHistory::where('lottery_id', $lottery->id)
             ->with(['winner', 'winningTicket'])
             ->orderBy('created_at', 'desc')
             ->get();
-            
+
         return response()->json([
             'lottery' => $lottery->only(['id', 'lottery_number', 'draw_date']),
             'history' => $history,
             'total_draws' => $history->count()
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/lotteries/{id}/participants",
+     *     tags={"Lotteries"},
+     *     summary="Liste des participants d'une tombola",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID de la tombola",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Liste des participants")
+     * )
+     */
+    public function participants($id)
+    {
+        $lottery = Lottery::findOrFail($id);
+
+        // Récupérer les tickets payés groupés par utilisateur
+        $ticketsByUser = $lottery->tickets()
+            ->where('status', 'paid')
+            ->with(['user:id,first_name,last_name'])
+            ->get()
+            ->groupBy('user_id');
+
+        // Transformer en liste de participants avec comptage
+        $participants = $ticketsByUser->map(function ($tickets, $userId) {
+            $user = $tickets->first()->user;
+
+            // Anonymiser le nom (première lettre + ***)
+            $firstName = $user ? (mb_substr($user->first_name ?? '', 0, 1) . '***') : '***';
+            $lastName = $user ? (mb_substr($user->last_name ?? '', 0, 1) . '.') : '';
+            $displayName = trim($firstName . ' ' . $lastName);
+
+            return [
+                'id' => $userId,
+                'name' => $displayName,
+                'tickets' => $tickets->count(),
+                'has_winner' => $tickets->contains('is_winner', true),
+            ];
+        })->values();
+
+        // Trier par nombre de tickets (décroissant)
+        $participants = $participants->sortByDesc('tickets')->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'participants' => $participants,
+                'stats' => [
+                    'total_tickets' => $ticketsByUser->flatten()->count(),
+                    'unique_participants' => $participants->count(),
+                    'max_tickets' => $lottery->max_tickets,
+                    'participation_rate' => $lottery->max_tickets > 0
+                        ? round(($ticketsByUser->flatten()->count() / $lottery->max_tickets) * 100, 1)
+                        : 0,
+                ]
+            ]
         ]);
     }
 }

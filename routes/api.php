@@ -119,6 +119,7 @@ Route::group([
     Route::get('lotteries/active', [LotteryController::class, 'active']);
     // Route avec paramètre {id} doit être après les routes spécifiques
     Route::get('lotteries/{id}', [LotteryController::class, 'show']);
+    Route::get('lotteries/{id}/participants', [LotteryController::class, 'participants']);
     
     // Payment callbacks (public)
     Route::post('payment/callback', [PaymentCallbackController::class, 'handleCallback']);
