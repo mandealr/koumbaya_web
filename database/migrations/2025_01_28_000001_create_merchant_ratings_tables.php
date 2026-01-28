@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         // Table principale des notations marchands (dénormalisée pour performance)
-        Schema::create('merchant_ratings', function (Blueprint $table) {
+        if (!Schema::hasTable('merchant_ratings')) {
+            Schema::create('merchant_ratings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('merchant_id')->constrained('users')->onDelete('cascade');
 
@@ -58,10 +59,12 @@ return new class extends Migration
             $table->index('avg_rating');
             $table->index('badge');
             $table->index('last_recalculated_at');
-        });
+            });
+        }
 
         // Historique mensuel des scores (snapshots)
-        Schema::create('merchant_rating_snapshots', function (Blueprint $table) {
+        if (!Schema::hasTable('merchant_rating_snapshots')) {
+            Schema::create('merchant_rating_snapshots', function (Blueprint $table) {
             $table->id();
             $table->foreignId('merchant_id')->constrained('users')->onDelete('cascade');
 
@@ -88,10 +91,12 @@ return new class extends Migration
             $table->index(['merchant_id', 'snapshot_month']);
             $table->index('overall_score');
             $table->unique(['merchant_id', 'snapshot_month']);
-        });
+            });
+        }
 
         // Log des changements de notation (audit trail)
-        Schema::create('merchant_rating_logs', function (Blueprint $table) {
+        if (!Schema::hasTable('merchant_rating_logs')) {
+            Schema::create('merchant_rating_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('merchant_id')->constrained('users')->onDelete('cascade');
 
@@ -114,14 +119,25 @@ return new class extends Migration
             // Index
             $table->index(['merchant_id', 'created_at']);
             $table->index('change_reason');
-        });
+            });
+        }
 
         // Ajouter colonnes dénormalisées à la table users pour affichage rapide
-        Schema::table('users', function (Blueprint $table) {
-            $table->decimal('merchant_score', 5, 2)->nullable();
-            $table->string('merchant_badge', 20)->nullable();
-            $table->timestamp('merchant_score_updated_at')->nullable();
-        });
+        if (!Schema::hasColumn('users', 'merchant_score')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->decimal('merchant_score', 5, 2)->nullable();
+            });
+        }
+        if (!Schema::hasColumn('users', 'merchant_badge')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('merchant_badge', 20)->nullable();
+            });
+        }
+        if (!Schema::hasColumn('users', 'merchant_score_updated_at')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->timestamp('merchant_score_updated_at')->nullable();
+            });
+        }
     }
 
     /**
