@@ -153,7 +153,7 @@ class MerchantRatingService
         // Produits
         $totalProducts = Product::where('merchant_id', $merchantId)->count();
         $activeProducts = Product::where('merchant_id', $merchantId)
-            ->where('status', 'active')
+            ->where('is_active', true)
             ->count();
 
         // Commandes via produits du marchand
