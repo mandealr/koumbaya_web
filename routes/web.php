@@ -20,15 +20,25 @@ Route::get('api/products/images/{year}/{month}/{filename}', [App\Http\Controller
 Route::get('auth/{provider}/callback', [AuthController::class, 'handleProviderCallback'])
     ->where('provider', 'google|facebook|apple');
 
-// Route de partage pour les réseaux sociaux (meta tags Open Graph dynamiques)
+// Routes de partage pour les réseaux sociaux (meta tags Open Graph dynamiques)
+// Toutes ces routes détectent les bots sociaux et servent des meta tags dynamiques
+
+// Route explicite de partage
 Route::get('share/product/{id}', [ProductShareController::class, 'show'])
     ->where('id', '[0-9]+');
 
-// Route pour les pages produit SPA avec détection des bots sociaux
+// Route produit public /products/{slug}
+Route::get('products/{slug}', [ProductShareController::class, 'showBySlug']);
+
+// Route produit client /customer/products/{slug}
 Route::get('customer/products/{slug}', [ProductShareController::class, 'showBySlug']);
 
-// Route pour les pages tombola SPA avec détection des bots sociaux
+// Route tombola /lotteries/{id}
 Route::get('lotteries/{id}', [ProductShareController::class, 'showLottery'])
+    ->where('id', '[0-9]+');
+
+// Route tombola /lottery/{id}
+Route::get('lottery/{id}', [ProductShareController::class, 'showLottery'])
     ->where('id', '[0-9]+');
 
 // Route pour servir l'application Vue.js (SPA)
