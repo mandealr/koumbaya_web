@@ -154,30 +154,45 @@
                 <span class="bg-[#0099cc]/10 text-[#0099cc] px-4 py-2 rounded-full font-semibold">
                   {{ product.category }}
                 </span>
-                <div class="flex items-center text-yellow-500">
-                  <StarIcon v-for="n in 5" :key="n" class="h-5 w-5 fill-current" />
-                  <span class="ml-2 text-gray-600">(4.8)</span>
-                </div>
               </div>
 
               <!-- Merchant Info -->
-              <div v-if="product.merchant" class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-                <div class="w-12 h-12 rounded-full bg-[#0099cc]/10 flex items-center justify-center">
-                  <svg v-if="getMerchantName(product.merchant) && !isIndividualMerchant(product.merchant)" class="w-6 h-6 text-[#0099cc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  <svg v-else class="w-6 h-6 text-[#0099cc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
+              <div v-if="product.merchant" class="p-4 bg-gray-50 rounded-xl">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-full bg-[#0099cc]/10 flex items-center justify-center">
+                    <svg v-if="getMerchantName(product.merchant) && !isIndividualMerchant(product.merchant)" class="w-6 h-6 text-[#0099cc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <svg v-else class="w-6 h-6 text-[#0099cc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm text-gray-600">Vendu par</p>
+                    <p class="font-semibold text-gray-900">
+                      {{ getMerchantName(product.merchant) }}
+                    </p>
+                    <p v-if="product.merchant.company?.company_type" class="text-xs text-gray-500">
+                      {{ product.merchant.company.company_type === 'enterprise' ? 'Entreprise' : 'Vendeur individuel' }}
+                    </p>
+                  </div>
+                  <MerchantRatingBadge v-if="merchantRating?.badge" :badge="merchantRating.badge" />
                 </div>
-                <div>
-                  <p class="text-sm text-gray-600">Vendu par</p>
-                  <p class="font-semibold text-gray-900">
-                    {{ getMerchantName(product.merchant) }}
-                  </p>
-                  <p v-if="product.merchant.company?.company_type" class="text-xs text-gray-500">
-                    {{ product.merchant.company.company_type === 'enterprise' ? 'Entreprise' : 'Vendeur individuel' }}
-                  </p>
+                <!-- Merchant Rating -->
+                <div v-if="merchantRating" class="mt-3 pt-3 border-t border-gray-200">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <RatingStars :rating="merchantRating.avg_rating || 0" size="sm" :show-value="true" />
+                      <span class="text-sm text-gray-500">({{ merchantRating.total_reviews || 0 }} avis)</span>
+                    </div>
+                    <span class="text-xs text-gray-500">{{ merchantRating.completed_sales || 0 }} ventes</span>
+                  </div>
+                </div>
+                <div v-else-if="merchantRatingLoading" class="mt-3 pt-3 border-t border-gray-200">
+                  <div class="animate-pulse flex items-center gap-2">
+                    <div class="h-4 bg-gray-200 rounded w-24"></div>
+                    <div class="h-4 bg-gray-200 rounded w-16"></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -509,6 +524,9 @@ import {
   CheckIcon,
   ExclamationCircleIcon
 } from '@heroicons/vue/24/outline'
+import RatingStars from '@/components/rating/RatingStars.vue'
+import MerchantRatingBadge from '@/components/rating/MerchantRatingBadge.vue'
+import { useMerchantRating } from '@/composables/useMerchantRating'
 
 const route = useRoute()
 const router = useRouter()
@@ -518,6 +536,10 @@ const authStore = useAuthStore()
 const loading = ref(true)
 const product = ref(null)
 const error = ref(null)
+
+// Merchant rating
+const { rating: merchantRating, fetchRatingSummary } = useMerchantRating()
+const merchantRatingLoading = ref(false)
 
 // Lightbox state
 const showLightbox = ref(false)
@@ -859,6 +881,18 @@ const loadProduct = async () => {
     // Charger les produits similaires de la même catégorie
     if (productData.category_id) {
       await loadRelatedProducts(productData.category_id, productData.id)
+    }
+
+    // Charger la notation du marchand
+    if (productData.merchant?.id) {
+      merchantRatingLoading.value = true
+      try {
+        await fetchRatingSummary(productData.merchant.id)
+      } catch (err) {
+        console.warn('Erreur chargement notation marchand:', err)
+      } finally {
+        merchantRatingLoading.value = false
+      }
     }
   } catch (err) {
     console.error('Erreur lors du chargement du produit:', err)

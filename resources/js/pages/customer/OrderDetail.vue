@@ -306,10 +306,10 @@
           <!-- Payments Section -->
           <div class="bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Paiements liés</h2>
-            
+
             <div v-if="order.payments && order.payments.length > 0" class="space-y-4">
-              <div 
-                v-for="payment in order.payments" 
+              <div
+                v-for="payment in order.payments"
                 :key="payment.id"
                 class="border border-gray-200 rounded-lg p-4"
               >
@@ -320,7 +320,7 @@
                   </div>
                   <span :class="getStatusBadgeClass(payment.status)" class="text-xs">{{ getStatusText(payment.status) }}</span>
                 </div>
-                
+
                 <dl class="grid grid-cols-2 gap-3 text-xs">
                   <div>
                     <dt class="text-gray-600">Montant</dt>
@@ -345,11 +345,39 @@
                 </dl>
               </div>
             </div>
-            
+
             <div v-else class="text-center py-8">
               <CreditCardIcon class="w-12 h-12 text-gray-400 mx-auto mb-3" />
               <p class="text-gray-500">Aucun paiement associé</p>
             </div>
+          </div>
+
+          <!-- Review Section -->
+          <div v-if="order.status === 'fulfilled' && order.product?.merchant_id" class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">
+              <StarIcon class="w-5 h-5 inline mr-2 text-yellow-400" />
+              Votre avis sur le vendeur
+            </h2>
+
+            <!-- Already submitted -->
+            <div v-if="reviewSubmitted || existingReview" class="text-center py-6 bg-green-50 rounded-lg">
+              <CheckIcon class="w-12 h-12 text-green-500 mx-auto mb-3" />
+              <h3 class="text-lg font-medium text-gray-900 mb-2">Merci pour votre avis !</h3>
+              <p class="text-gray-600">Votre avis aide les autres acheteurs à faire leur choix.</p>
+              <div v-if="existingReview" class="mt-4">
+                <RatingStars :rating="existingReview.rating" size="lg" />
+              </div>
+            </div>
+
+            <!-- Review form -->
+            <ReviewForm
+              v-else
+              :merchant-id="order.product.merchant_id"
+              :order-id="order.id"
+              :product-id="order.product.id"
+              @submitted="handleReviewSubmitted"
+              @error="handleReviewError"
+            />
           </div>
         </div>
 
@@ -577,8 +605,11 @@ import {
   DocumentArrowDownIcon,
   PrinterIcon,
   CreditCardIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  StarIcon
 } from '@heroicons/vue/24/outline'
+import ReviewForm from '@/components/rating/ReviewForm.vue'
+import RatingStars from '@/components/rating/RatingStars.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -594,6 +625,8 @@ const printingInvoice = ref(false)
 const confirmingDelivery = ref(false)
 const showDeliveryConfirmation = ref(false)
 const deliveryNotes = ref('')
+const reviewSubmitted = ref(false)
+const existingReview = ref(null)
 
 // Charger les détails de la commande
 const loadOrder = async () => {
@@ -859,6 +892,26 @@ const formatPrice = (price) => {
     currency: 'XAF',
     minimumFractionDigits: 0
   }).format(price || 0).replace('XAF', 'FCFA')
+}
+
+// Gestion des avis
+const handleReviewSubmitted = (review) => {
+  reviewSubmitted.value = true
+  existingReview.value = review
+  showSuccess('Merci pour votre avis !')
+}
+
+const handleReviewError = (error) => {
+  showError(error || 'Erreur lors de l\'envoi de l\'avis')
+}
+
+// Computed pour afficher le formulaire d'avis
+const canLeaveReview = () => {
+  if (!order.value) return false
+  // Peut laisser un avis si la commande est livrée et qu'un marchand est associé
+  return order.value.status === 'fulfilled' &&
+         order.value.product?.merchant_id &&
+         !reviewSubmitted.value
 }
 
 // Lifecycle

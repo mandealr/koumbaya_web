@@ -136,6 +136,55 @@
 
       <!-- Recent Activities -->
       <div class="space-y-6">
+        <!-- My Rating Widget -->
+        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Ma notation</h3>
+            <router-link to="/merchant/profile" class="text-[#0099cc] hover:text-[#0088bb] text-sm font-medium">
+              Détails →
+            </router-link>
+          </div>
+
+          <div v-if="ratingLoading" class="animate-pulse space-y-3">
+            <div class="h-10 bg-gray-200 rounded w-1/2"></div>
+            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+          </div>
+
+          <div v-else-if="myRating">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="text-4xl font-bold text-gray-900">
+                {{ (myRating.avg_rating || 0).toFixed(1) }}
+              </div>
+              <div>
+                <RatingStars :rating="myRating.avg_rating || 0" size="lg" />
+                <p class="text-sm text-gray-500 mt-1">{{ myRating.total_reviews || 0 }} avis</p>
+              </div>
+            </div>
+            <MerchantRatingBadge :badge="myRating.badge || 'average'" />
+
+            <!-- Quick stats -->
+            <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-gray-100">
+              <div class="text-center">
+                <div class="text-lg font-semibold text-[#0099cc]">{{ Math.round(myRating.activity_score || 50) }}</div>
+                <div class="text-xs text-gray-500">Activité</div>
+              </div>
+              <div class="text-center">
+                <div class="text-lg font-semibold text-green-600">{{ Math.round(myRating.quality_score || 50) }}</div>
+                <div class="text-xs text-gray-500">Qualité</div>
+              </div>
+              <div class="text-center">
+                <div class="text-lg font-semibold text-purple-600">{{ Math.round(myRating.reliability_score || 50) }}</div>
+                <div class="text-xs text-gray-500">Fiabilité</div>
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="text-center py-4">
+            <StarIcon class="w-12 h-12 text-gray-300 mx-auto mb-2" />
+            <p class="text-sm text-gray-500">Notation non disponible</p>
+          </div>
+        </div>
+
         <!-- Recent Orders -->
         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
           <div class="flex items-center justify-between mb-4">
@@ -234,8 +283,12 @@ import {
   GiftIcon,
   ArrowUpIcon,
   ArrowDownIcon,
-  TruckIcon
+  TruckIcon,
+  StarIcon
 } from '@heroicons/vue/24/outline'
+import RatingStars from '@/components/rating/RatingStars.vue'
+import MerchantRatingBadge from '@/components/rating/MerchantRatingBadge.vue'
+import { useMerchantRating } from '@/composables/useMerchantRating'
 
 // Composables
 const {
@@ -248,6 +301,9 @@ const {
   loadDashboardData,
   formatCurrency
 } = useMerchantDashboard()
+
+// Rating
+const { rating: myRating, loading: ratingLoading, fetchMyRating } = useMerchantRating()
 
 // Reactive data
 const selectedPeriod = ref('30j')
@@ -288,6 +344,9 @@ const getStatIcon = (iconName) => {
 }
 
 onMounted(async () => {
-  await loadDashboardData()
+  await Promise.all([
+    loadDashboardData(),
+    fetchMyRating()
+  ])
 })
 </script>

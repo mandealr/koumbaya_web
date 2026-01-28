@@ -192,6 +192,105 @@
           </form>
         </div>
 
+        <!-- Section Ma Notation -->
+        <div class="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6">Ma notation et mes avis</h3>
+
+          <!-- Rating summary -->
+          <div v-if="ratingLoading" class="animate-pulse space-y-4">
+            <div class="h-20 bg-gray-200 rounded"></div>
+            <div class="h-32 bg-gray-200 rounded"></div>
+          </div>
+
+          <div v-else-if="myRating">
+            <!-- Score overview -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div class="bg-gradient-to-br from-[#0099cc]/5 to-[#0099cc]/10 rounded-xl p-6">
+                <div class="flex items-center gap-4">
+                  <div class="text-5xl font-bold text-gray-900">
+                    {{ (myRating.avg_rating || 0).toFixed(1) }}
+                  </div>
+                  <div>
+                    <RatingStars :rating="myRating.avg_rating || 0" size="lg" />
+                    <p class="text-sm text-gray-600 mt-1">{{ myRating.total_reviews || 0 }} avis clients</p>
+                    <MerchantRatingBadge :badge="myRating.badge || 'average'" class="mt-2" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <h4 class="font-medium text-gray-900">Détail des scores</h4>
+                <div class="space-y-2">
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm text-gray-600 w-20">Activité</span>
+                    <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-[#0099cc] rounded-full" :style="{ width: (myRating.activity_score || 50) + '%' }"></div>
+                    </div>
+                    <span class="text-sm font-medium w-10 text-right">{{ Math.round(myRating.activity_score || 50) }}</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm text-gray-600 w-20">Qualité</span>
+                    <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-green-500 rounded-full" :style="{ width: (myRating.quality_score || 50) + '%' }"></div>
+                    </div>
+                    <span class="text-sm font-medium w-10 text-right">{{ Math.round(myRating.quality_score || 50) }}</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm text-gray-600 w-20">Fiabilité</span>
+                    <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-purple-500 rounded-full" :style="{ width: (myRating.reliability_score || 50) + '%' }"></div>
+                    </div>
+                    <span class="text-sm font-medium w-10 text-right">{{ Math.round(myRating.reliability_score || 50) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 pt-6 border-t border-gray-200">
+              <div class="text-center p-3 bg-gray-50 rounded-lg">
+                <div class="text-2xl font-bold text-gray-900">{{ myRating.completed_sales || 0 }}</div>
+                <div class="text-sm text-gray-600">Ventes</div>
+              </div>
+              <div class="text-center p-3 bg-gray-50 rounded-lg">
+                <div class="text-2xl font-bold text-green-600">{{ myRating.positive_reviews || 0 }}</div>
+                <div class="text-sm text-gray-600">Avis positifs</div>
+              </div>
+              <div class="text-center p-3 bg-gray-50 rounded-lg">
+                <div class="text-2xl font-bold text-blue-600">{{ myRating.verified_reviews || 0 }}</div>
+                <div class="text-sm text-gray-600">Avis vérifiés</div>
+              </div>
+              <div class="text-center p-3 bg-gray-50 rounded-lg">
+                <div class="text-2xl font-bold text-purple-600">{{ myRating.fulfilled_orders || 0 }}</div>
+                <div class="text-sm text-gray-600">Livraisons</div>
+              </div>
+            </div>
+
+            <!-- Reviews list -->
+            <div class="pt-6 border-t border-gray-200">
+              <ReviewsList
+                :reviews="myReviews"
+                :pagination="reviewsPagination"
+                :loading="ratingLoading"
+                title="Derniers avis reçus"
+                empty-message="Vous n'avez pas encore reçu d'avis."
+                :show-filter="myReviews.length > 3"
+                @page-change="handlePageChange"
+              />
+            </div>
+          </div>
+
+          <div v-else class="text-center py-12">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              </svg>
+            </div>
+            <h4 class="text-lg font-medium text-gray-900 mb-2">Notation non disponible</h4>
+            <p class="text-gray-600">Votre notation sera calculée automatiquement après vos premières ventes.</p>
+          </div>
+        </div>
+
         <!-- Section Changement de mot de passe -->
         <div class="mt-6 bg-white rounded-xl shadow-sm border border-gray-200">
           <form @submit.prevent="updatePassword" class="space-y-6 p-6">
@@ -292,9 +391,24 @@ import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/api'
 import PhoneInput from '@/components/PhoneInput.vue'
 import AvatarUpload from '@/components/common/AvatarUpload.vue'
+import RatingStars from '@/components/rating/RatingStars.vue'
+import MerchantRatingBadge from '@/components/rating/MerchantRatingBadge.vue'
+import MerchantRatingCard from '@/components/rating/MerchantRatingCard.vue'
+import ReviewsList from '@/components/rating/ReviewsList.vue'
+import { useMerchantRating } from '@/composables/useMerchantRating'
 
 const authStore = useAuthStore()
 const { get, put } = useApi()
+
+// Rating
+const {
+  rating: myRating,
+  reviews: myReviews,
+  pagination: reviewsPagination,
+  loading: ratingLoading,
+  fetchMyRating,
+  fetchMerchantReviews
+} = useMerchantRating()
 
 // State
 const loading = ref(false)
@@ -532,9 +646,24 @@ const handleAvatarError = (error) => {
 
 
 
+// Load reviews
+const loadMyReviews = async (page = 1) => {
+  if (user.value?.id) {
+    await fetchMerchantReviews(user.value.id, page)
+  }
+}
+
+const handlePageChange = (page) => {
+  loadMyReviews(page)
+}
+
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
   loadUserData()
   loadStats()
+  await fetchMyRating()
+  if (user.value?.id) {
+    await loadMyReviews()
+  }
 })
 </script>
