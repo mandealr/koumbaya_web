@@ -281,6 +281,7 @@ Route::group([
         Route::get('/top-products', [MerchantOrderController::class, 'getTopProducts']);
         Route::get('/metrics', [MerchantOrderController::class, 'metrics']);
         Route::get('/metrics/health', [MerchantOrderController::class, 'metricsHealth']);
+        Route::post('/{order_number}/send-delivery-reminder', [MerchantOrderController::class, 'sendDeliveryReminder']);
     });
     
     // Merchant Profile Management

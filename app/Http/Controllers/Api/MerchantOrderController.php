@@ -761,7 +761,7 @@ class MerchantOrderController extends Controller
 
     /**
      * Vérifier l'état de santé du système de métriques
-     * 
+     *
      * @OA\Get(
      *     path="/api/merchant/orders/metrics/health",
      *     tags={"Merchant Orders"},
@@ -792,5 +792,164 @@ class MerchantOrderController extends Controller
             'success' => true,
             'data' => $healthCheck
         ]);
+    }
+
+    /**
+     * Envoyer un rappel de livraison au client
+     *
+     * @OA\Post(
+     *     path="/api/merchant/orders/{order_number}/send-delivery-reminder",
+     *     tags={"Merchant Orders"},
+     *     summary="Envoyer un rappel de livraison au client",
+     *     description="Envoie une notification au client pour lui rappeler de confirmer la réception de sa commande",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="order_number",
+     *         in="path",
+     *         required=true,
+     *         description="Numéro de la commande",
+     *         @OA\Schema(type="string", example="ORD-67890ABCDE")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Rappel envoyé avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Rappel envoyé au client")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Impossible d'envoyer le rappel",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="error", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Commande non trouvée"
+     *     )
+     * )
+     */
+    public function sendDeliveryReminder(string $orderNumber): JsonResponse
+    {
+        $merchantId = Auth::id();
+        $merchant = Auth::user();
+
+        // Récupérer la commande avec ses relations
+        $order = Order::with(['user', 'product', 'lottery.product'])
+            ->where('order_number', $orderNumber)
+            ->where(function ($q) use ($merchantId) {
+                $q->whereHas('product', function ($subQ) use ($merchantId) {
+                    $subQ->where('merchant_id', $merchantId);
+                })
+                ->orWhere(function ($subQ) use ($merchantId) {
+                    $subQ->where('type', 'lottery')
+                        ->whereHas('lottery.product', function ($lotteryQ) use ($merchantId) {
+                            $lotteryQ->where('merchant_id', $merchantId);
+                        });
+                });
+            })
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Commande non trouvée ou non autorisée'
+            ], 404);
+        }
+
+        // Vérifier que la commande est dans un statut approprié (paid ou shipping)
+        $allowedStatuses = [OrderStatus::PAID->value, OrderStatus::SHIPPING->value];
+        if (!in_array($order->status, $allowedStatuses)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Impossible d\'envoyer un rappel pour une commande avec le statut : ' . $order->status
+            ], 400);
+        }
+
+        // Vérifier qu'un rappel n'a pas été envoyé dans les dernières 24h (anti-spam)
+        $meta = $order->meta ?? [];
+        $lastReminder = $meta['last_delivery_reminder'] ?? null;
+
+        if ($lastReminder) {
+            $lastReminderTime = Carbon::parse($lastReminder);
+            $hoursSinceLastReminder = $lastReminderTime->diffInHours(now());
+
+            if ($hoursSinceLastReminder < 24) {
+                $hoursRemaining = 24 - $hoursSinceLastReminder;
+                return response()->json([
+                    'success' => false,
+                    'error' => "Un rappel a déjà été envoyé. Vous pourrez en envoyer un autre dans {$hoursRemaining} heure(s)."
+                ], 400);
+            }
+        }
+
+        // Vérifier que le client a un email
+        if (!$order->user || !$order->user->email) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Le client n\'a pas d\'adresse email configurée'
+            ], 400);
+        }
+
+        try {
+            // Nom du marchand
+            $merchantName = $merchant->first_name . ' ' . $merchant->last_name;
+            if ($merchant->business_name) {
+                $merchantName = $merchant->business_name;
+            }
+
+            // Envoyer l'email
+            \Illuminate\Support\Facades\Mail::to($order->user->email)
+                ->send(new \App\Mail\DeliveryReminderEmail($order, $merchantName));
+
+            // Créer une notification in-app
+            \App\Models\Notification::create([
+                'user_id' => $order->user_id,
+                'type' => 'order_status',
+                'title' => 'Rappel : Confirmez la réception',
+                'message' => "Le vendeur {$merchantName} vous rappelle de confirmer la réception de votre commande {$order->order_number}.",
+                'data' => [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'reminder_type' => 'delivery',
+                    'merchant_name' => $merchantName
+                ],
+                'channel' => 'app,email',
+                'status' => 'sent',
+                'related_type' => Order::class,
+                'related_id' => $order->id
+            ]);
+
+            // Mettre à jour le meta de la commande avec le timestamp du rappel
+            $meta['last_delivery_reminder'] = now()->toIso8601String();
+            $meta['delivery_reminders_count'] = ($meta['delivery_reminders_count'] ?? 0) + 1;
+            $order->update(['meta' => $meta]);
+
+            \Illuminate\Support\Facades\Log::info('DELIVERY_REMINDER :: Rappel envoyé', [
+                'order_number' => $order->order_number,
+                'merchant_id' => $merchantId,
+                'customer_email' => $order->user->email,
+                'reminders_count' => $meta['delivery_reminders_count']
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Rappel envoyé au client avec succès'
+            ]);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('DELIVERY_REMINDER :: Erreur envoi rappel', [
+                'order_number' => $order->order_number,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de l\'envoi du rappel : ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

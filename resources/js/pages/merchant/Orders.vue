@@ -275,6 +275,15 @@
                   >
                     <XCircleIcon class="w-4 h-4" />
                   </button>
+                  <button
+                    v-if="['paid', 'shipping'].includes(order.status)"
+                    @click="sendDeliveryReminder(order)"
+                    :disabled="sendingReminder === order.order_number"
+                    class="text-orange-500 hover:text-orange-700 transition-colors disabled:opacity-50"
+                    title="Envoyer un rappel de livraison au client"
+                  >
+                    <BellAlertIcon :class="['w-4 h-4', { 'animate-pulse': sendingReminder === order.order_number }]" />
+                  </button>
                 </div>
               </td>
             </tr>
@@ -454,7 +463,8 @@ import {
   ClockIcon,
   CheckIcon,
   ExclamationTriangleIcon,
-  TruckIcon
+  TruckIcon,
+  BellAlertIcon
 } from '@heroicons/vue/24/outline'
 import { useMerchantOrders } from '@/composables/useMerchantOrders'
 import { useToast } from '@/composables/useToast'
@@ -486,6 +496,7 @@ const statusChangeLoading = ref(false)
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 const isRefreshing = ref(false)
+const sendingReminder = ref(null)
 
 const filters = reactive({
   search: '',
@@ -782,11 +793,38 @@ const exportOrders = async () => {
 
 const getDeliveryButtonTitle = (order) => {
   if (order.type === 'lottery') {
-    return order.has_winning_ticket 
+    return order.has_winning_ticket
       ? 'Marquer en cours de livraison (ticket gagnant)'
       : 'Ticket non gagnant - pas de livraison'
   }
   return 'Marquer en cours de livraison'
+}
+
+// Envoyer un rappel de livraison au client
+const sendDeliveryReminder = async (order) => {
+  sendingReminder.value = order.order_number
+  try {
+    const response = await fetch(`/api/merchant/orders/${order.order_number}/send-delivery-reminder`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+
+    const data = await response.json()
+
+    if (response.ok && data.success) {
+      toast.success('Rappel envoyé au client avec succès')
+    } else {
+      toast.error(data.error || 'Erreur lors de l\'envoi du rappel')
+    }
+  } catch (error) {
+    console.error('Erreur envoi rappel:', error)
+    toast.error('Erreur lors de l\'envoi du rappel')
+  } finally {
+    sendingReminder.value = null
+  }
 }
 
 // Charger les données au montage
