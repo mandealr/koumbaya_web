@@ -718,15 +718,18 @@ const addToWishlist = () => {
 }
 
 const shareProduct = () => {
+  // Utiliser l'URL de partage avec meta tags Open Graph dynamiques
+  const shareUrl = `${window.location.origin}/share/product/${product.value.id}`
+
   if (navigator.share) {
     navigator.share({
       title: product.value.name,
       text: product.value.description,
-      url: window.location.href,
+      url: shareUrl,
     })
   } else {
     // Copy to clipboard fallback
-    navigator.clipboard.writeText(window.location.href)
+    navigator.clipboard.writeText(shareUrl)
     if (window.$toast) {
       window.$toast.success('Lien copié dans le presse-papier !', 'Partage')
     }

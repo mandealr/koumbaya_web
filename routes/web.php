@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\ProductShareController;
 
 // Route pour obtenir le token CSRF
 Route::get('/csrf-token', function () {
@@ -18,6 +19,10 @@ Route::get('api/products/images/{year}/{month}/{filename}', [App\Http\Controller
 // Social Authentication Callbacks (must be web routes, not API)
 Route::get('auth/{provider}/callback', [AuthController::class, 'handleProviderCallback'])
     ->where('provider', 'google|facebook|apple');
+
+// Route de partage pour les réseaux sociaux (meta tags Open Graph dynamiques)
+Route::get('share/product/{id}', [ProductShareController::class, 'show'])
+    ->where('id', '[0-9]+');
 
 // Route pour servir l'application Vue.js (SPA)
 Route::get('/{any}', function () {
