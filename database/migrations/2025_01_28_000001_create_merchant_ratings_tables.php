@@ -118,9 +118,9 @@ return new class extends Migration
 
         // Ajouter colonnes dénormalisées à la table users pour affichage rapide
         Schema::table('users', function (Blueprint $table) {
-            $table->decimal('merchant_score', 5, 2)->nullable()->after('rating_count');
-            $table->string('merchant_badge', 20)->nullable()->after('merchant_score');
-            $table->timestamp('merchant_score_updated_at')->nullable()->after('merchant_badge');
+            $table->decimal('merchant_score', 5, 2)->nullable();
+            $table->string('merchant_badge', 20)->nullable();
+            $table->timestamp('merchant_score_updated_at')->nullable();
         });
     }
 
