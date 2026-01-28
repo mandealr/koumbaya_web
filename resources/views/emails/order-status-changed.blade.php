@@ -1,84 +1,119 @@
-@component('mail::message')
+@extends('emails.layouts.base')
+
+@section('content')
     @php
         $statusLabels = [
             'paid' => 'Payée',
-            'shipping' => 'En cours de livraison', 
-            'fulfilled' => 'En cours de livraison',
+            'shipping' => 'En cours de livraison',
+            'fulfilled' => 'Livrée',
             'cancelled' => 'Annulée'
+        ];
+        $statusColors = [
+            'paid' => '#10b981',
+            'shipping' => '#0099cc',
+            'fulfilled' => '#10b981',
+            'cancelled' => '#ef4444'
         ];
     @endphp
 
-    # Mise à jour de votre commande
+    <h2 style="color: #1f2937; margin-top: 0;">Mise à jour de votre commande</h2>
 
-    Bonjour **{{ $order->user->first_name ?? 'Client' }}**,
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
+        Bonjour <strong>{{ $order->user->first_name ?? 'Client' }}</strong>,
+    </p>
 
-    Votre commande **{{ $order->order_number }}** a été mise à jour.
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
+        Votre commande <strong>{{ $order->order_number }}</strong> a été mise à jour.
+    </p>
 
-    @component('mail::panel')
-        **Nouveau statut**
-        
-        Votre commande est maintenant : **{{ $statusLabels[$newStatus] ?? $newStatus }}**
-    @endcomponent
+    <div class="info-box" style="background-color: {{ $statusColors[$newStatus] ?? '#0099cc' }}15; border-left-color: {{ $statusColors[$newStatus] ?? '#0099cc' }};">
+        <h3 style="color: #1f2937; margin-top: 0; font-size: 18px;">Nouveau statut</h3>
+        <p style="font-size: 20px; font-weight: 700; color: {{ $statusColors[$newStatus] ?? '#0099cc' }}; margin: 0;">
+            {{ $statusLabels[$newStatus] ?? $newStatus }}
+        </p>
+    </div>
 
-    ## Détails de la commande
+    <h3 style="color: #1f2937; font-size: 18px;">Détails de la commande</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Numéro :</td>
+            <td style="padding: 8px 0; color: #1f2937;">{{ $order->order_number }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Date :</td>
+            <td style="padding: 8px 0; color: #1f2937;">{{ $order->created_at->format('d/m/Y à H:i') }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Montant total :</td>
+            <td style="padding: 8px 0; color: #1f2937; font-weight: 700;">{{ number_format($order->total_amount, 0, ',', ' ') }} FCFA</td>
+        </tr>
+        @if($order->notes)
+        <tr>
+            <td style="padding: 8px 0; color: #6b7280; font-weight: 600;">Notes :</td>
+            <td style="padding: 8px 0; color: #1f2937;">{{ $order->notes }}</td>
+        </tr>
+        @endif
+    </table>
 
-    - **Numéro :** {{ $order->order_number }}
-    - **Date :** {{ $order->created_at->format('d/m/Y à H:i') }}  
-    - **Montant total :** {{ number_format($order->total_amount, 0, ',', ' ') }} FCFA
-    @if($order->notes)
-    - **Notes :** {{ $order->notes }}
+    @if($order->product)
+    <h3 style="color: #1f2937; font-size: 18px; margin-top: 24px;">Produit commandé</h3>
+    <div style="background-color: #f9fafb; padding: 16px; border-radius: 8px;">
+        <p style="margin: 0; color: #1f2937; font-weight: 600;">{{ $order->product->name }}</p>
+        @if($order->lottery)
+        <p style="margin: 8px 0 0 0; color: #6b7280; font-size: 14px;">
+            Tombola : {{ $order->lottery->title }}
+        </p>
+        @endif
+    </div>
     @endif
 
-    ## Produits commandés
-
-    @foreach($order->items as $item)
-    - **{{ $item->product->name }}** - Quantité : {{ $item->quantity }} - {{ number_format($item->price, 0, ',', ' ') }} FCFA
-    @endforeach
-
-    @if($newStatus === 'shipping')
-        @component('mail::panel') 
-            **Votre commande est en route !**
-            
-            Votre commande a été expédiée et sera bientôt livrée.  
+    @if($newStatus === 'paid')
+    <div class="info-box" style="margin-top: 24px;">
+        <h4 style="color: #1f2937; margin-top: 0; font-size: 16px;">Paiement confirmé !</h4>
+        <p style="color: #4b5563; font-size: 14px; margin: 0;">
+            Votre paiement a été reçu avec succès. Le vendeur a été notifié et prépare votre commande.
+        </p>
+    </div>
+    @elseif($newStatus === 'shipping' || $newStatus === 'fulfilled')
+    <div class="info-box" style="margin-top: 24px;">
+        <h4 style="color: #1f2937; margin-top: 0; font-size: 16px;">Votre commande est en route !</h4>
+        <p style="color: #4b5563; font-size: 14px; margin: 0;">
+            Votre commande a été expédiée et sera bientôt livrée.
             Vous recevrez une notification dès qu'elle sera livrée.
-        @endcomponent
-    @elseif($newStatus === 'fulfilled')
-        @component('mail::panel')
-            **Votre commande est en cours de livraison !**
-            
-            Votre commande a été expédiée et sera bientôt livrée.  
-            Vous recevrez une notification dès qu'elle sera livrée.
-        @endcomponent
+        </p>
+    </div>
     @elseif($newStatus === 'cancelled')
-        @component('mail::panel')
-            **Commande annulée**
-            
-            Votre commande a été annulée. Si vous avez des questions, n'hésitez pas à nous contacter.  
+    <div class="info-box" style="margin-top: 24px; background-color: #fef2f2; border-left-color: #ef4444;">
+        <h4 style="color: #1f2937; margin-top: 0; font-size: 16px;">Commande annulée</h4>
+        <p style="color: #4b5563; font-size: 14px; margin: 0;">
+            Votre commande a été annulée. Si vous avez des questions, n'hésitez pas à nous contacter.
             Le remboursement sera traité dans les plus brefs délais.
-        @endcomponent
+        </p>
+    </div>
     @endif
 
-    @component('mail::button', ['url' => config('app.frontend_url').'/customer/orders/'.$order->order_number])
-        Voir ma commande
-    @endcomponent
+    <div style="text-align: center; margin: 32px 0;">
+        <a href="{{ config('app.frontend_url') }}/customer/orders/{{ $order->order_number }}" class="koumbaya-button" style="background-color: #0099cc; border: 8px solid #0099cc; border-radius: 8px; color: #ffffff; text-decoration: none; display: inline-block; padding: 12px 24px; font-weight: 600;">
+            Voir ma commande
+        </a>
+    </div>
 
-    @component('mail::panel')
-        **Informations utiles**
-        
-        - Vous pouvez suivre l'évolution de votre commande dans votre espace client
-        - En cas de question, contactez notre service client  
-        - Conservez ce numéro de commande : **{{ $order->order_number }}**
-    @endcomponent
+    <div style="background-color: #f0f9ff; border-radius: 8px; padding: 16px; margin-top: 24px;">
+        <h4 style="color: #1f2937; margin-top: 0; font-size: 14px;">Informations utiles</h4>
+        <ul style="color: #4b5563; font-size: 14px; margin: 0; padding-left: 20px;">
+            <li>Vous pouvez suivre l'évolution de votre commande dans votre espace client</li>
+            <li>En cas de question, contactez notre service client</li>
+            <li>Conservez ce numéro de commande : <strong>{{ $order->order_number }}</strong></li>
+        </ul>
+    </div>
 
-    ---
+    <p style="color: #6b7280; font-size: 14px; margin-top: 32px; border-top: 1px solid #e5e7eb; padding-top: 16px;">
+        <strong>Besoin d'aide ?</strong> Notre équipe support est disponible à
+        <a href="mailto:support@koumbaya.com" style="color: #0099cc; text-decoration: none;">support@koumbaya.com</a>
+    </p>
 
-    **Besoin d'aide ?** Notre équipe support est disponible à support@koumbaya.com
-
-    Merci de votre confiance en Koumbaya Marketplace  
-    **L'équipe Koumbaya Marketplace**
-
-    @component('mail::subcopy')
-        Pour suivre toutes vos commandes, rendez-vous dans votre espace client :  
-        {{ config('app.frontend_url') }}/customer/orders
-    @endcomponent
-@endcomponent
+    <p style="color: #4b5563; font-size: 14px; margin-top: 24px;">
+        Merci de votre confiance !<br>
+        <strong>L'équipe Koumbaya Marketplace</strong>
+    </p>
+@endsection
