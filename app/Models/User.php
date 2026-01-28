@@ -156,6 +156,11 @@ class User extends Authenticatable
         return $this->hasMany(Product::class, 'merchant_id');
     }
 
+    public function merchantRating()
+    {
+        return $this->hasOne(MerchantRating::class, 'merchant_id');
+    }
+
     public function lotteryTickets()
     {
         return $this->hasMany(LotteryTicket::class, 'user_id');

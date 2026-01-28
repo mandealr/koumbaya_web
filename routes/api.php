@@ -150,6 +150,13 @@ Route::group([
     Route::post('calculate-ticket-price', [TicketPriceController::class, 'calculate']);
     Route::post('ticket-price-suggestions', [TicketPriceController::class, 'suggestions']);
     Route::get('ticket-calculation-config', [TicketPriceController::class, 'config']);
+
+    // Merchant Ratings (public)
+    Route::get('merchants/top-rated', [App\Http\Controllers\Api\MerchantRatingController::class, 'topRated']);
+    Route::get('merchants/{id}/rating', [App\Http\Controllers\Api\MerchantRatingController::class, 'show']);
+    Route::get('merchants/{id}/rating/summary', [App\Http\Controllers\Api\MerchantRatingController::class, 'summary']);
+    Route::get('merchants/{id}/rating/history', [App\Http\Controllers\Api\MerchantRatingController::class, 'history']);
+    Route::get('merchants/{id}/reviews', [App\Http\Controllers\Api\MerchantRatingController::class, 'reviews']);
 });
 
 
@@ -292,7 +299,13 @@ Route::group([
         Route::put('/password', [App\Http\Controllers\Api\MerchantProfileController::class, 'updatePassword']);
         Route::get('/business-stats', [App\Http\Controllers\Api\MerchantProfileController::class, 'businessStats']);
     });
-    
+
+    // Merchant Rating (pour le marchand connecté)
+    Route::get('merchant/my-rating', [App\Http\Controllers\Api\MerchantRatingController::class, 'myRating']);
+
+    // Client: Ajouter un avis sur un marchand
+    Route::post('merchants/{id}/reviews', [App\Http\Controllers\Api\MerchantRatingController::class, 'storeReview']);
+
     // Merchant Refund Management
     Route::prefix('merchant/refunds')->group(function () {
         Route::get('/', [App\Http\Controllers\Api\MerchantRefundController::class, 'index']);
