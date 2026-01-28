@@ -81,9 +81,21 @@ class SecurityHeadersMiddleware
         );
 
         // Cross-Origin Policies
-        $response->headers->set('Cross-Origin-Embedder-Policy', 'require-corp');
-        $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
-        $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
+        // Exclure les images des restrictions cross-origin pour compatibilité mobile
+        $isImageRequest = $request->is('api/products/images/*') ||
+                          $request->is('storage/*') ||
+                          preg_match('/\.(jpg|jpeg|png|gif|webp|svg|ico)$/i', $request->path());
+
+        if ($isImageRequest) {
+            // Headers permissifs pour les images (compatibilité mobile)
+            $response->headers->set('Cross-Origin-Resource-Policy', 'cross-origin');
+            $response->headers->set('Access-Control-Allow-Origin', '*');
+        } else {
+            // Headers restrictifs pour le reste
+            $response->headers->set('Cross-Origin-Embedder-Policy', 'unsafe-none');
+            $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+            $response->headers->set('Cross-Origin-Resource-Policy', 'same-site');
+        }
 
         // Supprimer les headers qui révèlent des informations sensibles
         $response->headers->remove('X-Powered-By');
