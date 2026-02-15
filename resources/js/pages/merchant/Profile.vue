@@ -515,7 +515,7 @@ const updateProfile = async () => {
   loading.value = true
   
   try {
-    await put('/user/profile', profileForm)
+    await post('/user/profile', { ...profileForm, _method: 'PUT' })
     
     // Refresh user data in store
     await authStore.refreshUser()
@@ -556,7 +556,7 @@ const updatePassword = async () => {
       data.current_password = passwordForm.current_password
     }
 
-    const response = await put('/user/password', data)
+    const response = await post('/user/password', { ...data, _method: 'PUT' })
 
     // Reset form
     passwordForm.current_password = ''

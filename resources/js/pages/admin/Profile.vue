@@ -567,7 +567,7 @@ const loadProfile = async () => {
 const updatePersonalInfo = async () => {
   loading.value = true
   try {
-    const response = await put('/admin/profile', profileData)
+    const response = await post('/admin/profile', { ...profileData, _method: 'PUT' })
     if (response && response.success) {
       // Update auth store
       await authStore.refreshUser()
@@ -600,9 +600,10 @@ const updatePassword = async () => {
   
   loading.value = true
   try {
-    const response = await put('/admin/profile/password', {
+    const response = await post('/admin/profile/password', {
       current_password: passwordForm.current_password,
-      new_password: passwordForm.new_password
+      new_password: passwordForm.new_password,
+      _method: 'PUT'
     })
     
     if (response && response.success) {
@@ -629,10 +630,11 @@ const updatePassword = async () => {
 const updatePreferences = async () => {
   loading.value = true
   try {
-    const response = await put('/admin/profile/preferences', {
+    const response = await post('/admin/profile/preferences', {
       timezone: profileData.timezone,
       language: profileData.language,
-      notifications: adminNotifications.value
+      notifications: adminNotifications.value,
+      _method: 'PUT'
     })
     
     if (response && response.success) {

@@ -242,7 +242,7 @@ const loadUserData = () => {
 
 const updateAccountInfo = async () => {
   try {
-    await put('/user/profile', accountForm)
+    await post('/user/profile', { ...accountForm, _method: 'PUT' })
     // Update auth store
     await authStore.refreshUser()
     if (window.$toast) {
@@ -265,10 +265,11 @@ const updatePassword = async () => {
   }
 
   try {
-    await put('/user/password', {
+    await post('/user/password', {
       current_password: passwordForm.current_password,
       new_password: passwordForm.new_password,
-      new_password_confirmation: passwordForm.new_password_confirmation
+      new_password_confirmation: passwordForm.new_password_confirmation,
+      _method: 'PUT'
     })
 
     // Reset form
@@ -289,7 +290,7 @@ const updatePassword = async () => {
 
 const updatePreferences = async () => {
   try {
-    await put('/user/preferences', preferences)
+    await post('/user/preferences', { ...preferences, _method: 'PUT' })
     if (window.$toast) {
       window.$toast.success('Préférences sauvegardées avec succès', '✅ Préférences')
     }

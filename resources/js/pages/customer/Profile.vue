@@ -643,7 +643,7 @@ const updatePersonalInfo = async () => {
   updatingPersonal.value = true
   try {
     console.log('Updating personal info with data:', personalForm)
-    const response = await put('/user/profile', personalForm)
+    const response = await post('/user/profile', { ...personalForm, _method: 'PUT' })
     console.log('Update personal info response:', response)
     
     if (response && response.success) {
@@ -728,7 +728,7 @@ const updateAddress = async () => {
   updatingAddress.value = true
   try {
     console.log('Updating address with data:', combinedData)
-    const response = await put('/user/profile', combinedData)
+    const response = await post('/user/profile', { ...combinedData, _method: 'PUT' })
     console.log('Update address response:', response)
     
     if (response && response.success) {
@@ -792,10 +792,11 @@ const updatePassword = async () => {
 
   updatingPassword.value = true
   try {
-    const response = await put('/user/password', {
+    const response = await post('/user/password', {
       current_password: passwordForm.current_password,
       new_password: passwordForm.new_password,
-      new_password_confirmation: passwordForm.confirm_password
+      new_password_confirmation: passwordForm.confirm_password,
+      _method: 'PUT'
     })
     
     if (response && response.success) {
@@ -823,7 +824,7 @@ const updatePassword = async () => {
 const updateNotifications = async () => {
   updatingNotifications.value = true
   try {
-    const response = await put('/user/preferences/detailed', {
+    const response = await post('/user/preferences/detailed', {
       email_notifications: {
         lottery_results: notificationForm.draw_results.email,
         new_lotteries: notificationForm.new_lottery.email,
@@ -839,7 +840,8 @@ const updateNotifications = async () => {
         login_alerts: notificationForm.login.sms
       },
       push_notifications: true,
-      marketing_emails: true
+      marketing_emails: true,
+      _method: 'PUT'
     })
     if (response && response.success) {
       if (window.$toast) {
