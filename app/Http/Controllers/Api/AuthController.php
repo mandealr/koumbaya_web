@@ -514,6 +514,29 @@ class AuthController extends Controller
     }
 
     /**
+     * Retourne la liste des providers OAuth disponibles (credentials configurés)
+     */
+    public function availableProviders()
+    {
+        $providers = ['google', 'facebook', 'apple'];
+        $available = [];
+
+        foreach ($providers as $provider) {
+            $clientId = config("services.{$provider}.client_id");
+            $clientSecret = config("services.{$provider}.client_secret");
+
+            if (!empty($clientId) && !empty($clientSecret)) {
+                $available[] = $provider;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $available,
+        ]);
+    }
+
+    /**
      * Redirect to social provider
      */
     public function redirectToProvider($provider)
@@ -524,30 +547,34 @@ class AuthController extends Controller
             return response()->json(['error' => 'Provider not supported'], 400);
         }
 
+        // Vérifier que les credentials sont configurés avant de rediriger
+        $clientId = config("services.{$provider}.client_id");
+        $clientSecret = config("services.{$provider}.client_secret");
+
+        if (empty($clientId) || empty($clientSecret)) {
+            Log::warning('Social auth redirect attempted with missing credentials', [
+                'provider' => $provider,
+            ]);
+
+            return response()->json([
+                'error' => 'Provider not configured',
+                'message' => "La connexion via " . ucfirst($provider) . " n'est pas disponible pour le moment.",
+            ], 503);
+        }
+
         try {
             Log::info('Social auth redirect initiated', [
                 'provider' => $provider,
-                'config' => [
-                    'client_id' => config("services.{$provider}.client_id") ? 'set' : 'missing',
-                    'client_secret' => config("services.{$provider}.client_secret") ? 'set' : 'missing',
-                    'redirect' => config("services.{$provider}.redirect")
-                ]
             ]);
 
             // Use stateless mode for API (no session required)
             $redirect_url = Socialite::driver($provider)->stateless()->redirect()->getTargetUrl();
-
-            Log::info('Social auth redirect URL generated', [
-                'provider' => $provider,
-                'url' => $redirect_url
-            ]);
 
             return response()->json(['redirect_url' => $redirect_url]);
         } catch (\Exception $e) {
             Log::error('Social auth redirect failed', [
                 'provider' => $provider,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([

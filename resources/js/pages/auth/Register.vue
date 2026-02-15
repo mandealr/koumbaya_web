@@ -68,6 +68,7 @@
               <!-- Social Login Buttons -->
               <div class="space-y-3 mb-8">
                 <button
+                  v-if="availableProviders.includes('facebook')"
                   @click="loginWithFacebook"
                   class="w-full flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200 group"
                 >
@@ -78,6 +79,7 @@
                 </button>
 
                 <button
+                  v-if="availableProviders.includes('google')"
                   @click="loginWithGoogle"
                   class="w-full flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200 group"
                 >
@@ -385,6 +387,7 @@ const showPassword = ref(false)
 const showPasswordConfirmation = ref(false)
 const countries = ref([])
 const countriesLoading = ref(false)
+const availableProviders = ref(['google'])
 const phoneValid = ref(false)
 const selectedCountryCode = ref('GA') // Gabon par défaut
 
@@ -602,8 +605,21 @@ const loadCountries = async () => {
   }
 }
 
+const loadAvailableProviders = async () => {
+  try {
+    const response = await fetch('/api/auth/providers')
+    const data = await response.json()
+    if (data.success && data.data) {
+      availableProviders.value = data.data
+    }
+  } catch (err) {
+    availableProviders.value = ['google']
+  }
+}
+
 onMounted(() => {
   loadCountries()
+  loadAvailableProviders()
 })
 </script>
 

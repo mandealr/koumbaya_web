@@ -266,8 +266,9 @@
           </div>
 
           <!-- Social login buttons avec style amélioré -->
-          <div class="grid grid-cols-2 gap-4">
+          <div :class="availableProviders.length === 1 ? 'grid grid-cols-1 gap-4' : 'grid grid-cols-2 gap-4'">
             <button
+              v-if="availableProviders.includes('google')"
               @click="loginWithGoogle"
               type="button"
               :disabled="loading"
@@ -283,6 +284,7 @@
             </button>
 
             <button
+              v-if="availableProviders.includes('facebook')"
               @click="loginWithFacebook"
               type="button"
               :disabled="loading"
@@ -353,6 +355,7 @@ const onPhoneChange = (phoneData) => {
 const loading = ref(false)
 const showPassword = ref(false)
 const registrationSuccess = ref(null)
+const availableProviders = ref(['google', 'facebook']) // défaut optimiste, mis à jour au mount
 
 const validateForm = () => {
   let isValid = true
@@ -666,8 +669,24 @@ const loginWithFacebook = async () => {
   }
 }
 
+// Charger les providers OAuth disponibles
+const loadAvailableProviders = async () => {
+  try {
+    const response = await fetch('/api/auth/providers')
+    const data = await response.json()
+    if (data.success && data.data) {
+      availableProviders.value = data.data
+    }
+  } catch (err) {
+    // En cas d'erreur, garder le défaut (Google seul par sécurité)
+    availableProviders.value = ['google']
+  }
+}
+
 // Vérifier s'il y a des données d'inscription réussie
 onMounted(() => {
+  loadAvailableProviders()
+
   // Vérifier les paramètres de requête pour la redirection depuis l'inscription
   if (route.query.registered === 'true') {
     // Récupérer les données stockées dans sessionStorage

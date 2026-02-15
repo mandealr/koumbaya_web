@@ -131,21 +131,56 @@ class SecurityHeadersMiddleware
     }
 
     /**
+     * Vérifier si le User-Agent correspond à un bot/crawler connu
+     */
+    private function isKnownBot(string $userAgent): bool
+    {
+        $knownBots = [
+            'facebookexternalhit',
+            'Facebot',
+            'Twitterbot',
+            'WhatsApp',
+            'LinkedInBot',
+            'Googlebot',
+            'bingbot',
+            'Slackbot',
+            'TelegramBot',
+            'Discordbot',
+            'Pinterestbot',
+            'Applebot',
+        ];
+
+        foreach ($knownBots as $bot) {
+            if (stripos($userAgent, $bot) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Logger l'activité suspecte
      */
     private function logSuspiciousActivity(Request $request): void
     {
+        $userAgent = $request->userAgent() ?? '';
+
+        // Ne pas analyser les requêtes des bots/crawlers connus
+        if ($this->isKnownBot($userAgent)) {
+            return;
+        }
+
         $suspiciousPatterns = [
             '/script[^>]*>.*?<\/script>/i',
             '/javascript:/i',
-            '/on\w+\s*=/i',
+            '/\bon(click|load|error|mouseover|mouseout|mousedown|mouseup|focus|blur|submit|change|input|keydown|keyup|keypress|abort|dblclick|drag|drop|resize|scroll|unload|beforeunload|contextmenu|copy|cut|paste)\s*=/i',
             '/eval\s*\(/i',
             '/<\s*iframe/i',
             '/document\.cookie/i',
             '/window\.location/i',
         ];
 
-        $userAgent = $request->userAgent() ?? '';
         $queryString = $request->getQueryString() ?? '';
         $content = $request->getContent();
 

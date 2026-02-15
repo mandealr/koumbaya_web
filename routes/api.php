@@ -66,6 +66,9 @@ Route::group([
     Route::post('resend-verification', [AuthController::class, 'resendVerificationEmail']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
 
+    // Social Authentication - Available providers
+    Route::get('providers', [AuthController::class, 'availableProviders']);
+
     // Social Authentication - Redirect only (callback is in web.php)
     Route::get('{provider}/redirect', [AuthController::class, 'redirectToProvider'])->where('provider', 'google|facebook|apple');
 
