@@ -65,6 +65,11 @@ class Payment extends Model
         return $this->hasMany(Refund::class, 'transaction_id');
     }
 
+    public function lottery_tickets()
+    {
+        return $this->hasMany(LotteryTicket::class, 'payment_id');
+    }
+
     /**
      * Scopes
      */
