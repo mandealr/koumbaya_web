@@ -12,58 +12,56 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Process lottery draws every day at 14:00 (2 PM)
+        // Tirages de tombola - 3 fois par jour (heures fixes)
         $schedule->command('lottery:draw')
-            ->dailyAt('14:00')
+            ->dailyAt('12:00')
             ->withoutOverlapping()
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/lottery-draws.log'));
 
-        // Also run at 20:00 (8 PM) for lotteries ending in the evening
+        $schedule->command('lottery:draw')
+            ->dailyAt('16:00')
+            ->withoutOverlapping()
+            ->runInBackground()
+            ->appendOutputTo(storage_path('logs/lottery-draws.log'));
+
         $schedule->command('lottery:draw')
             ->dailyAt('20:00')
             ->withoutOverlapping()
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/lottery-draws.log'));
 
-        // Check for completed lotteries (all tickets sold) every 30 minutes
-        $schedule->command('lottery:draw')
-            ->everyThirtyMinutes()
-            ->withoutOverlapping()
-            ->runInBackground()
-            ->appendOutputTo(storage_path('logs/lottery-draws-frequent.log'));
-
-        // Process expired lotteries and automatic refunds daily at 3 AM
+        // Tombolas expirées et remboursements automatiques - 1 fois par jour à 3h
         $schedule->command('lottery:process-expired')
             ->dailyAt('03:00')
             ->withoutOverlapping()
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/expired-lotteries.log'));
 
-        // Expire old orders every 15 minutes
+        // Expiration commandes anciennes - toutes les heures (au lieu de 15 min)
         $schedule->command('orders:expire-old')
-            ->everyFifteenMinutes()
+            ->hourly()
             ->withoutOverlapping()
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/expired-orders.log'));
 
-        // Envoyer rappels tombola 24h avant tirage - tous les jours à 8h
+        // Rappels tombola 24h avant tirage - tous les jours à 8h
         $schedule->command('lottery:send-reminders 24h')
             ->dailyAt('08:00')
             ->withoutOverlapping()
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/lottery-reminders.log'));
 
-        // Envoyer rappels tombola 1h avant tirage - toutes les heures
+        // Rappels tombola 1h avant tirage - toutes les 2 heures (au lieu de chaque heure)
         $schedule->command('lottery:send-reminders 1h')
-            ->hourly()
+            ->everyTwoHours()
             ->withoutOverlapping()
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/lottery-reminders.log'));
 
-        // Annuler les commandes en attente depuis plus d'une heure - toutes les 30 minutes
+        // Annuler commandes en attente depuis +1h - toutes les heures (au lieu de 30 min)
         $schedule->command('orders:cancel-pending')
-            ->everyThirtyMinutes()
+            ->hourly()
             ->withoutOverlapping()
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/cancelled-orders.log'));

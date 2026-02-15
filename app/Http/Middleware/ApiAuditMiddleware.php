@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Log;
 class ApiAuditMiddleware
 {
     /**
+     * Cache statique pour éviter Schema::hasTable() sur chaque requête
+     */
+    protected static ?bool $tableExists = null;
+
+    /**
      * Routes sensibles qui nécessitent un audit automatique
      */
     protected $auditRoutes = [
@@ -57,9 +62,12 @@ class ApiAuditMiddleware
     protected function logApiRequest(Request $request, $response)
     {
         try {
-            // Vérifier si la table audit_logs existe
-            if (!\Schema::hasTable('audit_logs')) {
-                return; // Skip silencieusement si la table n'existe pas
+            // Vérifier si la table audit_logs existe (cache statique par process)
+            if (self::$tableExists === null) {
+                self::$tableExists = \Schema::hasTable('audit_logs');
+            }
+            if (!self::$tableExists) {
+                return;
             }
 
             $statusCode = method_exists($response, 'getStatusCode') 
