@@ -208,16 +208,16 @@
             <div v-if="product.sale_mode === 'lottery'" class="mb-4">
               <div class="flex justify-between text-sm text-gray-600 mb-2">
                 <span>Progression</span>
-                <span>{{ product.sold_tickets || 0 }}/500</span>
+                <span>{{ product.sold_tickets || 0 }}/{{ product.max_tickets || 100 }}</span>
               </div>
               <div class="w-full bg-gray-200 rounded-full h-2">
                 <div
                   class="bg-purple-500 h-2 rounded-full transition-all"
-                  :style="{ width: Math.min(((product.sold_tickets || 0) / 500) * 100, 100) + '%' }"
+                  :style="{ width: Math.min(((product.sold_tickets || 0) / (product.max_tickets || 100)) * 100, 100) + '%' }"
                 ></div>
               </div>
               <p class="text-xs text-gray-500 mt-1">
-                {{ Math.round(((product.sold_tickets || 0) / 500) * 100) }}% vendu
+                {{ Math.round(((product.sold_tickets || 0) / (product.max_tickets || 100)) * 100) }}% vendu
               </p>
             </div>
 

@@ -43,18 +43,18 @@ return [
         | Nombre de tickets générés par défaut pour chaque tombola
         |
         */
-        'default_tickets' => env('KOUMBAYA_DEFAULT_TICKETS', 500),
+        'default_tickets' => env('KOUMBAYA_DEFAULT_TICKETS', 100),
 
         /*
         |--------------------------------------------------------------------------
         | Limites du Nombre de Tickets
         |--------------------------------------------------------------------------
         |
-        | Nombre minimum et maximum de tickets autorisés
+        | Nombre fixe de tickets pour toutes les tombolas (100)
         |
         */
         'min_tickets' => env('KOUMBAYA_MIN_TICKETS', 100),
-        'max_tickets' => env('KOUMBAYA_MAX_TICKETS', 5000),
+        'max_tickets' => env('KOUMBAYA_MAX_TICKETS', 100),
 
         /*
         |--------------------------------------------------------------------------
@@ -178,34 +178,37 @@ return [
         | Permettre aux marchands de modifier le nombre de tickets
         |--------------------------------------------------------------------------
         */
-        'allow_custom_ticket_count' => env('KOUMBAYA_ALLOW_CUSTOM_TICKET_COUNT', true),
-        
+        'allow_custom_ticket_count' => env('KOUMBAYA_ALLOW_CUSTOM_TICKET_COUNT', false),
+
         /*
         |--------------------------------------------------------------------------
         | Configuration des Profils Vendeurs
         |--------------------------------------------------------------------------
+        |
+        | Nombre de tickets fixé à 100 pour tous les profils vendeurs
+        |
         */
         'seller_profiles' => [
             'individual' => [
-                'fixed_tickets' => 500, // Tickets fixes pour les vendeurs particuliers
-                'can_customize_tickets' => false, // Ne peuvent pas modifier le nombre
-                'min_product_price' => 100000, // Prix minimum produit (pour avoir ticket >= 200 FCFA)
+                'fixed_tickets' => 100, // Tickets fixes pour tous
+                'can_customize_tickets' => false,
+                'min_product_price' => null,
                 'lottery_duration' => [
-                    'fixed' => 30, // Durée fixe de 30 jours
-                    'can_customize' => false, // Ne peut pas modifier la durée
+                    'fixed' => 30,
+                    'can_customize' => false,
                     'min_days' => 30,
                     'max_days' => 30,
                 ],
             ],
             'business' => [
-                'fixed_tickets' => null, // Peut choisir le nombre de tickets
-                'can_customize_tickets' => true, // Toutes les possibilités
-                'min_product_price' => null, // Pas de limite minimum
+                'fixed_tickets' => 100, // Tickets fixes pour tous
+                'can_customize_tickets' => false,
+                'min_product_price' => null,
                 'lottery_duration' => [
-                    'fixed' => null, // Pas de durée fixe
-                    'can_customize' => true, // Peut configurer comme il veut
-                    'min_days' => 1, // Minimum 1 jour
-                    'max_days' => 60, // Maximum 60 jours
+                    'fixed' => null,
+                    'can_customize' => true,
+                    'min_days' => 1,
+                    'max_days' => 60,
                 ],
             ]
         ],

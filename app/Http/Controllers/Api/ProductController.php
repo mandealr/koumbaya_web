@@ -517,9 +517,9 @@ class ProductController extends Controller
 
         // Add lottery-specific validation rules only if lottery mode
         if ($request->sale_mode === 'lottery') {
-            $rules['total_tickets'] = 'required|integer|min:10|max:10000'; // Nombre de tickets requis
+            $rules['total_tickets'] = 'nullable|integer'; // Fixé à 100 côté serveur
             $rules['ticket_price'] = "nullable|numeric|min:{$minTicketPrice}"; // Calculé automatiquement
-            $rules['min_participants'] = 'nullable|integer|min:10|max:10000';
+            $rules['min_participants'] = 'nullable|integer';
             $rules['lottery_duration'] = 'nullable|integer|min:1|max:60'; // Durée en jours
         }
 
@@ -552,18 +552,19 @@ class ProductController extends Controller
             }
         }
 
-        // Pour mode tombola, calculer automatiquement le prix du ticket basé sur le nombre de tickets fourni
+        // Pour mode tombola, calculer automatiquement le prix du ticket (100 tickets fixes)
         $ticketPrice = $request->ticket_price;
-        $totalTickets = $request->total_tickets;
-        
+        $fixedTickets = config('koumbaya.ticket_calculation.default_tickets', 100);
+        $totalTickets = $fixedTickets;
+
         if ($request->sale_mode === 'lottery') {
-            // Utiliser la nouvelle logique: calculer le prix basé sur le nombre de tickets fourni
+            // Calcul du prix basé sur 100 tickets fixes
             $ticketPrice = \App\Services\TicketPriceCalculator::calculateTicketPrice(
                 $request->price,
-                $totalTickets ?? 1000, // Utiliser le nombre fourni par l'utilisateur
+                $fixedTickets,
                 0.10, // Commission par défaut (10%)
                 0.15, // Marge par défaut (15%)
-                $user // Utiliser l'utilisateur pour les contraintes
+                $user
             );
             
             // Valider le prix calculé
@@ -604,11 +605,11 @@ class ProductController extends Controller
 
         // Add lottery-specific fields only if lottery mode
         if ($request->sale_mode === 'lottery') {
-            // Store lottery data in meta field (existing pattern in codebase)
+            // Store lottery data in meta field (100 tickets fixes)
             $productData['meta'] = [
                 'ticket_price' => $ticketPrice,
-                'total_tickets' => $totalTickets,
-                'min_participants' => $request->min_participants ?? $totalTickets,
+                'total_tickets' => $fixedTickets,
+                'min_participants' => $fixedTickets,
             ];
         }
 
@@ -616,37 +617,15 @@ class ProductController extends Controller
 
         // Si c'est un produit tombola, créer automatiquement la tombola
         if ($request->sale_mode === 'lottery') {
-            // Utiliser la nouvelle logique: l'utilisateur a fourni le nombre de tickets
-            // et nous avons calculé le prix du ticket
-
             // Déterminer la durée selon le type de vendeur
             $lotteryDuration = $this->getLotteryDurationForUser($user, $request->lottery_duration);
-
-            // Vérifier si l'utilisateur a un abonnement premium
-            $isPremium = $this->checkPremiumStatus($user);
-
-            // Limiter le nombre de tickets à 500 pour les utilisateurs non premium
-            $maxAllowedTickets = $isPremium ? $totalTickets : min($totalTickets, 500);
-
-            if (!$isPremium && $totalTickets > 500) {
-                \Log::warning('Nombre de tickets limité à 500 (non premium)', [
-                    'user_id' => $user->id,
-                    'requested_tickets' => $totalTickets,
-                    'allowed_tickets' => $maxAllowedTickets
-                ]);
-            }
-
-            // Recalculer le prix du ticket si le nombre a été limité
-            if ($maxAllowedTickets != $totalTickets) {
-                $ticketPrice = round($product->price / $maxAllowedTickets, 0);
-            }
 
             $product->lotteries()->create([
                 'lottery_number' => 'LOT-' . strtoupper(Str::random(8)),
                 'title' => 'Tombola - ' . $product->name,
                 'description' => 'Tombola pour le produit : ' . $product->name,
                 'ticket_price' => $ticketPrice,
-                'max_tickets' => $maxAllowedTickets,
+                'max_tickets' => $fixedTickets,
                 'sold_tickets' => 0,
                 'currency' => 'XAF',
                 'draw_date' => now()->addDays($lotteryDuration),
@@ -656,10 +635,7 @@ class ProductController extends Controller
                     'created_with_product' => true,
                     'vendor_profile_id' => $vendor ? $vendor->id : null,
                     'duration_days' => $lotteryDuration,
-                    'calculation_method' => 'tickets_to_price', // Nouvelle méthode de calcul
-                    'is_premium' => $isPremium,
-                    'original_max_tickets' => $totalTickets,
-                    'limited_to_500' => !$isPremium && $totalTickets > 500
+                    'calculation_method' => 'fixed_100_tickets',
                 ]
             ]);
         }

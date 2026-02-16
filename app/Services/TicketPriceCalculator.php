@@ -57,7 +57,7 @@ class TicketPriceCalculator
      */
     public static function calculateTicketPrice(
         float $productPrice,
-        int $numberOfTickets = 500,  // Changé à 500 par défaut
+        int $numberOfTickets = 100,  // Fixé à 100 tickets pour tous
         float $commissionRate = 0.10, // 10%
         float $marginRate = 0.15,     // 15%
         ?\App\Models\User $seller = null
@@ -75,20 +75,9 @@ class TicketPriceCalculator
             throw new \InvalidArgumentException('Les taux ne peuvent pas être négatifs');
         }
 
-        // Application des contraintes selon le rôle vendeur
-        if ($seller) {
-            // Pour les Business Individual : tickets fixes à 500
-            $fixedTickets = $seller->getFixedTicketCount();
-            if ($fixedTickets) {
-                $numberOfTickets = $fixedTickets;
-            }
-
-            // Vérification du prix minimum de produit pour respecter le ticket minimum de 200 FCFA
-            $minProductPrice = $seller->getMinProductPrice();
-            if ($minProductPrice && $productPrice < $minProductPrice) {
-                throw new \InvalidArgumentException("Prix minimum requis: {$minProductPrice} FCFA pour les vendeurs individuels");
-            }
-        }
+        // Nombre de tickets fixé à 100 pour tous les vendeurs
+        $fixedTickets = config('koumbaya.ticket_calculation.default_tickets', 100);
+        $numberOfTickets = $fixedTickets;
 
         // Calcul selon la formule
         $commission = $productPrice * $commissionRate;
@@ -119,9 +108,9 @@ class TicketPriceCalculator
         return [
             'commission_rate' => config('koumbaya.ticket_calculation.commission_rate', 0.10),
             'margin_rate' => config('koumbaya.ticket_calculation.margin_rate', 0.15),
-            'default_tickets' => config('koumbaya.ticket_calculation.default_tickets', 1000),
+            'default_tickets' => config('koumbaya.ticket_calculation.default_tickets', 100),
             'min_tickets' => config('koumbaya.ticket_calculation.min_tickets', 100),
-            'max_tickets' => config('koumbaya.ticket_calculation.max_tickets', 5000),
+            'max_tickets' => config('koumbaya.ticket_calculation.max_tickets', 100),
         ];
     }
 
@@ -136,7 +125,7 @@ class TicketPriceCalculator
      */
     public static function getCalculationDetails(
         float $productPrice,
-        int $numberOfTickets = 1000,
+        int $numberOfTickets = 100,
         float $commissionRate = 0.10,
         float $marginRate = 0.15
     ): array {
@@ -201,7 +190,7 @@ class TicketPriceCalculator
         $suggestions = [];
         
         // Suggestion pour différents nombres de tickets
-        $ticketOptions = [500, 750, 1000, 1250, 1500, 2000];
+        $ticketOptions = [100];
         
         foreach ($ticketOptions as $tickets) {
             $price = self::calculateTicketPrice($productPrice, $tickets);

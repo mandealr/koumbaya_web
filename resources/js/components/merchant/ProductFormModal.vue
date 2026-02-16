@@ -54,7 +54,7 @@
                 Calcul automatique du ticket
               </h4>
               <span class="text-xs text-gray-500">
-                {{ form.numberOfTickets || 1000 }} tickets
+                100 tickets
               </span>
             </div>
 
@@ -90,66 +90,22 @@
               </div>
             </div>
 
-            <!-- Nombre de tickets personnalisable -->
-            <div v-if="showAdvanced && canCustomizeTickets" class="border-t pt-3">
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Nombre de tickets (optionnel)
-              </label>
-              <div class="grid grid-cols-3 gap-2">
-                <button
-                  v-for="ticketCount in [500, 1000, 1500]"
-                  :key="ticketCount"
-                  type="button"
-                  @click="updateTicketCount(ticketCount)"
-                  :class="[
-                    'px-3 py-2 text-sm border rounded-lg transition-colors',
-                    form.numberOfTickets === ticketCount
-                      ? 'border-[#0099cc] bg-[#0099cc] text-white'
-                      : 'border-gray-300 hover:border-[#0099cc]'
-                  ]"
-                >
-                  {{ ticketCount }}
-                </button>
-              </div>
-              <input
-                v-model.number="form.numberOfTickets"
-                @input="calculateTicketPrice"
-                type="number"
-                min="100"
-                max="5000"
-                class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                placeholder="Nombre personnalisé..."
-              />
-            </div>
-
-            <!-- Message pour les vendeurs individuels -->
-            <div v-else-if="showAdvanced && !canCustomizeTickets" class="border-t pt-3">
-              <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <!-- Nombre de tickets fixé à 100 -->
+            <div class="border-t pt-3">
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <div class="flex items-center">
                   <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                     </svg>
                   </div>
                   <div class="ml-3">
-                    <p class="text-sm text-yellow-800">
-                      <strong>Profil Vendeur Individuel:</strong> Le nombre de tickets est fixé à {{ form.numberOfTickets }} pour garantir un prix de ticket minimum de 200 FCFA.
+                    <p class="text-sm text-blue-800">
+                      <strong>Nombre fixe :</strong> Le nombre de tickets est fixé à 100 pour toutes les tombolas.
                     </p>
                   </div>
                 </div>
               </div>
-            </div>
-
-            <button
-              v-if="canCustomizeTickets"
-              type="button"
-              @click="showAdvanced = !showAdvanced"
-              class="text-xs text-[#0099cc] hover:text-[#0088bb] transition-colors"
-            >
-              {{ showAdvanced ? '▼ Masquer les options' : '▶ Options avancées' }}
-            </button>
-            <div v-else class="text-xs text-gray-500">
-              Options limitées pour profil vendeur individuel
             </div>
           </div>
 
@@ -235,7 +191,7 @@ const form = reactive({
   value: '',
   ticketPrice: '',
   category: '',
-  numberOfTickets: 500  // Changé à 500 par défaut
+  numberOfTickets: 100  // Fixé à 100 tickets pour tous
 })
 
 watch(() => props.product, (newProduct) => {
@@ -332,11 +288,11 @@ watch(() => form.value, () => {
 
 // Helpers pour les profils vendeurs
 const canCustomizeTickets = computed(() => {
-  return !isIndividualSeller.value
+  return false // Personnalisation désactivée - 100 tickets fixes pour tous
 })
 
 const getDefaultTicketCount = () => {
-  return 500 // 500 par défaut pour tous
+  return 100 // 100 tickets fixes pour tous
 }
 
 const getMinProductPrice = () => {
@@ -351,9 +307,9 @@ watch(() => form.value, (newValue) => {
     console.warn(`Prix minimum recommandé: ${formatCurrency(minPrice)} pour profil individuel`)
   }
 
-  // Forcer les tickets à 500 pour les vendeurs individuels
+  // Forcer les tickets à 100 pour tous les vendeurs
   if (isIndividualSeller.value) {
-    form.numberOfTickets = 500
+    form.numberOfTickets = 100
   }
 
   if (newValue && newValue > 0) {
@@ -364,7 +320,7 @@ watch(() => form.value, (newValue) => {
 // Initialisation du nombre de tickets selon le profil
 watch(() => isIndividualSeller.value, (isIndividual) => {
   if (isIndividual) {
-    form.numberOfTickets = 500
+    form.numberOfTickets = 100
     calculateTicketPrice()
   }
 }, { immediate: true })
@@ -374,7 +330,7 @@ onMounted(() => {
 
   // Configurer le nombre de tickets selon le profil au montage
   if (isIndividualSeller.value) {
-    form.numberOfTickets = 500
+    form.numberOfTickets = 100
   }
 })
 </script>

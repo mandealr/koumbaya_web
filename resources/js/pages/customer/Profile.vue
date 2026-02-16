@@ -40,7 +40,7 @@
               {{ loadingBecomeSeller ? 'En cours...' : 'Devenir vendeur individuel' }}
             </button>
             <p class="text-xs text-gray-500 mt-2 text-center">
-              Vendez vos produits avec 500 tickets par tombola
+              Vendez vos produits avec 100 tickets par tombola
             </p>
           </div>
 
@@ -448,7 +448,7 @@ const becomeSeller = async () => {
       
       if (window.$toast) {
         window.$toast.success(
-          'Vous êtes maintenant un vendeur individuel ! Vous pouvez créer des tombolas avec 500 tickets fixes.',
+          'Vous êtes maintenant un vendeur individuel ! Vous pouvez créer des tombolas avec 100 tickets par tombola.',
           '🎉 Félicitations !'
         )
       }

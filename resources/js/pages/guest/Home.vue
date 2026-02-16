@@ -86,7 +86,7 @@
                       ></div>
                     </div>
                     <div class="text-center text-sm text-gray-500">
-                      {{ latestLotteryProduct?.soldTickets || 0 }}/{{ latestLotteryProduct?.totalTickets || 500 }} tickets
+                      {{ latestLotteryProduct?.soldTickets || 0 }}/{{ latestLotteryProduct?.totalTickets || 100 }} tickets
                     </div>
                   </div>
                   <button class="w-full bg-purple-600 text-white font-semibold py-3 rounded-xl hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 whitespace-nowrap">

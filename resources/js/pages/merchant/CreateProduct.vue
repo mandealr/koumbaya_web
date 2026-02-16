@@ -232,7 +232,7 @@
             <!-- Message d'avertissement pour vendeur individuel -->
             <div v-if="isIndividualSeller && form.sale_mode === 'lottery' && form.price && parseFloat(form.price) < 100000" class="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-2">
               <p class="text-xs text-blue-800">
-                <strong>Recommandation:</strong> Pour un vendeur individuel avec 500 tickets fixes, un prix produit minimum de 100,000 FCFA est recommandé pour garantir un prix de ticket d'au moins 200 FCFA.
+                <strong>Recommandation:</strong> Pour garantir un prix de ticket accessible, un prix produit suffisamment élevé est recommandé (100 tickets par tombola).
               </p>
             </div>
           </div>
@@ -334,7 +334,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Nombre de tickets <span class="text-red-600">*</span>
             </label>
-            <!-- BLOQUÉ À 500 TICKETS POUR TOUS -->
+            <!-- FIXÉ À 100 TICKETS POUR TOUS -->
             <div>
               <input
                 v-model="form.total_tickets"
@@ -353,7 +353,7 @@
                   </div>
                   <div class="ml-3">
                     <p class="text-sm text-blue-800">
-                      <strong>Nombre fixe :</strong> Le nombre de tickets est automatiquement fixé à 500 pour garantir l'équité et maintenir des prix accessibles.
+                      <strong>Nombre fixe :</strong> Le nombre de tickets est automatiquement fixé à 100 pour garantir l'équité et maintenir des prix accessibles.
                     </p>
                   </div>
                 </div>
@@ -709,7 +709,7 @@ const form = reactive({
   images: [], // Ancien système pour compatibilité
   imageUrls: [], // Nouveau système avec URLs des images uploadées
   ticket_price: '',
-  total_tickets: 500, // BLOQUÉ À 500 TICKETS MAX
+  total_tickets: 100, // FIXÉ À 100 TICKETS
   min_tickets: '', // This will be 'min_participants' in the API
   end_date: '',
   lottery_duration: '', // Durée en jours pour les vendeurs business
@@ -725,17 +725,17 @@ watch(() => form.sale_mode, (newMode, oldMode) => {
   console.log('Is individual seller:', isIndividualSeller.value)
   
   if (newMode === 'lottery') {
-    // TOUJOURS forcer 500 tickets en mode tombola (restriction globale)
-    console.log('Forcing 500 tickets for lottery mode')
-    form.total_tickets = 500
-    form.min_tickets = 500 // Minimum = maximum = 500
+    // TOUJOURS forcer 100 tickets en mode tombola (restriction globale)
+    console.log('Forcing 100 tickets for lottery mode')
+    form.total_tickets = 100
+    form.min_tickets = 100 // Minimum = maximum = 100
   }
 
   // Réinitialiser les champs spécifiques à la tombola si on passe en vente directe
   if (newMode === 'direct') {
     console.log('Switching to direct sale - clearing lottery fields')
     form.ticket_price = ''
-    form.total_tickets = 500
+    form.total_tickets = 100
     form.min_tickets = ''
     form.end_date = ''
   }
@@ -1272,8 +1272,8 @@ const handleSubmit = async () => {
     // Add lottery-specific fields only if lottery mode
     if (form.sale_mode === 'lottery') {
       productData.ticket_price = calculatedTicketPrice.value
-      productData.total_tickets = 500 // TOUJOURS 500
-      productData.min_participants = 500 // TOUJOURS 500 (même valeur que total_tickets)
+      productData.total_tickets = 100 // TOUJOURS 100
+      productData.min_participants = 100 // TOUJOURS 100 (même valeur que total_tickets)
 
       console.log('Adding lottery fields:', {
         ticket_price: productData.ticket_price,
@@ -1438,7 +1438,7 @@ const validateTicketPrice = () => {
     
     // Log du calcul du prix minimum recommandé
     if (isIndividualSeller.value && form.price) {
-      const minRecommendedPrice = parseFloat(form.price) / 500 // 500 tickets fixes
+      const minRecommendedPrice = parseFloat(form.price) / 100 // 100 tickets fixes
       console.log('Recommended minimum ticket price for individual seller:', minRecommendedPrice)
       console.log('Current ticket price meets recommendation:', price >= minRecommendedPrice)
     }
@@ -1455,10 +1455,10 @@ const validateTotalTickets = () => {
     const tickets = parseInt(form.total_tickets)
     console.log('Parsed tickets:', tickets)
     
-    // Pour vendeur individuel, toujours 500 tickets
+    // Toujours 100 tickets pour tous les vendeurs
     if (isIndividualSeller.value) {
-      console.log('Forcing 500 tickets for individual seller')
-      form.total_tickets = '500'
+      console.log('Forcing 100 tickets for individual seller')
+      form.total_tickets = '100'
       errors.total_tickets = ''
       return
     }
@@ -1656,10 +1656,10 @@ onMounted(() => {
   // Vérifier et restaurer un brouillon sauvegardé
   loadFormFromLocalStorage()
 
-  // Forcer le nombre de tickets à 500 pour les vendeurs individuels (si pas de brouillon)
-  if (isIndividualSeller.value && !form.total_tickets) {
-    console.log('Setting default 500 tickets for individual seller')
-    form.total_tickets = '500'
+  // Forcer le nombre de tickets à 100 pour tous (si pas de brouillon)
+  if (!form.total_tickets) {
+    console.log('Setting default 100 tickets')
+    form.total_tickets = '100'
   }
 
   // Set default end date (tomorrow) si pas déjà défini

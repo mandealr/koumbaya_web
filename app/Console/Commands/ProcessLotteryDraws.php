@@ -120,7 +120,7 @@ class ProcessLotteryDraws extends Command
         // Get paid tickets count
         $paidTicketsCount = $lottery->paidTickets()->count();
         $totalTickets = $lottery->total_tickets ?? $lottery->max_tickets ?? 0;
-        $minParticipants = $lottery->product->min_participants ?? 300;
+        $minParticipants = $lottery->product->min_participants ?? config('koumbaya.ticket_calculation.default_tickets', 100);
         
         // Determine draw type
         $allTicketsSold = $paidTicketsCount >= $totalTickets && $totalTickets > 0;

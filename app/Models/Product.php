@@ -301,7 +301,7 @@ class Product extends Model
      */
     public function getMinParticipantsAttribute()
     {
-        return $this->meta['min_participants'] ?? 1000;
+        return $this->meta['min_participants'] ?? config('koumbaya.ticket_calculation.default_tickets', 100);
     }
 
     /**
@@ -354,7 +354,7 @@ class Product extends Model
     public function getTotalParticipationAmount()
     {
         $ticketPrice = $this->meta['ticket_price'] ?? 100;
-        $minParticipants = $this->meta['min_participants'] ?? 1000;
+        $minParticipants = $this->meta['min_participants'] ?? config('koumbaya.ticket_calculation.default_tickets', 100);
         return $ticketPrice * $minParticipants;
     }
 
@@ -418,7 +418,7 @@ class Product extends Model
      */
     public function calculateTicketPrice(int $numberOfTickets = null): float
     {
-        $numberOfTickets = $numberOfTickets ?? config('koumbaya.ticket_calculation.default_tickets', 1000);
+        $numberOfTickets = $numberOfTickets ?? config('koumbaya.ticket_calculation.default_tickets', 100);
         
         return TicketPriceCalculator::calculateTicketPrice(
             $this->price,
@@ -431,7 +431,7 @@ class Product extends Model
      */
     public function getTicketCalculationDetails(int $numberOfTickets = null): array
     {
-        $numberOfTickets = $numberOfTickets ?? config('koumbaya.ticket_calculation.default_tickets', 1000);
+        $numberOfTickets = $numberOfTickets ?? config('koumbaya.ticket_calculation.default_tickets', 100);
         
         return TicketPriceCalculator::getCalculationDetails(
             $this->price,
@@ -453,7 +453,7 @@ class Product extends Model
      */
     public function updateTicketPrice(int $numberOfTickets = null): void
     {
-        $numberOfTickets = $numberOfTickets ?? config('koumbaya.ticket_calculation.default_tickets', 1000);
+        $numberOfTickets = $numberOfTickets ?? config('koumbaya.ticket_calculation.default_tickets', 100);
         $meta = $this->meta ?? [];
         $meta['ticket_price'] = $this->calculateTicketPrice($numberOfTickets);
         $meta['min_participants'] = $numberOfTickets;
@@ -491,7 +491,7 @@ class Product extends Model
 
                 // Définir min_participants seulement pour les tombolas
                 if ($product->sale_mode === 'lottery' && !isset($meta['min_participants'])) {
-                    $meta['min_participants'] = config('koumbaya.ticket_calculation.default_tickets', 1000);
+                    $meta['min_participants'] = config('koumbaya.ticket_calculation.default_tickets', 100);
                 }
 
                 $product->meta = $meta;
@@ -517,7 +517,7 @@ class Product extends Model
                 // Recalculer seulement pour les produits en mode tombola
                 if ($product->isDirty('price') && $product->price && $product->sale_mode === 'lottery') {
                     $meta = $product->meta ?? [];
-                    $minParticipants = $meta['min_participants'] ?? 1000;
+                    $minParticipants = $meta['min_participants'] ?? config('koumbaya.ticket_calculation.default_tickets', 100);
                     $meta['ticket_price'] = $product->calculateTicketPrice($minParticipants);
                     $product->meta = $meta;
                 }
@@ -538,7 +538,7 @@ class Product extends Model
             'description' => $this->description,
             'price' => (float) $this->price,
             'ticket_price' => (float) ($this->meta['ticket_price'] ?? 0),
-            'min_participants' => $this->meta['min_participants'] ?? 1000,
+            'min_participants' => $this->meta['min_participants'] ?? config('koumbaya.ticket_calculation.default_tickets', 100),
             'image' => $this->image,
             'image_url' => $this->image_url,
             'main_image' => $this->main_image,

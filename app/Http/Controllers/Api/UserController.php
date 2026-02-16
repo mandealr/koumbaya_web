@@ -51,9 +51,9 @@ class UserController extends Controller
                 'data' => [
                     'user' => $user->fresh()->load('roles'),
                     'seller_constraints' => [
-                        'fixed_tickets' => 500,
+                        'fixed_tickets' => config('koumbaya.ticket_calculation.default_tickets', 100),
                         'can_customize_tickets' => false,
-                        'min_product_price' => 100000
+                        'min_product_price' => null
                     ]
                 ]
             ]);

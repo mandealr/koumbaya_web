@@ -79,7 +79,7 @@ class TicketPriceController extends Controller
         try {
             // Paramètres par défaut
             $productPrice = $validated['product_price'];
-            $numberOfTickets = $validated['number_of_tickets'] ?? config('koumbaya.ticket_calculation.default_tickets', 1000);
+            $numberOfTickets = config('koumbaya.ticket_calculation.default_tickets', 100); // Toujours 100 tickets fixes
             $commissionRate = $validated['commission_rate'] ?? config('koumbaya.ticket_calculation.commission_rate', 0.10);
             $marginRate = $validated['margin_rate'] ?? config('koumbaya.ticket_calculation.margin_rate', 0.15);
             $vendorProfileId = $validated['vendor_profile_id'] ?? null;
@@ -212,7 +212,7 @@ class TicketPriceController extends Controller
                 }
             }
             
-            $currentTicketPrice = TicketPriceCalculator::calculateTicketPrice($productPrice, 1000, null, null, $vendor);
+            $currentTicketPrice = TicketPriceCalculator::calculateTicketPrice($productPrice, 100, null, null, $vendor);
             $suggestions = TicketPriceCalculator::getSuggestions($productPrice, $currentTicketPrice, $vendor);
 
             // Formater les suggestions

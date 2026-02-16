@@ -374,17 +374,7 @@ class User extends Authenticatable
      */
     public function canCustomizeTickets(): bool
     {
-        // business_individual : tickets fixes à 500
-        if ($this->hasRole('business_individual') || $this->hasRole('Business Individual')) {
-            return false;
-        }
-
-        // business_enterprise : peut personnaliser
-        if ($this->hasRole('business_enterprise') || $this->hasRole('Business Enterprise')) {
-            return true;
-        }
-
-        // Autres cas
+        // Personnalisation désactivée - 100 tickets fixes pour tous
         return false;
     }
 
@@ -393,13 +383,8 @@ class User extends Authenticatable
      */
     public function getFixedTicketCount(): ?int
     {
-        // business_individual : 500 tickets fixes
-        if ($this->hasRole('business_individual') || $this->hasRole('Business Individual')) {
-            return 500;
-        }
-
-        // business_enterprise : pas de limite fixe
-        return null;
+        // 100 tickets fixes pour tous les vendeurs
+        return (int) config('koumbaya.ticket_calculation.default_tickets', 100);
     }
 
     /**
