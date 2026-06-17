@@ -4,9 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Lottery;
-use App\Models\LotteryTicket;
-use App\Services\NotificationService;
-use Illuminate\Support\Facades\DB;
+use App\Services\LotteryDrawService;
+use App\Services\RefundService;
 use Illuminate\Support\Facades\Log;
 
 class ProcessLotteryDraws extends Command
@@ -25,20 +24,15 @@ class ProcessLotteryDraws extends Command
      */
     protected $description = 'Process automatic lottery draws for eligible lotteries';
 
-    /**
-     * The notification service instance.
-     *
-     * @var NotificationService
-     */
-    protected $notificationService;
+    protected LotteryDrawService $drawService;
 
-    /**
-     * Create a new command instance.
-     */
-    public function __construct(NotificationService $notificationService)
+    protected RefundService $refundService;
+
+    public function __construct(LotteryDrawService $drawService, RefundService $refundService)
     {
         parent::__construct();
-        $this->notificationService = $notificationService;
+        $this->drawService = $drawService;
+        $this->refundService = $refundService;
     }
 
     /**
@@ -47,234 +41,136 @@ class ProcessLotteryDraws extends Command
     public function handle()
     {
         $this->info('Starting lottery draw process...');
-        
-        $isDryRun = $this->option('dry-run');
+
+        $isDryRun = (bool) $this->option('dry-run');
         $specificLotteries = $this->option('lottery');
-        
+
         if ($isDryRun) {
             $this->warn('Running in DRY RUN mode - no changes will be made');
         }
 
-        // Get eligible lotteries (either date reached OR all tickets sold)
+        // Tombolas candidates au tirage : actives et soit la date est atteinte,
+        // soit tous les tickets sont vendus. On n'utilise que des colonnes
+        // réelles (draw_date, sold_tickets, max_tickets) — l'éligibilité fine
+        // (participants minimum, etc.) est déléguée au LotteryDrawService.
         $query = Lottery::with(['product', 'paidTickets'])
             ->where('status', 'active')
-            ->where('is_drawn', false)
-            ->where(function($q) {
-                // Date reached
+            ->where(function ($q) {
                 $q->where('draw_date', '<=', now())
-                // OR all tickets sold (check via raw SQL for performance)
-                ->orWhereRaw('sold_tickets >= total_tickets')
-                ->orWhereRaw('sold_tickets >= max_tickets');
+                    ->orWhereColumn('sold_tickets', '>=', 'max_tickets');
             });
 
-        // If specific lotteries are requested
         if (!empty($specificLotteries)) {
             $query->whereIn('id', $specificLotteries);
         }
 
         $eligibleLotteries = $query->get();
 
-        if ($eligibleLotteries->isEmpty()) {
-            $this->info('No eligible lotteries found for drawing.');
-            return Command::SUCCESS;
-        }
-
-        $this->info("Found {$eligibleLotteries->count()} eligible lotteries");
-        
         $successCount = 0;
         $failCount = 0;
         $skippedCount = 0;
 
-        foreach ($eligibleLotteries as $lottery) {
-            try {
-                $this->processLottery($lottery, $isDryRun, $successCount, $failCount, $skippedCount);
-            } catch (\Exception $e) {
-                $failCount++;
-                $this->error("Failed to process lottery {$lottery->lottery_number}: " . $e->getMessage());
-                Log::error('Lottery draw failed', [
-                    'lottery_id' => $lottery->id,
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
-                ]);
+        if ($eligibleLotteries->isEmpty()) {
+            $this->info('No eligible lotteries found for drawing.');
+        } else {
+            $this->info("Found {$eligibleLotteries->count()} candidate lotteries");
+
+            foreach ($eligibleLotteries as $lottery) {
+                try {
+                    $this->processLottery($lottery, $isDryRun, $successCount, $failCount, $skippedCount);
+                } catch (\Throwable $e) {
+                    $failCount++;
+                    $this->error("Failed to process lottery {$lottery->lottery_number}: " . $e->getMessage());
+                    Log::error('Lottery draw failed', [
+                        'lottery_id' => $lottery->id,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+                }
             }
         }
 
-        // Summary
+        // Remboursements automatiques des tombolas sous-souscrites / annulées
+        // (le service applique son propre délai de grâce avant remboursement).
+        $refundSummary = $this->processRefunds($isDryRun, $specificLotteries);
+
+        // Résumé
         $this->info("\n" . str_repeat('=', 50));
-        $this->info("Process completed!");
-        $this->info("Success: $successCount");
-        $this->info("Failed: $failCount");
-        $this->info("Skipped: $skippedCount");
+        $this->info('Process completed!');
+        $this->info("Draws — Success: $successCount | Failed: $failCount | Skipped: $skippedCount");
+        $this->info("Refunds — Lotteries refunded: {$refundSummary['refunded']}");
 
         return Command::SUCCESS;
     }
 
     /**
-     * Process a single lottery draw
+     * Process a single lottery draw by delegating to the verifiable draw service.
      */
-    protected function processLottery(Lottery $lottery, bool $isDryRun, int &$successCount, int &$failCount, int &$skippedCount)
+    protected function processLottery(Lottery $lottery, bool $isDryRun, int &$successCount, int &$failCount, int &$skippedCount): void
     {
         $this->info("\nProcessing lottery: {$lottery->lottery_number}");
-        $this->info("Product: {$lottery->product->name}");
-        
-        // Get paid tickets count
-        $paidTicketsCount = $lottery->paidTickets()->count();
-        $totalTickets = $lottery->total_tickets ?? $lottery->max_tickets ?? 0;
-        $minParticipants = $lottery->product->min_participants ?? config('koumbaya.ticket_calculation.default_tickets', 100);
-        
-        // Determine draw type
-        $allTicketsSold = $paidTicketsCount >= $totalTickets && $totalTickets > 0;
-        $dateReached = now() >= $lottery->draw_date;
-        
-        if ($allTicketsSold && !$dateReached) {
-            $this->info("Draw type: MANUAL (All tickets sold: $paidTicketsCount/$totalTickets)");
-        } else if ($dateReached) {
-            $this->info("Draw type: AUTOMATIC (Date reached: " . $lottery->draw_date . ")");
-        }
-        
-        $this->info("Participants: $paidTicketsCount / $minParticipants minimum required");
+        $this->info("Product: " . ($lottery->product->name ?? 'N/A'));
 
-        // Check if minimum participants reached
-        if ($paidTicketsCount < $minParticipants) {
-            $this->warn("Skipped: Not enough participants (minimum: $minParticipants)");
-            $skippedCount++;
-            
-            // Check if we should initiate refunds
-            $daysSinceEnd = now()->diffInDays($lottery->end_date);
-            if ($daysSinceEnd >= 3) {
-                $this->warn("Lottery ended {$daysSinceEnd} days ago. Consider initiating refunds.");
-                // TODO: Trigger refund process
-            }
-            
-            return;
-        }
+        $paidTicketsCount = $lottery->paidTickets()->count();
+        $this->info("Paid tickets: $paidTicketsCount");
 
         if ($isDryRun) {
-            $this->info("DRY RUN: Would draw winner from $paidTicketsCount tickets");
+            $this->info("DRY RUN: would attempt draw via LotteryDrawService");
             $successCount++;
             return;
         }
 
-        // Perform the actual draw
-        DB::beginTransaction();
-        try {
-            // Get all paid tickets
-            $paidTickets = $lottery->paidTickets()->get();
-            
-            // Use secure random selection
-            $winningTicket = $this->selectWinningTicket($paidTickets, $lottery);
-            
-            $this->info("Winner selected: Ticket {$winningTicket->ticket_number}");
-            $this->info("Winner: User ID {$winningTicket->user_id}");
-
-            // Mark ticket as winner
-            $winningTicket->update(['is_winner' => true]);
-
-            // Update lottery with winner information
-            $lottery->update([
-                'winner_user_id' => $winningTicket->user_id,
-                'winner_ticket_number' => $winningTicket->ticket_number,
-                'draw_date' => now(),
-                'is_drawn' => true,
-                'status' => 'completed',
-                'draw_proof' => $this->generateDrawProof($lottery, $paidTickets, $winningTicket, $allTicketsSold ?? false, $dateReached ?? false)
-            ]);
-
-            // Update product status
-            $lottery->product->update(['status' => 'sold']);
-
-            DB::commit();
-            $successCount++;
-            
-            $this->info("✓ Draw completed successfully!");
-
-            // Send notifications
-            $this->sendNotifications($lottery, $winningTicket);
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-    }
-
-    /**
-     * Select winning ticket using secure random method
-     */
-    protected function selectWinningTicket($tickets, Lottery $lottery)
-    {
-        // Generate cryptographically secure random number
-        $totalTickets = $tickets->count();
-        $randomIndex = random_int(0, $totalTickets - 1);
-        
-        // Additional entropy from system
-        $seed = hash('sha256', $lottery->id . microtime(true) . random_bytes(32));
-        $finalIndex = hexdec(substr($seed, 0, 8)) % $totalTickets;
-        
-        return $tickets->values()->get($finalIndex);
-    }
-
-    /**
-     * Generate draw proof data
-     */
-    protected function generateDrawProof(Lottery $lottery, $paidTickets, $winningTicket, $allTicketsSold = false, $dateReached = false)
-    {
-        // Determine draw trigger reason
-        $drawTrigger = 'automated_cron';
-        $drawReason = 'scheduled_date_reached';
-        
-        if ($allTicketsSold && !$dateReached) {
-            $drawReason = 'all_tickets_sold';
-        } else if ($dateReached) {
-            $drawReason = 'scheduled_date_reached';
-        }
-        
-        return json_encode([
-            'draw_method' => 'automatic_system_draw',
-            'draw_algorithm' => 'secure_random_with_entropy',
-            'draw_reason' => $drawReason,
-            'all_tickets_sold' => $allTicketsSold,
-            'date_reached' => $dateReached,
-            'total_participants' => $paidTickets->count(),
-            'total_tickets_sold' => $paidTickets->count(),
-            'max_tickets_available' => $lottery->total_tickets ?? $lottery->max_tickets,
-            'winning_ticket' => $winningTicket->ticket_number,
-            'timestamp' => now()->toISOString(),
-            'system_time' => microtime(true),
-            'lottery_hash' => hash('sha256', $lottery->id . $lottery->lottery_number),
-            'participants_hash' => hash('sha256', $paidTickets->pluck('id')->join(',')),
-            'draw_triggered_by' => $drawTrigger,
-            'server_info' => [
-                'hostname' => gethostname(),
-                'php_version' => PHP_VERSION,
-                'laravel_version' => app()->version()
-            ]
+        // Tirage vérifiable + enregistrement dans draw_histories + notifications,
+        // assuré par le service (source de vérité unique, partagée avec l'API).
+        $result = $this->drawService->performDraw($lottery, [
+            'method' => 'auto',
+            'initiated_by' => 'system',
         ]);
+
+        if ($result['success']) {
+            $successCount++;
+            $winner = $result['data']['winning_ticket'] ?? null;
+            $this->info('✓ Draw completed successfully'
+                . ($winner ? " — winning ticket {$winner->ticket_number} (user {$winner->user_id})" : ''));
+            return;
+        }
+
+        // Non éligible (ex. participants insuffisants) : on n'échoue pas, le
+        // remboursement automatique sera traité par la passe dédiée après délai.
+        $skippedCount++;
+        $this->warn('Skipped: ' . ($result['message'] ?? 'not eligible for draw'));
     }
 
     /**
-     * Send notifications to winner and participants
+     * Trigger automatic refunds for under-subscribed / cancelled lotteries.
+     *
+     * @param  array<int|string>  $specificLotteries
+     * @return array{refunded: int}
      */
-    protected function sendNotifications(Lottery $lottery, LotteryTicket $winningTicket)
+    protected function processRefunds(bool $isDryRun, array $specificLotteries): array
     {
+        // On ne lance la passe globale de remboursement que lors d'un run complet.
+        if ($isDryRun || !empty($specificLotteries)) {
+            return ['refunded' => 0];
+        }
+
         try {
-            // Reload with relationships
-            $lottery = $lottery->fresh(['product', 'winner']);
-            $winner = $winningTicket->user;
+            $results = $this->refundService->checkAndProcessRefunds();
+            $refunded = count($results['insufficient_participants'] ?? [])
+                + count($results['cancelled_lotteries'] ?? []);
 
-            // Notify winner
-            $this->notificationService->notifyLotteryWinner($lottery, $winner, $winningTicket);
-            $this->info("✓ Winner notification sent");
+            if ($refunded > 0) {
+                $this->info("✓ Automatic refunds processed for $refunded lottery(ies)");
+            }
 
-            // Notify all participants
-            $this->notificationService->notifyLotteryResult($lottery, $winner);
-            $this->info("✓ Participant notifications sent");
-
-        } catch (\Exception $e) {
-            $this->error("Failed to send notifications: " . $e->getMessage());
-            Log::error('Failed to send lottery notifications', [
-                'lottery_id' => $lottery->id,
-                'error' => $e->getMessage()
+            return ['refunded' => $refunded];
+        } catch (\Throwable $e) {
+            $this->error('Automatic refund pass failed: ' . $e->getMessage());
+            Log::error('Automatic refund pass failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
+            return ['refunded' => 0];
         }
     }
 }
