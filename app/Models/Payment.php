@@ -221,12 +221,18 @@ class Payment extends Model
 
     public function markAsCompleted($gatewayResponse = null)
     {
+        // Idempotence : éviter de relancer l'attribution des tickets et la
+        // mise à jour de la commande si le paiement est déjà finalisé.
+        if (in_array($this->status, ['paid', 'completed', 'processed'], true)) {
+            return;
+        }
+
         $meta = $this->meta ?? [];
-        
+
         if ($gatewayResponse) {
             $meta['gateway_response'] = $gatewayResponse;
         }
-        
+
         $this->update([
             'status' => 'paid',
             'paid_at' => now(),
