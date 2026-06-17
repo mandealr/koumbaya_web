@@ -16,7 +16,7 @@ class LotteryFactory extends Factory
 
         return [
             'product_id' => Product::factory()->lottery(),
-            'lottery_number' => 'LOT-' . strtoupper(uniqid()),
+            'lottery_number' => 'LOT-' . strtoupper(\Illuminate\Support\Str::random(16)),
             'title' => $this->faker->sentence(4),
             'description' => $this->faker->paragraph(),
             'ticket_price' => $this->faker->randomFloat(2, 500, 5000),

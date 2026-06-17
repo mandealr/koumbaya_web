@@ -15,7 +15,7 @@ class RefundFactory extends Factory
     public function definition(): array
     {
         return [
-            'refund_number' => 'REF-' . strtoupper(uniqid()),
+            'refund_number' => 'REF-' . strtoupper(\Illuminate\Support\Str::random(16)),
             'user_id' => User::factory(),
             'order_id' => Order::factory(),
             'payment_id' => Payment::factory(),

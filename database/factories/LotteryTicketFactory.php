@@ -14,7 +14,7 @@ class LotteryTicketFactory extends Factory
     public function definition(): array
     {
         return [
-            'ticket_number' => 'TKT-' . strtoupper(uniqid()),
+            'ticket_number' => 'TKT-' . strtoupper(\Illuminate\Support\Str::random(16)),
             'lottery_id' => Lottery::factory(),
             'user_id' => User::factory(),
             'price' => 1000,

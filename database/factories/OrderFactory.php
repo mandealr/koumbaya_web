@@ -15,7 +15,7 @@ class OrderFactory extends Factory
         $type = $this->faker->randomElement(['lottery', 'direct']);
 
         return [
-            'order_number' => 'ORD-' . strtoupper(uniqid()),
+            'order_number' => 'ORD-' . strtoupper(\Illuminate\Support\Str::random(16)),
             'user_id' => User::factory(),
             'type' => $type,
             'product_id' => null,

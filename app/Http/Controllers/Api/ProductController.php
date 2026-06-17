@@ -819,7 +819,7 @@ class ProductController extends Controller
 
         return response()->json([
             'message' => 'Produit mis à jour avec succès',
-            'product' => $product->load(['category', 'merchant', 'vendorProfile'])
+            'product' => $product->load(['category', 'merchant'])
         ]);
     }
 

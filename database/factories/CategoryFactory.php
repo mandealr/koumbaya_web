@@ -11,11 +11,11 @@ class CategoryFactory extends Factory
 {
     public function definition(): array
     {
-        $name = $this->faker->unique()->words(2, true);
+        $suffix = uniqid();
 
         return [
-            'name' => ucfirst($name),
-            'slug' => \Illuminate\Support\Str::slug($name) . '-' . $this->faker->unique()->numberBetween(1, 999999),
+            'name' => ucfirst($this->faker->words(2, true)),
+            'slug' => 'cat-' . $suffix,
             'description' => $this->faker->sentence(),
             'is_active' => true,
             'is_featured' => false,

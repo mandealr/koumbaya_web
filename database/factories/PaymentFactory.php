@@ -14,7 +14,7 @@ class PaymentFactory extends Factory
     public function definition(): array
     {
         return [
-            'reference' => 'KMB-PAY-' . strtoupper(uniqid()),
+            'reference' => 'KMB-PAY-' . strtoupper(\Illuminate\Support\Str::random(16)),
             'user_id' => User::factory(),
             'order_id' => Order::factory(),
             'amount' => $this->faker->randomFloat(2, 500, 50000),
