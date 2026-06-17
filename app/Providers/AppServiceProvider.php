@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\Facades\Socialite;
 use SocialiteProviders\Apple\Provider;
@@ -26,5 +27,9 @@ class AppServiceProvider extends ServiceProvider
             $config = $app['config']['services.apple'];
             return Socialite::buildProvider(Provider::class, $config);
         });
+
+        // Autorisation centralisée (anti-IDOR) — Policies d'ownership
+        Gate::policy(\App\Models\Product::class, \App\Policies\ProductPolicy::class);
+        Gate::policy(\App\Models\Lottery::class, \App\Policies\LotteryPolicy::class);
     }
 }
