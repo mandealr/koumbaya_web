@@ -74,7 +74,7 @@
                 <h3 
                   class="text-lg font-medium text-gray-900"
                   :class="{ 'font-semibold': !notification.is_read }"
-                  v-html="notification.title"
+                  v-safe-html="notification.title"
                 ></h3>
                 
                 <!-- Actions -->
@@ -96,9 +96,9 @@
                 </div>
               </div>
 
-              <p 
+              <p
                 class="text-gray-600 text-sm mb-3"
-                v-html="notification.message"
+                v-safe-html="notification.message"
               ></p>
 
               <!-- Tags/Métadonnées -->

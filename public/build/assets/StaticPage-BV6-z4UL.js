@@ -1,93 +1,4 @@
-<template>
-  <div class="min-h-screen bg-white">
-    <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-[#0099cc] via-[#0088bb] to-[#0077aa] text-white py-20">
-      <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-        <h1 class="text-4xl md:text-6xl font-bold mb-6">
-          {{ pageTitle }}
-        </h1>
-        <p class="text-xl md:text-2xl text-blue-100 leading-relaxed" v-if="pageDescription">
-          {{ pageDescription }}
-        </p>
-      </div>
-    </section>
-
-    <!-- Main Content Section -->
-    <section class="py-20">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-          <div class="p-8 md:p-12">
-            <div class="prose prose-lg max-w-none" v-safe-html="pageContent"></div>
-          </div>
-        </div>
-
-        <!-- Call to Action si nécessaire -->
-        <div v-if="showCTA" class="mt-12 text-center">
-          <router-link
-            :to="ctaLink"
-            class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-xl text-white bg-[#0099cc] hover:bg-[#0088bb] transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
-          >
-            {{ ctaText }}
-          </router-link>
-        </div>
-      </div>
-    </section>
-
-    <!-- Related Links Section si nécessaire -->
-    <section v-if="relatedLinks && relatedLinks.length > 0" class="py-20 bg-[#0099cc]/5">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-12">
-          Pages connexes
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <router-link
-            v-for="link in relatedLinks"
-            :key="link.path"
-            :to="link.path"
-            class="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-200 hover:scale-[1.02]"
-          >
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ link.title }}</h3>
-            <p class="text-gray-600">{{ link.description }}</p>
-          </router-link>
-        </div>
-      </div>
-    </section>
-  </div>
-</template>
-
-<script setup>
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-
-const route = useRoute()
-
-// Extraire le nom de la page depuis le chemin
-const pageName = computed(() => {
-  const path = route.path.replace(/^\//, '')
-  return path
-})
-
-const pageDescription = computed(() => {
-  const descriptions = {
-    'about': 'Découvrez notre mission et nos valeurs',
-    'careers': 'Intégrez Koumbaya et faites partie d\'une équipe dynamique qui transforme le e-commerce en Afrique',
-    'media-press': 'Collaborons pour partager les histoires inspirantes de notre communauté et écosystème',
-    'lottery-participation': 'Conditions d\'utilisation des tirages spéciaux d\'articles listés sur Koumbaya',
-    'intellectual-property': 'Politique de protection des droits de propriété intellectuelle - signalements et procédures',
-    'order-delivery': 'Expérience de livraison simple, transparente et avantageuse avec livraison gratuite et express',
-    'sell-on-koumbaya': 'Vendez sur Koumbaya - Engagements éthiques et code de conduite pour nos partenaires marchands',
-    'terms': 'Conditions générales d\'utilisation de la plateforme Koumbaya',
-    'privacy': 'Comment nous protégeons vos données personnelles',
-    'legal': 'Informations légales et réglementaires',
-    'cookies': 'Notre politique d\'utilisation des cookies'
-  }
-  return descriptions[pageName.value] || ''
-})
-
-const pageContent = computed(() => {
-  // TODO: Ajouter ici le contenu fourni par l'utilisateur
-  const contents = {
-    'about': `
+import{c as s,U as w,b as a,e,l as c,t as o,A as k,B as j,g as C,w as p,h as M,F as q,z as L,o as r,i as z,C as A}from"./vendor-DTUsvPJ8.js";import{_ as B}from"./app-DkTsY-ZQ.js";const V={class:"min-h-screen bg-white"},P={class:"bg-gradient-to-br from-[#0099cc] via-[#0088bb] to-[#0077aa] text-white py-20"},S={class:"max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8"},K={class:"text-4xl md:text-6xl font-bold mb-6"},D={key:0,class:"text-xl md:text-2xl text-blue-100 leading-relaxed"},R={class:"py-20"},H={class:"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"},Z={class:"bg-white rounded-2xl shadow-lg overflow-hidden"},I={class:"p-8 md:p-12"},N={class:"prose prose-lg max-w-none"},_={key:0,class:"mt-12 text-center"},T={key:0,class:"py-20 bg-[#0099cc]/5"},U={class:"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"},E={class:"grid grid-cols-1 md:grid-cols-3 gap-6"},F={class:"text-xl font-semibold text-gray-900 mb-2"},G={class:"text-gray-600"},O={__name:"StaticPage",setup(Q){const g=w(),t=s(()=>g.path.replace(/^\//,"")),d=s(()=>({about:"Découvrez notre mission et nos valeurs",careers:"Intégrez Koumbaya et faites partie d'une équipe dynamique qui transforme le e-commerce en Afrique","media-press":"Collaborons pour partager les histoires inspirantes de notre communauté et écosystème","lottery-participation":"Conditions d'utilisation des tirages spéciaux d'articles listés sur Koumbaya","intellectual-property":"Politique de protection des droits de propriété intellectuelle - signalements et procédures","order-delivery":"Expérience de livraison simple, transparente et avantageuse avec livraison gratuite et express","sell-on-koumbaya":"Vendez sur Koumbaya - Engagements éthiques et code de conduite pour nos partenaires marchands",terms:"Conditions générales d'utilisation de la plateforme Koumbaya",privacy:"Comment nous protégeons vos données personnelles",legal:"Informations légales et réglementaires",cookies:"Notre politique d'utilisation des cookies"})[t.value]||""),x=s(()=>({about:`
       <div class="space-y-12">
         <!-- Koumbaya, c'est quoi ? -->
         <div class="space-y-6">
@@ -273,8 +184,7 @@ const pageContent = computed(() => {
           </div>
         </div>
       </div>
-    `,
-    'affiliates': `
+    `,affiliates:`
       <div class="space-y-12">
         <!-- Introduction -->
         <div class="text-center space-y-6">
@@ -547,8 +457,7 @@ const pageContent = computed(() => {
           </div>
         </div>
       </div>
-    `,
-    'peace-on-koumbaya': `
+    `,"peace-on-koumbaya":`
       <div class="space-y-12">
         <!-- Introduction -->
         <div class="text-center space-y-6">
@@ -750,13 +659,12 @@ const pageContent = computed(() => {
           </div>
         </div>
       </div>
-    `,
-    'terms': `
+    `,terms:`
       <div class="space-y-12">
         <!-- Date de mise à jour -->
         <div class="bg-gradient-to-r from-[#0099cc]/5 to-[#0099cc]/10 rounded-xl p-4 border border-[#0099cc]/20">
           <p class="text-sm text-[#0099cc] font-medium text-center">
-            Dernière mise à jour : ${new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+            Dernière mise à jour : ${new Date().toLocaleDateString("fr-FR",{year:"numeric",month:"long",day:"numeric"})}
           </p>
         </div>
 
@@ -1057,13 +965,12 @@ const pageContent = computed(() => {
           </div>
         </div>
       </div>
-    `,
-    'privacy': `
+    `,privacy:`
       <div class="space-y-12">
         <!-- Date de mise à jour -->
         <div class="bg-gradient-to-r from-[#0099cc]/5 to-[#0099cc]/10 rounded-xl p-4 border border-[#0099cc]/20">
           <p class="text-sm text-[#0099cc] font-medium text-center">
-            Dernière mise à jour : ${new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+            Dernière mise à jour : ${new Date().toLocaleDateString("fr-FR",{year:"numeric",month:"long",day:"numeric"})}
           </p>
         </div>
 
@@ -1466,13 +1373,12 @@ const pageContent = computed(() => {
           </div>
         </div>
       </div>
-    `,
-    'legal': `
+    `,legal:`
       <div class="space-y-12">
         <!-- Date de mise à jour -->
         <div class="bg-gradient-to-r from-[#0099cc]/5 to-[#0099cc]/10 rounded-xl p-4 border border-[#0099cc]/20">
           <p class="text-sm text-[#0099cc] font-medium text-center">
-            Dernière mise à jour : ${new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+            Dernière mise à jour : ${new Date().toLocaleDateString("fr-FR",{year:"numeric",month:"long",day:"numeric"})}
           </p>
         </div>
 
@@ -1809,13 +1715,12 @@ const pageContent = computed(() => {
           </div>
         </div>
       </div>
-    `,
-    'cookies': `
+    `,cookies:`
       <div class="space-y-12">
         <!-- Date de mise à jour -->
         <div class="bg-gradient-to-r from-[#0099cc]/5 to-[#0099cc]/10 rounded-xl p-4 border border-[#0099cc]/20">
           <p class="text-sm text-[#0099cc] font-medium text-center">
-            Dernière mise à jour : ${new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+            Dernière mise à jour : ${new Date().toLocaleDateString("fr-FR",{year:"numeric",month:"long",day:"numeric"})}
           </p>
         </div>
 
@@ -2184,8 +2089,7 @@ const pageContent = computed(() => {
           </div>
         </div>
       </div>
-    `,
-    'careers': `
+    `,careers:`
       <div class="space-y-12">
         <!-- Introduction -->
         <div class="text-center space-y-6">
@@ -2408,8 +2312,7 @@ const pageContent = computed(() => {
           </div>
         </div>
       </div>
-    `,
-    'order-delivery': `
+    `,"order-delivery":`
       <div class="space-y-12">
         <!-- Introduction -->
         <div class="text-center space-y-6">
@@ -2735,8 +2638,7 @@ const pageContent = computed(() => {
           </div>
         </div>
       </div>
-    `,
-    'media-press': `
+    `,"media-press":`
       <div class="space-y-12">
         <!-- Introduction -->
         <div class="text-center space-y-6">
@@ -2959,8 +2861,7 @@ const pageContent = computed(() => {
           </div>
         </div>
       </div>
-    `,
-    'lottery-participation': `
+    `,"lottery-participation":`
       <div class="space-y-12">
         <!-- Introduction -->
         <div class="text-center space-y-6">
@@ -3238,8 +3139,7 @@ const pageContent = computed(() => {
           </div>
         </div>
       </div>
-    `,
-    'intellectual-property': `
+    `,"intellectual-property":`
       <div class="space-y-12">
         <!-- Introduction -->
         <div class="text-center space-y-6">
@@ -3729,8 +3629,7 @@ const pageContent = computed(() => {
           </div>
         </div>
       </div>
-    `,
-    'sell-on-koumbaya': `
+    `,"sell-on-koumbaya":`
       <div class="space-y-12">
         <!-- Introduction -->
         <div class="text-center space-y-6">
@@ -4224,11 +4123,7 @@ const pageContent = computed(() => {
           </div>
         </div>
       </div>
-    `
-  }
-
-  // Pour toutes les autres pages, afficher un message temporaire
-  return contents[pageName.value] || `
+    `})[t.value]||`
     <div class="text-center py-12">
       <p class="text-gray-600 text-lg mb-6">
         Cette page sera bientôt disponible avec le contenu approprié.
@@ -4237,152 +4132,4 @@ const pageContent = computed(() => {
         Veuillez fournir le contenu spécifique pour cette page.
       </p>
     </div>
-  `
-})
-
-const pageTitle = computed(() => {
-  const titles = {
-    'about': 'À propos de Koumbaya',
-    'affiliates': 'Programme d\'Affiliation',
-    'earn-gombos': 'Gagnez des Gombos',
-    'careers': 'Carrières',
-    'media-press': 'Médias & Presse',
-    'lottery-participation': 'Participation aux tirages spéciaux',
-    'intellectual-property': 'Propriété Intellectuelle',
-    'order-delivery': 'Livraison des commandes',
-    'report-suspicious': 'Signaler une activité suspecte',
-    'support-center': 'Centre d\'assistance',
-    'security-center': 'Centre de sécurité',
-    'peace-on-koumbaya': 'Avoir la paix sur Koumbaya',
-    'sitemap': 'Plan du site',
-    'sell-on-koumbaya': 'Vendre sur Koumbaya',
-    'terms': 'Conditions d\'utilisation',
-    'privacy': 'Politique de confidentialité',
-    'legal': 'Mentions légales',
-    'cookies': 'Politique de cookies'
-  }
-
-  return titles[pageName.value] || 'Page Koumbaya'
-})
-
-// Configuration des CTA pour certaines pages
-const showCTA = computed(() => {
-  return ['sell-on-koumbaya', 'affiliates', 'careers'].includes(pageName.value)
-})
-
-const ctaText = computed(() => {
-  const ctas = {
-    'sell-on-koumbaya': 'Commencer à vendre',
-    'affiliates': 'Rejoindre le programme',
-    'careers': 'Voir les offres d\'emploi'
-  }
-  return ctas[pageName.value] || 'En savoir plus'
-})
-
-const ctaLink = computed(() => {
-  const links = {
-    'sell-on-koumbaya': '/register',
-    'affiliates': '/register',
-    'careers': '/contact'
-  }
-  return links[pageName.value] || '/contact'
-})
-
-// Liens connexes pour certaines pages
-const relatedLinks = computed(() => {
-  const links = {
-    'about': [
-      { path: '/how-it-works', title: 'Comment ça marche', description: 'Découvrez le fonctionnement de Koumbaya' },
-      { path: '/contact', title: 'Contactez-nous', description: 'Une question ? Nous sommes là pour vous' },
-      { path: '/careers', title: 'Carrières', description: 'Rejoignez notre équipe' }
-    ],
-    'support-center': [
-      { path: '/how-it-works', title: 'FAQ', description: 'Questions fréquemment posées' },
-      { path: '/contact', title: 'Contact', description: 'Parlez à notre équipe support' },
-      { path: '/report-suspicious', title: 'Signaler un problème', description: 'Signalez une activité suspecte' }
-    ],
-    'legal': [
-      { path: '/terms', title: 'CGU', description: 'Conditions générales d\'utilisation' },
-      { path: '/privacy', title: 'Confidentialité', description: 'Protection de vos données' },
-      { path: '/cookies', title: 'Cookies', description: 'Politique de cookies' }
-    ]
-  }
-  return links[pageName.value] || []
-})
-</script>
-
-<style scoped>
-/* Styles pour la prose avec le même design que Contact */
-:deep(.prose) {
-  color: #374151;
-}
-
-:deep(.prose h2) {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: #111827;
-  margin-top: 3rem;
-  margin-bottom: 1.5rem;
-}
-
-:deep(.prose h3) {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-}
-
-:deep(.prose p) {
-  font-size: 1.125rem;
-  line-height: 1.75;
-  margin-bottom: 1.5rem;
-}
-
-:deep(.prose ul) {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-:deep(.prose ul li) {
-  margin-bottom: 0.5rem;
-  line-height: 1.75;
-}
-
-:deep(.prose ol) {
-  list-style-type: decimal;
-  padding-left: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-:deep(.prose ol li) {
-  margin-bottom: 0.5rem;
-  line-height: 1.75;
-}
-
-:deep(.prose a) {
-  color: #0099cc;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.15s ease-in-out;
-}
-
-:deep(.prose a:hover) {
-  color: #0088bb;
-  text-decoration: underline;
-}
-
-:deep(.prose strong) {
-  font-weight: 600;
-  color: #111827;
-}
-
-:deep(.prose blockquote) {
-  border-left: 4px solid #0099cc;
-  padding-left: 1.5rem;
-  margin: 2rem 0;
-  font-style: italic;
-  color: #4b5563;
-}
-</style>
+  `),m=s(()=>({about:"À propos de Koumbaya",affiliates:"Programme d'Affiliation","earn-gombos":"Gagnez des Gombos",careers:"Carrières","media-press":"Médias & Presse","lottery-participation":"Participation aux tirages spéciaux","intellectual-property":"Propriété Intellectuelle","order-delivery":"Livraison des commandes","report-suspicious":"Signaler une activité suspecte","support-center":"Centre d'assistance","security-center":"Centre de sécurité","peace-on-koumbaya":"Avoir la paix sur Koumbaya",sitemap:"Plan du site","sell-on-koumbaya":"Vendre sur Koumbaya",terms:"Conditions d'utilisation",privacy:"Politique de confidentialité",legal:"Mentions légales",cookies:"Politique de cookies"})[t.value]||"Page Koumbaya"),f=s(()=>["sell-on-koumbaya","affiliates","careers"].includes(t.value)),h=s(()=>({"sell-on-koumbaya":"Commencer à vendre",affiliates:"Rejoindre le programme",careers:"Voir les offres d'emploi"})[t.value]||"En savoir plus"),b=s(()=>({"sell-on-koumbaya":"/register",affiliates:"/register",careers:"/contact"})[t.value]||"/contact"),n=s(()=>({about:[{path:"/how-it-works",title:"Comment ça marche",description:"Découvrez le fonctionnement de Koumbaya"},{path:"/contact",title:"Contactez-nous",description:"Une question ? Nous sommes là pour vous"},{path:"/careers",title:"Carrières",description:"Rejoignez notre équipe"}],"support-center":[{path:"/how-it-works",title:"FAQ",description:"Questions fréquemment posées"},{path:"/contact",title:"Contact",description:"Parlez à notre équipe support"},{path:"/report-suspicious",title:"Signaler un problème",description:"Signalez une activité suspecte"}],legal:[{path:"/terms",title:"CGU",description:"Conditions générales d'utilisation"},{path:"/privacy",title:"Confidentialité",description:"Protection de vos données"},{path:"/cookies",title:"Cookies",description:"Politique de cookies"}]})[t.value]||[]);return(i,u)=>{const v=M("router-link"),y=j("safe-html");return r(),a("div",V,[e("section",P,[e("div",S,[e("h1",K,o(m.value),1),d.value?(r(),a("p",D,o(d.value),1)):c("",!0)])]),e("section",R,[e("div",H,[e("div",Z,[e("div",I,[k(e("div",N,null,512),[[y,x.value]])])]),f.value?(r(),a("div",_,[C(v,{to:b.value,class:"inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-xl text-white bg-[#0099cc] hover:bg-[#0088bb] transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"},{default:p(()=>[z(o(h.value),1)]),_:1},8,["to"])])):c("",!0)])]),n.value&&n.value.length>0?(r(),a("section",T,[e("div",U,[u[0]||(u[0]=e("h2",{class:"text-2xl md:text-3xl font-bold text-gray-900 text-center mb-12"}," Pages connexes ",-1)),e("div",E,[(r(!0),a(q,null,L(n.value,l=>(r(),A(v,{key:l.path,to:l.path,class:"bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-200 hover:scale-[1.02]"},{default:p(()=>[e("h3",F,o(l.title),1),e("p",G,o(l.description),1)]),_:2},1032,["to"]))),128))])])])):c("",!0)])}}},J=B(O,[["__scopeId","data-v-61543ae3"]]);export{J as default};
