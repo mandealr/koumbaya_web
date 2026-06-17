@@ -11,7 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasColumn('payments', 'external_transaction_id')) {
+            return;
+        }
+
         Schema::table('payments', function (Blueprint $table) {
+            // Supprimer l'index avant la colonne (requis par SQLite lors de la
+            // reconstruction de table ; no-op si l'index n'existe pas).
+            try {
+                $table->dropIndex('payments_external_transaction_id_index');
+            } catch (\Throwable $e) {
+                // index absent : on ignore
+            }
             $table->dropColumn('external_transaction_id');
         });
     }

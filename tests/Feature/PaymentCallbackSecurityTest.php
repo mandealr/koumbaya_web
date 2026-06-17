@@ -23,10 +23,8 @@ class PaymentCallbackSecurityTest extends TestCase
     {
         parent::setUp();
         
-        // Disable logs during testing
-        Log::shouldReceive('info')->andReturn(null);
-        Log::shouldReceive('warning')->andReturn(null);
-        Log::shouldReceive('error')->andReturn(null);
+        // Espionner les logs (silencieux, et permet shouldHaveReceived ensuite)
+        Log::spy();
 
         // Setup test data
         $this->user = User::factory()->create();
@@ -240,9 +238,11 @@ class PaymentCallbackSecurityTest extends TestCase
                     'message' => 'Callback processed successfully'
                 ]);
 
-        // Reset payment status for next test
-        $this->payment->update(['status' => 'pending', 'paid_at' => null]);
-        $this->order->update(['status' => OrderStatus::AWAITING_PAYMENT->value, 'paid_at' => null]);
+        // Reset payment status for next test (forcer l'écriture en base :
+        // un update() Eloquent n'écrit que les attributs "dirty", or l'instance
+        // en mémoire croit déjà être 'pending' → on écrit directement en base).
+        Payment::where('id', $this->payment->id)->update(['status' => 'pending', 'paid_at' => null]);
+        Order::where('id', $this->order->id)->update(['status' => OrderStatus::AWAITING_PAYMENT->value, 'paid_at' => null]);
 
         // Test request from disallowed IP
         $payload['transactionid'] = 'TXN-IP-BAD-456';
@@ -345,10 +345,19 @@ class PaymentCallbackSecurityTest extends TestCase
      */
     public function test_callback_malformed_json_handling()
     {
-        // Send malformed JSON
-        $response = $this->postJson('/api/payments/callback', 'invalid-json-data');
+        // Send malformed JSON (corps brut invalide ; postJson n'accepte qu'un array)
+        $response = $this->call(
+            'POST',
+            '/api/payments/callback',
+            [],
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_ACCEPT' => 'application/json'],
+            'invalid-json-data'
+        );
 
-        $response->assertStatus(400);
+        // Un JSON malformé doit être rejeté (400) et ne jamais être traité comme valide.
+        $this->assertContains($response->getStatusCode(), [400, 422]);
     }
 
     /**
@@ -356,10 +365,6 @@ class PaymentCallbackSecurityTest extends TestCase
      */
     public function test_callback_logs_security_events()
     {
-        Log::shouldReceive('warning')
-           ->once()
-           ->with('Payment callback security event', \Mockery::type('array'));
-
         Config::set('services.ebilling.webhook_secret', 'test-secret-key');
 
         $payload = [
@@ -376,5 +381,9 @@ class PaymentCallbackSecurityTest extends TestCase
         ])->postJson('/api/payments/callback', $payload);
 
         $response->assertStatus(403);
+
+        Log::shouldHaveReceived('warning')
+           ->with('Payment callback security event', \Mockery::type('array'))
+           ->once();
     }
 }

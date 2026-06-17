@@ -84,7 +84,10 @@ class Transaction extends Model
      */
     public function getTypeAttribute()
     {
-        // Déterminer le type basé sur les relations
+        // Priorité au type explicite stocké dans meta, sinon inférence par relation.
+        if (!empty($this->meta['type'])) {
+            return $this->meta['type'];
+        }
         if (isset($this->meta['lottery_id'])) {
             return 'lottery_ticket';
         } elseif (isset($this->meta['product_id'])) {
@@ -164,11 +167,6 @@ class Transaction extends Model
     /**
      * Accesseurs pour les champs migrés vers meta
      */
-    public function getTypeAttribute()
-    {
-        return $this->meta['type'] ?? null;
-    }
-
     public function getCurrencyAttribute()
     {
         return $this->meta['currency'] ?? 'XAF';
