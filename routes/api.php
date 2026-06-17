@@ -59,12 +59,13 @@ Route::group([
     'middleware' => ['throttle.api:100,1'],
     'prefix' => 'auth'
 ], function () {
-    Route::post('login', [AuthController::class, 'login']);
-    Route::post('register', [AuthController::class, 'register']);
+    // Endpoints sensibles : throttle strict supplémentaire (anti brute-force / credential-stuffing)
+    Route::post('login', [AuthController::class, 'login'])->middleware('throttle.api:10,1');
+    Route::post('register', [AuthController::class, 'register'])->middleware('throttle.api:10,1');
     Route::post('verify-account', [AuthController::class, 'verifyAccount']);
     Route::get('verify-email/{token}', [AuthController::class, 'verifyAccountByUrl']);
-    Route::post('resend-verification', [AuthController::class, 'resendVerificationEmail']);
-    Route::post('reset-password', [AuthController::class, 'resetPassword']);
+    Route::post('resend-verification', [AuthController::class, 'resendVerificationEmail'])->middleware('throttle.api:5,1');
+    Route::post('reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle.api:5,1');
 
     // Social Authentication - Available providers
     Route::get('providers', [AuthController::class, 'availableProviders']);
@@ -139,7 +140,9 @@ Route::group([
     Route::post('otp/verify', [App\Http\Controllers\Api\OtpController::class, 'verify']);
     Route::post('otp/resend', [App\Http\Controllers\Api\OtpController::class, 'resend']);
     Route::get('otp/status/{identifier}', [App\Http\Controllers\Api\OtpController::class, 'status']);
-    Route::delete('otp/cleanup', [App\Http\Controllers\Api\OtpController::class, 'cleanup']);
+    // Nettoyage des OTP : réservé aux administrateurs (action sensible)
+    Route::delete('otp/cleanup', [App\Http\Controllers\Api\OtpController::class, 'cleanup'])
+        ->middleware(['auth:sanctum', 'admin']);
     
     // Public Results
     Route::prefix('public/results')->group(function () {
