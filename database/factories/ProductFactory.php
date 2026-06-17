@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Category;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,73 +11,29 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ProductFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
-        $saleMode = $this->faker->randomElement(['lottery', 'direct']);
-        
         return [
-            'name' => $this->faker->sentence(3),
+            'name' => ucfirst($this->faker->words(3, true)),
             'description' => $this->faker->paragraph(),
-            'price' => $this->faker->randomFloat(2, 500, 10000),
+            'price' => $this->faker->randomFloat(2, 1000, 100000),
             'currency' => 'XAF',
-            'sale_mode' => $saleMode,
-            'stock' => $saleMode === 'direct' ? $this->faker->numberBetween(0, 100) : null,
-            'image' => $this->faker->optional()->imageUrl(400, 300, 'products'),
-            'is_active' => $this->faker->boolean(85),
-            'featured' => $this->faker->boolean(20),
-            'category_id' => 1,
-            'meta' => $this->faker->optional(0.3)->randomElement([
-                ['weight' => '1kg', 'dimensions' => '20x15x5'],
-                ['color' => 'blue', 'material' => 'cotton'],
-                ['brand' => 'TestBrand', 'warranty' => '1 year'],
-            ]),
+            'category_id' => Category::factory(),
+            'merchant_id' => User::factory(),
+            'sale_mode' => $this->faker->randomElement(['lottery', 'direct']),
+            'stock_quantity' => $this->faker->numberBetween(0, 100),
+            'is_active' => true,
+            'is_featured' => false,
         ];
     }
 
-    /**
-     * Create a lottery product
-     */
     public function lottery(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'sale_mode' => 'lottery',
-            'stock' => null,
-        ]);
+        return $this->state(fn () => ['sale_mode' => 'lottery']);
     }
 
-    /**
-     * Create a direct sale product
-     */
     public function direct(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'sale_mode' => 'direct',
-            'stock' => $this->faker->numberBetween(1, 100),
-        ]);
-    }
-
-    /**
-     * Create an active product
-     */
-    public function active(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'is_active' => true,
-        ]);
-    }
-
-    /**
-     * Create an inactive product
-     */
-    public function inactive(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'is_active' => false,
-        ]);
+        return $this->state(fn () => ['sale_mode' => 'direct']);
     }
 }
