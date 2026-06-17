@@ -1,8 +1,10 @@
 *.log
 .DS_Store
+# Ignorer tous les fichiers d'environnement SAUF les modèles *.example
 .env
-.env.backup
-.env.production
+.env.*
+!.env.example
+!.env.*.example
 .phpactor.json
 .phpunit.result.cache
 /.fleet

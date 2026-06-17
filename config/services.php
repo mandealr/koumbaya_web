@@ -72,6 +72,9 @@ return [
         'url' => env('EBILLING_URL', 'https://lab.billing-easy.net/api/v1/'),
         'transfer_username' => env('EBILLING_TRANSFER_USERNAME'),
         'transfer_shared_key' => env('EBILLING_TRANSFER_SHARED_KEY'),
+        // Sécurité du callback entrant (à renseigner avec l'opérateur E-Billing)
+        'allowed_ips' => env('EBILLING_ALLOWED_IPS'),     // liste d'IP autorisées séparées par des virgules
+        'webhook_secret' => env('EBILLING_WEBHOOK_SECRET'), // secret HMAC (signature X-Signature)
     ],
 
     /*

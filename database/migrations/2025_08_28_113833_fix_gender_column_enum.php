@@ -12,10 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            // Modify gender enum to use full words instead of letters
-            DB::statement("ALTER TABLE users MODIFY COLUMN gender ENUM('male', 'female', 'other') NULL");
-        });
+        // Syntaxe ENUM/MODIFY COLUMN spécifique à MySQL. SQLite (tests) n'a pas
+        // de type ENUM strict : on saute pour ne pas casser la suite de tests.
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
+        DB::statement("ALTER TABLE users MODIFY COLUMN gender ENUM('male', 'female', 'other') NULL");
     }
 
     /**
@@ -23,9 +26,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            // Revert back to the original enum values
-            DB::statement("ALTER TABLE users MODIFY COLUMN gender ENUM('M', 'F', 'O') NULL");
-        });
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
+        DB::statement("ALTER TABLE users MODIFY COLUMN gender ENUM('M', 'F', 'O') NULL");
     }
 };

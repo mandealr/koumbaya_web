@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Services\EBillingService;
+use App\Services\PaymentCallbackVerifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -18,9 +19,12 @@ class PaymentCallbackController extends Controller
 {
     protected $eBillingService;
 
-    public function __construct(EBillingService $eBillingService)
+    protected PaymentCallbackVerifier $verifier;
+
+    public function __construct(EBillingService $eBillingService, PaymentCallbackVerifier $verifier)
     {
         $this->eBillingService = $eBillingService;
+        $this->verifier = $verifier;
     }
 
     /**
@@ -42,7 +46,8 @@ class PaymentCallbackController extends Controller
      */
     public function handleCallback(Request $request)
     {
-        // Log de la requête pour debugging avec informations de sécurité
+        // Informations de sécurité (sans headers/payload complets pour éviter
+        // la fuite de tokens/données sensibles dans les logs).
         $securityInfo = [
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -50,10 +55,21 @@ class PaymentCallbackController extends Controller
             'timestamp' => now()->toISOString()
         ];
 
+        // Vérification d'authenticité du callback (allowlist IP + secret partagé).
+        $verification = $this->verifier->verify($request);
+        if (!$verification['allowed']) {
+            Log::warning('Payment callback rejected by verifier', [
+                'reason' => $verification['reason'],
+                'security' => $securityInfo,
+            ]);
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized callback'], 403);
+        }
+
         Log::info('Payment callback received', [
-            'payload' => $request->all(),
+            'reference' => $request->input('reference'),
+            'status' => $request->input('status'),
+            'verified' => $verification['enforced'],
             'security' => $securityInfo,
-            'headers' => $request->headers->all()
         ]);
 
         try {
@@ -119,6 +135,17 @@ class PaymentCallbackController extends Controller
                 case 'success':
                 case 'completed':
                 case 'paid':
+                    // Idempotence : un callback rejoué sur un paiement déjà finalisé
+                    // ne doit pas relancer l'attribution des tickets / la commande.
+                    if (in_array($payment->status, ['paid', 'completed', 'processed'], true)) {
+                        Log::info('Duplicate success callback ignored (already finalized)', [
+                            'payment_id' => $payment->id,
+                            'reference' => $reference,
+                            'current_status' => $payment->status,
+                        ]);
+                        return response()->json(['status' => 'success', 'message' => 'Already processed']);
+                    }
+
                     Log::info('Processing successful payment callback', [
                         'payment_id' => $payment->id,
                         'reference' => $reference,

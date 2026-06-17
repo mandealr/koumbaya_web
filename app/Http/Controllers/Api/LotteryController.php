@@ -492,8 +492,8 @@ class LotteryController extends Controller
         $user = auth()->user();
         $lottery = Lottery::with('product.merchant')->findOrFail($id);
 
-        // Vérifier les permissions (propriétaire du produit ou admin)
-        if ($lottery->product->merchant_id !== $user->id && !$user->isAdmin()) {
+        // Autorisation centralisée (propriétaire du produit ou admin) via LotteryPolicy
+        if (! $user->can('draw', $lottery)) {
             return response()->json(['error' => 'Non autorisé - Vous n\'êtes pas le propriétaire de cette tombola'], 403);
         }
 

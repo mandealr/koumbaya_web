@@ -23,8 +23,11 @@ class RateLimitMiddleware
      */
     public function handle(Request $request, Closure $next, $maxAttempts = 100, $decayMinutes = 1): Response
     {
-        $key = $this->resolveRequestSignature($request);
-        
+        // La clé inclut la limite (maxAttempts/decay) pour que des throttles
+        // empilés (groupe + route) utilisent des seaux indépendants au lieu de
+        // partager le même compteur et de se double-compter.
+        $key = $this->resolveRequestSignature($request) . ':' . $maxAttempts . ':' . $decayMinutes;
+
         if ($this->rateLimiter->tooManyAttempts($key, $maxAttempts)) {
             $retryAfter = $this->rateLimiter->availableIn($key);
             

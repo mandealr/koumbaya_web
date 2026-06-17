@@ -45,5 +45,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Rendu JSON homogène pour les requêtes API / qui attendent du JSON.
+        $exceptions->render(function (\Throwable $e, $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return \App\Exceptions\ApiExceptionRenderer::render($e, $request);
+            }
+
+            return null; // rendu par défaut pour le web
+        });
     })->create();

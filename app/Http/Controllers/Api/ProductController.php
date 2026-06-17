@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Http\Requests\UpdateProductRequest;
 use App\Models\Lottery;
 use App\Models\LotteryTicket;
 use App\Http\Resources\ProductResource;
@@ -771,36 +772,15 @@ class ProductController extends Controller
      *     @OA\Response(response=403, description="Non autorisé")
      * )
      */
-    public function update(Request $request, $id)
+    public function update(UpdateProductRequest $request, $id)
     {
+        // Autorisation (ProductPolicy::update) et validation gérées par UpdateProductRequest.
         $user = auth()->user();
         $product = Product::findOrFail($id);
-
-        // Vérifier que l'utilisateur est le propriétaire
-        if ($product->merchant_id !== $user->id) {
-            return response()->json(['error' => 'Non autorisé'], 403);
-        }
 
         // Ne pas permettre la modification si une tombola est active
         if ($product->activeLottery) {
             return response()->json(['error' => 'Impossible de modifier un produit avec une tombola active'], 422);
-        }
-
-        $minProductPrice = config('koumbaya.marketplace.min_product_price', 1000);
-        $minTicketPrice = config('koumbaya.ticket_calculation.min_ticket_price', 200);
-
-        $validator = Validator::make($request->all(), [
-            'name' => 'string|max:255',
-            'description' => 'string',
-            'price' => "numeric|min:{$minProductPrice}",
-            'ticket_price' => "numeric|min:{$minTicketPrice}",
-            'images' => 'nullable|array',
-            'status' => 'in:draft,active',
-            'vendor_profile_id' => 'nullable|exists:vendor_profiles,id',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
         }
 
         // Vérifier le profil vendeur si fourni
@@ -870,7 +850,8 @@ class ProductController extends Controller
         $user = auth()->user();
         $product = Product::findOrFail($id);
 
-        if ($product->merchant_id !== $user->id) {
+        // Autorisation centralisée (propriétaire ou admin) via ProductPolicy
+        if (! $user->can('createLottery', $product)) {
             return response()->json(['error' => 'Non autorisé'], 403);
         }
 

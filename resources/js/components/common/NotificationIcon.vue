@@ -93,8 +93,8 @@
 
                 <!-- Contenu -->
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-gray-900" v-html="notification.title"></p>
-                  <p class="text-xs text-gray-600 mt-1 line-clamp-2" v-html="notification.message"></p>
+                  <p class="text-sm font-medium text-gray-900" v-safe-html="notification.title"></p>
+                  <p class="text-xs text-gray-600 mt-1 line-clamp-2" v-safe-html="notification.message"></p>
                   <p class="text-xs text-gray-400 mt-2">{{ formatTimeAgo(notification.created_at) }}</p>
                 </div>
 

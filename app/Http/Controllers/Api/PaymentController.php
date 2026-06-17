@@ -30,9 +30,12 @@ class PaymentController extends Controller
 {
     protected MetricsService $metricsService;
 
-    public function __construct(MetricsService $metricsService)
+    protected \App\Services\PaymentCallbackVerifier $callbackVerifier;
+
+    public function __construct(MetricsService $metricsService, \App\Services\PaymentCallbackVerifier $callbackVerifier)
     {
         $this->metricsService = $metricsService;
+        $this->callbackVerifier = $callbackVerifier;
         $this->middleware('auth:sanctum', ['except' => ['callback', 'success', 'notify']]);
     }
 
@@ -807,10 +810,21 @@ class PaymentController extends Controller
             'timestamp' => now()->toISOString()
         ];
 
+        // Vérification d'authenticité du callback (allowlist IP + signature HMAC).
+        $verification = $this->callbackVerifier->verify($request);
+        if (!$verification['allowed']) {
+            return response()->json([
+                'success' => false,
+                'message' => $verification['message'] ?? 'Unauthorized callback',
+            ], 403);
+        }
+
+        // Log assaini : pas de payload complet ni de headers (fuite de secrets).
         Log::info('Payment callback received', [
-            'payload' => $request->all(),
+            'reference' => $request->input('reference'),
+            'state' => $request->input('state'),
+            'verified' => $verification['enforced'],
             'security' => $securityInfo,
-            'headers' => $request->headers->all()
         ]);
 
         // Track payment callback metrics

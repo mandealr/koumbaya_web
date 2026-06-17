@@ -349,9 +349,13 @@ class OtpController extends Controller
      */
     public function cleanup(Request $request)
     {
-        // Cette méthode pourrait être restreinte aux admins
-        // $this->middleware('auth:sanctum');
-        // if (!auth()->user()->isAdmin()) { ... }
+        // Action sensible : l'accès est restreint aux administrateurs via les
+        // middlewares (auth:sanctum + admin) déclarés sur la route. Garde-fou
+        // défensif en cas de réutilisation de la méthode hors de cette route.
+        $user = $request->user();
+        if (!$user || !method_exists($user, 'isAdmin') || !$user->isAdmin()) {
+            return $this->sendError('Action non autorisée', [], 403);
+        }
 
         $deletedCount = OtpService::cleanup();
 
